@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Share2, GitCompareArrows } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface ProfileHeroProps {
   celebrity: Celebrity;
@@ -65,12 +66,17 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
                   Compare
                 </Button>
               </Link>
-              <Link to={`/share?celebrity=${celebrity.id}`}>
-                <Button variant="outline" className="border-border/50">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="border-border/50"
+                onClick={() => {
+                  const shareSection = document.getElementById('share-card');
+                  shareSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
             </div>
           </div>
         </div>

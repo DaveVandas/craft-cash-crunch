@@ -126,7 +126,7 @@ serve(async (req) => {
 
     // Build sanitized prompt
     const prompt = name 
-      ? `Provide earnings data for the celebrity named "${name}". Return a JSON object with: name, profession, category (one of: athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical), netWorth (number in USD), annualEarnings (number in USD), and a brief source note. Be accurate based on recent public data. Only return the JSON, no other text.`
+      ? `Provide earnings data for the celebrity named "${name}". Return a JSON object with: name, profession, category (one of: athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical), netWorth (number in USD), annualEarnings (number in USD), and a brief source note. Be accurate based on recent public data. IMPORTANT: For historical figures (people who lived before 1950), adjust all wealth values to 2024 USD using proper inflation calculations. Only return the JSON, no other text.`
       : `List 6 notable people in the ${category} category with their earnings. Return a JSON array of objects with: name, profession, category, netWorth, annualEarnings. Only return the JSON array, no other text.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
