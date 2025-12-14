@@ -1,13 +1,15 @@
 import { useRef, useState } from 'react';
 import { Celebrity } from '@/lib/types';
-import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons } from '@/lib/earnings';
+import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons, getMostDramaticComparison } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Share2, DollarSign, Clock, TrendingUp, Zap, Download, Loader2 } from 'lucide-react';
+import { Share2, DollarSign, Clock, TrendingUp, Zap, Download, Loader2, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 // Custom social icons
 const TwitterIcon = () => (
@@ -48,8 +50,10 @@ interface ShareCardProps {
 const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [flexMode, setFlexMode] = useState(false);
   const breakdown = calculateEarningsBreakdown(celebrity.annualEarnings);
   const comparisons = generateComparisons(celebrity.annualEarnings);
+  const dramaticComparison = getMostDramaticComparison(celebrity.annualEarnings);
   
   // Get diverse comparisons for visual appeal
   const topComparisons = comparisons.slice(0, 4);
@@ -208,161 +212,277 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
 
   return (
     <div id="share-card" className="space-y-6">
-      {/* Baseball Card Style - Capturable */}
-      <div 
-        ref={cardRef}
-        className="relative overflow-hidden rounded-2xl border-4 border-amber-500/60 shadow-2xl"
-        style={{ 
-          background: 'linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 50%, #1a1510 100%)',
-        }}
-      >
-        {/* Gold Frame Effect */}
-        <div className="absolute inset-0 border-4 border-amber-400/20 rounded-xl pointer-events-none" />
-        
-        {/* Top Banner with Logo */}
-        <div 
-          className="px-6 py-4 flex items-center justify-between"
-          style={{ background: 'linear-gradient(90deg, #b8860b 0%, #daa520 50%, #b8860b 100%)' }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">💎</span>
-            <span className="font-serif text-lg font-bold text-black tracking-wide">
-              Wealth Perspective
-            </span>
-          </div>
-          <span className="text-sm font-semibold text-black/70">EST. 2024</span>
+      {/* Flex Mode Toggle */}
+      <div className="flex items-center justify-end gap-3 px-2">
+        <div className="flex items-center gap-2">
+          <Flame className={`h-4 w-4 transition-colors ${flexMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
+          <Label htmlFor="flex-mode" className={`text-sm font-medium cursor-pointer ${flexMode ? 'text-orange-500' : 'text-muted-foreground'}`}>
+            Flex Mode
+          </Label>
         </div>
+        <Switch
+          id="flex-mode"
+          checked={flexMode}
+          onCheckedChange={setFlexMode}
+          className="data-[state=checked]:bg-orange-500"
+        />
+      </div>
 
-        {/* Main Content */}
-        <div className="p-6 space-y-5">
-          {/* Header with Avatar and Name */}
-          <div className="text-center border-b border-amber-500/30 pb-4">
-            <div className="flex justify-center mb-3">
-              <Avatar className="h-20 w-20 ring-2 ring-amber-500/50 shadow-lg">
-                <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover" />
-                <AvatarFallback className="bg-gradient-to-br from-amber-900/50 to-amber-800/50 text-3xl text-amber-200">
-                  {getAvatarEmoji(celebrity.profession)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <h2 
-              className="font-serif text-3xl md:text-4xl font-bold mb-1"
-              style={{ 
-                background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {celebrity.name}
-            </h2>
-            <p className="text-amber-200/70 text-sm uppercase tracking-widest">
-              {celebrity.profession}
-            </p>
-          </div>
-
-          {/* Annual Earnings - Hero Stat */}
+      {/* Card - Flex Mode or Standard */}
+      {flexMode && dramaticComparison ? (
+        /* FLEX MODE CARD - Single dramatic stat */
+        <div 
+          ref={cardRef}
+          className="relative overflow-hidden rounded-2xl border-4 border-orange-500/60 shadow-2xl"
+          style={{ 
+            background: 'linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 50%, #1a0a00 100%)',
+          }}
+        >
+          {/* Fire Frame Effect */}
+          <div className="absolute inset-0 border-4 border-orange-400/20 rounded-xl pointer-events-none" />
+          
+          {/* Top Banner */}
           <div 
-            className="text-center py-5 rounded-xl border-2 border-amber-500/40"
-            style={{ background: 'linear-gradient(145deg, rgba(184,134,11,0.2) 0%, rgba(10,10,11,0.8) 100%)' }}
+            className="px-6 py-4 flex items-center justify-between"
+            style={{ background: 'linear-gradient(90deg, #f97316 0%, #fb923c 50%, #f97316 100%)' }}
           >
-            <p className="text-xs text-amber-300/70 uppercase tracking-widest mb-2">💰 Annual Earnings</p>
-            <p 
-              className="text-4xl md:text-5xl font-bold"
-              style={{ 
-                background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {formatCompactCurrency(celebrity.annualEarnings)}
-            </p>
-          </div>
-
-          {/* Stats Grid - Like a Baseball Card */}
-          <div className="grid grid-cols-2 gap-3">
-            <StatBox 
-              icon={<Zap className="h-4 w-4 text-amber-400" />}
-              label="Per Second" 
-              value={formatCurrency(breakdown.perSecond)} 
-            />
-            <StatBox 
-              icon={<Clock className="h-4 w-4 text-amber-400" />}
-              label="Per Minute" 
-              value={formatCurrency(breakdown.perMinute)} 
-            />
-            <StatBox 
-              icon={<TrendingUp className="h-4 w-4 text-amber-400" />}
-              label="Per Hour" 
-              value={formatCurrency(breakdown.perHour)} 
-            />
-            <StatBox 
-              icon={<DollarSign className="h-4 w-4 text-amber-400" />}
-              label="Per Day" 
-              value={formatCurrency(breakdown.perDay)} 
-            />
-          </div>
-
-          {/* Fun Comparisons */}
-          <div className="space-y-2">
-            <p className="text-xs text-amber-300/70 uppercase tracking-widest text-center">
-              🛒 What This Buys
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {topComparisons.map((comparison, idx) => (
-                <div 
-                  key={idx}
-                  className="flex items-center gap-2 p-3 rounded-lg border border-amber-500/30"
-                  style={{ background: 'rgba(184,134,11,0.1)' }}
-                >
-                  <span className="text-2xl">{comparison.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p 
-                      className="text-sm font-bold truncate"
-                      style={{ color: '#ffd700' }}
-                    >
-                      {comparison.quantity.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-amber-100/80 truncate">
-                      {comparison.item}
-                    </p>
-                    <p className="text-[10px] text-amber-200/50">
-                      {comparison.timeframe}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🔥</span>
+              <span className="font-serif text-lg font-bold text-black tracking-wide">
+                FLEX MODE
+              </span>
             </div>
+            <span className="text-sm font-semibold text-black/70">💎</span>
           </div>
 
-          {/* User Salary Comparison */}
-          {userSalary && userSalary > 0 && (
+          {/* Main Content */}
+          <div className="p-8 space-y-6">
+            {/* Avatar and Name */}
+            <div className="text-center">
+              <div className="flex justify-center mb-3">
+                <Avatar className="h-24 w-24 ring-4 ring-orange-500/50 shadow-lg">
+                  <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-orange-900/50 to-orange-800/50 text-4xl text-orange-200">
+                    {getAvatarEmoji(celebrity.profession)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <h2 
+                className="font-serif text-3xl md:text-4xl font-bold"
+                style={{ 
+                  background: 'linear-gradient(90deg, #fb923c, #f97316, #ea580c)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {celebrity.name}
+              </h2>
+            </div>
+
+            {/* THE DRAMATIC STAT */}
             <div 
-              className="p-4 rounded-lg border border-red-500/30 text-center"
-              style={{ background: 'rgba(220,38,38,0.1)' }}
+              className="text-center py-8 rounded-2xl border-2 border-orange-500/40"
+              style={{ background: 'linear-gradient(145deg, rgba(249,115,22,0.2) 0%, rgba(10,10,11,0.9) 100%)' }}
             >
-              <p className="text-xs text-red-300/70 mb-1">😅 Your Reality Check</p>
-              <p className="text-sm text-red-100">
-                Makes your yearly salary ({formatCompactCurrency(userSalary)}) in just{' '}
-                <span className="text-red-400 font-bold">
-                  {((userSalary / celebrity.annualEarnings) * 365 * 24 * 60).toFixed(1)} minutes
-                </span>
+              <p className="text-orange-300/80 text-sm uppercase tracking-widest mb-4">
+                Earns
+              </p>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <span className="text-6xl">{dramaticComparison.emoji}</span>
+                <div>
+                  <p 
+                    className="text-5xl md:text-6xl font-black"
+                    style={{ 
+                      background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    {dramaticComparison.quantity.toLocaleString()}
+                  </p>
+                  <p className="text-2xl text-orange-100 font-bold">
+                    {dramaticComparison.item}
+                  </p>
+                </div>
+              </div>
+              <p className="text-orange-400 text-xl font-semibold uppercase tracking-wide">
+                {dramaticComparison.timeframe}
+              </p>
+              <p className="text-orange-200/60 text-sm mt-2">
+                {dramaticComparison.context}
               </p>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Bottom Banner */}
-        <div 
-          className="px-6 py-3 flex items-center justify-center gap-3"
-          style={{ background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #8b7355 100%)' }}
-        >
-          <span className="text-xs font-medium text-black/80">earningsexplorer.shop</span>
-          <span className="text-black/50">•</span>
-          <span className="text-xs text-black/60">{new Date().getFullYear()}</span>
+          {/* Bottom Banner */}
+          <div 
+            className="px-6 py-3 flex items-center justify-center gap-3"
+            style={{ background: 'linear-gradient(90deg, #7c2d12 0%, #9a3412 50%, #7c2d12 100%)' }}
+          >
+            <span className="text-xs font-medium text-orange-100/80">earningsexplorer.shop</span>
+            <span className="text-orange-100/50">•</span>
+            <span className="text-xs text-orange-100/60">{new Date().getFullYear()}</span>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* STANDARD CARD - Baseball Card Style */
+        <div 
+          ref={cardRef}
+          className="relative overflow-hidden rounded-2xl border-4 border-amber-500/60 shadow-2xl"
+          style={{ 
+            background: 'linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 50%, #1a1510 100%)',
+          }}
+        >
+          {/* Gold Frame Effect */}
+          <div className="absolute inset-0 border-4 border-amber-400/20 rounded-xl pointer-events-none" />
+          
+          {/* Top Banner with Logo */}
+          <div 
+            className="px-6 py-4 flex items-center justify-between"
+            style={{ background: 'linear-gradient(90deg, #b8860b 0%, #daa520 50%, #b8860b 100%)' }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">💎</span>
+              <span className="font-serif text-lg font-bold text-black tracking-wide">
+                Wealth Perspective
+              </span>
+            </div>
+            <span className="text-sm font-semibold text-black/70">EST. 2024</span>
+          </div>
+
+          {/* Main Content */}
+          <div className="p-6 space-y-5">
+            {/* Header with Avatar and Name */}
+            <div className="text-center border-b border-amber-500/30 pb-4">
+              <div className="flex justify-center mb-3">
+                <Avatar className="h-20 w-20 ring-2 ring-amber-500/50 shadow-lg">
+                  <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-amber-900/50 to-amber-800/50 text-3xl text-amber-200">
+                    {getAvatarEmoji(celebrity.profession)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <h2 
+                className="font-serif text-3xl md:text-4xl font-bold mb-1"
+                style={{ 
+                  background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {celebrity.name}
+              </h2>
+              <p className="text-amber-200/70 text-sm uppercase tracking-widest">
+                {celebrity.profession}
+              </p>
+            </div>
+
+            {/* Annual Earnings - Hero Stat */}
+            <div 
+              className="text-center py-5 rounded-xl border-2 border-amber-500/40"
+              style={{ background: 'linear-gradient(145deg, rgba(184,134,11,0.2) 0%, rgba(10,10,11,0.8) 100%)' }}
+            >
+              <p className="text-xs text-amber-300/70 uppercase tracking-widest mb-2">💰 Annual Earnings</p>
+              <p 
+                className="text-4xl md:text-5xl font-bold"
+                style={{ 
+                  background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {formatCompactCurrency(celebrity.annualEarnings)}
+              </p>
+            </div>
+
+            {/* Stats Grid - Like a Baseball Card */}
+            <div className="grid grid-cols-2 gap-3">
+              <StatBox 
+                icon={<Zap className="h-4 w-4 text-amber-400" />}
+                label="Per Second" 
+                value={formatCurrency(breakdown.perSecond)} 
+              />
+              <StatBox 
+                icon={<Clock className="h-4 w-4 text-amber-400" />}
+                label="Per Minute" 
+                value={formatCurrency(breakdown.perMinute)} 
+              />
+              <StatBox 
+                icon={<TrendingUp className="h-4 w-4 text-amber-400" />}
+                label="Per Hour" 
+                value={formatCurrency(breakdown.perHour)} 
+              />
+              <StatBox 
+                icon={<DollarSign className="h-4 w-4 text-amber-400" />}
+                label="Per Day" 
+                value={formatCurrency(breakdown.perDay)} 
+              />
+            </div>
+
+            {/* Fun Comparisons */}
+            <div className="space-y-2">
+              <p className="text-xs text-amber-300/70 uppercase tracking-widest text-center">
+                🛒 What This Buys
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {topComparisons.map((comparison, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex items-center gap-2 p-3 rounded-lg border border-amber-500/30"
+                    style={{ background: 'rgba(184,134,11,0.1)' }}
+                  >
+                    <span className="text-2xl">{comparison.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p 
+                        className="text-sm font-bold truncate"
+                        style={{ color: '#ffd700' }}
+                      >
+                        {comparison.quantity.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-amber-100/80 truncate">
+                        {comparison.item}
+                      </p>
+                      <p className="text-[10px] text-amber-200/50">
+                        {comparison.timeframe}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* User Salary Comparison */}
+            {userSalary && userSalary > 0 && (
+              <div 
+                className="p-4 rounded-lg border border-red-500/30 text-center"
+                style={{ background: 'rgba(220,38,38,0.1)' }}
+              >
+                <p className="text-xs text-red-300/70 mb-1">😅 Your Reality Check</p>
+                <p className="text-sm text-red-100">
+                  Makes your yearly salary ({formatCompactCurrency(userSalary)}) in just{' '}
+                  <span className="text-red-400 font-bold">
+                    {((userSalary / celebrity.annualEarnings) * 365 * 24 * 60).toFixed(1)} minutes
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Banner */}
+          <div 
+            className="px-6 py-3 flex items-center justify-center gap-3"
+            style={{ background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #8b7355 100%)' }}
+          >
+            <span className="text-xs font-medium text-black/80">earningsexplorer.shop</span>
+            <span className="text-black/50">•</span>
+            <span className="text-xs text-black/60">{new Date().getFullYear()}</span>
+          </div>
+        </div>
+      )}
 
       {/* Share Buttons */}
       <Card className="border-border/50 bg-card/50">

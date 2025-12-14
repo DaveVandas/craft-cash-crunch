@@ -134,3 +134,40 @@ export const calculateTimeToEarn = (amount: number, annualEarnings: number): str
   }
   return `${(seconds / 31536000).toFixed(1)} years`;
 };
+
+// Get the single most dramatic comparison for Flex Mode
+// Prioritizes high-value items with impressive quantities or fast timeframes
+export const getMostDramaticComparison = (annualEarnings: number): EnhancedComparison | null => {
+  const comparisons = generateComparisons(annualEarnings);
+  
+  if (comparisons.length === 0) return null;
+  
+  // Score each comparison by drama factor:
+  // - Prefer expensive items (jets, yachts, Bugattis)
+  // - Prefer impressive quantities or fast timeframes
+  const scored = comparisons.map(c => {
+    const item = comparisonItems.find(i => i.item === c.item);
+    const price = item?.price || 1;
+    
+    // Drama score = price tier * quantity factor * timeframe bonus
+    const priceTier = price >= 1000000 ? 5 : price >= 100000 ? 4 : price >= 10000 ? 3 : 2;
+    const quantityFactor = Math.min(c.quantity, 100); // Cap to avoid boring "1000 watches"
+    const timeframeBonus = 
+      c.timeframe === 'every minute' ? 10 :
+      c.timeframe === 'every hour' ? 8 :
+      c.timeframe === 'every day' ? 6 :
+      c.timeframe === 'every week' ? 4 : 2;
+    
+    // Sweet spot: prefer quantity between 1-20 for expensive items
+    const sweetSpotBonus = (c.quantity >= 1 && c.quantity <= 20 && priceTier >= 3) ? 3 : 1;
+    
+    return {
+      comparison: c,
+      score: priceTier * quantityFactor * timeframeBonus * sweetSpotBonus
+    };
+  });
+  
+  // Sort by score and return the most dramatic
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.comparison || null;
+};
