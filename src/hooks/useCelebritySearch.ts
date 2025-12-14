@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getFallbackCelebrity } from '@/lib/fallbackCelebrities';
 
 export const useCelebritySearch = () => {
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,8 @@ export const useCelebritySearch = () => {
               onClick: () => navigate('/auth'),
             },
           });
+          setError(data.error);
+          return null;
         } else if (errorCode === 'LIMIT_REACHED') {
           toast.error(data.error, {
             description: 'Unlock unlimited access for just $4.99',
@@ -68,12 +71,20 @@ export const useCelebritySearch = () => {
               },
             },
           });
+          setError(data.error);
+          return null;
         } else {
-          toast.error(data.error);
+          // For AI_ERROR, PARSE_ERROR, etc., try fallback data first
+          const fallback = getFallbackCelebrity(name);
+          if (fallback) {
+            console.log('Using fallback data for:', name);
+            return fallback;
+          }
+          // No fallback available, show error
+          toast.error("We couldn't fetch data right now. Please try again in a moment.");
+          setError(data.error);
+          return null;
         }
-        
-        setError(data.error);
-        return null;
       }
 
       // Refresh access to update remaining searches after this search
