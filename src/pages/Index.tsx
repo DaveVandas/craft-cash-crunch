@@ -54,9 +54,7 @@ const Index = () => {
 
         {/* Trending */}
         <section className="container mb-12">
-          <div className="max-w-md">
-            <TrendingSearches />
-          </div>
+          <TrendingSearches />
         </section>
 
         {/* Categories */}
