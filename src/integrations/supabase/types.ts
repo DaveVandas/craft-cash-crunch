@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      celebrity_images: {
+        Row: {
+          celebrity_name: string
+          celebrity_slug: string
+          created_at: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          celebrity_name: string
+          celebrity_slug: string
+          created_at?: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          celebrity_name?: string
+          celebrity_slug?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
       search_trends: {
         Row: {
           category: string | null

@@ -79,90 +79,112 @@ function errorResponse(message: string, code: string = 'ERROR') {
   });
 }
 
-// Fetch Wikipedia image for a celebrity
-async function fetchWikipediaImage(name: string): Promise<string | null> {
+// Generate AI portrait for a celebrity and cache it
+async function getCelebrityImage(
+  name: string, 
+  profession: string,
+  supabaseClient: any
+): Promise<string | null> {
+  const slug = name.toLowerCase().replace(/\s+/g, '-');
+  
   try {
-    const encodedName = encodeURIComponent(name);
+    // Check cache first
+    const { data: cached } = await supabaseClient
+      .from('celebrity_images')
+      .select('image_url')
+      .eq('celebrity_slug', slug)
+      .maybeSingle();
     
-    // Always use search first for more reliable results (handles "Patrick Mahomes" → "Patrick Mahomes II")
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&srlimit=5&format=json&origin=*`;
-    const searchResponse = await fetch(searchUrl);
-    if (!searchResponse.ok) return null;
-
-    const searchData = await searchResponse.json();
-    const searchResults = searchData?.query?.search;
-    if (!searchResults || searchResults.length === 0) return null;
-
-    // Try each search result until we find one with an image
-    for (const result of searchResults) {
-      const title = result?.title;
-      if (!title) continue;
-
-      // Try pageimages first (most reliable for infobox images)
-      const imageUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
-      const imageResponse = await fetch(imageUrl);
-      if (imageResponse.ok) {
-        const imageData = await imageResponse.json();
-        const pages = imageData.query?.pages;
-        if (pages) {
-          const pageId = Object.keys(pages)[0];
-          if (pageId !== '-1') {
-            const thumbnailUrl = pages[pageId]?.thumbnail?.source;
-            if (thumbnailUrl) {
-              return thumbnailUrl;
-            }
-          }
-        }
-      }
-
-      // Fallback: try to get the main image from the page's images list
-      const imagesUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=images&format=json&origin=*`;
-      const imagesResponse = await fetch(imagesUrl);
-      if (imagesResponse.ok) {
-        const imagesData = await imagesResponse.json();
-        const pages = imagesData.query?.pages;
-        if (pages) {
-          const pageId = Object.keys(pages)[0];
-          if (pageId !== '-1' && pages[pageId]?.images) {
-            // Find a suitable image (skip icons, logos, commons icons)
-            for (const img of pages[pageId].images) {
-              const imgTitle = img.title || '';
-              const lowerTitle = imgTitle.toLowerCase();
-              // Skip common non-portrait images
-              if (lowerTitle.includes('icon') || 
-                  lowerTitle.includes('logo') || 
-                  lowerTitle.includes('flag') ||
-                  lowerTitle.includes('map') ||
-                  lowerTitle.includes('commons') ||
-                  lowerTitle.includes('.svg')) {
-                continue;
-              }
-              // Get the actual image URL
-              const fileUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imgTitle)}&prop=imageinfo&iiprop=url&iiurlwidth=400&format=json&origin=*`;
-              const fileResponse = await fetch(fileUrl);
-              if (fileResponse.ok) {
-                const fileData = await fileResponse.json();
-                const filePages = fileData.query?.pages;
-                if (filePages) {
-                  const filePageId = Object.keys(filePages)[0];
-                  if (filePageId !== '-1') {
-                    const imageInfo = filePages[filePageId]?.imageinfo?.[0];
-                    const thumbUrl = imageInfo?.thumburl || imageInfo?.url;
-                    if (thumbUrl) {
-                      return thumbUrl;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    if (cached?.image_url) {
+      console.log(`Cache hit for ${name}`);
+      return cached.image_url;
     }
-
-    return null;
+    
+    // Generate new portrait using Lovable AI
+    console.log(`Generating AI portrait for ${name}`);
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured for image generation');
+      return null;
+    }
+    
+    const prompt = `Create a professional, photorealistic portrait headshot of a famous ${profession} named ${name}. The portrait should be high quality, well-lit studio photo style, neutral background, showing head and shoulders. Make it look like an official professional photo.`;
+    
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-image-preview',
+        messages: [{ role: 'user', content: prompt }],
+        modalities: ['image', 'text']
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('AI image generation failed:', response.status);
+      return null;
+    }
+    
+    const data = await response.json();
+    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    if (!imageData || !imageData.startsWith('data:image')) {
+      console.error('No valid image data returned from AI');
+      return null;
+    }
+    
+    // Extract base64 data and upload to storage
+    const base64Match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!base64Match) {
+      console.error('Invalid base64 image format');
+      return null;
+    }
+    
+    const [, imageType, base64Data] = base64Match;
+    const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const fileName = `${slug}.${imageType === 'png' ? 'png' : 'jpg'}`;
+    
+    // Upload to storage
+    const { error: uploadError } = await supabaseClient.storage
+      .from('celebrity-images')
+      .upload(fileName, binaryData, {
+        contentType: `image/${imageType}`,
+        upsert: true
+      });
+    
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      return null;
+    }
+    
+    // Get public URL
+    const { data: urlData } = supabaseClient.storage
+      .from('celebrity-images')
+      .getPublicUrl(fileName);
+    
+    const publicUrl = urlData?.publicUrl;
+    if (!publicUrl) {
+      console.error('Failed to get public URL');
+      return null;
+    }
+    
+    // Cache the URL
+    await supabaseClient
+      .from('celebrity_images')
+      .upsert({
+        celebrity_slug: slug,
+        celebrity_name: name,
+        image_url: publicUrl
+      }, { onConflict: 'celebrity_slug' });
+    
+    console.log(`Generated and cached image for ${name}: ${publicUrl}`);
+    return publicUrl;
+    
   } catch (error) {
-    console.error('Wikipedia image fetch error:', error);
+    console.error('Image generation error:', error);
     return null;
   }
 }
@@ -296,8 +318,8 @@ Return ONLY valid JSON, no markdown or explanation.`
     const parsed = JSON.parse(jsonMatch[0]);
     
     if (name) {
-      // Fetch Wikipedia image for single celebrity
-      const imageUrl = await fetchWikipediaImage(parsed.name || name);
+      // Generate AI portrait for single celebrity
+      const imageUrl = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
       
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
@@ -309,10 +331,10 @@ Return ONLY valid JSON, no markdown or explanation.`
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      // Fetch Wikipedia images for all celebrities in parallel
+      // Generate AI portraits for all celebrities in parallel
       const celebritiesWithImages = await Promise.all(
         parsed.map(async (p: any) => {
-          const imageUrl = await fetchWikipediaImage(p.name);
+          const imageUrl = await getCelebrityImage(p.name, p.profession || 'celebrity', supabaseClient);
           return {
             id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
             imageUrl,
