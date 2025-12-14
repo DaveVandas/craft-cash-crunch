@@ -149,7 +149,7 @@ const Search = () => {
                         }}
                       />
                       <AvatarFallback className="rounded-lg bg-secondary text-2xl">
-                        {getAvatarEmoji(result.profession)}
+                        {result.emoji || getAvatarEmoji(result.profession)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
