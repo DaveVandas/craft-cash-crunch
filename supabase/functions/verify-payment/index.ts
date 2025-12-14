@@ -35,6 +35,37 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.retrieve(session_id);
 
     if (session.payment_status === "paid") {
+      // Security check 1: Verify the session belongs to the authenticated user
+      if (session.metadata?.user_id !== user.id) {
+        console.error("Session user_id mismatch:", {
+          sessionUserId: session.metadata?.user_id,
+          authenticatedUserId: user.id,
+        });
+        return new Response(JSON.stringify({ error: "Session does not belong to authenticated user" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        });
+      }
+
+      // Security check 2: Verify this payment_intent hasn't been used by another user
+      const { data: existingUsage } = await supabaseClient
+        .from("user_access")
+        .select("id, user_id")
+        .eq("stripe_payment_intent_id", session.payment_intent as string)
+        .maybeSingle();
+
+      if (existingUsage && existingUsage.user_id !== user.id) {
+        console.error("Payment intent already used by another user:", {
+          paymentIntent: session.payment_intent,
+          existingUserId: existingUsage.user_id,
+          attemptingUserId: user.id,
+        });
+        return new Response(JSON.stringify({ error: "Payment session has already been used" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 409,
+        });
+      }
+
       // Update user_access to grant lifetime access
       const { error: updateError } = await supabaseClient
         .from("user_access")
