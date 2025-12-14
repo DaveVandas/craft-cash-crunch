@@ -158,56 +158,103 @@ const TrendingSearches = () => {
   const displayItems: TrendingItem[] = spotlightItems.slice(0, 5);
 
   return (
-    <Card className="border-border/50 bg-card/50">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
+    <div className="w-full">
+      {/* Mobile: Card layout */}
+      <div className="md:hidden">
+        <Card className="border-border/50 bg-card/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Trending Now
+              </CardTitle>
+              {spotlightCategory && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  {spotlightCategory}
+                </p>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex flex-col gap-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-10 bg-secondary/30 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {displayItems.map((person, index) => (
+                  <Link
+                    key={`${person.name}-${index}`}
+                    to={`/profile/${nameToSlug(person.name)}`}
+                    className="flex items-center justify-between gap-3 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground font-mono text-sm w-4">
+                        {index + 1}
+                      </span>
+                      <span className="font-medium group-hover:text-primary transition-colors text-sm">
+                        {person.name}
+                      </span>
+                      {person.hot && (
+                        <Flame className="h-4 w-4 text-orange-500" />
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {person.searches}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Desktop: Horizontal scrolling bar */}
+      <div className="hidden md:block">
+        <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-gradient-to-r from-card/80 via-card/50 to-card/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2 pr-4 border-r border-border/50 shrink-0">
             <TrendingUp className="h-5 w-5 text-primary" />
-            Trending Now
-          </CardTitle>
+            <span className="font-semibold text-sm whitespace-nowrap">Trending Now</span>
+          </div>
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-3">
+              {loading ? (
+                [1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-10 w-40 bg-secondary/30 rounded-full animate-pulse shrink-0" />
+                ))
+              ) : (
+                displayItems.map((person, index) => (
+                  <Link
+                    key={`${person.name}-${index}`}
+                    to={`/profile/${nameToSlug(person.name)}`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/40 hover:bg-primary/20 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
+                  >
+                    <span className="font-medium group-hover:text-primary transition-colors whitespace-nowrap">
+                      {person.name}
+                    </span>
+                    {person.hot && (
+                      <Flame className="h-4 w-4 text-orange-500" />
+                    )}
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+
           {spotlightCategory && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Spotlight: {spotlightCategory}
-            </p>
+            <div className="flex items-center gap-1.5 pl-4 border-l border-border/50 shrink-0">
+              <Sparkles className="h-4 w-4 text-primary/70" />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">{spotlightCategory}</span>
+            </div>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-10 md:h-12 md:flex-1 md:min-w-[180px] bg-secondary/30 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
-            {displayItems.slice(0, 5).map((person, index) => (
-              <Link
-                key={`${person.name}-${index}`}
-                to={`/profile/${nameToSlug(person.name)}`}
-                className="flex items-center justify-between md:justify-center gap-3 p-2 md:px-4 md:py-3 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group md:flex-1 md:min-w-[180px]"
-              >
-                <div className="flex items-center gap-2 md:gap-3">
-                  <span className="text-muted-foreground font-mono text-sm w-4 md:hidden">
-                    {index + 1}
-                  </span>
-                  <span className="font-medium group-hover:text-primary transition-colors text-sm md:text-base">
-                    {person.name}
-                  </span>
-                  {person.hot && (
-                    <Flame className="h-4 w-4 text-orange-500" />
-                  )}
-                </div>
-                <Badge variant="secondary" className="text-xs md:hidden">
-                  {person.searches}
-                </Badge>
-              </Link>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
