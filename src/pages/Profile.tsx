@@ -7,17 +7,28 @@ import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
+import { slugToName } from '@/lib/validation';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Profile = () => {
   const { id } = useParams<{ id: string }>();
   const { fetchCelebrity, loading } = useCelebrityData();
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
+  const [validationError, setValidationError] = useState(false);
 
   useEffect(() => {
     if (id) {
-      const name = id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      fetchCelebrity(name).then(setCelebrity);
+      // Validate the URL parameter before making API call
+      const validatedName = slugToName(id);
+      
+      if (!validatedName) {
+        setValidationError(true);
+        setCelebrity(null);
+        return;
+      }
+      
+      setValidationError(false);
+      fetchCelebrity(validatedName).then(setCelebrity);
     }
   }, [id, fetchCelebrity]);
 
@@ -29,6 +40,19 @@ const Profile = () => {
           <Skeleton className="h-40 w-full mb-8" />
           <Skeleton className="h-64 w-full mb-8" />
           <Skeleton className="h-96 w-full" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (validationError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid profile</h1>
+          <p className="text-muted-foreground">The profile URL contains invalid characters. Please use the search to find someone.</p>
         </main>
         <Footer />
       </div>

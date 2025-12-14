@@ -6,21 +6,37 @@ import SearchBar from '@/components/home/SearchBar';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
+import { validateCelebrityName, sanitizeSearchQuery } from '@/lib/validation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const rawQuery = searchParams.get('q') || '';
+  const displayQuery = sanitizeSearchQuery(rawQuery);
   const { fetchCelebrity, loading } = useCelebrityData();
   const [result, setResult] = useState<Celebrity | null>(null);
+  const [validationError, setValidationError] = useState(false);
 
   useEffect(() => {
-    if (query) {
-      fetchCelebrity(query).then(setResult);
+    if (rawQuery) {
+      // Validate the search query before making API call
+      const validatedQuery = validateCelebrityName(rawQuery);
+      
+      if (!validatedQuery) {
+        setValidationError(true);
+        setResult(null);
+        return;
+      }
+      
+      setValidationError(false);
+      fetchCelebrity(validatedQuery).then(setResult);
+    } else {
+      setResult(null);
+      setValidationError(false);
     }
-  }, [query, fetchCelebrity]);
+  }, [rawQuery, fetchCelebrity]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -40,7 +56,13 @@ const Search = () => {
             </div>
           )}
 
-          {!loading && result && (
+          {!loading && validationError && displayQuery && (
+            <p className="text-center text-muted-foreground">
+              Invalid search query. Please use only letters, spaces, and hyphens.
+            </p>
+          )}
+
+          {!loading && !validationError && result && (
             <Link to={`/profile/${result.id}`}>
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
                 <CardContent className="p-6">
@@ -64,9 +86,9 @@ const Search = () => {
             </Link>
           )}
 
-          {!loading && query && !result && (
+          {!loading && !validationError && displayQuery && !result && (
             <p className="text-center text-muted-foreground">
-              No results found for "{query}". Try another search.
+              No results found for "{displayQuery}". Try another search.
             </p>
           )}
         </div>
