@@ -13,42 +13,78 @@ interface TrendingItem {
   category?: string;
 }
 
-// Curated fallback celebrities by category for rotating spotlight
+// Expanded curated featured celebrities by category
 const categorySpotlights: Record<string, { name: string; hot?: boolean }[]> = {
   Athletes: [
     { name: 'LeBron James', hot: true },
-    { name: 'Cristiano Ronaldo' },
+    { name: 'Cristiano Ronaldo', hot: true },
     { name: 'Lionel Messi' },
     { name: 'Serena Williams' },
     { name: 'Patrick Mahomes', hot: true },
+    { name: 'Stephen Curry' },
+    { name: 'Kevin Durant' },
+    { name: 'Tom Brady' },
+    { name: 'Shohei Ohtani', hot: true },
+    { name: 'Lewis Hamilton' },
+    { name: 'Tiger Woods' },
+    { name: 'Kylian Mbappé', hot: true },
   ],
   Musicians: [
     { name: 'Taylor Swift', hot: true },
     { name: 'Drake' },
-    { name: 'Beyoncé' },
+    { name: 'Beyoncé', hot: true },
     { name: 'The Weeknd' },
     { name: 'Bad Bunny', hot: true },
+    { name: 'Rihanna' },
+    { name: 'Ed Sheeran' },
+    { name: 'Travis Scott' },
+    { name: 'Billie Eilish' },
+    { name: 'Post Malone' },
+    { name: 'Kanye West' },
+    { name: 'Jay-Z' },
   ],
   'Tech Billionaires': [
     { name: 'Elon Musk', hot: true },
     { name: 'Jeff Bezos' },
-    { name: 'Mark Zuckerberg' },
+    { name: 'Mark Zuckerberg', hot: true },
     { name: 'Jensen Huang', hot: true },
     { name: 'Larry Ellison' },
+    { name: 'Bill Gates' },
+    { name: 'Tim Cook' },
+    { name: 'Satya Nadella' },
+    { name: 'Larry Page' },
+    { name: 'Sam Altman', hot: true },
   ],
   Hollywood: [
-    { name: 'Dwayne Johnson' },
+    { name: 'Dwayne Johnson', hot: true },
     { name: 'Ryan Reynolds' },
     { name: 'Margot Robbie' },
     { name: 'Tom Cruise', hot: true },
     { name: 'Zendaya', hot: true },
+    { name: 'Leonardo DiCaprio' },
+    { name: 'Scarlett Johansson' },
+    { name: 'Robert Downey Jr' },
+    { name: 'Chris Hemsworth' },
+    { name: 'Jennifer Lawrence' },
   ],
   Influencers: [
     { name: 'MrBeast', hot: true },
     { name: 'Kylie Jenner' },
     { name: 'PewDiePie' },
-    { name: 'Charli D\'Amelio' },
+    { name: "Charli D'Amelio" },
     { name: 'Logan Paul', hot: true },
+    { name: 'Kim Kardashian', hot: true },
+    { name: 'Jake Paul' },
+    { name: 'KSI' },
+    { name: 'Addison Rae' },
+    { name: 'Emma Chamberlain' },
+  ],
+  Historical: [
+    { name: 'Mansa Musa', hot: true },
+    { name: 'John D. Rockefeller' },
+    { name: 'Andrew Carnegie' },
+    { name: 'Cleopatra' },
+    { name: 'Genghis Khan' },
   ],
 };
 
@@ -82,22 +118,38 @@ const TrendingSearches = () => {
     }));
     setSpotlightItems(items);
 
-    // Fetch real trends from database
+    // Get 4 featured items from spotlight category (shuffled by hour)
+    const allSpotlight = categorySpotlights[currentCategory];
+    const hourSeed = new Date().getHours() + new Date().getDate();
+    const shuffledSpotlight = [...allSpotlight].sort((a, b) => {
+      const hashA = a.name.charCodeAt(0) * hourSeed;
+      const hashB = b.name.charCodeAt(0) * hourSeed;
+      return (hashA % 100) - (hashB % 100);
+    });
+    const featuredItems = shuffledSpotlight.slice(0, 4).map((item) => ({
+      name: item.name,
+      searches: 'Featured',
+      hot: item.hot || false,
+      category: currentCategory,
+    }));
+    setSpotlightItems(featuredItems);
+
+    // Fetch only top 1 from real trends to mix in
     const fetchTrends = async () => {
       try {
         const { data, error } = await supabase
           .from('search_trends')
           .select('celebrity_name, search_count, category')
           .order('search_count', { ascending: false })
-          .limit(5);
+          .limit(2);
 
         if (error) throw error;
 
         if (data && data.length > 0) {
-          const trends: TrendingItem[] = data.map((item, index) => ({
+          const trends: TrendingItem[] = data.map((item) => ({
             name: item.celebrity_name,
             searches: formatSearchCount(item.search_count),
-            hot: index < 2, // Top 2 are "hot"
+            hot: true,
             category: item.category || undefined,
           }));
           setRealTrends(trends);
@@ -112,18 +164,23 @@ const TrendingSearches = () => {
     fetchTrends();
   }, []);
 
-  // Combine real trends with spotlight, prioritizing real data
-  const displayItems: TrendingItem[] = realTrends.length > 0 
-    ? realTrends.slice(0, 3).concat(spotlightItems.slice(0, 2))
-    : spotlightItems.concat(
-        categorySpotlights[categories[(new Date().getHours() + 1) % categories.length]]
-          .slice(0, 3)
-          .map((item) => ({
-            name: item.name,
-            searches: 'Popular',
-            hot: item.hot || false,
-          }))
-      );
+  // Prioritize featured celebrities, add 1 real trend if available
+  const displayItems: TrendingItem[] = (() => {
+    const items: TrendingItem[] = [];
+    
+    // Add up to 4 featured items first
+    items.push(...spotlightItems.slice(0, 4));
+    
+    // Add 1 real trend if available and not already in list
+    if (realTrends.length > 0) {
+      const realTrend = realTrends.find(t => !items.some(i => i.name === t.name));
+      if (realTrend) {
+        items.splice(2, 0, realTrend); // Insert at position 3
+      }
+    }
+    
+    return items.slice(0, 5);
+  })();
 
   return (
     <Card className="border-border/50 bg-card/50">
