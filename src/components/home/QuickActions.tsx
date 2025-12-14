@@ -46,7 +46,7 @@ const QuickActions = () => {
                 <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
                   {action.title}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-foreground/70 font-medium">
                   {action.description}
                 </p>
               </div>
