@@ -366,13 +366,38 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
 
       {/* Share Buttons */}
       <Card className="border-border/50 bg-card/50">
-        <CardContent className="p-6">
-          <p className="text-sm text-muted-foreground mb-4">Share this card</p>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-muted-foreground">Share this card</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleDownload}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+              </Button>
+              <Button 
+                onClick={() => handleShare('copy')}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           
           {/* Primary: Native Share with Image */}
           <Button 
             onClick={() => handleShare('native')}
-            className="w-full mb-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-semibold"
+            className="w-full mb-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-semibold h-9 text-sm"
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -380,35 +405,36 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
             ) : (
               <Share2 className="h-4 w-4 mr-2" />
             )}
-            Share Card Image
+            Share Card
           </Button>
 
-          {/* Social Platform Buttons */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          {/* Social Platform Buttons - Compact Circle Icons */}
+          <div className="flex items-center justify-center gap-2">
             <Button 
               onClick={() => handleShare('twitter')}
-              className="bg-black hover:bg-black/80 text-white"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-black hover:bg-black/80 text-white"
             >
               <TwitterIcon />
-              <span className="ml-2">Twitter</span>
             </Button>
             <Button 
               onClick={() => handleShare('facebook')}
-              className="bg-[#1877F2] hover:bg-[#1877F2]/80 text-white"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-[#1877F2] hover:bg-[#1877F2]/80 text-white"
             >
               <FacebookIcon />
-              <span className="ml-2">Facebook</span>
             </Button>
             <Button 
               onClick={() => handleShare('linkedin')}
-              className="bg-[#0A66C2] hover:bg-[#0A66C2]/80 text-white"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-[#0A66C2] hover:bg-[#0A66C2]/80 text-white"
             >
               <LinkedInIcon />
-              <span className="ml-2">LinkedIn</span>
             </Button>
             <Button 
               onClick={handleInstagramShare}
-              className="bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] hover:opacity-90 text-white"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] hover:opacity-90 text-white"
               disabled={isGenerating}
             >
               {isGenerating ? (
@@ -416,11 +442,11 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               ) : (
                 <InstagramIcon />
               )}
-              <span className="ml-2">Instagram</span>
             </Button>
             <Button 
               onClick={handleTikTokShare}
-              className="bg-black hover:bg-black/80 text-white col-span-2"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-black hover:bg-black/80 text-white"
               disabled={isGenerating}
             >
               {isGenerating ? (
@@ -428,30 +454,6 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               ) : (
                 <TikTokIcon />
               )}
-              <span className="ml-2">TikTok</span>
-            </Button>
-          </div>
-
-          {/* Secondary Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              onClick={handleDownload}
-              variant="outline"
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4 mr-2" />
-              )}
-              Download
-            </Button>
-            <Button 
-              onClick={() => handleShare('copy')}
-              variant="outline"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Copy Link
             </Button>
           </div>
         </CardContent>
