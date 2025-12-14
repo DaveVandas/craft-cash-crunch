@@ -229,7 +229,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
           {/* Footer */}
           <div className="text-center mt-4 pt-4 border-t border-amber-500/20">
-            <p className="text-gray-500 text-xs">{window.location.host}</p>
+            <p className="text-gray-500 text-xs">earningsexplorer.shop</p>
           </div>
         </div>
       </div>
