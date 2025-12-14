@@ -47,7 +47,26 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-3">4. Use of Service</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-3">4. Payments & Refund Policy</h2>
+                <p className="text-muted-foreground mb-3">
+                  Wealth Perspective offers a one-time lifetime access purchase for $4.99. Before purchasing, 
+                  all users receive <strong className="text-foreground">3 free searches</strong> to explore the service and determine if it 
+                  meets their needs.
+                </p>
+                <p className="text-muted-foreground mb-3">
+                  <strong className="text-foreground">All sales are final.</strong> Due to the digital nature of this product and the 
+                  immediate access granted upon purchase, we do not offer refunds, returns, or exchanges. 
+                  By completing your purchase, you acknowledge that you have had the opportunity to try the 
+                  service with free searches and agree to this no-refund policy.
+                </p>
+                <p className="text-muted-foreground">
+                  If you experience technical issues preventing access to paid features, please contact us 
+                  and we will work to resolve the issue.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold text-foreground mb-3">5. Use of Service</h2>
                 <p className="text-muted-foreground">
                   You agree to use Wealth Perspective only for lawful purposes and in accordance with 
                   these Terms. You agree not to misrepresent information from this service as verified 
@@ -56,7 +75,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-3">5. Intellectual Property</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-3">6. Intellectual Property</h2>
                 <p className="text-muted-foreground">
                   The service, including its design, features, and content, is owned by Wealth Perspective 
                   and is protected by applicable intellectual property laws. You may share generated 
@@ -65,7 +84,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-3">6. Limitation of Liability</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-3">7. Limitation of Liability</h2>
                 <p className="text-muted-foreground">
                   Wealth Perspective shall not be liable for any damages arising from the use or inability 
                   to use our service, or from any information provided through the service. This includes 
@@ -74,7 +93,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-3">7. Changes to Terms</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-3">8. Changes to Terms</h2>
                 <p className="text-muted-foreground">
                   We reserve the right to modify these terms at any time. Continued use of the service 
                   after changes constitutes acceptance of the new terms.
@@ -82,7 +101,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-3">8. Contact</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-3">9. Contact</h2>
                 <p className="text-muted-foreground">
                   For questions about these Terms of Service, please contact us through our website.
                 </p>
