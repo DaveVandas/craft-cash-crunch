@@ -99,7 +99,7 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, refreshAccess]);
+  }, [user, navigate]);
 
   const searchCelebritiesByCategory = useCallback(async (category: string): Promise<Celebrity[]> => {
     if (!user) {
@@ -150,7 +150,7 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, refreshAccess]);
+  }, [user, navigate]);
 
   return {
     loading,
