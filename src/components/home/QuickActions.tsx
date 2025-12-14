@@ -31,8 +31,14 @@ const QuickActions = () => {
     <>
       {actions.map((action) => (
         <Link key={action.href} to={action.href}>
-          <Card className="border-border/50 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 cursor-pointer group">
-            <CardContent className="p-4 flex items-center gap-3">
+          <Card className="relative overflow-hidden border-border/50 bg-card/50 hover:bg-card transition-all duration-300 cursor-pointer group hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]">
+            {/* Gold shimmer border on hover */}
+            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              <div className="absolute inset-0 rounded-lg border-2 border-primary/60" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+            </div>
+            
+            <CardContent className="p-4 flex items-center gap-3 relative z-10">
               <div className={`p-2 rounded-full bg-secondary group-hover:scale-110 transition-transform flex-shrink-0 ${action.color}`}>
                 <action.icon className="h-5 w-5" />
               </div>

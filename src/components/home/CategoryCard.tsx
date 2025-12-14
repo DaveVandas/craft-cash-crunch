@@ -14,12 +14,18 @@ const CategoryCard = ({ category, index }: CategoryCardProps) => {
       <Card 
         className={cn(
           "group relative overflow-hidden border-border/50 bg-card/50 hover:bg-card transition-all duration-300",
-          "hover:border-primary/50 hover:shadow-gold cursor-pointer",
+          "hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] cursor-pointer",
           "animate-slide-up"
         )}
         style={{ animationDelay: `${index * 100}ms` }}
       >
-        <CardContent className="p-6">
+        {/* Gold shimmer border on hover */}
+        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute inset-0 rounded-lg border-2 border-primary/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+        </div>
+        
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-center gap-4">
             <div 
               className={cn(

@@ -97,8 +97,14 @@ const DailyWealthFact = () => {
   };
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5">
-      <CardContent className="p-4 flex items-start gap-3">
+    <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 group hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] transition-all duration-300">
+      {/* Gold shimmer border on hover */}
+      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="absolute inset-0 rounded-lg border-2 border-primary/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+      </div>
+      
+      <CardContent className="p-4 flex items-start gap-3 relative z-10">
         <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
           <Lightbulb className="h-5 w-5 text-primary" />
         </div>
