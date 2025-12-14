@@ -8,12 +8,10 @@ import { useNavigate } from 'react-router-dom';
 export const useCelebritySearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user, accessInfo, refreshAccess } = useAuth();
+  const { user, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
-  const accessLoaded = accessInfo !== null;
-
-  const checkAccess = useCallback((): boolean => {
+  const checkAccess = useCallback(async (): Promise<boolean> => {
     if (!user) {
       toast.error('Please sign in to search for celebrities', {
         action: {
@@ -24,42 +22,61 @@ export const useCelebritySearch = () => {
       return false;
     }
 
-    if (!accessInfo?.hasLifetimeAccess && accessInfo?.searchesRemaining === 0) {
-      toast.error('You have used all your free searches', {
-        description: 'Unlock unlimited access for just $4.99',
-        action: {
-          label: 'Upgrade',
-          onClick: async () => {
-            const { data } = await supabase.functions.invoke('create-payment');
-            if (data?.url) window.open(data.url, '_blank');
+    try {
+      const { data, error } = await supabase.functions.invoke('check-access');
+      if (error) throw error;
+
+      // Keep AuthContext in sync
+      await refreshAccess();
+
+      // Lifetime access: always allow
+      if (data?.hasLifetimeAccess) {
+        return true;
+      }
+
+      // Free tier with no searches remaining
+      if (data && !data.hasLifetimeAccess && data.searchesRemaining === 0) {
+        toast.error('You have used all your free searches', {
+          description: 'Unlock unlimited access for just $4.99',
+          action: {
+            label: 'Upgrade',
+            onClick: async () => {
+              const { data: paymentData } = await supabase.functions.invoke('create-payment');
+              if (paymentData?.url) window.open(paymentData.url, '_blank');
+            },
           },
-        },
-      });
+        });
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to check access';
+      console.error('Access check failed:', err);
+      toast.error(message);
       return false;
     }
-
-    return true;
-  }, [user, accessInfo, navigate]);
+  }, [user, navigate, refreshAccess]);
 
   const searchCelebrity = useCallback(async (name: string): Promise<Celebrity | null> => {
-    if (!checkAccess()) return null;
+    if (!(await checkAccess())) return null;
 
     setLoading(true);
     setError(null);
 
     try {
-      // Increment search count first
+      // Increment search count first (backend will no-op for lifetime access)
       await supabase.functions.invoke('increment-search');
 
       // Then fetch celebrity data
       const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
-        body: { name }
+        body: { name },
       });
 
       if (fnError) throw fnError;
-      if (data.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
 
-      // Refresh access to update remaining searches
+      // Refresh access to update remaining searches after this search
       await refreshAccess();
 
       return data.celebrity as Celebrity;
@@ -74,7 +91,7 @@ export const useCelebritySearch = () => {
   }, [checkAccess, refreshAccess]);
 
   const searchCelebritiesByCategory = useCallback(async (category: string): Promise<Celebrity[]> => {
-    if (!checkAccess()) return [];
+    if (!(await checkAccess())) return [];
 
     setLoading(true);
     setError(null);
@@ -84,11 +101,11 @@ export const useCelebritySearch = () => {
       await supabase.functions.invoke('increment-search');
 
       const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
-        body: { category }
+        body: { category },
       });
 
       if (fnError) throw fnError;
-      if (data.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
 
       await refreshAccess();
 
@@ -108,9 +125,5 @@ export const useCelebritySearch = () => {
     error,
     searchCelebrity,
     searchCelebritiesByCategory,
-    hasAccess: accessInfo?.hasAccess ?? false,
-    searchesRemaining: accessInfo?.searchesRemaining ?? 0,
-    hasLifetimeAccess: accessInfo?.hasLifetimeAccess ?? false,
-    accessLoaded,
   };
 };
