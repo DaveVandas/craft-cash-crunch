@@ -1,11 +1,11 @@
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { Celebrity } from '@/lib/types';
-import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
+import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, getMostDramaticComparison } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Crown, Trophy, Equal } from 'lucide-react';
+import { Download, Share2, Crown, Trophy, Equal, Zap, Clock, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CompareShareCardProps {
@@ -26,8 +26,17 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   
   const winner = person1.annualEarnings >= person2.annualEarnings ? person1 : person2;
   const loser = person1.annualEarnings >= person2.annualEarnings ? person2 : person1;
-  const ratio = winner.annualEarnings / loser.annualEarnings;
+  const ratio = loser.annualEarnings > 0 ? winner.annualEarnings / loser.annualEarnings : 0;
   const timeToEarn = calculateTimeToEarn(loser.annualEarnings, winner.annualEarnings);
+  
+  // Calculate dramatic stats
+  const winnerBreakdown = calculateEarningsBreakdown(winner.annualEarnings);
+  const loserBreakdown = calculateEarningsBreakdown(loser.annualEarnings);
+  const winnerFlex = getMostDramaticComparison(winner.annualEarnings);
+  
+  // Combined earnings
+  const combinedAnnual = person1.annualEarnings + person2.annualEarnings;
+  const combinedBreakdown = calculateEarningsBreakdown(combinedAnnual);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -51,9 +60,11 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   };
 
   const handleShare = async () => {
+    const flexText = winnerFlex ? `${winnerFlex.emoji} ${winner.name} buys ${winnerFlex.quantity} ${winnerFlex.item} ${winnerFlex.timeframe}` : '';
+    
     const text = isTie
-      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings with Wealth Perspective`
-      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCompare celebrity earnings with Wealth Perspective`;
+      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n💵 Combined: ${formatCurrency(combinedBreakdown.perSecond)}/second\n\nCompare celebrity earnings at earningsexplorer.shop`
+      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n⚡ ${formatCurrency(winnerBreakdown.perSecond)}/second\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
 
     const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
 
@@ -128,108 +139,148 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
           background: 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
         }}
       >
-        <div className="rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-6">
+        <div className="rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-5">
           {/* Header */}
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <span className="text-2xl">💎</span>
-            <span className="font-serif text-lg font-bold text-amber-400">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-xl">💎</span>
+            <span className="font-serif text-base font-bold text-amber-400">
               Wealth Showdown
             </span>
           </div>
 
           {/* VS Layout */}
-          <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
             {/* Person 1 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className="h-20 w-20 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                <Avatar className="h-16 w-16 mx-auto ring-2 ring-amber-500/50 shadow-lg">
                   <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
-                    {getAvatarEmoji(person1.profession)}
+                  <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                    {person1.emoji || getAvatarEmoji(person1.profession)}
                   </AvatarFallback>
                 </Avatar>
                 {!isTie && person1 === winner && (
-                  <div className="absolute -top-3 -right-3">
-                    <Crown className="h-8 w-8 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                  <div className="absolute -top-2 -right-2">
+                    <Crown className="h-6 w-6 text-amber-400 fill-amber-400 drop-shadow-lg" />
                   </div>
                 )}
               </div>
-              <p className="font-bold text-white mt-2 text-sm">{person1.name}</p>
-              <p className="text-xs text-amber-400 font-mono">
+              <p className="font-bold text-white mt-2 text-xs truncate max-w-[90px] mx-auto">{person1.name}</p>
+              <p className="text-[10px] text-amber-400 font-mono">
                 {formatCompactCurrency(person1.annualEarnings)}/yr
               </p>
             </div>
 
             {/* VS */}
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg">
-                <span className="text-black font-bold text-sm">VS</span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg">
+                <span className="text-black font-bold text-xs">VS</span>
               </div>
             </div>
 
             {/* Person 2 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className="h-20 w-20 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                <Avatar className="h-16 w-16 mx-auto ring-2 ring-amber-500/50 shadow-lg">
                   <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
-                    {getAvatarEmoji(person2.profession)}
+                  <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                    {person2.emoji || getAvatarEmoji(person2.profession)}
                   </AvatarFallback>
                 </Avatar>
                 {!isTie && person2 === winner && (
-                  <div className="absolute -top-3 -right-3">
-                    <Crown className="h-8 w-8 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                  <div className="absolute -top-2 -right-2">
+                    <Crown className="h-6 w-6 text-amber-400 fill-amber-400 drop-shadow-lg" />
                   </div>
                 )}
               </div>
-              <p className="font-bold text-white mt-2 text-sm">{person2.name}</p>
-              <p className="text-xs text-amber-400 font-mono">
+              <p className="font-bold text-white mt-2 text-xs truncate max-w-[90px] mx-auto">{person2.name}</p>
+              <p className="text-[10px] text-amber-400 font-mono">
                 {formatCompactCurrency(person2.annualEarnings)}/yr
               </p>
             </div>
           </div>
 
+          {/* Dramatic Stats Grid */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {/* Per Second */}
+            <div className="bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-2 border border-amber-500/20">
+              <div className="flex items-center gap-1 mb-1">
+                <Zap className="h-3 w-3 text-amber-400" />
+                <span className="text-[9px] text-gray-400 uppercase tracking-wide">Per Second</span>
+              </div>
+              <p className="text-amber-400 font-mono text-xs font-bold">
+                {formatCurrency(winnerBreakdown.perSecond)}
+              </p>
+              <p className="text-[8px] text-gray-500 truncate">{winner.name}</p>
+            </div>
+            
+            {/* Per Minute */}
+            <div className="bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-2 border border-amber-500/20">
+              <div className="flex items-center gap-1 mb-1">
+                <Clock className="h-3 w-3 text-amber-400" />
+                <span className="text-[9px] text-gray-400 uppercase tracking-wide">Per Minute</span>
+              </div>
+              <p className="text-amber-400 font-mono text-xs font-bold">
+                {formatCurrency(winnerBreakdown.perMinute)}
+              </p>
+              <p className="text-[8px] text-gray-500 truncate">{winner.name}</p>
+            </div>
+          </div>
+
           {/* Result Section */}
           {isTie ? (
-            <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-4 border border-amber-500/30">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Equal className="h-5 w-5 text-amber-400" />
-                <span className="text-amber-400 font-bold">IT'S A DRAW!</span>
-                <Equal className="h-5 w-5 text-amber-400" />
+            <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Equal className="h-4 w-4 text-amber-400" />
+                <span className="text-amber-400 font-bold text-sm">IT'S A DRAW!</span>
+                <Equal className="h-4 w-4 text-amber-400" />
               </div>
-              <p className="text-white text-center text-sm">
-                Both earn approximately
-              </p>
-              <p className="text-amber-400 text-center font-bold text-lg mt-1">
-                {formatCompactCurrency(person1.annualEarnings)}/yr
+              <p className="text-white text-center text-xs">
+                Both earn approximately <span className="text-amber-400 font-bold">{formatCompactCurrency(person1.annualEarnings)}/yr</span>
               </p>
             </div>
           ) : (
             <>
-              <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-4 border border-amber-500/30">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Trophy className="h-5 w-5 text-amber-400" />
-                  <span className="text-amber-400 font-bold">WINNER</span>
+              <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30 mb-2">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Trophy className="h-4 w-4 text-amber-400" />
+                  <span className="text-amber-400 font-bold text-sm">{winner.name}</span>
                 </div>
-                <p className="text-white text-center font-serif text-lg">{winner.name}</p>
-                <p className="text-amber-400 text-center text-sm mt-1">
-                  earns <span className="font-bold">{ratio.toFixed(1)}x</span> more
+                <p className="text-white text-center text-xs">
+                  earns <span className="text-amber-400 font-bold">{ratio.toFixed(1)}x</span> more • Makes {loser.name}'s yearly salary in <span className="text-amber-400 font-bold">{timeToEarn}</span>
                 </p>
               </div>
 
-              {/* Key Stat */}
-              <div className="text-center mt-4">
-                <p className="text-gray-400 text-xs">
-                  {winner.name} makes {loser.name}'s yearly salary in
-                </p>
-                <p className="text-amber-400 font-bold text-xl">{timeToEarn}</p>
-              </div>
+              {/* Flex Mode Stat */}
+              {winnerFlex && (
+                <div className="bg-gradient-to-r from-purple-900/30 via-purple-800/20 to-purple-900/30 rounded-lg p-2 border border-purple-500/30">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-lg">{winnerFlex.emoji}</span>
+                    <p className="text-white text-xs text-center">
+                      <span className="text-purple-400 font-bold">{winnerFlex.quantity}</span>{' '}
+                      <span className="text-gray-300">{winnerFlex.item}</span>{' '}
+                      <span className="text-purple-400 font-bold">{winnerFlex.timeframe}</span>
+                    </p>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
-          {/* Footer */}
-          <div className="text-center mt-4 pt-4 border-t border-amber-500/20">
-            <p className="text-gray-500 text-xs">earningsexplorer.shop</p>
+          {/* Combined Earnings Footer */}
+          <div className="mt-3 pt-2 border-t border-amber-500/20">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <DollarSign className="h-3 w-3 text-gray-500" />
+              <span className="text-[9px] text-gray-500 uppercase tracking-wide">Combined Earnings</span>
+            </div>
+            <p className="text-center text-amber-400/80 font-mono text-[10px]">
+              {formatCurrency(combinedBreakdown.perSecond)}/sec • {formatCurrency(combinedBreakdown.perHour)}/hr
+            </p>
+          </div>
+
+          {/* Branding Footer */}
+          <div className="text-center mt-2">
+            <p className="text-gray-600 text-[10px]">earningsexplorer.shop</p>
           </div>
         </div>
       </div>
