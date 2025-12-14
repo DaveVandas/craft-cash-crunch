@@ -22,8 +22,12 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
   const person1Percent = (person1.annualEarnings / maxEarnings) * 100;
   const person2Percent = (person2.annualEarnings / maxEarnings) * 100;
   
-  // Consider it a tie if earnings are within 5% of each other (or exactly equal)
-  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) <= 1.05;
+  // Consider it a tie if earnings are within 5% of each other OR the displayed compact values match
+  const formatted1 = formatCompactCurrency(person1.annualEarnings);
+  const formatted2 = formatCompactCurrency(person2.annualEarnings);
+  const isTie =
+    (minEarnings > 0 && maxEarnings / minEarnings <= 1.05) ||
+    formatted1 === formatted2;
   
   const ratio = maxEarnings / minEarnings;
   
