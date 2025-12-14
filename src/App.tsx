@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import Share from "./pages/Share";
 import Category from "./pages/Category";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/share" element={<Share />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

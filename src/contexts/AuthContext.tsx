@@ -17,6 +17,8 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   refreshAccess: () => Promise<void>;
   initiatePayment: () => Promise<void>;
 }
@@ -100,6 +102,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccessInfo(null);
   };
 
+  const resetPassword = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    return { error };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    return { error };
+  };
+
   const initiatePayment = async () => {
     const { data, error } = await supabase.functions.invoke('create-payment');
     if (error) throw error;
@@ -118,6 +135,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
+        resetPassword,
+        updatePassword,
         refreshAccess,
         initiatePayment,
       }}
