@@ -22,7 +22,7 @@ const Header = () => {
     navigate('/');
   };
 
-  const isPremium = accessInfo?.hasLifetimeAccess === true;
+  const isPremium = accessInfo?.hasLifetimeAccess === true || (accessInfo?.searchesRemaining ?? 0) < 0;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
