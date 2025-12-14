@@ -11,7 +11,7 @@ export const useCelebritySearch = () => {
   const { user, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
-  const checkAccess = useCallback(async (): Promise<boolean> => {
+  const searchCelebrity = useCallback(async (name: string): Promise<Celebrity | null> => {
     if (!user) {
       toast.error('Please sign in to search for celebrities', {
         action: {
@@ -19,62 +19,62 @@ export const useCelebritySearch = () => {
           onClick: () => navigate('/auth'),
         },
       });
-      return false;
+      return null;
     }
-
-    try {
-      const { data, error } = await supabase.functions.invoke('check-access');
-      if (error) throw error;
-
-      // Keep AuthContext in sync
-      await refreshAccess();
-
-      // Lifetime access: always allow
-      if (data?.hasLifetimeAccess) {
-        return true;
-      }
-
-      // Free tier with no searches remaining
-      if (data && !data.hasLifetimeAccess && data.searchesRemaining === 0) {
-        toast.error('You have used all your free searches', {
-          description: 'Unlock unlimited access for just $4.99',
-          action: {
-            label: 'Upgrade',
-            onClick: async () => {
-              const { data: paymentData } = await supabase.functions.invoke('create-payment');
-              if (paymentData?.url) window.open(paymentData.url, '_blank');
-            },
-          },
-        });
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to check access';
-      console.error('Access check failed:', err);
-      toast.error(message);
-      return false;
-    }
-  }, [user, navigate, refreshAccess]);
-
-  const searchCelebrity = useCallback(async (name: string): Promise<Celebrity | null> => {
-    if (!(await checkAccess())) return null;
 
     setLoading(true);
     setError(null);
 
     try {
       // Increment search count first (backend will no-op for lifetime access)
-      await supabase.functions.invoke('increment-search');
+      const incrementRes = await supabase.functions.invoke('increment-search');
+      if (incrementRes.data?.error) {
+        console.warn('Increment search soft error:', incrementRes.data.error);
+        // Don't block on increment errors, continue with search
+      }
 
       // Then fetch celebrity data
       const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
         body: { name },
       });
 
-      if (fnError) throw fnError;
-      if (data?.error) throw new Error(data.error);
+      // Handle network-level errors
+      if (fnError) {
+        const message = 'Network error. Please check your connection and try again.';
+        setError(message);
+        toast.error(message);
+        return null;
+      }
+
+      // Handle soft errors returned as 200 with error field
+      if (data?.error) {
+        const errorCode = data.errorCode || 'ERROR';
+        
+        if (errorCode === 'AUTH_REQUIRED') {
+          toast.error(data.error, {
+            action: {
+              label: 'Sign In',
+              onClick: () => navigate('/auth'),
+            },
+          });
+        } else if (errorCode === 'LIMIT_REACHED') {
+          toast.error(data.error, {
+            description: 'Unlock unlimited access for just $4.99',
+            action: {
+              label: 'Upgrade',
+              onClick: async () => {
+                const { data: paymentData } = await supabase.functions.invoke('create-payment');
+                if (paymentData?.url) window.open(paymentData.url, '_blank');
+              },
+            },
+          });
+        } else {
+          toast.error(data.error);
+        }
+        
+        setError(data.error);
+        return null;
+      }
 
       // Refresh access to update remaining searches after this search
       await refreshAccess();
@@ -88,24 +88,45 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [checkAccess, refreshAccess]);
+  }, [user, navigate, refreshAccess]);
 
   const searchCelebritiesByCategory = useCallback(async (category: string): Promise<Celebrity[]> => {
-    if (!(await checkAccess())) return [];
+    if (!user) {
+      toast.error('Please sign in to browse categories', {
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth'),
+        },
+      });
+      return [];
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       // Increment search count
-      await supabase.functions.invoke('increment-search');
+      const incrementRes = await supabase.functions.invoke('increment-search');
+      if (incrementRes.data?.error) {
+        console.warn('Increment search soft error:', incrementRes.data.error);
+      }
 
       const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
         body: { category },
       });
 
-      if (fnError) throw fnError;
-      if (data?.error) throw new Error(data.error);
+      if (fnError) {
+        const message = 'Network error. Please check your connection and try again.';
+        setError(message);
+        toast.error(message);
+        return [];
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        setError(data.error);
+        return [];
+      }
 
       await refreshAccess();
 
@@ -118,7 +139,7 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [checkAccess, refreshAccess]);
+  }, [user, navigate, refreshAccess]);
 
   return {
     loading,
