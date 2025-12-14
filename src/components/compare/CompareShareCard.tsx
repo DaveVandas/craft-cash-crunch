@@ -50,18 +50,50 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
     const text = isTie
       ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCheck your earnings at wealthperspective.app`
       : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCheck your earnings at wealthperspective.app`;
+
+    // Try to share the image on mobile
+    if (cardRef.current && navigator.canShare) {
+      try {
+        const canvas = await html2canvas(cardRef.current, {
+          backgroundColor: '#0a0a0a',
+          scale: 2,
+          logging: false,
+        });
+        
+        const blob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob((b) => resolve(b!), 'image/png');
+        });
+        
+        const file = new File([blob], `wealth-showdown.png`, { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Wealth Showdown',
+            text,
+          });
+          toast.success('Shared successfully!');
+          return;
+        }
+      } catch (err) {
+        // Fall through to text share or clipboard
+      }
+    }
     
+    // Fallback: try text share (mobile) or clipboard (desktop)
     if (navigator.share) {
       try {
         await navigator.share({ text });
         toast.success('Shared successfully!');
+        return;
       } catch (err) {
-        // User cancelled
+        // User cancelled or error - fall through to clipboard
       }
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast.success('Copied to clipboard!');
     }
+    
+    // Final fallback: copy to clipboard
+    await navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
 
   return (
