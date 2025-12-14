@@ -52,36 +52,55 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
       ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings at ${appUrl}`
       : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCompare celebrity earnings at ${appUrl}`;
 
-    // Try to share the image on mobile
-    if (cardRef.current && navigator.canShare) {
-      try {
+    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
+
+    try {
+      if (cardRef.current) {
         const canvas = await html2canvas(cardRef.current, {
           backgroundColor: '#0a0a0a',
           scale: 2,
           logging: false,
         });
-        
-        const blob = await new Promise<Blob>((resolve) => {
-          canvas.toBlob((b) => resolve(b!), 'image/png');
+
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((b) => {
+            if (b) resolve(b);
+            else reject(new Error('Failed to create image blob'));
+          }, 'image/png');
         });
-        
-        const file = new File([blob], `wealth-showdown.png`, { type: 'image/png' });
-        
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'Wealth Showdown',
-            text,
-          });
-          toast.success('Shared successfully!');
+
+        const file = new File([blob], 'wealth-showdown.png', { type: 'image/png' });
+        const shareData: ShareData & { files?: File[] } = {
+          title: 'Wealth Showdown',
+          text,
+          files: [file],
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast.success('Shared card image!');
           return;
         }
-      } catch (err) {
-        // Fall through to text share or clipboard
+
+        // If we're on mobile but can't share the file directly, save the image instead
+        if (isMobile) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'wealth-showdown.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success('Card saved! Share it from your photos/gallery.');
+          return;
+        }
       }
+    } catch (err) {
+      // Fall through to text/clipboard share
     }
-    
-    // Fallback: try text share (mobile) or clipboard (desktop)
+
+    // Desktop or final fallback: share/copy text
     if (navigator.share) {
       try {
         await navigator.share({ text });
@@ -91,8 +110,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
         // User cancelled or error - fall through to clipboard
       }
     }
-    
-    // Final fallback: copy to clipboard
+
     await navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
   };

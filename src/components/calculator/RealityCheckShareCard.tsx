@@ -51,18 +51,66 @@ const RealityCheckShareCard = ({
   const handleShare = async () => {
     const appUrl = window.location.origin;
     const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at ${appUrl}`;
-    
+
+    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
+
+    try {
+      if (cardRef.current) {
+        const canvas = await html2canvas(cardRef.current, {
+          backgroundColor: '#0a0a0a',
+          scale: 2,
+          logging: false,
+        });
+
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((b) => {
+            if (b) resolve(b);
+            else reject(new Error('Failed to create image blob'));
+          }, 'image/png');
+        });
+
+        const file = new File([blob], 'reality-check.png', { type: 'image/png' });
+        const shareData: ShareData & { files?: File[] } = {
+          title: 'Reality Check',
+          text,
+          files: [file],
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast.success('Shared card image!');
+          return;
+        }
+
+        if (isMobile) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reality-check.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success('Card saved! Share it from your photos/gallery.');
+          return;
+        }
+      }
+    } catch (err) {
+      // Fall through to text/clipboard share
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({ text });
         toast.success('Shared successfully!');
+        return;
       } catch (err) {
         // User cancelled
       }
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast.success('Copied to clipboard!');
     }
+
+    await navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
 
   return (
