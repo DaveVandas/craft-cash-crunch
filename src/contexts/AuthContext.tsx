@@ -43,7 +43,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const { data: accessData, error } = await supabase.functions.invoke('check-access');
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Error invoking check-access:', error);
+        return;
+      }
+      
+      if (accessData?.error) {
+        console.error('check-access returned error:', accessData.error);
+        return;
+      }
+      
+      console.log('Access info loaded:', accessData);
       setAccessInfo(accessData as AccessInfo);
     } catch (err) {
       console.error('Error checking access:', err);
