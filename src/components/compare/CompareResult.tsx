@@ -160,7 +160,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                    <AvatarFallback className="text-sm">{getAvatarEmoji(person1.profession)}</AvatarFallback>
+                    <AvatarFallback className="text-sm">{person1.emoji || getAvatarEmoji(person1.profession)}</AvatarFallback>
                   </Avatar>
                   {!isTie && person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person1.name}</span>
@@ -177,7 +177,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                    <AvatarFallback className="text-sm">{getAvatarEmoji(person2.profession)}</AvatarFallback>
+                    <AvatarFallback className="text-sm">{person2.emoji || getAvatarEmoji(person2.profession)}</AvatarFallback>
                   </Avatar>
                   {!isTie && person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person2.name}</span>

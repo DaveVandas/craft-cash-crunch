@@ -67,7 +67,7 @@ const Compare = () => {
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5">
                       <Avatar className="h-10 w-10 ring-2 ring-primary/30">
                         <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                        <AvatarFallback className="text-lg">{getAvatarEmoji(person1.profession)}</AvatarFallback>
+                        <AvatarFallback className="text-lg">{person1.emoji || getAvatarEmoji(person1.profession)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{person1.name}</p>
@@ -105,7 +105,7 @@ const Compare = () => {
                     <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5">
                       <Avatar className="h-10 w-10 ring-2 ring-primary/30">
                         <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                        <AvatarFallback className="text-lg">{getAvatarEmoji(person2.profession)}</AvatarFallback>
+                        <AvatarFallback className="text-lg">{person2.emoji || getAvatarEmoji(person2.profession)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{person2.name}</p>
