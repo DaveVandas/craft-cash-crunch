@@ -221,7 +221,7 @@ const TrendingSearches = () => {
             <span className="font-semibold text-sm whitespace-nowrap">Trending Now</span>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          <div className="flex-1 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-secondary/30 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-primary/60">
             <div className="flex items-center gap-3">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
