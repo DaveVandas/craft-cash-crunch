@@ -22,8 +22,8 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
   const person1Percent = (person1.annualEarnings / maxEarnings) * 100;
   const person2Percent = (person2.annualEarnings / maxEarnings) * 100;
   
-  // Consider it a tie if earnings are within 5% of each other
-  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) < 1.05;
+  // Consider it a tie if earnings are within 5% of each other (or exactly equal)
+  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) <= 1.05;
   
   const ratio = maxEarnings / minEarnings;
   

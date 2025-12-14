@@ -18,7 +18,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
   const maxEarnings = Math.max(person1.annualEarnings, person2.annualEarnings);
   const minEarnings = Math.min(person1.annualEarnings, person2.annualEarnings);
-  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) < 1.05;
+  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) <= 1.05;
   
   const winner = person1.annualEarnings >= person2.annualEarnings ? person1 : person2;
   const loser = person1.annualEarnings >= person2.annualEarnings ? person2 : person1;
@@ -47,9 +47,10 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   };
 
   const handleShare = async () => {
+    const appUrl = window.location.origin;
     const text = isTie
-      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCheck your earnings at wealthperspective.app`
-      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCheck your earnings at wealthperspective.app`;
+      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings at ${appUrl}`
+      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCompare celebrity earnings at ${appUrl}`;
 
     // Try to share the image on mobile
     if (cardRef.current && navigator.canShare) {
@@ -207,7 +208,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
           {/* Footer */}
           <div className="text-center mt-4 pt-4 border-t border-amber-500/20">
-            <p className="text-gray-500 text-xs">wealthperspective.app</p>
+            <p className="text-gray-500 text-xs">{window.location.host}</p>
           </div>
         </div>
       </div>
