@@ -36,7 +36,7 @@ const Compare = () => {
               Wealth <span className="gradient-gold-text">Showdown</span> ⚔️
             </h1>
             <p className="text-muted-foreground">
-              Pick your fighters and see who's stacking more cash.
+              Pick your tycoons and see who's stacking more cash.
             </p>
           </div>
 
