@@ -280,6 +280,12 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               </h2>
             </div>
 
+            {/* Net Worth */}
+            <div className="text-center mb-2">
+              <p className="text-orange-300/60 text-xs uppercase tracking-widest">Net Worth</p>
+              <p className="text-2xl font-bold text-orange-100">{formatCompactCurrency(celebrity.netWorth)}</p>
+            </div>
+
             {/* THE DRAMATIC STAT */}
             <div 
               className="text-center py-8 rounded-2xl border-2 border-orange-500/40"
@@ -380,23 +386,42 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               </p>
             </div>
 
-            {/* Annual Earnings - Hero Stat */}
-            <div 
-              className="text-center py-5 rounded-xl border-2 border-amber-500/40"
-              style={{ background: 'linear-gradient(145deg, rgba(184,134,11,0.2) 0%, rgba(10,10,11,0.8) 100%)' }}
-            >
-              <p className="text-xs text-amber-300/70 uppercase tracking-widest mb-2">💰 Annual Earnings</p>
-              <p 
-                className="text-4xl md:text-5xl font-bold"
-                style={{ 
-                  background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+            {/* Net Worth & Annual Earnings */}
+            <div className="grid grid-cols-2 gap-3">
+              <div 
+                className="text-center py-4 rounded-xl border-2 border-amber-500/40"
+                style={{ background: 'linear-gradient(145deg, rgba(184,134,11,0.15) 0%, rgba(10,10,11,0.8) 100%)' }}
               >
-                {formatCompactCurrency(celebrity.annualEarnings)}
-              </p>
+                <p className="text-xs text-amber-300/70 uppercase tracking-widest mb-1">💎 Net Worth</p>
+                <p 
+                  className="text-2xl md:text-3xl font-bold"
+                  style={{ 
+                    background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {formatCompactCurrency(celebrity.netWorth)}
+                </p>
+              </div>
+              <div 
+                className="text-center py-4 rounded-xl border-2 border-amber-500/40"
+                style={{ background: 'linear-gradient(145deg, rgba(184,134,11,0.15) 0%, rgba(10,10,11,0.8) 100%)' }}
+              >
+                <p className="text-xs text-amber-300/70 uppercase tracking-widest mb-1">💰 Annual</p>
+                <p 
+                  className="text-2xl md:text-3xl font-bold"
+                  style={{ 
+                    background: 'linear-gradient(90deg, #ffd700, #ffb347, #ffd700)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {formatCompactCurrency(celebrity.annualEarnings)}
+                </p>
+              </div>
             </div>
 
             {/* Stats Grid - Like a Baseball Card */}
