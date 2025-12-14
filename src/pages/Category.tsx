@@ -1,16 +1,46 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SearchBar from '@/components/home/SearchBar';
 import { getCategoryById, categories } from '@/lib/categories';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Seeded random for consistent shuffling within a time period
+function seededRandom(seed: number): () => number {
+  return function() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+}
+
+function shuffleWithSeed<T>(array: T[], seed: number): T[] {
+  const result = [...array];
+  const random = seededRandom(seed);
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 const Category = () => {
   const { id } = useParams<{ id: string }>();
   const category = id ? getCategoryById(id) : undefined;
+  const [displayedSuggestions, setDisplayedSuggestions] = useState<string[]>([]);
+
+  // Rotate suggestions every hour based on timestamp
+  useEffect(() => {
+    if (category) {
+      const allSuggestions = getAllSuggestionsForCategory(category.id);
+      // Create a seed based on current hour - changes every hour
+      const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
+      const shuffled = shuffleWithSeed(allSuggestions, hourSeed + category.id.length);
+      setDisplayedSuggestions(shuffled.slice(0, 5));
+    }
+  }, [category]);
 
   if (!category) {
     return (
@@ -75,7 +105,7 @@ const Category = () => {
         <section className="container pb-16">
           <h2 className="font-serif text-xl font-bold mb-4">Try searching for</h2>
           <div className="flex flex-wrap gap-2">
-            {getSuggestionsForCategory(category.id).map((suggestion) => (
+            {displayedSuggestions.map((suggestion) => (
               <Link 
                 key={suggestion} 
                 to={`/profile/${suggestion.toLowerCase().replace(/\s+/g, '-')}`}
@@ -93,16 +123,16 @@ const Category = () => {
   );
 };
 
-// Sample suggestions for each category
-function getSuggestionsForCategory(categoryId: string): string[] {
+// Extended suggestions pool for each category (rotates from this list)
+function getAllSuggestionsForCategory(categoryId: string): string[] {
   const suggestions: Record<string, string[]> = {
-    'athletes': ['LeBron James', 'Cristiano Ronaldo', 'Lionel Messi', 'Patrick Mahomes', 'Stephen Curry'],
-    'hollywood': ['Dwayne Johnson', 'Scarlett Johansson', 'Tom Cruise', 'Margot Robbie', 'Leonardo DiCaprio'],
-    'musicians': ['Taylor Swift', 'Drake', 'Beyoncé', 'Ed Sheeran', 'Bad Bunny'],
-    'tech-billionaires': ['Elon Musk', 'Jeff Bezos', 'Mark Zuckerberg', 'Bill Gates', 'Sundar Pichai'],
-    'politicians': ['Donald Trump', 'Joe Biden', 'Rishi Sunak', 'Emmanuel Macron'],
-    'influencers': ['MrBeast', 'Kylie Jenner', 'Charli D\'Amelio', 'Logan Paul', 'PewDiePie'],
-    'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Cleopatra', 'Genghis Khan', 'Mansa Musa'],
+    'athletes': ['LeBron James', 'Cristiano Ronaldo', 'Lionel Messi', 'Patrick Mahomes', 'Stephen Curry', 'Kevin Durant', 'Giannis Antetokounmpo', 'Kylian Mbappé', 'Neymar Jr', 'Tom Brady', 'Serena Williams', 'Roger Federer', 'Tiger Woods', 'Shohei Ohtani', 'Lewis Hamilton'],
+    'hollywood': ['Dwayne Johnson', 'Scarlett Johansson', 'Tom Cruise', 'Margot Robbie', 'Leonardo DiCaprio', 'Robert Downey Jr', 'Jennifer Lawrence', 'Brad Pitt', 'Sandra Bullock', 'Ryan Reynolds', 'Chris Hemsworth', 'Gal Gadot', 'Will Smith', 'Denzel Washington', 'Meryl Streep'],
+    'musicians': ['Taylor Swift', 'Drake', 'Beyoncé', 'Ed Sheeran', 'Bad Bunny', 'The Weeknd', 'Rihanna', 'Post Malone', 'Travis Scott', 'Harry Styles', 'Billie Eilish', 'Bruno Mars', 'Adele', 'Jay-Z', 'Kanye West'],
+    'tech-billionaires': ['Elon Musk', 'Jeff Bezos', 'Mark Zuckerberg', 'Bill Gates', 'Sundar Pichai', 'Tim Cook', 'Larry Page', 'Sergey Brin', 'Jensen Huang', 'Satya Nadella', 'Larry Ellison', 'Steve Ballmer', 'Michael Dell', 'Jack Dorsey', 'Brian Chesky'],
+    'politicians': ['Donald Trump', 'Joe Biden', 'Rishi Sunak', 'Emmanuel Macron', 'Barack Obama', 'Vladimir Putin', 'Xi Jinping', 'Justin Trudeau', 'Angela Merkel', 'Boris Johnson', 'Nancy Pelosi', 'Bernie Sanders'],
+    'influencers': ['MrBeast', 'Kylie Jenner', 'Charli D\'Amelio', 'Logan Paul', 'PewDiePie', 'Jake Paul', 'Addison Rae', 'David Dobrik', 'Emma Chamberlain', 'Kim Kardashian', 'Khaby Lame', 'Markiplier', 'Ninja', 'Pokimane', 'KSI'],
+    'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Cleopatra', 'Genghis Khan', 'Mansa Musa', 'Henry Ford', 'J.P. Morgan', 'Cornelius Vanderbilt', 'King Solomon', 'Augustus Caesar', 'Akbar I', 'William the Conqueror', 'Mir Osman Ali Khan', 'Jakob Fugger'],
   };
   return suggestions[categoryId] || [];
 }
