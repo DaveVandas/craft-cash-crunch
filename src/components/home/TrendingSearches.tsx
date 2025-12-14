@@ -109,16 +109,7 @@ const TrendingSearches = () => {
     const currentCategory = categories[hourIndex];
     setSpotlightCategory(currentCategory);
 
-    // Get spotlight items for this category
-    const items = categorySpotlights[currentCategory].slice(0, 2).map((item) => ({
-      name: item.name,
-      searches: 'Featured',
-      hot: item.hot || false,
-      category: currentCategory,
-    }));
-    setSpotlightItems(items);
-
-    // Get 4 featured items from spotlight category (shuffled by hour)
+    // Get 5 featured items from spotlight category (shuffled by hour)
     const allSpotlight = categorySpotlights[currentCategory];
     const hourSeed = new Date().getHours() + new Date().getDate();
     const shuffledSpotlight = [...allSpotlight].sort((a, b) => {
@@ -126,22 +117,23 @@ const TrendingSearches = () => {
       const hashB = b.name.charCodeAt(0) * hourSeed;
       return (hashA % 100) - (hashB % 100);
     });
-    const featuredItems = shuffledSpotlight.slice(0, 4).map((item) => ({
+    const featuredItems = shuffledSpotlight.slice(0, 5).map((item) => ({
       name: item.name,
       searches: 'Featured',
       hot: item.hot || false,
       category: currentCategory,
     }));
     setSpotlightItems(featuredItems);
+    setLoading(false);
 
-    // Fetch only top 1 from real trends to mix in
+    // Optionally fetch top 1 real trend (but we won't prioritize it)
     const fetchTrends = async () => {
       try {
         const { data, error } = await supabase
           .from('search_trends')
           .select('celebrity_name, search_count, category')
           .order('search_count', { ascending: false })
-          .limit(2);
+          .limit(1);
 
         if (error) throw error;
 
@@ -156,31 +148,14 @@ const TrendingSearches = () => {
         }
       } catch (err) {
         console.error('Failed to fetch trends:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchTrends();
   }, []);
 
-  // Prioritize featured celebrities, add 1 real trend if available
-  const displayItems: TrendingItem[] = (() => {
-    const items: TrendingItem[] = [];
-    
-    // Add up to 4 featured items first
-    items.push(...spotlightItems.slice(0, 4));
-    
-    // Add 1 real trend if available and not already in list
-    if (realTrends.length > 0) {
-      const realTrend = realTrends.find(t => !items.some(i => i.name === t.name));
-      if (realTrend) {
-        items.splice(2, 0, realTrend); // Insert at position 3
-      }
-    }
-    
-    return items.slice(0, 5);
-  })();
+  // Display only featured celebrities (5 total)
+  const displayItems: TrendingItem[] = spotlightItems.slice(0, 5);
 
   return (
     <Card className="border-border/50 bg-card/50">
