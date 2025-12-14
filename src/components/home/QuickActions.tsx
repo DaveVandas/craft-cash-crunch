@@ -29,11 +29,9 @@ const actions = [
 const QuickActions = () => {
   return (
     <>
-      {actions.map((action, index) => (
+      {actions.map((action) => (
         <Link key={action.href} to={action.href}>
-          <Card 
-            className="h-full border-border/50 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 cursor-pointer group"
-          >
+          <Card className="border-border/50 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 cursor-pointer group">
             <CardContent className="p-4 flex items-center gap-3">
               <div className={`p-2 rounded-full bg-secondary group-hover:scale-110 transition-transform flex-shrink-0 ${action.color}`}>
                 <action.icon className="h-5 w-5" />
