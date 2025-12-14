@@ -3,6 +3,7 @@ import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Share2, GitCompareArrows, ArrowLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -11,20 +12,29 @@ interface ProfileHeroProps {
   celebrity: Celebrity;
 }
 
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+};
+
 const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
   const navigate = useNavigate();
   
-  const categoryConfig: Record<string, { emoji: string; animation: string; bgGradient: string }> = {
-    'athletes': { emoji: '🏆', animation: 'animate-bounce-wobble', bgGradient: 'from-amber-900/50 to-orange-900/50' },
-    'hollywood': { emoji: '🎬', animation: 'animate-pulse-scale', bgGradient: 'from-purple-900/50 to-pink-900/50' },
-    'musicians': { emoji: '🎵', animation: 'animate-bounce-wobble', bgGradient: 'from-pink-900/50 to-rose-900/50' },
-    'tech-billionaires': { emoji: '🚀', animation: 'animate-float', bgGradient: 'from-blue-900/50 to-indigo-900/50' },
-    'politicians': { emoji: '🏛️', animation: 'animate-wiggle', bgGradient: 'from-slate-800/50 to-zinc-900/50' },
-    'influencers': { emoji: '📱', animation: 'animate-wiggle', bgGradient: 'from-fuchsia-900/50 to-violet-900/50' },
-    'historical': { emoji: '📜', animation: 'animate-float', bgGradient: 'from-amber-900/50 to-yellow-900/50' }
+  const categoryConfig: Record<string, { bgGradient: string }> = {
+    'athletes': { bgGradient: 'from-amber-900/50 to-orange-900/50' },
+    'hollywood': { bgGradient: 'from-purple-900/50 to-pink-900/50' },
+    'musicians': { bgGradient: 'from-pink-900/50 to-rose-900/50' },
+    'tech-billionaires': { bgGradient: 'from-blue-900/50 to-indigo-900/50' },
+    'politicians': { bgGradient: 'from-slate-800/50 to-zinc-900/50' },
+    'influencers': { bgGradient: 'from-fuchsia-900/50 to-violet-900/50' },
+    'historical': { bgGradient: 'from-amber-900/50 to-yellow-900/50' }
   };
 
-  const config = categoryConfig[celebrity.category] || { emoji: '💰', animation: 'animate-pulse-scale', bgGradient: 'from-yellow-900/50 to-amber-900/50' };
+  const config = categoryConfig[celebrity.category] || { bgGradient: 'from-yellow-900/50 to-amber-900/50' };
 
   return (
     <div className="relative">
@@ -50,14 +60,12 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
         </div>
 
         <div className="flex flex-col md:flex-row items-start gap-8">
-          <div className={cn(
-            "flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-2xl bg-gradient-to-br shadow-xl shadow-primary/10 ring-2 ring-primary/30",
-            config.bgGradient
-          )}>
-            <span className={cn("text-6xl md:text-7xl", config.animation)}>
-              {config.emoji}
-            </span>
-          </div>
+          <Avatar className="h-32 w-32 md:h-40 md:w-40 rounded-2xl shadow-xl shadow-primary/10 ring-2 ring-primary/30">
+            <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover rounded-2xl" />
+            <AvatarFallback className={cn("rounded-2xl bg-gradient-to-br text-3xl md:text-4xl font-bold", config.bgGradient)}>
+              {getInitials(celebrity.name)}
+            </AvatarFallback>
+          </Avatar>
 
           <div className="flex-1 animate-fade-in">
             <Badge variant="outline" className="mb-3 border-primary/50 text-primary">
