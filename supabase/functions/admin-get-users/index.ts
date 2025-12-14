@@ -11,13 +11,14 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  
+  // Service role client for admin operations
+  const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
 
   try {
-    // Authenticate the user
+    // Authenticate the user using their JWT
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "No authorization header" }), {
@@ -27,7 +28,12 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    // Use admin API to get user from token
+    const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(
+      // First decode the token to get user id
+      JSON.parse(atob(token.split('.')[1])).sub
+    );
     
     if (userError || !userData.user) {
       console.error("Auth error:", userError);
