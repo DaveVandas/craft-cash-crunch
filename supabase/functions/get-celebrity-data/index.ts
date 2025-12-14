@@ -435,8 +435,14 @@ Return ONLY valid JSON, no markdown or explanation.`
       const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
       
       // Ensure numeric values are properly parsed
-      const annualEarnings = Number(parsed.annualEarnings) || 0;
       const netWorth = Number(parsed.netWorth) || 0;
+      let annualEarnings = Number(parsed.annualEarnings) || 0;
+      
+      // Fallback: If earnings are 0 but we have net worth, estimate at 5% annual return
+      if (annualEarnings === 0 && netWorth > 0) {
+        annualEarnings = Math.round(netWorth * 0.05);
+        console.log(`Estimated annualEarnings for ${parsed.name} at 5% of netWorth: $${annualEarnings}`);
+      }
       
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
