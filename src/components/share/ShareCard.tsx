@@ -358,7 +358,7 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
           className="px-6 py-3 flex items-center justify-center gap-3"
           style={{ background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #8b7355 100%)' }}
         >
-          <span className="text-xs font-medium text-black/80">{typeof window !== 'undefined' ? window.location.host : ''}</span>
+          <span className="text-xs font-medium text-black/80">earningsexplorer.shop</span>
           <span className="text-black/50">•</span>
           <span className="text-xs text-black/60">{new Date().getFullYear()}</span>
         </div>
