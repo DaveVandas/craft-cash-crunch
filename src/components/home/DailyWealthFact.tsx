@@ -29,6 +29,19 @@ const DailyWealthFact = () => {
     setFactIndex(dayOfYear % wealthFacts.length);
   }, []);
 
+  // Auto-rotate every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setFactIndex(prev => (prev + 1) % wealthFacts.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const shuffleFact = () => {
     setIsAnimating(true);
     setTimeout(() => {

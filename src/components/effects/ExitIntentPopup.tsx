@@ -15,12 +15,17 @@ const ExitIntentPopup = () => {
   const [open, setOpen] = useState(false);
   const [hasShown, setHasShown] = useState(false);
   const { user, accessInfo } = useAuth();
-  const hasLifetimeAccess = accessInfo?.hasLifetimeAccess ?? false;
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Don't show if already paid or has shown this session
-    if (hasLifetimeAccess || hasShown) return;
+    // Don't show if:
+    // 1. User is logged in and has lifetime access
+    // 2. User is logged in and accessInfo is still loading (wait for it)
+    // 3. Already shown this session
+    const isPremium = accessInfo?.hasLifetimeAccess === true;
+    const isLoadingAccess = user && accessInfo === null;
+    
+    if (isPremium || isLoadingAccess || hasShown) return;
 
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && !hasShown) {
@@ -31,7 +36,7 @@ const ExitIntentPopup = () => {
 
     document.addEventListener('mouseleave', handleMouseLeave);
     return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [hasLifetimeAccess, hasShown]);
+  }, [user, accessInfo, hasShown]);
 
   const handleUnlock = () => {
     setOpen(false);
