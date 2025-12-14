@@ -171,8 +171,17 @@ serve(async (req) => {
 
     // Build sanitized prompt
     const prompt = name 
-      ? `Provide earnings data for the celebrity named "${name}". Return a JSON object with: name, profession, category (one of: athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical), netWorth (number in USD), annualEarnings (number in USD), and a brief source note. Be accurate based on recent public data. IMPORTANT: For historical figures (people who lived before 1950), adjust all wealth values to 2024 USD using proper inflation calculations. Only return the JSON, no other text.`
-      : `List 6 notable people in the ${category} category with their earnings. Return a JSON array of objects with: name, profession, category, netWorth, annualEarnings. Only return the JSON array, no other text.`;
+      ? `Provide earnings data for the celebrity named "${name}". Return a JSON object with: name, profession, category (one of: athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical), netWorth (number in USD), annualEarnings (number in USD), and a brief source note. 
+
+IMPORTANT RULES FOR annualEarnings:
+- For billionaires and wealthy investors: Calculate their TOTAL annual wealth increase from all sources including stock appreciation, dividends, business income, and investments. Do NOT use just their base salary. For example, Jeff Bezos earns billions annually from Amazon stock appreciation and other investments, not just his $80k salary.
+- For athletes/entertainers: Include all income from contracts, endorsements, royalties, and business ventures.
+- For historical figures (pre-1950): Adjust all wealth values to 2024 USD using inflation.
+
+Be accurate based on recent Forbes, Bloomberg, and financial reporting data. Only return the JSON, no other text.`
+      : `List 6 notable people in the ${category} category with their earnings. Return a JSON array of objects with: name, profession, category, netWorth, annualEarnings. 
+
+IMPORTANT: For billionaires, annualEarnings should reflect their total annual wealth increase from all sources (stocks, dividends, investments, business income), not just salary. Only return the JSON array, no other text.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
