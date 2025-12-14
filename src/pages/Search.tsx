@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { getAvatarEmoji } from '@/lib/avatar';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -136,9 +138,16 @@ const Search = () => {
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg bg-secondary flex items-center justify-center text-3xl">
-                      💰
-                    </div>
+                    <Avatar className="h-16 w-16 rounded-lg shadow-md shadow-primary/10 ring-2 ring-primary/30">
+                      <AvatarImage
+                        src={result.imageUrl}
+                        alt={result.name}
+                        className="object-cover rounded-lg"
+                      />
+                      <AvatarFallback className="rounded-lg bg-secondary text-2xl">
+                        {getAvatarEmoji(result.profession)}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex-1">
                       <h3 className="font-semibold text-xl">{result.name}</h3>
                       <p className="text-muted-foreground">{result.profession}</p>

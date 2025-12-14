@@ -83,14 +83,32 @@ function errorResponse(message: string, code: string = 'ERROR') {
 async function fetchWikipediaImage(name: string): Promise<string | null> {
   try {
     const encodedName = encodeURIComponent(name);
-    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
+    let url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
     
-    const response = await fetch(url);
+    let response = await fetch(url);
     if (!response.ok) return null;
     
-    const data = await response.json();
-    const pages = data.query?.pages;
-    if (!pages) return null;
+    let data = await response.json();
+    let pages = data.query?.pages;
+
+    // If direct title lookup failed, try a search-based lookup
+    if (!pages || Object.keys(pages)[0] === '-1') {
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&format=json&origin=*`;
+      const searchResponse = await fetch(searchUrl);
+      if (!searchResponse.ok) return null;
+
+      const searchData = await searchResponse.json();
+      const firstResult = searchData?.query?.search?.[0];
+      if (!firstResult?.title) return null;
+
+      const searchTitle = encodeURIComponent(firstResult.title);
+      url = `https://en.wikipedia.org/w/api.php?action=query&titles=${searchTitle}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
+      response = await fetch(url);
+      if (!response.ok) return null;
+      data = await response.json();
+      pages = data.query?.pages;
+      if (!pages) return null;
+    }
     
     // Get the first page result
     const pageId = Object.keys(pages)[0];
