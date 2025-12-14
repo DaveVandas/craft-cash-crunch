@@ -280,15 +280,19 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               </h2>
             </div>
 
-            {/* Net Worth & Hourly Earnings */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Net Worth, Annual & Hourly Earnings */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="text-center p-3 rounded-xl border border-orange-500/30" style={{ background: 'rgba(249,115,22,0.1)' }}>
-                <p className="text-orange-300/60 text-xs uppercase tracking-widest">Net Worth</p>
-                <p className="text-xl font-bold text-orange-100">{formatCompactCurrency(celebrity.netWorth)}</p>
+                <p className="text-orange-300/60 text-[10px] uppercase tracking-widest">Net Worth</p>
+                <p className="text-lg font-bold text-orange-100">{formatCompactCurrency(celebrity.netWorth)}</p>
               </div>
               <div className="text-center p-3 rounded-xl border border-orange-500/30" style={{ background: 'rgba(249,115,22,0.1)' }}>
-                <p className="text-orange-300/60 text-xs uppercase tracking-widest">Per Hour</p>
-                <p className="text-xl font-bold text-orange-100">{formatCurrency(breakdown.perHour)}</p>
+                <p className="text-orange-300/60 text-[10px] uppercase tracking-widest">Annual</p>
+                <p className="text-lg font-bold text-orange-100">{formatCompactCurrency(celebrity.annualEarnings)}</p>
+              </div>
+              <div className="text-center p-3 rounded-xl border border-orange-500/30" style={{ background: 'rgba(249,115,22,0.1)' }}>
+                <p className="text-orange-300/60 text-[10px] uppercase tracking-widest">Per Hour</p>
+                <p className="text-lg font-bold text-orange-100">{formatCurrency(breakdown.perHour)}</p>
               </div>
             </div>
 
