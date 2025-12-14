@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
 import Compare from "./pages/Compare";
 import Search from "./pages/Search";
+import Share from "./pages/Share";
 import Category from "./pages/Category";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/share" element={<Share />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
