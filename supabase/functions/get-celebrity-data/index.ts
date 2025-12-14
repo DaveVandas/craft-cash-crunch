@@ -79,13 +79,164 @@ function errorResponse(message: string, code: string = 'ERROR') {
   });
 }
 
-// Generate AI portrait for a celebrity and cache it
+// Profession to emoji mapping
+function getProfessionEmoji(profession: string): string {
+  const lower = profession?.toLowerCase() || '';
+  
+  if (lower.includes('basketball') || lower.includes('nba')) return '🏀';
+  if (lower.includes('football') || lower.includes('nfl') || lower.includes('soccer')) return '🏈';
+  if (lower.includes('baseball') || lower.includes('mlb')) return '⚾';
+  if (lower.includes('tennis')) return '🎾';
+  if (lower.includes('golf')) return '⛳';
+  if (lower.includes('boxer') || lower.includes('boxing') || lower.includes('ufc') || lower.includes('mma')) return '🥊';
+  if (lower.includes('athlete') || lower.includes('sport') || lower.includes('olymp')) return '🏆';
+  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood') || lower.includes('film')) return '🎬';
+  if (lower.includes('singer') || lower.includes('musician') || lower.includes('rapper') || lower.includes('artist') || lower.includes('music')) return '🎤';
+  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder') || lower.includes('entrepreneur')) return '💻';
+  if (lower.includes('politician') || lower.includes('president') || lower.includes('senator') || lower.includes('governor')) return '🏛️';
+  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktoker') || lower.includes('streamer')) return '📱';
+  if (lower.includes('model')) return '📸';
+  if (lower.includes('author') || lower.includes('writer')) return '📚';
+  if (lower.includes('chef') || lower.includes('cook')) return '👨‍🍳';
+  if (lower.includes('investor') || lower.includes('billionaire')) return '💰';
+  if (lower.includes('royal') || lower.includes('king') || lower.includes('queen') || lower.includes('prince')) return '👑';
+  
+  return '⭐'; // Default star for general celebrities
+}
+
+// Aggressively try to get Wikipedia image with multiple strategies
+async function getWikipediaImage(name: string): Promise<string | null> {
+  const searchVariants = [
+    name,
+    name.replace(/\./g, ''),  // Remove periods (e.g., "Dr." -> "Dr")
+    name.replace(/\s+Jr\.?$/i, ' Junior'),  // Jr -> Junior
+    name.replace(/\s+Sr\.?$/i, ' Senior'),  // Sr -> Senior
+  ];
+  
+  for (const searchName of searchVariants) {
+    console.log(`Wikipedia search attempt: "${searchName}"`);
+    
+    try {
+      // Strategy 1: Direct page image via API
+      const encodedName = encodeURIComponent(searchName);
+      const pageImageUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedName}`;
+      
+      const pageRes = await fetch(pageImageUrl, {
+        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
+      });
+      
+      if (pageRes.ok) {
+        const pageData = await pageRes.json();
+        
+        // Check for original image (highest quality)
+        if (pageData.originalimage?.source) {
+          console.log(`Found Wikipedia originalimage for ${name}`);
+          return pageData.originalimage.source;
+        }
+        
+        // Fall back to thumbnail
+        if (pageData.thumbnail?.source) {
+          console.log(`Found Wikipedia thumbnail for ${name}`);
+          return pageData.thumbnail.source;
+        }
+      }
+      
+      // Strategy 2: Search API with multiple results
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&format=json&origin=*&srlimit=5`;
+      
+      const searchRes = await fetch(searchUrl, {
+        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
+      });
+      
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        const results = searchData.query?.search || [];
+        
+        // Try each search result
+        for (const result of results) {
+          const pageTitle = encodeURIComponent(result.title);
+          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${pageTitle}`;
+          
+          try {
+            const summaryRes = await fetch(summaryUrl, {
+              headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
+            });
+            
+            if (summaryRes.ok) {
+              const summaryData = await summaryRes.json();
+              
+              // Skip disambiguation pages
+              if (summaryData.type === 'disambiguation') continue;
+              
+              if (summaryData.originalimage?.source) {
+                console.log(`Found Wikipedia image via search for ${name}: ${result.title}`);
+                return summaryData.originalimage.source;
+              }
+              
+              if (summaryData.thumbnail?.source) {
+                console.log(`Found Wikipedia thumbnail via search for ${name}: ${result.title}`);
+                return summaryData.thumbnail.source;
+              }
+            }
+          } catch (e) {
+            console.log(`Error fetching summary for ${result.title}:`, e);
+          }
+        }
+      }
+      
+      // Strategy 3: Wikidata for commons images
+      const wikidataSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodedName}&language=en&format=json&origin=*&limit=3`;
+      
+      const wdSearchRes = await fetch(wikidataSearchUrl, {
+        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
+      });
+      
+      if (wdSearchRes.ok) {
+        const wdData = await wdSearchRes.json();
+        const entities = wdData.search || [];
+        
+        for (const entity of entities) {
+          const entityUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entity.id}&property=P18&format=json&origin=*`;
+          
+          try {
+            const claimsRes = await fetch(entityUrl, {
+              headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
+            });
+            
+            if (claimsRes.ok) {
+              const claimsData = await claimsRes.json();
+              const imageClaim = claimsData.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+              
+              if (imageClaim) {
+                const fileName = imageClaim.replace(/ /g, '_');
+                const commonsUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=400`;
+                console.log(`Found Wikidata/Commons image for ${name}`);
+                return commonsUrl;
+              }
+            }
+          } catch (e) {
+            console.log(`Error fetching Wikidata claims:`, e);
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.log(`Wikipedia search error for "${searchName}":`, error);
+    }
+  }
+  
+  console.log(`No Wikipedia image found for ${name} after all strategies`);
+  return null;
+}
+
+// Get celebrity image with aggressive Wikipedia fetching, emoji fallback
 async function getCelebrityImage(
   name: string, 
   profession: string,
   supabaseClient: any
-): Promise<string | null> {
+): Promise<{ imageUrl: string | null; emoji: string }> {
   const slug = name.toLowerCase().replace(/\s+/g, '-');
+  const emoji = getProfessionEmoji(profession);
   
   try {
     // Check cache first
@@ -97,95 +248,33 @@ async function getCelebrityImage(
     
     if (cached?.image_url) {
       console.log(`Cache hit for ${name}`);
-      return cached.image_url;
+      return { imageUrl: cached.image_url, emoji };
     }
     
-    // Generate new portrait using Lovable AI
-    console.log(`Generating AI portrait for ${name}`);
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured for image generation');
-      return null;
+    // Try Wikipedia aggressively
+    const wikiImage = await getWikipediaImage(name);
+    
+    if (wikiImage) {
+      // Cache the Wikipedia URL
+      await supabaseClient
+        .from('celebrity_images')
+        .upsert({
+          celebrity_slug: slug,
+          celebrity_name: name,
+          image_url: wikiImage
+        }, { onConflict: 'celebrity_slug' });
+      
+      console.log(`Cached Wikipedia image for ${name}`);
+      return { imageUrl: wikiImage, emoji };
     }
     
-    const prompt = `Create a professional, photorealistic portrait headshot of a famous ${profession} named ${name}. The portrait should be high quality, well-lit studio photo style, neutral background, showing head and shoulders. Make it look like an official professional photo.`;
-    
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image-preview',
-        messages: [{ role: 'user', content: prompt }],
-        modalities: ['image', 'text']
-      }),
-    });
-    
-    if (!response.ok) {
-      console.error('AI image generation failed:', response.status);
-      return null;
-    }
-    
-    const data = await response.json();
-    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    
-    if (!imageData || !imageData.startsWith('data:image')) {
-      console.error('No valid image data returned from AI');
-      return null;
-    }
-    
-    // Extract base64 data and upload to storage
-    const base64Match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
-    if (!base64Match) {
-      console.error('Invalid base64 image format');
-      return null;
-    }
-    
-    const [, imageType, base64Data] = base64Match;
-    const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-    const fileName = `${slug}.${imageType === 'png' ? 'png' : 'jpg'}`;
-    
-    // Upload to storage
-    const { error: uploadError } = await supabaseClient.storage
-      .from('celebrity-images')
-      .upload(fileName, binaryData, {
-        contentType: `image/${imageType}`,
-        upsert: true
-      });
-    
-    if (uploadError) {
-      console.error('Storage upload error:', uploadError);
-      return null;
-    }
-    
-    // Get public URL
-    const { data: urlData } = supabaseClient.storage
-      .from('celebrity-images')
-      .getPublicUrl(fileName);
-    
-    const publicUrl = urlData?.publicUrl;
-    if (!publicUrl) {
-      console.error('Failed to get public URL');
-      return null;
-    }
-    
-    // Cache the URL
-    await supabaseClient
-      .from('celebrity_images')
-      .upsert({
-        celebrity_slug: slug,
-        celebrity_name: name,
-        image_url: publicUrl
-      }, { onConflict: 'celebrity_slug' });
-    
-    console.log(`Generated and cached image for ${name}: ${publicUrl}`);
-    return publicUrl;
+    // No image found, return emoji only
+    console.log(`No image for ${name}, using emoji: ${emoji}`);
+    return { imageUrl: null, emoji };
     
   } catch (error) {
-    console.error('Image generation error:', error);
-    return null;
+    console.error('Image fetch error:', error);
+    return { imageUrl: null, emoji };
   }
 }
 
@@ -318,26 +407,28 @@ Return ONLY valid JSON, no markdown or explanation.`
     const parsed = JSON.parse(jsonMatch[0]);
     
     if (name) {
-      // Generate AI portrait for single celebrity
-      const imageUrl = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
+      // Get image with aggressive Wikipedia + emoji fallback
+      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
       
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
         imageUrl,
+        emoji,
         ...parsed
       };
-      console.log(`Fetched celebrity: ${parsed.name}, image: ${imageUrl ? 'found' : 'not found'}`);
+      console.log(`Fetched celebrity: ${parsed.name}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
       return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      // Generate AI portraits for all celebrities in parallel
+      // Get images for all celebrities in parallel
       const celebritiesWithImages = await Promise.all(
         parsed.map(async (p: any) => {
-          const imageUrl = await getCelebrityImage(p.name, p.profession || 'celebrity', supabaseClient);
+          const { imageUrl, emoji } = await getCelebrityImage(p.name, p.profession || 'celebrity', supabaseClient);
           return {
             id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
             imageUrl,
+            emoji,
             ...p
           };
         })
