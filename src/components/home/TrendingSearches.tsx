@@ -6,6 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { nameToSlug } from '@/lib/validation';
 import { supabase } from '@/integrations/supabase/client';
 
+// Category to emoji mapping for avatars
+const categoryEmojis: Record<string, string> = {
+  Athletes: '🏆',
+  Musicians: '🎵',
+  'Tech Billionaires': '💻',
+  Hollywood: '🎬',
+  Influencers: '📱',
+  Historical: '👑',
+};
+
 interface TrendingItem {
   name: string;
   searches: string;
@@ -243,19 +253,29 @@ const TrendingSearches = () => {
                   <Link
                     key={`${person.name}-${index}`}
                     to={`/profile/${nameToSlug(person.name)}`}
-                    className="flex flex-col px-4 py-2 rounded-xl bg-secondary/40 hover:bg-primary/20 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-secondary/40 hover:bg-primary/20 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold group-hover:text-primary transition-colors whitespace-nowrap">
-                        {person.name}
-                      </span>
-                      {person.hot && (
-                        <Flame className="h-4 w-4 text-orange-500" />
-                      )}
+                    {/* Avatar */}
+                    <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-lg shrink-0">
+                      {categoryEmojis[person.category || ''] || '💰'}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="text-primary/80 font-medium">{person.netWorth}</span>
-                      <span className="text-foreground/60">{person.hourlyEarnings}</span>
+                    
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold group-hover:text-primary transition-colors whitespace-nowrap">
+                          {person.name}
+                        </span>
+                        {person.hot && (
+                          <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30">
+                            <Flame className="h-3 w-3 text-orange-500 animate-pulse" />
+                            <span className="text-[10px] font-medium text-orange-400">HOT</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="text-primary/80 font-medium">{person.netWorth}</span>
+                        <span className="text-foreground/60">{person.hourlyEarnings}</span>
+                      </div>
                     </div>
                   </Link>
                 ))
