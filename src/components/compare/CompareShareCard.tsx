@@ -63,6 +63,8 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
         backgroundColor: '#0a0a0a',
         scale: 2,
         logging: false,
+        useCORS: true,
+        allowTaint: true,
       });
       
       const link = document.createElement('a');
@@ -97,6 +99,8 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
           backgroundColor: '#0a0a0a',
           scale: 2,
           logging: false,
+          useCORS: true,
+          allowTaint: true,
         });
 
         const blob = await new Promise<Blob>((resolve, reject) => {
