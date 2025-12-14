@@ -18,11 +18,12 @@ const Search = () => {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const displayQuery = sanitizeSearchQuery(rawQuery);
-  const { searchCelebrity, loading } = useCelebritySearch();
+  const { searchCelebrity } = useCelebritySearch();
   const { user } = useAuth();
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
   const [accessDenied, setAccessDenied] = useState<'signin' | 'upgrade' | null>(null);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (rawQuery) {
@@ -40,16 +41,22 @@ const Search = () => {
         setAccessDenied('signin');
         setResult(null);
         setValidationError(false);
+        setSearching(false);
         return;
       }
       
       setValidationError(false);
       setAccessDenied(null);
-      searchCelebrity(validatedQuery).then(setResult);
+      setSearching(true);
+      searchCelebrity(validatedQuery).then((res) => {
+        setResult(res);
+        setSearching(false);
+      });
     } else {
       setResult(null);
       setValidationError(false);
       setAccessDenied(null);
+      setSearching(false);
     }
   }, [rawQuery, searchCelebrity, user]);
 
@@ -70,13 +77,13 @@ const Search = () => {
             <SearchBar />
           </div>
 
-          {loading && (
+          {searching && (
             <div className="space-y-4">
               <Skeleton className="h-32 w-full" />
             </div>
           )}
 
-          {!loading && accessDenied === 'signin' && (
+          {!searching && accessDenied === 'signin' && (
             <Card className="border-primary/30 bg-card/50 animate-fade-in">
               <CardContent className="p-8 text-center">
                 <div className="text-4xl mb-4">🔐</div>
@@ -91,7 +98,7 @@ const Search = () => {
             </Card>
           )}
 
-          {!loading && accessDenied === 'upgrade' && (
+          {!searching && accessDenied === 'upgrade' && (
             <Card className="border-primary/30 bg-card/50 animate-fade-in">
               <CardContent className="p-8 text-center">
                 <div className="text-4xl mb-4">✨</div>
@@ -109,13 +116,13 @@ const Search = () => {
             </Card>
           )}
 
-          {!loading && !accessDenied && validationError && displayQuery && (
+          {!searching && !accessDenied && validationError && displayQuery && (
             <p className="text-center text-muted-foreground">
               Invalid search query. Please use only letters, spaces, and hyphens.
             </p>
           )}
 
-          {!loading && !accessDenied && !validationError && result && (
+          {!searching && !accessDenied && !validationError && result && (
             <Link to={`/profile/${result.id}`}>
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
                 <CardContent className="p-6">
@@ -139,7 +146,7 @@ const Search = () => {
             </Link>
           )}
 
-          {!loading && !accessDenied && !validationError && displayQuery && !result && (
+          {!searching && !accessDenied && !validationError && displayQuery && !result && (
             <p className="text-center text-muted-foreground">
               No results found for "{displayQuery}". Try another search.
             </p>
