@@ -32,15 +32,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [accessInfo, setAccessInfo] = useState<AccessInfo | null>(null);
 
   const refreshAccess = async () => {
-    if (!session) {
-      setAccessInfo(null);
-      return;
-    }
-
     try {
-      const { data, error } = await supabase.functions.invoke('check-access');
+      // Always get the latest session from the auth client so we don't depend on stale state
+      const { data } = await supabase.auth.getSession();
+      const currentSession = data.session;
+
+      if (!currentSession) {
+        setAccessInfo(null);
+        return;
+      }
+
+      const { data: accessData, error } = await supabase.functions.invoke('check-access');
       if (error) throw error;
-      setAccessInfo(data);
+      setAccessInfo(accessData as AccessInfo);
     } catch (err) {
       console.error('Error checking access:', err);
     }
