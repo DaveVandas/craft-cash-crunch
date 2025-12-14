@@ -28,7 +28,7 @@ const actions = [
 
 const QuickActions = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <>
       {actions.map((action, index) => (
         <Link key={action.href} to={action.href}>
           <Card 
@@ -49,7 +49,7 @@ const QuickActions = () => {
           </Card>
         </Link>
       ))}
-    </div>
+    </>
   );
 };
 
