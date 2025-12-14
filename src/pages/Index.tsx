@@ -44,17 +44,18 @@ const Index = () => {
           <FeaturedTicker />
         </section>
 
-        {/* Quick Actions + Trending */}
+        {/* Quick Actions */}
+        <section className="container mb-8">
+          <h2 className="font-serif text-2xl font-bold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <QuickActions />
+          </div>
+        </section>
+
+        {/* Trending */}
         <section className="container mb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Quick Actions - stacked vertically */}
-            <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 content-start">
-              <QuickActions />
-            </div>
-            {/* Trending */}
-            <div className="lg:col-span-1">
-              <TrendingSearches />
-            </div>
+          <div className="max-w-md">
+            <TrendingSearches />
           </div>
         </section>
 
