@@ -1,22 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
+import { getAvatarEmoji } from '@/lib/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Scale, TrendingUp, Clock, Crown } from 'lucide-react';
 import CompareShareCard from './CompareShareCard';
-
-const getAvatarEmoji = (profession: string) => {
-  const lower = profession.toLowerCase();
-  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
-  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
-  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
-  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
-  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
-  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
-  return '💰';
-};
 
 interface CompareResultProps {
   person1: Celebrity;

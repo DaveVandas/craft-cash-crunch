@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
+import { getAvatarEmoji } from '@/lib/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -11,15 +12,6 @@ import { cn } from '@/lib/utils';
 interface ProfileHeroProps {
   celebrity: Celebrity;
 }
-
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-};
 
 const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
   const navigate = useNavigate();
@@ -62,8 +54,8 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
         <div className="flex flex-col md:flex-row items-start gap-8">
           <Avatar className="h-32 w-32 md:h-40 md:w-40 rounded-2xl shadow-xl shadow-primary/10 ring-2 ring-primary/30">
             <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover rounded-2xl" />
-            <AvatarFallback className={cn("rounded-2xl bg-gradient-to-br text-3xl md:text-4xl font-bold", config.bgGradient)}>
-              {getInitials(celebrity.name)}
+            <AvatarFallback className={cn("rounded-2xl bg-gradient-to-br text-4xl md:text-5xl", config.bgGradient)}>
+              {getAvatarEmoji(celebrity.profession)}
             </AvatarFallback>
           </Avatar>
 
