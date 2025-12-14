@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,6 +16,8 @@ const VALID_CATEGORIES = [
   'influencers',
   'historical'
 ] as const;
+
+const FREE_SEARCH_LIMIT = 3;
 
 // Simple in-memory rate limiting (resets on function cold start)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -79,6 +82,48 @@ serve(async (req) => {
     console.warn(`Rate limit exceeded for IP: ${clientIP}`);
     return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
       status: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Backend access control check
+  const supabaseClient = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  );
+
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    console.warn("No auth header - blocking unauthenticated request");
+    return new Response(JSON.stringify({ error: 'Please sign in to search for celebrities.' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: userData } = await supabaseClient.auth.getUser(token);
+  const user = userData.user;
+
+  if (!user) {
+    console.warn("Invalid token - blocking request");
+    return new Response(JSON.stringify({ error: 'Please sign in to search for celebrities.' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Check user access
+  const { data: accessData } = await supabaseClient
+    .from("user_access")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
+    console.log(`User ${user.id} has exceeded free search limit`);
+    return new Response(JSON.stringify({ error: 'Free search limit reached. Please upgrade for unlimited access.' }), {
+      status: 403,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

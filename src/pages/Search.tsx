@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SearchBar from '@/components/home/SearchBar';
-import { useCelebrityData } from '@/hooks/useCelebrityData';
+import { useCelebritySearch } from '@/hooks/useCelebritySearch';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
 import { validateCelebrityName, sanitizeSearchQuery } from '@/lib/validation';
@@ -15,7 +15,7 @@ const Search = () => {
   const [searchParams] = useSearchParams();
   const rawQuery = searchParams.get('q') || '';
   const displayQuery = sanitizeSearchQuery(rawQuery);
-  const { fetchCelebrity, loading } = useCelebrityData();
+  const { searchCelebrity, loading } = useCelebritySearch();
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
 
@@ -31,12 +31,12 @@ const Search = () => {
       }
       
       setValidationError(false);
-      fetchCelebrity(validatedQuery).then(setResult);
+      searchCelebrity(validatedQuery).then(setResult);
     } else {
       setResult(null);
       setValidationError(false);
     }
-  }, [rawQuery, fetchCelebrity]);
+  }, [rawQuery, searchCelebrity]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
