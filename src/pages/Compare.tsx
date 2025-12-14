@@ -45,7 +45,7 @@ const Compare = () => {
             {/* Person 1 */}
             <div className="flex-1">
               <CompareSelector
-                label="Challenger 1"
+                label="Tycoon #1"
                 selected={person1}
                 onSearch={handleSearch1}
                 loading={loading}
@@ -62,7 +62,7 @@ const Compare = () => {
             {/* Person 2 */}
             <div className="flex-1 md:pl-8">
               <CompareSelector
-                label="Challenger 2"
+                label="Tycoon #2"
                 selected={person2}
                 onSearch={handleSearch2}
                 loading={loading}

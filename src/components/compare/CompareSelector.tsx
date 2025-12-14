@@ -46,15 +46,15 @@ const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelector
               Change
             </Button>
           </div>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-lg">
-              <AvatarImage src={selected.imageUrl} alt={selected.name} className="object-cover rounded-lg" />
-              <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 text-lg font-bold">
+          <div className="flex flex-col items-center text-center gap-3">
+            <Avatar className="h-24 w-24 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
+              <AvatarImage src={selected.imageUrl} alt={selected.name} className="object-cover" />
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-2xl font-bold">
                 {getInitials(selected.name)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-lg">{selected.name}</h3>
+              <h3 className="font-serif font-bold text-xl">{selected.name}</h3>
               <p className="text-sm text-muted-foreground">{selected.profession}</p>
             </div>
           </div>
