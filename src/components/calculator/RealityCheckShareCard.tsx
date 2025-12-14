@@ -49,7 +49,8 @@ const RealityCheckShareCard = ({
   };
 
   const handleShare = async () => {
-    const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at wealthperspective.app`;
+    const appUrl = window.location.origin;
+    const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at ${appUrl}`;
     
     if (navigator.share) {
       try {
@@ -121,7 +122,7 @@ const RealityCheckShareCard = ({
 
           {/* Footer */}
           <div className="text-center mt-4 pt-4 border-t border-amber-500/20">
-            <p className="text-gray-500 text-xs">wealthperspective.app</p>
+            <p className="text-gray-500 text-xs">{window.location.host}</p>
           </div>
         </div>
       </div>
