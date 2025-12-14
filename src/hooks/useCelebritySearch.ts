@@ -11,6 +11,8 @@ export const useCelebritySearch = () => {
   const { user, accessInfo, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
+  const accessLoaded = accessInfo !== null;
+
   const checkAccess = useCallback((): boolean => {
     if (!user) {
       toast.error('Please sign in to search for celebrities', {
@@ -109,5 +111,6 @@ export const useCelebritySearch = () => {
     hasAccess: accessInfo?.hasAccess ?? false,
     searchesRemaining: accessInfo?.searchesRemaining ?? 0,
     hasLifetimeAccess: accessInfo?.hasLifetimeAccess ?? false,
+    accessLoaded,
   };
 };
