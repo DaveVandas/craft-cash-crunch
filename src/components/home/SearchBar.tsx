@@ -4,7 +4,11 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const SearchBar = () => {
+interface SearchBarProps {
+  placeholder?: string;
+}
+
+const SearchBar = ({ placeholder = "Search any celebrity, athlete, or billionaire..." }: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
@@ -21,7 +25,7 @@ const SearchBar = () => {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search any celebrity, athlete, or billionaire..."
+          placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-12 pr-24 h-14 text-lg bg-card border-border/50 focus:border-primary/50 transition-colors"
