@@ -268,6 +268,18 @@ async function getCelebrityImage(
       return { imageUrl: wikiImage, emoji };
     }
     
+    // Check cache again in case another parallel request cached it while we were searching
+    const { data: cachedAfter } = await supabaseClient
+      .from('celebrity_images')
+      .select('image_url')
+      .eq('celebrity_slug', slug)
+      .maybeSingle();
+    
+    if (cachedAfter?.image_url) {
+      console.log(`Cache hit (after Wikipedia search) for ${name}`);
+      return { imageUrl: cachedAfter.image_url, emoji };
+    }
+    
     // No image found, return emoji only
     console.log(`No image for ${name}, using emoji: ${emoji}`);
     return { imageUrl: null, emoji };
