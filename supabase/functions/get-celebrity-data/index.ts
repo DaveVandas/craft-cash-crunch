@@ -381,9 +381,10 @@ CRITICAL RULES:
 4. For historical figures (pre-1950): Adjust to 2024 USD and note the original figure.
 5. If you cannot find verified Forbes/Bloomberg data, use the most authoritative financial source available.
 6. Be CONSISTENT - if Forbes says $50M, report $50M exactly.
+7. NEVER return 0 for annualEarnings - estimate based on net worth if needed (assume 5-10% annual return).
 
 Return ONLY valid JSON, no markdown or explanation.`
-      : `List 6 notable people in the ${category} category. Return ONLY a JSON array with objects containing: name, profession, category, netWorth (number), annualEarnings (number). Use Forbes/Bloomberg published figures only. No markdown.`;
+      : `List 6 notable people in the ${category} category. Return ONLY a JSON array with objects containing: name, profession, category, netWorth (number), annualEarnings (number). Use Forbes/Bloomberg published figures only. Never return 0 for annualEarnings. No markdown.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -395,7 +396,7 @@ Return ONLY valid JSON, no markdown or explanation.`
         model: 'google/gemini-2.5-flash',
         temperature: 0, // Deterministic output for consistent results
         messages: [
-          { role: 'system', content: 'You are a celebrity wealth data API. Return ONLY valid JSON. Use only verified Forbes, Bloomberg, or official financial reporting figures. Be consistent and accurate - never estimate or vary figures between queries.' },
+          { role: 'system', content: 'You are a celebrity wealth data API. Return ONLY valid JSON. Use only verified Forbes, Bloomberg, or official financial reporting figures. Be consistent and accurate - never estimate or vary figures between queries. NEVER return 0 for annualEarnings - if exact data is unavailable, estimate based on net worth.' },
           { role: 'user', content: prompt }
         ],
       }),
@@ -409,6 +410,9 @@ Return ONLY valid JSON, no markdown or explanation.`
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
     
+    // Log raw AI response for debugging
+    console.log(`AI raw response content: ${content.substring(0, 500)}`);
+    
     // Parse the JSON from the response
     const jsonMatch = content.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -419,16 +423,30 @@ Return ONLY valid JSON, no markdown or explanation.`
     const parsed = JSON.parse(jsonMatch[0]);
     
     if (name) {
+      // Log the raw parsed data for debugging
+      console.log(`AI parsed data for "${name}": netWorth=${parsed.netWorth}, annualEarnings=${parsed.annualEarnings}`);
+      
+      // Validate earnings data - if 0 or missing, log warning
+      if (!parsed.annualEarnings || parsed.annualEarnings === 0) {
+        console.warn(`WARNING: Zero/missing annualEarnings for ${parsed.name || name}, netWorth: ${parsed.netWorth}`);
+      }
+      
       // Get image with aggressive Wikipedia + emoji fallback
       const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
+      
+      // Ensure numeric values are properly parsed
+      const annualEarnings = Number(parsed.annualEarnings) || 0;
+      const netWorth = Number(parsed.netWorth) || 0;
       
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
         imageUrl,
         emoji,
-        ...parsed
+        ...parsed,
+        annualEarnings,
+        netWorth,
       };
-      console.log(`Fetched celebrity: ${parsed.name}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
+      console.log(`Fetched celebrity: ${parsed.name}, earnings: $${annualEarnings}, netWorth: $${netWorth}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
       return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -441,7 +459,9 @@ Return ONLY valid JSON, no markdown or explanation.`
             id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
             imageUrl,
             emoji,
-            ...p
+            ...p,
+            annualEarnings: Number(p.annualEarnings) || 0,
+            netWorth: Number(p.netWorth) || 0,
           };
         })
       );
