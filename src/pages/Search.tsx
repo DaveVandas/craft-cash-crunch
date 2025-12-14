@@ -12,18 +12,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { AlertCircle } from 'lucide-react';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const displayQuery = sanitizeSearchQuery(rawQuery);
-  const { searchCelebrity } = useCelebritySearch();
+  const { searchCelebrity, error: searchError } = useCelebritySearch();
   const { user } = useAuth();
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
   const [accessDenied, setAccessDenied] = useState<'signin' | 'upgrade' | null>(null);
   const [searching, setSearching] = useState(false);
+  const [aiError, setAiError] = useState(false);
 
   useEffect(() => {
     if (rawQuery) {
@@ -33,6 +35,7 @@ const Search = () => {
         setValidationError(true);
         setResult(null);
         setAccessDenied(null);
+        setAiError(false);
         return;
       }
       
@@ -42,14 +45,20 @@ const Search = () => {
         setResult(null);
         setValidationError(false);
         setSearching(false);
+        setAiError(false);
         return;
       }
       
       setValidationError(false);
       setAccessDenied(null);
+      setAiError(false);
       setSearching(true);
       searchCelebrity(validatedQuery).then((res) => {
         setResult(res);
+        // If no result and there was a search error, show AI error state
+        if (!res && searchError) {
+          setAiError(true);
+        }
         setSearching(false);
       });
     } else {
@@ -57,8 +66,9 @@ const Search = () => {
       setValidationError(false);
       setAccessDenied(null);
       setSearching(false);
+      setAiError(false);
     }
-  }, [rawQuery, searchCelebrity, user]);
+  }, [rawQuery, searchCelebrity, user, searchError]);
 
   const handleUpgrade = async () => {
     const { data } = await supabase.functions.invoke('create-payment');
@@ -122,6 +132,27 @@ const Search = () => {
             </p>
           )}
 
+          {!searching && !accessDenied && !validationError && aiError && displayQuery && !result && (
+            <Card className="border-destructive/30 bg-card/50 animate-fade-in">
+              <CardContent className="p-8 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                <h3 className="font-semibold text-xl mb-2">Couldn't Fetch Data</h3>
+                <p className="text-muted-foreground mb-4">
+                  We're having trouble fetching data for "{displayQuery}" right now.
+                </p>
+                <p className="text-sm text-muted-foreground mb-6">
+                  This is usually temporary. Please try again in a moment.
+                </p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  variant="outline"
+                >
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {!searching && !accessDenied && !validationError && result && (
             <Link to={`/profile/${result.id}`}>
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
@@ -146,7 +177,7 @@ const Search = () => {
             </Link>
           )}
 
-          {!searching && !accessDenied && !validationError && displayQuery && !result && (
+          {!searching && !accessDenied && !validationError && !aiError && displayQuery && !result && (
             <p className="text-center text-muted-foreground">
               No results found for "{displayQuery}". Try another search.
             </p>
