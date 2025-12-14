@@ -143,6 +143,10 @@ const Search = () => {
                         src={result.imageUrl}
                         alt={result.name}
                         className="object-cover rounded-lg"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.src = '';
+                        }}
                       />
                       <AvatarFallback className="rounded-lg bg-secondary text-2xl">
                         {getAvatarEmoji(result.profession)}
