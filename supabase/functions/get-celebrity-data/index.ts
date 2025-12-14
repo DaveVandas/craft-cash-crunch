@@ -85,7 +85,7 @@ async function fetchWikipediaImage(name: string): Promise<string | null> {
     const encodedName = encodeURIComponent(name);
     
     // Always use search first for more reliable results (handles "Patrick Mahomes" → "Patrick Mahomes II")
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&srlimit=3&format=json&origin=*`;
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&srlimit=5&format=json&origin=*`;
     const searchResponse = await fetch(searchUrl);
     if (!searchResponse.ok) return null;
 
@@ -98,20 +98,65 @@ async function fetchWikipediaImage(name: string): Promise<string | null> {
       const title = result?.title;
       if (!title) continue;
 
+      // Try pageimages first (most reliable for infobox images)
       const imageUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
       const imageResponse = await fetch(imageUrl);
-      if (!imageResponse.ok) continue;
+      if (imageResponse.ok) {
+        const imageData = await imageResponse.json();
+        const pages = imageData.query?.pages;
+        if (pages) {
+          const pageId = Object.keys(pages)[0];
+          if (pageId !== '-1') {
+            const thumbnailUrl = pages[pageId]?.thumbnail?.source;
+            if (thumbnailUrl) {
+              return thumbnailUrl;
+            }
+          }
+        }
+      }
 
-      const imageData = await imageResponse.json();
-      const pages = imageData.query?.pages;
-      if (!pages) continue;
-
-      const pageId = Object.keys(pages)[0];
-      if (pageId === '-1') continue;
-
-      const thumbnailUrl = pages[pageId]?.thumbnail?.source;
-      if (thumbnailUrl) {
-        return thumbnailUrl;
+      // Fallback: try to get the main image from the page's images list
+      const imagesUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=images&format=json&origin=*`;
+      const imagesResponse = await fetch(imagesUrl);
+      if (imagesResponse.ok) {
+        const imagesData = await imagesResponse.json();
+        const pages = imagesData.query?.pages;
+        if (pages) {
+          const pageId = Object.keys(pages)[0];
+          if (pageId !== '-1' && pages[pageId]?.images) {
+            // Find a suitable image (skip icons, logos, commons icons)
+            for (const img of pages[pageId].images) {
+              const imgTitle = img.title || '';
+              const lowerTitle = imgTitle.toLowerCase();
+              // Skip common non-portrait images
+              if (lowerTitle.includes('icon') || 
+                  lowerTitle.includes('logo') || 
+                  lowerTitle.includes('flag') ||
+                  lowerTitle.includes('map') ||
+                  lowerTitle.includes('commons') ||
+                  lowerTitle.includes('.svg')) {
+                continue;
+              }
+              // Get the actual image URL
+              const fileUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imgTitle)}&prop=imageinfo&iiprop=url&iiurlwidth=400&format=json&origin=*`;
+              const fileResponse = await fetch(fileUrl);
+              if (fileResponse.ok) {
+                const fileData = await fileResponse.json();
+                const filePages = fileData.query?.pages;
+                if (filePages) {
+                  const filePageId = Object.keys(filePages)[0];
+                  if (filePageId !== '-1') {
+                    const imageInfo = filePages[filePageId]?.imageinfo?.[0];
+                    const thumbUrl = imageInfo?.thumburl || imageInfo?.url;
+                    if (thumbUrl) {
+                      return thumbUrl;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
