@@ -4,15 +4,18 @@ import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Scale, TrendingUp, Clock, Swords } from 'lucide-react';
+import { Scale, TrendingUp, Clock, Swords, Crown } from 'lucide-react';
+import CompareShareCard from './CompareShareCard';
 
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+const getAvatarEmoji = (profession: string) => {
+  const lower = profession.toLowerCase();
+  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
+  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
+  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
+  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
+  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
+  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
+  return '💰';
 };
 
 interface CompareResultProps {
@@ -73,12 +76,19 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 : 'opacity-0 -translate-x-20'
             }`}
           >
-            <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-primary/50 shadow-xl shadow-primary/20">
-              <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-              <AvatarFallback className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-blue-900/50 to-indigo-900/50">
-                {getInitials(person1.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-primary/50 shadow-xl shadow-primary/20">
+                <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
+                <AvatarFallback className="text-3xl md:text-4xl bg-gradient-to-br from-primary/20 to-primary/10">
+                  {getAvatarEmoji(person1.profession)}
+                </AvatarFallback>
+              </Avatar>
+              {person1 === richer && (
+                <div className="absolute -top-2 -right-2">
+                  <Crown className="h-8 w-8 text-primary fill-primary drop-shadow-lg" />
+                </div>
+              )}
+            </div>
             <div className="text-center">
               <p className="font-serif font-bold text-lg md:text-xl">{person1.name}</p>
               <p className="text-sm text-muted-foreground">{person1.profession}</p>
@@ -106,12 +116,19 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 : 'opacity-0 translate-x-20'
             }`}
           >
-            <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-primary/50 shadow-xl shadow-primary/20">
-              <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-              <AvatarFallback className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-red-900/50 to-rose-900/50">
-                {getInitials(person2.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-primary/50 shadow-xl shadow-primary/20">
+                <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
+                <AvatarFallback className="text-3xl md:text-4xl bg-gradient-to-br from-primary/20 to-primary/10">
+                  {getAvatarEmoji(person2.profession)}
+                </AvatarFallback>
+              </Avatar>
+              {person2 === richer && (
+                <div className="absolute -top-2 -right-2">
+                  <Crown className="h-8 w-8 text-primary fill-primary drop-shadow-lg" />
+                </div>
+              )}
+            </div>
             <div className="text-center">
               <p className="font-serif font-bold text-lg md:text-xl">{person2.name}</p>
               <p className="text-sm text-muted-foreground">{person2.profession}</p>
@@ -147,8 +164,9 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                    <AvatarFallback className="text-xs">{getInitials(person1.name)}</AvatarFallback>
+                    <AvatarFallback className="text-sm">{getAvatarEmoji(person1.profession)}</AvatarFallback>
                   </Avatar>
+                  {person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person1.name}</span>
                 </div>
                 <span className="text-primary font-mono">
@@ -163,8 +181,9 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                    <AvatarFallback className="text-xs">{getInitials(person2.name)}</AvatarFallback>
+                    <AvatarFallback className="text-sm">{getAvatarEmoji(person2.profession)}</AvatarFallback>
                   </Avatar>
+                  {person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person2.name}</span>
                 </div>
                 <span className="text-primary font-mono">
@@ -228,6 +247,9 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Share Card */}
+      <CompareShareCard person1={person1} person2={person2} />
     </div>
   );
 };

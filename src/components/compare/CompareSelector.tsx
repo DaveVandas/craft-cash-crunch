@@ -13,13 +13,15 @@ interface CompareSelectorProps {
   loading: boolean;
 }
 
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+const getAvatarEmoji = (profession: string) => {
+  const lower = profession.toLowerCase();
+  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
+  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
+  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
+  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
+  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
+  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
+  return '💰';
 };
 
 const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelectorProps) => {
@@ -49,8 +51,8 @@ const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelector
           <div className="flex flex-col items-center text-center gap-3">
             <Avatar className="h-24 w-24 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
               <AvatarImage src={selected.imageUrl} alt={selected.name} className="object-cover" />
-              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-2xl font-bold">
-                {getInitials(selected.name)}
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-3xl">
+                {getAvatarEmoji(selected.profession)}
               </AvatarFallback>
             </Avatar>
             <div>

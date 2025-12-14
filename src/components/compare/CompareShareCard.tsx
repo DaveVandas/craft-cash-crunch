@@ -1,0 +1,184 @@
+import { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import { Celebrity } from '@/lib/types';
+import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Download, Share2, Crown, Trophy } from 'lucide-react';
+import { toast } from 'sonner';
+
+const getAvatarEmoji = (profession: string) => {
+  const lower = profession.toLowerCase();
+  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
+  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
+  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
+  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
+  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
+  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
+  return '💰';
+};
+
+interface CompareShareCardProps {
+  person1: Celebrity;
+  person2: Celebrity;
+}
+
+const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const winner = person1.annualEarnings > person2.annualEarnings ? person1 : person2;
+  const loser = person1.annualEarnings > person2.annualEarnings ? person2 : person1;
+  const ratio = winner.annualEarnings / loser.annualEarnings;
+  const timeToEarn = calculateTimeToEarn(loser.annualEarnings, winner.annualEarnings);
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#0a0a0a',
+        scale: 2,
+        logging: false,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `wealth-showdown-${winner.name.replace(/\s+/g, '-')}-vs-${loser.name.replace(/\s+/g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      toast.success('Card downloaded!');
+    } catch (error) {
+      toast.error('Failed to generate image');
+    }
+  };
+
+  const handleShare = async () => {
+    const text = `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 ${winner.name} earns ${ratio.toFixed(1)}x more!\n⏱️ ${winner.name} makes ${loser.name}'s yearly salary in just ${timeToEarn}\n\nCheck your earnings at wealthperspective.app`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        toast.success('Shared successfully!');
+      } catch (err) {
+        // User cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard!');
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Shareable Card */}
+      <div 
+        ref={cardRef}
+        className="relative overflow-hidden rounded-2xl p-1"
+        style={{
+          background: 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
+        }}
+      >
+        <div className="rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-6">
+          {/* Header */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <span className="text-2xl">💎</span>
+            <span className="font-serif text-lg font-bold text-amber-400">
+              Wealth Showdown
+            </span>
+          </div>
+
+          {/* VS Layout */}
+          <div className="flex items-center justify-between gap-4 mb-6">
+            {/* Person 1 */}
+            <div className="flex-1 text-center">
+              <div className="relative inline-block">
+                <Avatar className="h-20 w-20 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                  <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                    {getAvatarEmoji(person1.profession)}
+                  </AvatarFallback>
+                </Avatar>
+                {person1 === winner && (
+                  <div className="absolute -top-3 -right-3">
+                    <Crown className="h-8 w-8 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                  </div>
+                )}
+              </div>
+              <p className="font-bold text-white mt-2 text-sm">{person1.name}</p>
+              <p className="text-xs text-amber-400 font-mono">
+                {formatCompactCurrency(person1.annualEarnings)}/yr
+              </p>
+            </div>
+
+            {/* VS */}
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg">
+                <span className="text-black font-bold text-sm">VS</span>
+              </div>
+            </div>
+
+            {/* Person 2 */}
+            <div className="flex-1 text-center">
+              <div className="relative inline-block">
+                <Avatar className="h-20 w-20 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                  <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                    {getAvatarEmoji(person2.profession)}
+                  </AvatarFallback>
+                </Avatar>
+                {person2 === winner && (
+                  <div className="absolute -top-3 -right-3">
+                    <Crown className="h-8 w-8 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                  </div>
+                )}
+              </div>
+              <p className="font-bold text-white mt-2 text-sm">{person2.name}</p>
+              <p className="text-xs text-amber-400 font-mono">
+                {formatCompactCurrency(person2.annualEarnings)}/yr
+              </p>
+            </div>
+          </div>
+
+          {/* Winner Section */}
+          <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-4 border border-amber-500/30">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Trophy className="h-5 w-5 text-amber-400" />
+              <span className="text-amber-400 font-bold">WINNER</span>
+            </div>
+            <p className="text-white text-center font-serif text-lg">{winner.name}</p>
+            <p className="text-amber-400 text-center text-sm mt-1">
+              earns <span className="font-bold">{ratio.toFixed(1)}x</span> more
+            </p>
+          </div>
+
+          {/* Key Stat */}
+          <div className="text-center mt-4">
+            <p className="text-gray-400 text-xs">
+              {winner.name} makes {loser.name}'s yearly salary in
+            </p>
+            <p className="text-amber-400 font-bold text-xl">{timeToEarn}</p>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-4 pt-4 border-t border-amber-500/20">
+            <p className="text-gray-500 text-xs">wealthperspective.app</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3">
+        <Button onClick={handleDownload} className="flex-1" variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download
+        </Button>
+        <Button onClick={handleShare} className="flex-1 bg-gradient-to-r from-primary to-primary/80">
+          <Share2 className="h-4 w-4 mr-2" />
+          Share
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default CompareShareCard;
