@@ -18,7 +18,7 @@ const Search = () => {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const displayQuery = sanitizeSearchQuery(rawQuery);
-  const { searchCelebrity, loading, hasAccess, searchesRemaining, hasLifetimeAccess } = useCelebritySearch();
+  const { searchCelebrity, loading, hasAccess, searchesRemaining, hasLifetimeAccess, accessLoaded } = useCelebritySearch();
   const { user } = useAuth();
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
@@ -43,13 +43,13 @@ const Search = () => {
         return;
       }
       
-      if (!hasLifetimeAccess && searchesRemaining === 0) {
+      if (!hasLifetimeAccess && searchesRemaining === 0 && accessLoaded) {
         setAccessDenied('upgrade');
         setResult(null);
         setValidationError(false);
         return;
       }
-      
+
       setValidationError(false);
       setAccessDenied(null);
       searchCelebrity(validatedQuery).then(setResult);
