@@ -4,6 +4,7 @@ export interface Celebrity {
   profession: string;
   category: Category;
   imageUrl?: string;
+  emoji?: string;
   netWorth: number;
   annualEarnings: number;
   source?: string;
