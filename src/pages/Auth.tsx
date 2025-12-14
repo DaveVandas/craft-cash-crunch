@@ -20,12 +20,21 @@ const Auth = () => {
   const { user, signIn, signUp, resetPassword, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
+    // If we've stored a remembered email, prefill it
+    const storedEmail = localStorage.getItem('wp_remember_email');
+    const storedRemember = localStorage.getItem('wp_remember_me');
+    if (storedEmail && storedRemember === 'true') {
+      setEmail(storedEmail);
+      setRememberMe(true);
+    }
+
     if (user) {
       navigate('/');
     }
@@ -63,6 +72,13 @@ const Auth = () => {
         toast.error(error.message);
       }
     } else {
+      if (rememberMe) {
+        localStorage.setItem('wp_remember_email', email);
+        localStorage.setItem('wp_remember_me', 'true');
+      } else {
+        localStorage.removeItem('wp_remember_email');
+        localStorage.setItem('wp_remember_me', 'false');
+      }
       toast.success('Welcome back!');
       navigate('/');
     }
@@ -224,6 +240,7 @@ const Auth = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="pl-10"
+                            autoComplete="email"
                           />
                         </div>
                         {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
@@ -240,23 +257,35 @@ const Auth = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="pl-10"
+                            autoComplete="current-password"
                           />
                         </div>
                         {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="h-4 w-4 rounded border-border bg-background"
+                          />
+                          <span className="text-muted-foreground">Remember me</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-primary hover:underline"
+                        >
+                          Forgot your password?
+                        </button>
                       </div>
 
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                         Sign In
                       </Button>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(true)}
-                        className="w-full text-sm text-primary hover:underline"
-                      >
-                        Forgot your password?
-                      </button>
                     </form>
                   </TabsContent>
 
