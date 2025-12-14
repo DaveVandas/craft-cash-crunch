@@ -117,7 +117,7 @@ const TrendingSearches = () => {
       const hashB = b.name.charCodeAt(0) * hourSeed;
       return (hashA % 100) - (hashB % 100);
     });
-    const featuredItems = shuffledSpotlight.slice(0, 5).map((item) => ({
+    const featuredItems = shuffledSpotlight.slice(0, 10).map((item) => ({
       name: item.name,
       searches: 'Featured',
       hot: item.hot || false,
@@ -154,8 +154,8 @@ const TrendingSearches = () => {
     fetchTrends();
   }, []);
 
-  // Display only featured celebrities (5 total)
-  const displayItems: TrendingItem[] = spotlightItems.slice(0, 5);
+  // Display featured celebrities (10 on desktop, 5 on mobile)
+  const displayItems: TrendingItem[] = spotlightItems;
 
   return (
     <div className="w-full">
