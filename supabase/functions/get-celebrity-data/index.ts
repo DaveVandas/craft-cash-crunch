@@ -153,19 +153,26 @@ serve(async (req) => {
       return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE');
     }
 
-    // Build sanitized prompt
+    // Build sanitized prompt with specific instructions for consistent, verifiable data
     const prompt = name 
-      ? `Provide earnings data for the celebrity named "${name}". Return a JSON object with: name, profession, category (one of: athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical), netWorth (number in USD), annualEarnings (number in USD), and a brief source note. 
+      ? `Provide earnings data for "${name}". Return ONLY a JSON object with these fields:
+- name: full name
+- profession: their primary profession
+- category: one of (athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical)
+- netWorth: number in USD (no commas or symbols)
+- annualEarnings: number in USD (no commas or symbols)
+- source: cite the specific Forbes/Bloomberg list and year (e.g., "Forbes 400 2024", "Bloomberg Billionaires 2024")
 
-IMPORTANT RULES FOR annualEarnings:
-- For billionaires and wealthy investors: Calculate their TOTAL annual wealth increase from all sources including stock appreciation, dividends, business income, and investments. Do NOT use just their base salary. For example, Jeff Bezos earns billions annually from Amazon stock appreciation and other investments, not just his $80k salary.
-- For athletes/entertainers: Include all income from contracts, endorsements, royalties, and business ventures.
-- For historical figures (pre-1950): Adjust all wealth values to 2024 USD using inflation.
+CRITICAL RULES:
+1. Use ONLY the most recent Forbes or Bloomberg published figures. Do not estimate or interpolate.
+2. For billionaires: Use their TOTAL annual wealth change from Forbes/Bloomberg tracking, not salary.
+3. For athletes/entertainers: Use Forbes highest-paid lists (athletes, celebrities, musicians).
+4. For historical figures (pre-1950): Adjust to 2024 USD and note the original figure.
+5. If you cannot find verified Forbes/Bloomberg data, use the most authoritative financial source available.
+6. Be CONSISTENT - if Forbes says $50M, report $50M exactly.
 
-Be accurate based on recent Forbes, Bloomberg, and financial reporting data. Only return the JSON, no other text.`
-      : `List 6 notable people in the ${category} category with their earnings. Return a JSON array of objects with: name, profession, category, netWorth, annualEarnings. 
-
-IMPORTANT: For billionaires, annualEarnings should reflect their total annual wealth increase from all sources (stocks, dividends, investments, business income), not just salary. Only return the JSON array, no other text.`;
+Return ONLY valid JSON, no markdown or explanation.`
+      : `List 6 notable people in the ${category} category. Return ONLY a JSON array with objects containing: name, profession, category, netWorth (number), annualEarnings (number). Use Forbes/Bloomberg published figures only. No markdown.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -175,8 +182,9 @@ IMPORTANT: For billionaires, annualEarnings should reflect their total annual we
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
+        temperature: 0, // Deterministic output for consistent results
         messages: [
-          { role: 'system', content: 'You are a celebrity wealth data API. Always return valid JSON only. Only provide data for real, publicly known individuals.' },
+          { role: 'system', content: 'You are a celebrity wealth data API. Return ONLY valid JSON. Use only verified Forbes, Bloomberg, or official financial reporting figures. Be consistent and accurate - never estimate or vary figures between queries.' },
           { role: 'user', content: prompt }
         ],
       }),
