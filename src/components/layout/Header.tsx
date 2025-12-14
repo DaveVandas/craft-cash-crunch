@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus } from 'lucide-react';
+import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
@@ -19,6 +20,7 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -146,12 +148,18 @@ const Header = () => {
                       Upgrade to Unlimited
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={() => setInviteModalOpen(true)}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Invite Friends
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
             </>
           ) : (
             <Link to="/auth">
