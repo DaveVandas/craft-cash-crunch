@@ -79,6 +79,31 @@ function errorResponse(message: string, code: string = 'ERROR') {
   });
 }
 
+// Fetch Wikipedia image for a celebrity
+async function fetchWikipediaImage(name: string): Promise<string | null> {
+  try {
+    const encodedName = encodeURIComponent(name);
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
+    
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const pages = data.query?.pages;
+    if (!pages) return null;
+    
+    // Get the first page result
+    const pageId = Object.keys(pages)[0];
+    if (pageId === '-1') return null; // Page not found
+    
+    const imageUrl = pages[pageId]?.thumbnail?.source;
+    return imageUrl || null;
+  } catch (error) {
+    console.error('Wikipedia image fetch error:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -208,19 +233,32 @@ Return ONLY valid JSON, no markdown or explanation.`
     const parsed = JSON.parse(jsonMatch[0]);
     
     if (name) {
+      // Fetch Wikipedia image for single celebrity
+      const imageUrl = await fetchWikipediaImage(parsed.name || name);
+      
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+        imageUrl,
         ...parsed
       };
+      console.log(`Fetched celebrity: ${parsed.name}, image: ${imageUrl ? 'found' : 'not found'}`);
       return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      const celebrities = parsed.map((p: any) => ({
-        id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
-        ...p
-      }));
-      return new Response(JSON.stringify({ celebrities, error: null }), {
+      // Fetch Wikipedia images for all celebrities in parallel
+      const celebritiesWithImages = await Promise.all(
+        parsed.map(async (p: any) => {
+          const imageUrl = await fetchWikipediaImage(p.name);
+          return {
+            id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+            imageUrl,
+            ...p
+          };
+        })
+      );
+      console.log(`Fetched ${celebritiesWithImages.length} celebrities with images`);
+      return new Response(JSON.stringify({ celebrities: celebritiesWithImages, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
