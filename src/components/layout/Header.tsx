@@ -1,8 +1,24 @@
-import { Link } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user, accessInfo, signOut, initiatePayment } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
@@ -38,12 +54,60 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link to="/calculator">
-            <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
-              <Calculator className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Your Salary</span>
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              {!accessInfo?.hasLifetimeAccess && (
+                <Button 
+                  onClick={initiatePayment}
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Unlock Unlimited</span>
+                  <span className="sm:hidden">$4.99</span>
+                </Button>
+              )}
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="border-primary/50">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium truncate">{user.email}</p>
+                    {accessInfo?.hasLifetimeAccess ? (
+                      <p className="text-xs text-primary flex items-center gap-1">
+                        <Crown className="h-3 w-3" /> Lifetime Access
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        {accessInfo?.searchesRemaining ?? 0} searches remaining
+                      </p>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator />
+                  {!accessInfo?.hasLifetimeAccess && (
+                    <DropdownMenuItem onClick={initiatePayment}>
+                      <Crown className="h-4 w-4 mr-2" />
+                      Upgrade to Unlimited
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <Link to="/auth">
+              <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+                <LogIn className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>
