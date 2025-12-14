@@ -18,7 +18,7 @@ const Search = () => {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const displayQuery = sanitizeSearchQuery(rawQuery);
-  const { searchCelebrity, loading, hasAccess, searchesRemaining, hasLifetimeAccess, accessLoaded } = useCelebritySearch();
+  const { searchCelebrity, loading } = useCelebritySearch();
   const { user } = useAuth();
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
@@ -35,7 +35,7 @@ const Search = () => {
         return;
       }
       
-      // Check access before searching
+      // Check auth before searching; paywall is handled inside the search hook
       if (!user) {
         setAccessDenied('signin');
         setResult(null);
@@ -43,13 +43,6 @@ const Search = () => {
         return;
       }
       
-      if (!hasLifetimeAccess && searchesRemaining === 0 && accessLoaded) {
-        setAccessDenied('upgrade');
-        setResult(null);
-        setValidationError(false);
-        return;
-      }
-
       setValidationError(false);
       setAccessDenied(null);
       searchCelebrity(validatedQuery).then(setResult);
@@ -58,7 +51,7 @@ const Search = () => {
       setValidationError(false);
       setAccessDenied(null);
     }
-  }, [rawQuery, searchCelebrity, user, hasLifetimeAccess, searchesRemaining]);
+  }, [rawQuery, searchCelebrity, user]);
 
   const handleUpgrade = async () => {
     const { data } = await supabase.functions.invoke('create-payment');
