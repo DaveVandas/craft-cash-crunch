@@ -7,10 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper logging function for debugging
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[VERIFY-PAYMENT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  logStep("Function started");
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -18,26 +26,66 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    logStep("Auth header present", { hasAuth: !!authHeader });
+    
+    if (!authHeader) {
+      logStep("ERROR: No authorization header");
+      throw new Error("No authorization header");
+    }
+    
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData } = await supabaseClient.auth.getUser(token);
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError) {
+      logStep("ERROR: Auth error", { error: userError.message });
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
+    
     const user = userData.user;
-    if (!user) throw new Error("User not authenticated");
+    if (!user) {
+      logStep("ERROR: User not authenticated");
+      throw new Error("User not authenticated");
+    }
+    
+    logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { session_id } = await req.json();
-    if (!session_id) throw new Error("Session ID required");
+    const body = await req.json();
+    const { session_id } = body;
+    logStep("Request body parsed", { session_id: session_id ? session_id.substring(0, 20) + '...' : null });
+    
+    if (!session_id) {
+      logStep("ERROR: No session_id provided");
+      throw new Error("Session ID required");
+    }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      logStep("ERROR: STRIPE_SECRET_KEY not set");
+      throw new Error("STRIPE_SECRET_KEY not configured");
+    }
+    logStep("Stripe key verified");
+
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
 
     // Retrieve the checkout session
+    logStep("Retrieving Stripe session", { session_id: session_id.substring(0, 20) + '...' });
     const session = await stripe.checkout.sessions.retrieve(session_id);
+    logStep("Session retrieved", { 
+      payment_status: session.payment_status,
+      customer: session.customer,
+      payment_intent: session.payment_intent,
+      metadata_user_id: session.metadata?.user_id
+    });
 
     if (session.payment_status === "paid") {
+      logStep("Payment status is PAID, proceeding with verification");
+      
       // Security check 1: Verify the session belongs to the authenticated user
       if (session.metadata?.user_id !== user.id) {
-        console.error("Session user_id mismatch:", {
+        logStep("ERROR: Session user_id mismatch", {
           sessionUserId: session.metadata?.user_id,
           authenticatedUserId: user.id,
         });
@@ -46,16 +94,23 @@ serve(async (req) => {
           status: 403,
         });
       }
+      logStep("Security check 1 passed: user_id matches");
 
       // Security check 2: Verify this payment_intent hasn't been used by another user
-      const { data: existingUsage } = await supabaseClient
+      const { data: existingUsage, error: existingError } = await supabaseClient
         .from("user_access")
-        .select("id, user_id")
+        .select("id, user_id, has_lifetime_access")
         .eq("stripe_payment_intent_id", session.payment_intent as string)
         .maybeSingle();
 
+      if (existingError) {
+        logStep("ERROR: Failed to check existing usage", { error: existingError.message });
+      }
+      
+      logStep("Existing usage check", { existingUsage });
+
       if (existingUsage && existingUsage.user_id !== user.id) {
-        console.error("Payment intent already used by another user:", {
+        logStep("ERROR: Payment intent already used by another user", {
           paymentIntent: session.payment_intent,
           existingUserId: existingUsage.user_id,
           attemptingUserId: user.id,
@@ -65,21 +120,44 @@ serve(async (req) => {
           status: 409,
         });
       }
+      logStep("Security check 2 passed: payment_intent not used by another user");
+
+      // Check current user_access record
+      const { data: currentAccess, error: accessError } = await supabaseClient
+        .from("user_access")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      logStep("Current user_access record", { currentAccess, error: accessError?.message });
 
       // Update user_access to grant lifetime access
-      const { error: updateError } = await supabaseClient
+      logStep("Updating user_access to grant lifetime access");
+      const { data: updateData, error: updateError } = await supabaseClient
         .from("user_access")
         .update({
           has_lifetime_access: true,
           stripe_customer_id: session.customer as string,
           stripe_payment_intent_id: session.payment_intent as string,
         })
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select();
 
       if (updateError) {
-        console.error("Error updating user access:", updateError);
-        throw new Error("Failed to update access");
+        logStep("ERROR: Failed to update user_access", { error: updateError.message, code: updateError.code });
+        throw new Error(`Failed to update access: ${updateError.message}`);
       }
+      
+      logStep("SUCCESS: user_access updated", { updateData });
+
+      // Verify the update worked
+      const { data: verifyAccess } = await supabaseClient
+        .from("user_access")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      
+      logStep("Verification after update", { verifyAccess });
 
       return new Response(JSON.stringify({ success: true, paid: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -87,13 +165,14 @@ serve(async (req) => {
       });
     }
 
+    logStep("Payment status is NOT paid", { status: session.payment_status });
     return new Response(JSON.stringify({ success: true, paid: false }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error verifying payment:", error);
+    logStep("ERROR in verify-payment", { message: errorMessage, stack: error instanceof Error ? error.stack : undefined });
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
