@@ -49,8 +49,7 @@ const RealityCheckShareCard = ({
   };
 
   const handleShare = async () => {
-    const appUrl = window.location.origin;
-    const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at ${appUrl}`;
+    const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings with Wealth Perspective`;
 
     const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
 
@@ -99,15 +98,15 @@ const RealityCheckShareCard = ({
       // Fall through to text/clipboard share
     }
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ text });
-        toast.success('Shared successfully!');
-        return;
-      } catch (err) {
-        // User cancelled
-      }
+  if (navigator.share && !isMobile) {
+    try {
+      await navigator.share({ text });
+      toast.success('Shared successfully!');
+      return;
+    } catch (err) {
+      // User cancelled
     }
+  }
 
     await navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
