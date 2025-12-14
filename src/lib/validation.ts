@@ -50,6 +50,17 @@ export function slugToName(slug: string | undefined): string | null {
 }
 
 /**
+ * Converts a name to a URL slug (e.g., "Elon Musk" -> "elon-musk")
+ */
+export function nameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-');
+}
+
+/**
  * Sanitizes a search query for display
  * Returns empty string if invalid (safe for display but won't be sent to API)
  */

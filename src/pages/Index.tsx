@@ -4,12 +4,16 @@ import FeaturedTicker from '@/components/home/FeaturedTicker';
 import SearchBar from '@/components/home/SearchBar';
 import CategoryCard from '@/components/home/CategoryCard';
 import QuickActions from '@/components/home/QuickActions';
+import TrendingSearches from '@/components/home/TrendingSearches';
+import DailyWealthFact from '@/components/home/DailyWealthFact';
+import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import { categories } from '@/lib/categories';
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      <ExitIntentPopup />
       
       <main className="flex-1">
         {/* Hero Section */}
@@ -27,6 +31,11 @@ const Index = () => {
             </div>
 
             <SearchBar />
+            
+            {/* Daily Wealth Fact */}
+            <div className="mt-8 max-w-2xl mx-auto">
+              <DailyWealthFact />
+            </div>
           </div>
         </section>
 
@@ -35,10 +44,17 @@ const Index = () => {
           <FeaturedTicker />
         </section>
 
-        {/* Quick Actions */}
+        {/* Trending + Quick Actions */}
         <section className="container mb-12">
-          <h2 className="font-serif text-2xl font-bold mb-6">Quick Actions</h2>
-          <QuickActions />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <h2 className="font-serif text-2xl font-bold mb-6">Quick Actions</h2>
+              <QuickActions />
+            </div>
+            <div>
+              <TrendingSearches />
+            </div>
+          </div>
         </section>
 
         {/* Categories */}

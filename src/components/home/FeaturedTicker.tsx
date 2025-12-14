@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 import { formatLargeCurrency } from '@/lib/earnings';
+import { useSound } from '@/contexts/SoundContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp } from 'lucide-react';
@@ -24,14 +25,26 @@ const featuredPeople: FeaturedPerson[] = [
 const FeaturedTicker = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const featured = featuredPeople[currentIndex];
+  const { play } = useSound();
+  const lastMilestone = useRef(0);
   
   const { currentEarnings, breakdown } = useEarningsTicker({ 
     annualEarnings: featured.annualEarnings 
   });
 
+  // Play sound at milestones
+  useEffect(() => {
+    const milestone = Math.floor(currentEarnings / 1000) * 1000;
+    if (milestone > lastMilestone.current && milestone > 0) {
+      play('coin');
+      lastMilestone.current = milestone;
+    }
+  }, [currentEarnings, play]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % featuredPeople.length);
+      lastMilestone.current = 0;
     }, 15000);
     return () => clearInterval(interval);
   }, []);

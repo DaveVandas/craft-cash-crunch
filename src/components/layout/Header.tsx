@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSound } from '@/contexts/SoundContext';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +15,7 @@ import {
 const Header = () => {
   const navigate = useNavigate();
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
+  const { enabled: soundEnabled, toggle: toggleSound } = useSound();
 
   const handleSignOut = async () => {
     await signOut();
@@ -54,6 +57,21 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Sound Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={toggleSound} className="h-9 w-9">
+                {soundEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{soundEnabled ? 'Mute sounds' : 'Enable sounds'}</p>
+            </TooltipContent>
+          </Tooltip>
           {user ? (
             <>
               {!accessInfo?.hasLifetimeAccess && (
