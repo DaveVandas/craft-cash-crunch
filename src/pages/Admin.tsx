@@ -8,9 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft } from 'lucide-react';
+import { 
+  Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
+  DollarSign, TrendingUp, Clock, Activity, Crown
+} from 'lucide-react';
 
 interface AdminUser {
   id: string;
@@ -23,10 +27,19 @@ interface AdminUser {
   roles: string[];
 }
 
+interface SearchTrend {
+  celebrity_name: string;
+  celebrity_slug: string;
+  search_count: number;
+  category: string | null;
+  last_searched_at: string;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [trends, setTrends] = useState<SearchTrend[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +67,21 @@ const Admin = () => {
     }
   };
 
+  const fetchTrends = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('search_trends')
+        .select('*')
+        .order('search_count', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setTrends(data || []);
+    } catch (err) {
+      console.error('Failed to fetch trends:', err);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -62,6 +90,7 @@ const Admin = () => {
 
     if (user) {
       fetchUsers();
+      fetchTrends();
     }
   }, [user, authLoading, navigate]);
 
@@ -76,10 +105,52 @@ const Admin = () => {
     });
   };
 
-  // Stats
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
+  // Stats calculations
   const totalUsers = users.length;
   const paidUsers = users.filter((u) => u.has_lifetime_access).length;
+  const freeUsers = totalUsers - paidUsers;
   const totalSearches = users.reduce((sum, u) => sum + u.search_count, 0);
+  const estimatedRevenue = paidUsers * 4.99;
+
+  // Recent activity (users who signed in within last 7 days)
+  const recentlyActive = users.filter((u) => {
+    if (!u.last_sign_in_at) return false;
+    const lastSignIn = new Date(u.last_sign_in_at);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    return lastSignIn > weekAgo;
+  }).length;
+
+  // New users today
+  const newUsersToday = users.filter((u) => {
+    const created = new Date(u.created_at);
+    const today = new Date();
+    return created.toDateString() === today.toDateString();
+  }).length;
+
+  // New users this week
+  const newUsersThisWeek = users.filter((u) => {
+    const created = new Date(u.created_at);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    return created > weekAgo;
+  }).length;
+
+  const handleRefresh = () => {
+    fetchUsers();
+    fetchTrends();
+  };
 
   if (authLoading) {
     return (
@@ -87,7 +158,8 @@ const Admin = () => {
         <Header />
         <main className="flex-1 container py-8">
           <Skeleton className="h-10 w-48 mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Skeleton className="h-32" />
             <Skeleton className="h-32" />
             <Skeleton className="h-32" />
             <Skeleton className="h-32" />
@@ -132,16 +204,31 @@ const Admin = () => {
               <Shield className="h-8 w-8 text-primary" />
               Admin Dashboard
             </h1>
-            <p className="text-muted-foreground mt-1">Manage users and view analytics</p>
+            <p className="text-muted-foreground mt-1">Monitor your app's performance and users</p>
           </div>
-          <Button onClick={fetchUsers} variant="outline" disabled={loading}>
+          <Button onClick={handleRefresh} variant="outline" disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* Revenue & Key Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" />
+                Est. Revenue
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-primary">${estimatedRevenue.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">
+                {paidUsers} × $4.99
+              </p>
+            </CardContent>
+          </Card>
+
           <Card className="border-primary/20">
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
@@ -151,6 +238,9 @@ const Admin = () => {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{totalUsers}</p>
+              <p className="text-sm text-muted-foreground">
+                +{newUsersToday} today, +{newUsersThisWeek} this week
+              </p>
             </CardContent>
           </Card>
 
@@ -158,17 +248,35 @@ const Admin = () => {
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
-                Paid Users
+                Conversion
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-primary">{paidUsers}</p>
+              <p className="text-3xl font-bold">{totalUsers > 0 ? Math.round((paidUsers / totalUsers) * 100) : 0}%</p>
               <p className="text-sm text-muted-foreground">
-                {totalUsers > 0 ? Math.round((paidUsers / totalUsers) * 100) : 0}% conversion
+                {paidUsers} paid / {freeUsers} free
               </p>
             </CardContent>
           </Card>
 
+          <Card className="border-primary/20">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Active (7d)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{recentlyActive}</p>
+              <p className="text-sm text-muted-foreground">
+                {totalUsers > 0 ? Math.round((recentlyActive / totalUsers) * 100) : 0}% of users
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Secondary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card className="border-primary/20">
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
@@ -177,89 +285,249 @@ const Admin = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{totalSearches}</p>
+              <p className="text-3xl font-bold">{totalSearches.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground">
                 {totalUsers > 0 ? (totalSearches / totalUsers).toFixed(1) : 0} avg per user
               </p>
             </CardContent>
           </Card>
+
+          <Card className="border-primary/20">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Trending Searches
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{trends.length}</p>
+              <p className="text-sm text-muted-foreground">
+                unique celebrities searched
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Users Table */}
-        <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>
-              View and manage all registered users
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : users.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No users found</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Searches</TableHead>
-                      <TableHead>Roles</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Last Sign In</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell className="font-medium">{u.email}</TableCell>
-                        <TableCell>
-                          {u.has_lifetime_access ? (
-                            <Badge className="bg-primary/20 text-primary border-primary/30">
-                              Lifetime Access
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary">Free</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">{u.search_count}</TableCell>
-                        <TableCell>
-                          {u.roles.length > 0 ? (
-                            <div className="flex gap-1">
-                              {u.roles.map((role) => (
-                                <Badge
-                                  key={role}
-                                  variant="outline"
-                                  className={role === 'admin' ? 'border-amber-500 text-amber-500' : ''}
-                                >
-                                  {role}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {formatDate(u.created_at)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {formatDate(u.last_sign_in_at)}
-                        </TableCell>
-                      </TableRow>
+        {/* Tabs for Users and Trends */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="trends" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Search Trends
+            </TabsTrigger>
+            <TabsTrigger value="recent" className="gap-2">
+              <Clock className="h-4 w-4" />
+              Recent Signups
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>
+                  View and manage all registered users
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                ) : users.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No users found</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-center">Searches</TableHead>
+                          <TableHead>Roles</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Last Sign In</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((u) => (
+                          <TableRow key={u.id}>
+                            <TableCell className="font-medium">{u.email}</TableCell>
+                            <TableCell>
+                              {u.has_lifetime_access ? (
+                                <Badge className="bg-primary/20 text-primary border-primary/30">
+                                  <Crown className="h-3 w-3 mr-1" />
+                                  Lifetime
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary">Free</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">{u.search_count}</TableCell>
+                            <TableCell>
+                              {u.roles.length > 0 ? (
+                                <div className="flex gap-1">
+                                  {u.roles.map((role) => (
+                                    <Badge
+                                      key={role}
+                                      variant="outline"
+                                      className={role === 'admin' ? 'border-amber-500 text-amber-500' : ''}
+                                    >
+                                      {role}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {formatDate(u.created_at)}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {formatDate(u.last_sign_in_at)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="trends">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle>Top Searched Celebrities</CardTitle>
+                <CardDescription>
+                  Most popular celebrity searches across all users
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {trends.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No search data yet</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">#</TableHead>
+                          <TableHead>Celebrity</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead className="text-center">Searches</TableHead>
+                          <TableHead>Last Searched</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {trends.map((trend, index) => (
+                          <TableRow key={trend.celebrity_slug}>
+                            <TableCell className="font-bold text-muted-foreground">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="font-medium">{trend.celebrity_name}</TableCell>
+                            <TableCell>
+                              {trend.category ? (
+                                <Badge variant="outline">{trend.category}</Badge>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {trend.search_count}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {formatRelativeTime(trend.last_searched_at)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="recent">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle>Recent Signups</CardTitle>
+                <CardDescription>
+                  Users who signed up in the last 7 days
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Searches So Far</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users
+                          .filter((u) => {
+                            const created = new Date(u.created_at);
+                            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                            return created > weekAgo;
+                          })
+                          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                          .map((u) => (
+                            <TableRow key={u.id}>
+                              <TableCell className="font-medium">{u.email}</TableCell>
+                              <TableCell>
+                                {u.has_lifetime_access ? (
+                                  <Badge className="bg-primary/20 text-primary border-primary/30">
+                                    <Crown className="h-3 w-3 mr-1" />
+                                    Paid
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">Free</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {formatRelativeTime(u.created_at)}
+                              </TableCell>
+                              <TableCell>{u.search_count}</TableCell>
+                            </TableRow>
+                          ))}
+                        {users.filter((u) => {
+                          const created = new Date(u.created_at);
+                          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                          return created > weekAgo;
+                        }).length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                              No new signups in the last 7 days
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Footer />
