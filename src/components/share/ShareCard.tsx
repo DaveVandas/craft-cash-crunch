@@ -32,6 +32,12 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const TikTokIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
+  </svg>
+);
+
 interface ShareCardProps {
   celebrity: Celebrity;
   userSalary?: number;
@@ -102,6 +108,30 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         toast.success('Card saved! Open Instagram → Stories → Select the image from your gallery', {
+          duration: 6000,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to download card');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleTikTokShare = async () => {
+    setIsGenerating(true);
+    try {
+      const blob = await generateImage();
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${celebrity.name.replace(/\s+/g, '-').toLowerCase()}-wealth-card.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('Card saved! Open TikTok → Create → Add the image from your gallery', {
           duration: 6000,
         });
       }
@@ -344,7 +374,7 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
           </Button>
 
           {/* Social Platform Buttons */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-3 gap-3 mb-4">
             <Button 
               onClick={() => handleShare('twitter')}
               className="bg-black hover:bg-black/80 text-white"
@@ -377,6 +407,18 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
                 <InstagramIcon />
               )}
               <span className="ml-2">Instagram</span>
+            </Button>
+            <Button 
+              onClick={handleTikTokShare}
+              className="bg-black hover:bg-black/80 text-white col-span-2"
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <TikTokIcon />
+              )}
+              <span className="ml-2">TikTok</span>
             </Button>
           </div>
 
