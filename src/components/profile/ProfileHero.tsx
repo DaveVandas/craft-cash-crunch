@@ -1,8 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, GitCompareArrows } from 'lucide-react';
+import { Share2, GitCompareArrows, ArrowLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +12,8 @@ interface ProfileHeroProps {
 }
 
 const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
+  const navigate = useNavigate();
+  
   const categoryConfig: Record<string, { emoji: string; animation: string; bgGradient: string }> = {
     'athletes': { emoji: '🏆', animation: 'animate-bounce-wobble', bgGradient: 'from-amber-900/50 to-orange-900/50' },
     'hollywood': { emoji: '🎬', animation: 'animate-pulse-scale', bgGradient: 'from-purple-900/50 to-pink-900/50' },
@@ -28,6 +31,24 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
       
       <div className="relative container py-12">
+        {/* Navigation bar */}
+        <div className="flex items-center justify-between mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)}
+            className="group"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            Back
+          </Button>
+          <Link to="/search">
+            <Button variant="outline" className="border-primary/30">
+              <Search className="h-4 w-4 mr-2" />
+              Search Another
+            </Button>
+          </Link>
+        </div>
+
         <div className="flex flex-col md:flex-row items-start gap-8">
           <div className={cn(
             "flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-2xl bg-gradient-to-br shadow-xl shadow-primary/10 ring-2 ring-primary/30",
