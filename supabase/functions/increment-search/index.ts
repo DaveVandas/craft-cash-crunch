@@ -6,6 +6,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper to return 200 with error field (prevents frontend global error dialog)
+function errorResponse(message: string) {
+  return new Response(JSON.stringify({ success: false, error: message, searchCount: null }), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,10 +27,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
+      return errorResponse("Unauthorized");
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -30,10 +35,7 @@ serve(async (req) => {
     const user = userData.user;
     
     if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
+      return errorResponse("Unauthorized");
     }
 
     // Get current access record
@@ -43,12 +45,16 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (fetchError) throw new Error("Failed to fetch access record");
+    if (fetchError) {
+      console.error("Failed to fetch access record:", fetchError);
+      return errorResponse("Failed to fetch access record");
+    }
 
     // Don't increment if user has lifetime access
     if (accessData?.has_lifetime_access) {
       return new Response(JSON.stringify({ 
         success: true, 
+        error: null,
         searchCount: accessData.search_count 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -63,10 +69,14 @@ serve(async (req) => {
       .update({ search_count: newCount })
       .eq("user_id", user.id);
 
-    if (updateError) throw new Error("Failed to update search count");
+    if (updateError) {
+      console.error("Failed to update search count:", updateError);
+      return errorResponse("Failed to update search count");
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
+      error: null,
       searchCount: newCount 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -75,9 +85,6 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Error incrementing search:", error);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return errorResponse(errorMessage);
   }
 });

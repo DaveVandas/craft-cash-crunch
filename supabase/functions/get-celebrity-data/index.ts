@@ -71,6 +71,14 @@ function validateCategory(category: unknown): string | null {
   return trimmed;
 }
 
+// Helper to return 200 with error field (prevents frontend global error dialog)
+function errorResponse(message: string, code: string = 'ERROR') {
+  return new Response(JSON.stringify({ error: message, errorCode: code, celebrity: null, celebrities: null }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -80,10 +88,7 @@ serve(async (req) => {
   const clientIP = getClientIP(req);
   if (isRateLimited(clientIP)) {
     console.warn(`Rate limit exceeded for IP: ${clientIP}`);
-    return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
-      status: 429,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Too many requests. Please try again later.', 'RATE_LIMITED');
   }
 
   // Backend access control check
@@ -95,10 +100,7 @@ serve(async (req) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     console.warn("No auth header - blocking unauthenticated request");
-    return new Response(JSON.stringify({ error: 'Please sign in to search for celebrities.' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Please sign in to search for celebrities.', 'AUTH_REQUIRED');
   }
 
   const token = authHeader.replace("Bearer ", "");
@@ -107,10 +109,7 @@ serve(async (req) => {
 
   if (!user) {
     console.warn("Invalid token - blocking request");
-    return new Response(JSON.stringify({ error: 'Please sign in to search for celebrities.' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Please sign in to search for celebrities.', 'AUTH_REQUIRED');
   }
 
   // Check user access
@@ -122,10 +121,7 @@ serve(async (req) => {
 
   if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
     console.log(`User ${user.id} has exceeded free search limit`);
-    return new Response(JSON.stringify({ error: 'Free search limit reached. Please upgrade for unlimited access.' }), {
-      status: 403,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED');
   }
 
   try {
@@ -137,36 +133,24 @@ serve(async (req) => {
     
     // Ensure at least one valid parameter
     if (!name && !category) {
-      return new Response(JSON.stringify({ error: 'Please provide a valid name or category.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Please provide a valid name or category.', 'INVALID_INPUT');
     }
     
     // If name was provided but invalid
     if (body.name && !name) {
-      return new Response(JSON.stringify({ error: 'Invalid name format. Please use only letters, spaces, and hyphens.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Invalid name format. Please use only letters, spaces, and hyphens.', 'INVALID_INPUT');
     }
     
     // If category was provided but invalid
     if (body.category && !category) {
-      return new Response(JSON.stringify({ error: 'Invalid category. Please select a valid category.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Invalid category. Please select a valid category.', 'INVALID_INPUT');
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY not configured');
-      return new Response(JSON.stringify({ error: 'Service temporarily unavailable.' }), {
-        status: 503,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE');
     }
 
     // Build sanitized prompt
@@ -200,10 +184,7 @@ IMPORTANT: For billionaires, annualEarnings should reflect their total annual we
 
     if (!response.ok) {
       console.error('AI Gateway error:', response.status);
-      return new Response(JSON.stringify({ error: 'Unable to fetch data. Please try again.' }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Unable to fetch data right now. Please try again.', 'AI_ERROR');
     }
 
     const data = await response.json();
@@ -213,10 +194,7 @@ IMPORTANT: For billionaires, annualEarnings should reflect their total annual we
     const jsonMatch = content.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('Invalid AI response format');
-      return new Response(JSON.stringify({ error: 'Unable to process data. Please try again.' }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Unable to process data. Please try again.', 'PARSE_ERROR');
     }
     
     const parsed = JSON.parse(jsonMatch[0]);
@@ -226,7 +204,7 @@ IMPORTANT: For billionaires, annualEarnings should reflect their total annual we
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
         ...parsed
       };
-      return new Response(JSON.stringify({ celebrity }), {
+      return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
@@ -234,15 +212,12 @@ IMPORTANT: For billionaires, annualEarnings should reflect their total annual we
         id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
         ...p
       }));
-      return new Response(JSON.stringify({ celebrities }), {
+      return new Response(JSON.stringify({ celebrities, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
   } catch (error) {
     console.error('Function error:', error);
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred. Please try again.' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return errorResponse('An unexpected error occurred. Please try again.', 'UNEXPECTED_ERROR');
   }
 });
