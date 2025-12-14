@@ -1,11 +1,11 @@
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { Celebrity } from '@/lib/types';
-import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, getMostDramaticComparison } from '@/lib/earnings';
+import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, generateComparisons } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Crown, Trophy, Equal, Zap, Clock, DollarSign } from 'lucide-react';
+import { Download, Share2, Crown, Trophy, Equal } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CompareShareCardProps {
@@ -29,14 +29,16 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   const ratio = loser.annualEarnings > 0 ? winner.annualEarnings / loser.annualEarnings : 0;
   const timeToEarn = calculateTimeToEarn(loser.annualEarnings, winner.annualEarnings);
   
-  // Calculate dramatic stats
-  const winnerBreakdown = calculateEarningsBreakdown(winner.annualEarnings);
-  const loserBreakdown = calculateEarningsBreakdown(loser.annualEarnings);
-  const winnerFlex = getMostDramaticComparison(winner.annualEarnings);
+  // Calculate the EXTRA income (difference between winner and loser)
+  const extraIncome = winner.annualEarnings - loser.annualEarnings;
+  const extraBreakdown = calculateEarningsBreakdown(extraIncome);
   
-  // Combined earnings
-  const combinedAnnual = person1.annualEarnings + person2.annualEarnings;
-  const combinedBreakdown = calculateEarningsBreakdown(combinedAnnual);
+  // Get what the winner can buy with just the EXTRA income
+  const extraComparisons = generateComparisons(extraIncome);
+  // Pick the most impressive one for the flex
+  const flexComparison = extraComparisons.find(c => 
+    c.item.includes('Private Jet') || c.item.includes('Superyacht') || c.item.includes('Bugatti') || c.item.includes('Mansion')
+  ) || extraComparisons.find(c => c.quantity >= 1 && c.quantity <= 50) || extraComparisons[0];
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -60,11 +62,13 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   };
 
   const handleShare = async () => {
-    const flexText = winnerFlex ? `${winnerFlex.emoji} ${winner.name} buys ${winnerFlex.quantity} ${winnerFlex.item} ${winnerFlex.timeframe}` : '';
+    const flexText = flexComparison 
+      ? `${flexComparison.emoji} With just the EXTRA income, ${winner.name} buys ${flexComparison.quantity} ${flexComparison.item} ${flexComparison.timeframe}` 
+      : '';
     
     const text = isTie
-      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n💵 Combined: ${formatCurrency(combinedBreakdown.perSecond)}/second\n\nCompare celebrity earnings at earningsexplorer.shop`
-      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n⚡ ${formatCurrency(winnerBreakdown.perSecond)}/second\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
+      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings at earningsexplorer.shop`
+      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
 
     const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
 
@@ -96,7 +100,6 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
           return;
         }
 
-        // If we're on mobile but can't share the file directly, save the image instead
         if (isMobile) {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -114,16 +117,15 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
       // Fall through to text/clipboard share
     }
 
-  // Desktop or final fallback: share/copy text
-  if (navigator.share && !isMobile) {
-    try {
-      await navigator.share({ text });
-      toast.success('Shared successfully!');
-      return;
-    } catch (err) {
-      // User cancelled or error - fall through to clipboard
+    if (navigator.share && !isMobile) {
+      try {
+        await navigator.share({ text });
+        toast.success('Shared successfully!');
+        return;
+      } catch (err) {
+        // User cancelled or error - fall through to clipboard
+      }
     }
-  }
 
     await navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
@@ -200,33 +202,6 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             </div>
           </div>
 
-          {/* Dramatic Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {/* Per Second */}
-            <div className="bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-2 border border-amber-500/20">
-              <div className="flex items-center gap-1 mb-1">
-                <Zap className="h-3 w-3 text-amber-400" />
-                <span className="text-[9px] text-gray-400 uppercase tracking-wide">Per Second</span>
-              </div>
-              <p className="text-amber-400 font-mono text-xs font-bold">
-                {formatCurrency(winnerBreakdown.perSecond)}
-              </p>
-              <p className="text-[8px] text-gray-500 truncate">{winner.name}</p>
-            </div>
-            
-            {/* Per Minute */}
-            <div className="bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-2 border border-amber-500/20">
-              <div className="flex items-center gap-1 mb-1">
-                <Clock className="h-3 w-3 text-amber-400" />
-                <span className="text-[9px] text-gray-400 uppercase tracking-wide">Per Minute</span>
-              </div>
-              <p className="text-amber-400 font-mono text-xs font-bold">
-                {formatCurrency(winnerBreakdown.perMinute)}
-              </p>
-              <p className="text-[8px] text-gray-500 truncate">{winner.name}</p>
-            </div>
-          </div>
-
           {/* Result Section */}
           {isTie ? (
             <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30">
@@ -241,45 +216,51 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             </div>
           ) : (
             <>
-              <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30 mb-2">
-                <div className="flex items-center justify-center gap-2 mb-1">
+              {/* Winner Declaration */}
+              <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <Trophy className="h-4 w-4 text-amber-400" />
-                  <span className="text-amber-400 font-bold text-sm">{winner.name}</span>
+                  <span className="text-amber-400 font-bold text-sm">{winner.name} WINS</span>
+                  <Trophy className="h-4 w-4 text-amber-400" />
                 </div>
-                <p className="text-white text-center text-xs">
-                  earns <span className="text-amber-400 font-bold">{ratio.toFixed(1)}x</span> more • Makes {loser.name}'s yearly salary in <span className="text-amber-400 font-bold">{timeToEarn}</span>
+                <p className="text-white text-center text-xs mb-1">
+                  Earns <span className="text-amber-400 font-bold">{ratio.toFixed(1)}x</span> more than {loser.name}
+                </p>
+                <p className="text-gray-400 text-center text-[10px]">
+                  Makes {loser.name}'s yearly salary in just <span className="text-amber-400 font-bold">{timeToEarn}</span>
                 </p>
               </div>
 
-              {/* Flex Mode Stat */}
-              {winnerFlex && (
-                <div className="bg-gradient-to-r from-purple-900/30 via-purple-800/20 to-purple-900/30 rounded-lg p-2 border border-purple-500/30">
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-lg">{winnerFlex.emoji}</span>
-                    <p className="text-white text-xs text-center">
-                      <span className="text-purple-400 font-bold">{winnerFlex.quantity}</span>{' '}
-                      <span className="text-gray-300">{winnerFlex.item}</span>{' '}
-                      <span className="text-purple-400 font-bold">{winnerFlex.timeframe}</span>
-                    </p>
+              {/* The Extra Income Flex - What winner can do with the difference */}
+              <div className="bg-gradient-to-r from-emerald-900/40 via-emerald-800/20 to-emerald-900/40 rounded-lg p-3 border border-emerald-500/30">
+                <p className="text-emerald-400 text-[10px] uppercase tracking-wide text-center mb-2">
+                  💸 With just the extra <span className="font-bold">{formatCompactCurrency(extraIncome)}/yr</span>
+                </p>
+                {flexComparison ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-2xl">{flexComparison.emoji}</span>
+                    <div className="text-center">
+                      <p className="text-white text-sm">
+                        <span className="text-emerald-400 font-bold">{flexComparison.quantity}</span>{' '}
+                        {flexComparison.item}
+                      </p>
+                      <p className="text-emerald-400 text-xs font-bold">{flexComparison.timeframe}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-white text-xs text-center">
+                    {winner.name} pockets <span className="text-emerald-400 font-bold">{formatCurrency(extraBreakdown.perHour)}</span> more per hour
+                  </p>
+                )}
+                <p className="text-gray-500 text-[9px] text-center mt-2 italic">
+                  ...that {loser.name} can only dream about 😅
+                </p>
+              </div>
             </>
           )}
 
-          {/* Combined Earnings Footer */}
-          <div className="mt-3 pt-2 border-t border-amber-500/20">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <DollarSign className="h-3 w-3 text-gray-500" />
-              <span className="text-[9px] text-gray-500 uppercase tracking-wide">Combined Earnings</span>
-            </div>
-            <p className="text-center text-amber-400/80 font-mono text-[10px]">
-              {formatCurrency(combinedBreakdown.perSecond)}/sec • {formatCurrency(combinedBreakdown.perHour)}/hr
-            </p>
-          </div>
-
           {/* Branding Footer */}
-          <div className="text-center mt-2">
+          <div className="text-center mt-4 pt-2 border-t border-amber-500/20">
             <p className="text-gray-600 text-[10px]">earningsexplorer.shop</p>
           </div>
         </div>
