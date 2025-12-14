@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
@@ -21,6 +21,8 @@ const Header = () => {
     await signOut();
     navigate('/');
   };
+
+  const isPremium = accessInfo?.hasLifetimeAccess === true;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -72,9 +74,11 @@ const Header = () => {
               <p>{soundEnabled ? 'Mute sounds' : 'Enable sounds'}</p>
             </TooltipContent>
           </Tooltip>
+          
           {user ? (
             <>
-              {!accessInfo?.hasLifetimeAccess && (
+              {/* Only show upgrade button if NOT premium */}
+              {!isPremium && (
                 <Button 
                   onClick={initiatePayment}
                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
@@ -87,16 +91,26 @@ const Header = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="border-primary/50">
-                    <User className="h-4 w-4" />
-                  </Button>
+                  {isPremium ? (
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="border-primary bg-gradient-to-br from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30"
+                    >
+                      <Gem className="h-4 w-4 text-primary" />
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="icon" className="border-primary/50">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium truncate">{user.email}</p>
-                    {accessInfo?.hasLifetimeAccess ? (
+                    {isPremium ? (
                       <p className="text-xs text-primary flex items-center gap-1">
-                        <Crown className="h-3 w-3" /> Lifetime Access
+                        <Gem className="h-3 w-3" /> Lifetime VIP Access
                       </p>
                     ) : (
                       <p className="text-xs text-muted-foreground">
@@ -105,7 +119,7 @@ const Header = () => {
                     )}
                   </div>
                   <DropdownMenuSeparator />
-                  {!accessInfo?.hasLifetimeAccess && (
+                  {!isPremium && (
                     <DropdownMenuItem onClick={initiatePayment}>
                       <Crown className="h-4 w-4 mr-2" />
                       Upgrade to Unlimited
