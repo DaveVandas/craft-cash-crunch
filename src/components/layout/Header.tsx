@@ -93,21 +93,14 @@ const Header = () => {
           </Tooltip>
 
           {/* Share App Button - visible to everyone */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setInviteModalOpen(true)} 
-                className="h-9 w-9"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Share App</p>
-            </TooltipContent>
-          </Tooltip>
+          <Button 
+            variant="ghost" 
+            onClick={() => setInviteModalOpen(true)} 
+            className="h-9 px-3"
+          >
+            <Share2 className="h-4 w-4 mr-1.5" />
+            <span className="text-sm">Share</span>
+          </Button>
           
           {user ? (
             <>
