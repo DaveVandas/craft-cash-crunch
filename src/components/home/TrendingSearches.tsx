@@ -253,8 +253,14 @@ const TrendingSearches = () => {
                   <Link
                     key={`${person.name}-${index}`}
                     to={`/profile/${nameToSlug(person.name)}`}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/30 hover:from-primary/20 hover:to-primary/10 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
+                    className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/30 hover:from-primary/20 hover:to-primary/10 border border-border/50 transition-all group shrink-0 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] overflow-hidden"
                   >
+                    {/* Gold shimmer border on hover */}
+                    <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-xl border-2 border-primary/60" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                    </div>
+                    
                     {/* Avatar with shimmer effect */}
                     <div className={`relative w-11 h-11 rounded-full bg-gradient-to-br ${categoryStyles[person.category || '']?.gradient || 'from-primary to-accent'} flex items-center justify-center text-xl shrink-0 shadow-lg ring-2 ring-primary/30 overflow-hidden`}>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
