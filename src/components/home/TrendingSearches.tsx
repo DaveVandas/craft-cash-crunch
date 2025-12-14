@@ -160,47 +160,51 @@ const TrendingSearches = () => {
   return (
     <Card className="border-border/50 bg-card/50">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          Trending Now
-        </CardTitle>
-        {spotlightCategory && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <Sparkles className="h-3 w-3" />
-            Spotlight: {spotlightCategory}
-          </p>
-        )}
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Trending Now
+          </CardTitle>
+          {spotlightCategory && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              Spotlight: {spotlightCategory}
+            </p>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent>
         {loading ? (
-          <div className="space-y-2">
+          <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-10 bg-secondary/30 rounded-lg animate-pulse" />
+              <div key={i} className="h-10 md:h-12 md:flex-1 md:min-w-[180px] bg-secondary/30 rounded-lg animate-pulse" />
             ))}
           </div>
         ) : (
-          displayItems.slice(0, 5).map((person, index) => (
-            <Link
-              key={`${person.name}-${index}`}
-              to={`/profile/${nameToSlug(person.name)}`}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors group"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-muted-foreground font-mono text-sm w-4">
-                  {index + 1}
-                </span>
-                <span className="font-medium group-hover:text-primary transition-colors">
-                  {person.name}
-                </span>
-                {person.hot && (
-                  <Flame className="h-4 w-4 text-orange-500" />
-                )}
-              </div>
-              <Badge variant="secondary" className="text-xs">
-                {person.searches}
-              </Badge>
-            </Link>
-          ))
+          <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
+            {displayItems.slice(0, 5).map((person, index) => (
+              <Link
+                key={`${person.name}-${index}`}
+                to={`/profile/${nameToSlug(person.name)}`}
+                className="flex items-center justify-between md:justify-center gap-3 p-2 md:px-4 md:py-3 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group md:flex-1 md:min-w-[180px]"
+              >
+                <div className="flex items-center gap-2 md:gap-3">
+                  <span className="text-muted-foreground font-mono text-sm w-4 md:hidden">
+                    {index + 1}
+                  </span>
+                  <span className="font-medium group-hover:text-primary transition-colors text-sm md:text-base">
+                    {person.name}
+                  </span>
+                  {person.hot && (
+                    <Flame className="h-4 w-4 text-orange-500" />
+                  )}
+                </div>
+                <Badge variant="secondary" className="text-xs md:hidden">
+                  {person.searches}
+                </Badge>
+              </Link>
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>

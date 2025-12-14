@@ -51,24 +51,24 @@ const Header = () => {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           <Link 
             to="/search" 
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
           </Link>
           <Link 
             to="/compare" 
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
           >
             <GitCompareArrows className="h-4 w-4" />
             <span>Compare</span>
           </Link>
           <Link 
             to="/calculator" 
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
           >
             <Calculator className="h-4 w-4" />
             <span>Reality Check</span>
