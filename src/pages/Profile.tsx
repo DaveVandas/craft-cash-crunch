@@ -1,0 +1,66 @@
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import ProfileHero from '@/components/profile/ProfileHero';
+import EarningsTicker from '@/components/profile/EarningsTicker';
+import ComparisonGrid from '@/components/profile/ComparisonGrid';
+import { useCelebrityData } from '@/hooks/useCelebrityData';
+import { Celebrity } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const Profile = () => {
+  const { id } = useParams<{ id: string }>();
+  const { fetchCelebrity, loading } = useCelebrityData();
+  const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const name = id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      fetchCelebrity(name).then(setCelebrity);
+    }
+  }, [id, fetchCelebrity]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container py-8">
+          <Skeleton className="h-40 w-full mb-8" />
+          <Skeleton className="h-64 w-full mb-8" />
+          <Skeleton className="h-96 w-full" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!celebrity) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">Celebrity not found</h1>
+          <p className="text-muted-foreground">Try searching for someone else.</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      <main className="flex-1">
+        <ProfileHero celebrity={celebrity} />
+        <div className="container py-8 space-y-8">
+          <EarningsTicker annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
+          <ComparisonGrid annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Profile;
