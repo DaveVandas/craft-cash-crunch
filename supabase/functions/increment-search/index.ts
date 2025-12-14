@@ -38,6 +38,49 @@ serve(async (req) => {
       return errorResponse("Unauthorized");
     }
 
+    // Parse body for celebrity info (optional - for tracking trends)
+    let celebrityName: string | null = null;
+    let celebritySlug: string | null = null;
+    let category: string | null = null;
+    try {
+      const body = await req.json();
+      celebrityName = body.celebrityName || null;
+      celebritySlug = body.celebritySlug || null;
+      category = body.category || null;
+    } catch {
+      // No body or invalid JSON - that's fine
+    }
+
+    // Track search trend if celebrity info provided
+    if (celebrityName && celebritySlug) {
+      const { data: existingTrend } = await supabaseClient
+        .from("search_trends")
+        .select("id, search_count")
+        .eq("celebrity_slug", celebritySlug)
+        .maybeSingle();
+
+      if (existingTrend) {
+        await supabaseClient
+          .from("search_trends")
+          .update({
+            search_count: existingTrend.search_count + 1,
+            last_searched_at: new Date().toISOString(),
+            category: category || undefined,
+          })
+          .eq("id", existingTrend.id);
+      } else {
+        await supabaseClient
+          .from("search_trends")
+          .insert({
+            celebrity_name: celebrityName,
+            celebrity_slug: celebritySlug,
+            category: category || null,
+            search_count: 1,
+          });
+      }
+      console.log(`Tracked search trend for: ${celebrityName}`);
+    }
+
     // Get current access record
     const { data: accessData, error: fetchError } = await supabaseClient
       .from("user_access")

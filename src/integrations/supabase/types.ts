@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      search_trends: {
+        Row: {
+          category: string | null
+          celebrity_name: string
+          celebrity_slug: string
+          created_at: string
+          id: string
+          last_searched_at: string
+          search_count: number
+        }
+        Insert: {
+          category?: string | null
+          celebrity_name: string
+          celebrity_slug: string
+          created_at?: string
+          id?: string
+          last_searched_at?: string
+          search_count?: number
+        }
+        Update: {
+          category?: string | null
+          celebrity_name?: string
+          celebrity_slug?: string
+          created_at?: string
+          id?: string
+          last_searched_at?: string
+          search_count?: number
+        }
+        Relationships: []
+      }
       user_access: {
         Row: {
           created_at: string

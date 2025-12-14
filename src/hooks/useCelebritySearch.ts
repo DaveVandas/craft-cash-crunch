@@ -27,19 +27,34 @@ export const useCelebritySearch = () => {
     setError(null);
 
     try {
-      // Increment search count first (backend will no-op for lifetime access)
-      const incrementRes = await supabase.functions.invoke('increment-search');
-      if (incrementRes.data?.error) {
-        console.warn('Increment search soft error:', incrementRes.data.error);
-        // Don't block on increment errors, continue with search
-      }
-
-      // Then fetch celebrity data
+      // Fetch celebrity data first so we have the info to track
       const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
         body: { name },
       });
 
       // Handle network-level errors
+      if (fnError) {
+        const message = 'Network error. Please check your connection and try again.';
+        setError(message);
+        toast.error(message);
+        return null;
+      }
+
+      // If we got celebrity data, increment search with tracking info
+      if (data?.celebrity) {
+        const celebrity = data.celebrity as Celebrity;
+        const celebritySlug = celebrity.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        await supabase.functions.invoke('increment-search', {
+          body: {
+            celebrityName: celebrity.name,
+            celebritySlug,
+            category: celebrity.profession,
+          },
+        });
+      } else {
+        // No celebrity data, still increment search count
+        await supabase.functions.invoke('increment-search');
+      }
       if (fnError) {
         const message = 'Network error. Please check your connection and try again.';
         setError(message);
