@@ -4,7 +4,7 @@ import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Scale, TrendingUp, Clock, Swords, Crown } from 'lucide-react';
+import { Scale, TrendingUp, Clock, Crown } from 'lucide-react';
 import CompareShareCard from './CompareShareCard';
 
 const getAvatarEmoji = (profession: string) => {
@@ -104,7 +104,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
             }`}
           >
             <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary to-amber-600 shadow-lg shadow-primary/40 animate-pulse">
-              <Swords className="h-8 w-8 md:h-10 md:w-10 text-background" />
+              <Scale className="h-8 w-8 md:h-10 md:w-10 text-background" />
             </div>
           </div>
 
