@@ -6,14 +6,23 @@ import { Badge } from '@/components/ui/badge';
 import { nameToSlug } from '@/lib/validation';
 import { supabase } from '@/integrations/supabase/client';
 
-// Category to emoji mapping for avatars
-const categoryEmojis: Record<string, string> = {
-  Athletes: '🏆',
-  Musicians: '🎵',
-  'Tech Billionaires': '💻',
-  Hollywood: '🎬',
-  Influencers: '📱',
-  Historical: '👑',
+// Category to gradient mapping for avatar backgrounds
+const categoryGradients: Record<string, string> = {
+  Athletes: 'from-emerald-500 to-teal-600',
+  Musicians: 'from-purple-500 to-pink-600',
+  'Tech Billionaires': 'from-blue-500 to-cyan-600',
+  Hollywood: 'from-amber-500 to-orange-600',
+  Influencers: 'from-rose-500 to-red-600',
+  Historical: 'from-yellow-500 to-amber-600',
+};
+
+// Get initials from name
+const getInitials = (name: string): string => {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return parts[0]?.substring(0, 2).toUpperCase() || '??';
 };
 
 interface TrendingItem {
@@ -253,11 +262,11 @@ const TrendingSearches = () => {
                   <Link
                     key={`${person.name}-${index}`}
                     to={`/profile/${nameToSlug(person.name)}`}
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-secondary/40 hover:bg-primary/20 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/30 hover:from-primary/20 hover:to-primary/10 border border-border/50 hover:border-primary/50 transition-all group shrink-0 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
                   >
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-lg shrink-0">
-                      {categoryEmojis[person.category || ''] || '💰'}
+                    {/* Avatar with gradient */}
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${categoryGradients[person.category || ''] || 'from-primary to-accent'} flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-lg ring-2 ring-primary/30`}>
+                      {getInitials(person.name)}
                     </div>
                     
                     <div className="flex flex-col">
