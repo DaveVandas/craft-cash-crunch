@@ -5,7 +5,7 @@ import { getAvatarEmoji } from '@/lib/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Scale, TrendingUp, Clock, Crown } from 'lucide-react';
+import { Scale, TrendingUp, Clock, Crown, Equal } from 'lucide-react';
 import CompareShareCard from './CompareShareCard';
 
 interface CompareResultProps {
@@ -18,15 +18,17 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
   const [introPhase, setIntroPhase] = useState(0);
   
   const maxEarnings = Math.max(person1.annualEarnings, person2.annualEarnings);
+  const minEarnings = Math.min(person1.annualEarnings, person2.annualEarnings);
   const person1Percent = (person1.annualEarnings / maxEarnings) * 100;
   const person2Percent = (person2.annualEarnings / maxEarnings) * 100;
   
-  const ratio = person1.annualEarnings > person2.annualEarnings
-    ? person1.annualEarnings / person2.annualEarnings
-    : person2.annualEarnings / person1.annualEarnings;
+  // Consider it a tie if earnings are within 5% of each other
+  const isTie = minEarnings > 0 && (maxEarnings / minEarnings) < 1.05;
   
-  const richer = person1.annualEarnings > person2.annualEarnings ? person1 : person2;
-  const poorer = person1.annualEarnings > person2.annualEarnings ? person2 : person1;
+  const ratio = maxEarnings / minEarnings;
+  
+  const richer = person1.annualEarnings >= person2.annualEarnings ? person1 : person2;
+  const poorer = person1.annualEarnings >= person2.annualEarnings ? person2 : person1;
   
   const timeForRicherToEarnPoorersYearly = calculateTimeToEarn(
     poorer.annualEarnings,
@@ -73,7 +75,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                   {getAvatarEmoji(person1.profession)}
                 </AvatarFallback>
               </Avatar>
-              {person1 === richer && (
+              {!isTie && person1 === richer && (
                 <div className="absolute -top-2 -right-2">
                   <Crown className="h-8 w-8 text-primary fill-primary drop-shadow-lg" />
                 </div>
@@ -113,7 +115,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                   {getAvatarEmoji(person2.profession)}
                 </AvatarFallback>
               </Avatar>
-              {person2 === richer && (
+              {!isTie && person2 === richer && (
                 <div className="absolute -top-2 -right-2">
                   <Crown className="h-8 w-8 text-primary fill-primary drop-shadow-lg" />
                 </div>
@@ -156,7 +158,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                     <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
                     <AvatarFallback className="text-sm">{getAvatarEmoji(person1.profession)}</AvatarFallback>
                   </Avatar>
-                  {person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
+                  {!isTie && person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person1.name}</span>
                 </div>
                 <span className="text-primary font-mono">
@@ -173,7 +175,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
                     <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
                     <AvatarFallback className="text-sm">{getAvatarEmoji(person2.profession)}</AvatarFallback>
                   </Avatar>
-                  {person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
+                  {!isTie && person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
                   <span className="font-medium">{person2.name}</span>
                 </div>
                 <span className="text-primary font-mono">
@@ -186,57 +188,79 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card className="border-border/50 bg-card/50 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-primary/10 text-primary">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <span className="text-sm text-muted-foreground">Earnings Ratio</span>
+      {isTie ? (
+        /* Tie Result */
+        <Card className="border-primary/30 bg-gradient-to-br from-card to-primary/5 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <CardContent className="p-8 text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Equal className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold gradient-gold-text">It's a Draw!</span>
+              <Equal className="h-8 w-8 text-primary" />
             </div>
-            <p className="text-2xl font-bold">
-              <span className="text-primary">{richer.name}</span> makes
+            <p className="text-lg text-muted-foreground">
+              {person1.name} and {person2.name} earn approximately the same amount annually
             </p>
-            <p className="text-4xl font-bold gradient-gold-text mt-2">
-              {ratio.toFixed(1)}x
-            </p>
-            <p className="text-muted-foreground mt-2">
-              more than {poorer.name}
+            <p className="text-3xl font-bold text-primary mt-4">
+              ~{formatCompactCurrency(person1.annualEarnings)}/yr
             </p>
           </CardContent>
         </Card>
+      ) : (
+        /* Winner Result */
+        <>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="border-border/50 bg-card/50 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-full bg-primary/10 text-primary">
+                    <TrendingUp className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Earnings Ratio</span>
+                </div>
+                <p className="text-2xl font-bold">
+                  <span className="text-primary">{richer.name}</span> makes
+                </p>
+                <p className="text-4xl font-bold gradient-gold-text mt-2">
+                  {ratio.toFixed(1)}x
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  more than {poorer.name}
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card className="border-border/50 bg-card/50 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-primary/10 text-primary">
-                <Clock className="h-5 w-5" />
-              </div>
-              <span className="text-sm text-muted-foreground">Time Comparison</span>
-            </div>
-            <p className="text-lg">
-              {richer.name} earns {poorer.name}'s entire yearly salary in just...
-            </p>
-            <p className="text-4xl font-bold gradient-gold-text mt-4">
-              {timeForRicherToEarnPoorersYearly}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="border-border/50 bg-card/50 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-full bg-primary/10 text-primary">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Time Comparison</span>
+                </div>
+                <p className="text-lg">
+                  {richer.name} earns {poorer.name}'s entire yearly salary in just...
+                </p>
+                <p className="text-4xl font-bold gradient-gold-text mt-4">
+                  {timeForRicherToEarnPoorersYearly}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-      <Card className="border-primary/30 bg-gradient-to-br from-card to-primary/5 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-        <CardContent className="p-6 text-center">
-          <p className="text-lg">
-            🎯 <span className="font-bold text-primary">{richer.name}</span>{' '}
-            makes approximately{' '}
-            <span className="font-bold gradient-gold-text">
-              {formatCompactCurrency(richer.annualEarnings - poorer.annualEarnings)}
-            </span>{' '}
-            more per year than {poorer.name}
-          </p>
-        </CardContent>
-      </Card>
+          <Card className="border-primary/30 bg-gradient-to-br from-card to-primary/5 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <CardContent className="p-6 text-center">
+              <p className="text-lg">
+                🎯 <span className="font-bold text-primary">{richer.name}</span>{' '}
+                makes approximately{' '}
+                <span className="font-bold gradient-gold-text">
+                  {formatCompactCurrency(richer.annualEarnings - poorer.annualEarnings)}
+                </span>{' '}
+                more per year than {poorer.name}
+              </p>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {/* Share Card */}
       <CompareShareCard person1={person1} person2={person2} />
