@@ -53,7 +53,15 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
 
         <div className="flex flex-col md:flex-row items-start gap-8">
           <Avatar className="h-32 w-32 md:h-40 md:w-40 rounded-2xl shadow-xl shadow-primary/10 ring-2 ring-primary/30">
-            <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover rounded-2xl" />
+            <AvatarImage
+              src={celebrity.imageUrl}
+              alt={celebrity.name}
+              className="object-cover rounded-2xl"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.src = '';
+              }}
+            />
             <AvatarFallback className={cn("rounded-2xl bg-gradient-to-br text-4xl md:text-5xl", config.bgGradient)}>
               {getAvatarEmoji(celebrity.profession)}
             </AvatarFallback>
