@@ -18,6 +18,13 @@ const Footer = () => {
             Data powered by AI • For entertainment purposes
           </p>
         </div>
+        
+        <div className="mt-6 pt-4 border-t border-border/30">
+          <p className="text-xs text-muted-foreground/70 text-center max-w-2xl mx-auto">
+            Disclaimer: Earnings and net worth figures are estimates based on publicly available information and may not reflect actual values. 
+            Wealth calculations can vary significantly due to complex financial structures, investments, and undisclosed assets.
+          </p>
+        </div>
       </div>
     </footer>
   );
