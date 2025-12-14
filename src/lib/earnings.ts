@@ -167,7 +167,9 @@ export const getMostDramaticComparison = (annualEarnings: number): EnhancedCompa
     };
   });
   
-  // Sort by score and return the most dramatic
+  // Sort by score and pick randomly from top 5 most dramatic
   scored.sort((a, b) => b.score - a.score);
-  return scored[0]?.comparison || null;
+  const topCandidates = scored.slice(0, 5);
+  const randomIndex = Math.floor(Math.random() * topCandidates.length);
+  return topCandidates[randomIndex]?.comparison || null;
 };
