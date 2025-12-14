@@ -77,8 +77,8 @@ const Header = () => {
           
           {user ? (
             <>
-              {/* Only show upgrade button if NOT premium */}
-              {!isPremium && (
+              {/* Only show upgrade button if accessInfo loaded AND user is NOT premium */}
+              {accessInfo && !isPremium && (
                 <Button 
                   onClick={initiatePayment}
                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
@@ -91,7 +91,7 @@ const Header = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {isPremium ? (
+                  {accessInfo && isPremium ? (
                     <Button 
                       variant="outline" 
                       size="icon" 
@@ -119,7 +119,7 @@ const Header = () => {
                     )}
                   </div>
                   <DropdownMenuSeparator />
-                  {!isPremium && (
+                  {accessInfo && !isPremium && (
                     <DropdownMenuItem onClick={initiatePayment}>
                       <Crown className="h-4 w-4 mr-2" />
                       Upgrade to Unlimited
