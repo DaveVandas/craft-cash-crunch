@@ -11,15 +11,17 @@ interface ProfileHeroProps {
 }
 
 const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
-  const categoryEmojis: Record<string, string> = {
-    'athletes': '🏆',
-    'hollywood': '🎬',
-    'musicians': '🎵',
-    'tech-billionaires': '💻',
-    'politicians': '🏛️',
-    'influencers': '📱',
-    'historical': '📜'
+  const categoryConfig: Record<string, { emoji: string; animation: string; bgGradient: string }> = {
+    'athletes': { emoji: '🏆', animation: 'animate-bounce-wobble', bgGradient: 'from-amber-900/50 to-orange-900/50' },
+    'hollywood': { emoji: '🎬', animation: 'animate-pulse-scale', bgGradient: 'from-purple-900/50 to-pink-900/50' },
+    'musicians': { emoji: '🎵', animation: 'animate-bounce-wobble', bgGradient: 'from-pink-900/50 to-rose-900/50' },
+    'tech-billionaires': { emoji: '🚀', animation: 'animate-float', bgGradient: 'from-blue-900/50 to-indigo-900/50' },
+    'politicians': { emoji: '🏛️', animation: 'animate-wiggle', bgGradient: 'from-slate-800/50 to-zinc-900/50' },
+    'influencers': { emoji: '📱', animation: 'animate-wiggle', bgGradient: 'from-fuchsia-900/50 to-violet-900/50' },
+    'historical': { emoji: '📜', animation: 'animate-float', bgGradient: 'from-amber-900/50 to-yellow-900/50' }
   };
+
+  const config = categoryConfig[celebrity.category] || { emoji: '💰', animation: 'animate-pulse-scale', bgGradient: 'from-yellow-900/50 to-amber-900/50' };
 
   return (
     <div className="relative">
@@ -27,8 +29,13 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
       
       <div className="relative container py-12">
         <div className="flex flex-col md:flex-row items-start gap-8">
-          <div className="flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary to-card text-6xl md:text-7xl shadow-xl shadow-primary/10 animate-scale-in">
-            {categoryEmojis[celebrity.category] || '💰'}
+          <div className={cn(
+            "flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-2xl bg-gradient-to-br shadow-xl shadow-primary/10 ring-2 ring-primary/30",
+            config.bgGradient
+          )}>
+            <span className={cn("text-6xl md:text-7xl", config.animation)}>
+              {config.emoji}
+            </span>
           </div>
 
           <div className="flex-1 animate-fade-in">
