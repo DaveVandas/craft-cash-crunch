@@ -112,6 +112,9 @@ const Search = () => {
                 <Button onClick={handleUpgrade} className="bg-primary hover:bg-primary/90">
                   Unlock Unlimited Access — $4.99
                 </Button>
+                <p className="text-xs text-muted-foreground/60 mt-3">
+                  All sales final. <Link to="/terms" className="underline hover:text-muted-foreground">Terms</Link>
+                </p>
               </CardContent>
             </Card>
           )}
