@@ -6,6 +6,8 @@ import ProfileHero from '@/components/profile/ProfileHero';
 import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import ShareCard from '@/components/share/ShareCard';
+import TimeOnPageCounter from '@/components/profile/TimeOnPageCounter';
+import MoneyRain from '@/components/effects/MoneyRain';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Celebrity } from '@/lib/types';
@@ -111,9 +113,13 @@ const Profile = () => {
     );
   }
 
+  // Show money rain for billionaires
+  const isBillionaire = celebrity.annualEarnings >= 1000000000;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      {isBillionaire && <MoneyRain intensity="light" />}
       <main className="flex-1">
         <ProfileHero celebrity={celebrity} />
         <div className="container py-8 space-y-8">
@@ -122,6 +128,7 @@ const Profile = () => {
           <ShareCard celebrity={celebrity} />
         </div>
       </main>
+      <TimeOnPageCounter annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
       <Footer />
     </div>
   );
