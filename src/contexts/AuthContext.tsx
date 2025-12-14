@@ -49,12 +49,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
+      // Handle stale session - if server says we need auth, clear local state
+      if (accessData?.requiresAuth) {
+        console.warn('Session is stale, clearing local auth state');
+        setUser(null);
+        setSession(null);
+        setAccessInfo(null);
+        // Clear local storage manually since signOut might fail with stale session
+        await supabase.auth.signOut({ scope: 'local' });
+        return;
+      }
+      
       if (accessData?.error) {
         console.error('check-access returned error:', accessData.error);
         return;
       }
       
-      console.log('Access info loaded:', accessData);
       setAccessInfo(accessData as AccessInfo);
     } catch (err) {
       console.error('Error checking access:', err);
@@ -113,7 +123,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Use local scope to avoid 403 errors when server session is already invalid
+    await supabase.auth.signOut({ scope: 'local' });
+    setUser(null);
+    setSession(null);
     setAccessInfo(null);
   };
 
