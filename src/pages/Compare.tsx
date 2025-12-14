@@ -5,7 +5,7 @@ import CompareSelector from '@/components/compare/CompareSelector';
 import CompareResult from '@/components/compare/CompareResult';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
-import { GitCompareArrows } from 'lucide-react';
+import { Swords } from 'lucide-react';
 
 const Compare = () => {
   const [person1, setPerson1] = useState<Celebrity | null>(null);
@@ -33,29 +33,41 @@ const Compare = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
-              Side by <span className="gradient-gold-text">Side</span> ⚖️
+              Wealth <span className="gradient-gold-text">Showdown</span> ⚔️
             </h1>
             <p className="text-muted-foreground">
-              Compare any two people and see who's making more dough.
+              Pick your fighters and see who's stacking more cash.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
-            <CompareSelector
-              label="Person 1"
-              selected={person1}
-              onSearch={handleSearch1}
-              loading={loading}
-            />
-            <div className="hidden md:flex items-center justify-center">
-              <GitCompareArrows className="h-8 w-8 text-primary" />
+          {/* Boxing Matchup Style Layout */}
+          <div className="relative flex flex-col md:flex-row items-stretch gap-4 md:gap-0 mb-8">
+            {/* Person 1 */}
+            <div className="flex-1">
+              <CompareSelector
+                label="Challenger 1"
+                selected={person1}
+                onSearch={handleSearch1}
+                loading={loading}
+              />
             </div>
-            <CompareSelector
-              label="Person 2"
-              selected={person2}
-              onSearch={handleSearch2}
-              loading={loading}
-            />
+            
+            {/* VS Badge */}
+            <div className="flex items-center justify-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-10">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-amber-600 shadow-lg shadow-primary/30 ring-4 ring-background">
+                <Swords className="h-7 w-7 text-background" />
+              </div>
+            </div>
+            
+            {/* Person 2 */}
+            <div className="flex-1 md:pl-8">
+              <CompareSelector
+                label="Challenger 2"
+                selected={person2}
+                onSearch={handleSearch2}
+                loading={loading}
+              />
+            </div>
           </div>
 
           {person1 && person2 && (
