@@ -30,7 +30,7 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div id="share-card" className="space-y-6">
       <div 
         ref={cardRef}
         className="relative overflow-hidden rounded-xl bg-gradient-to-br from-background via-card to-primary/10 p-8 border border-primary/30"
