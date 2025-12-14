@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/layout/Header';
@@ -13,8 +13,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
-  DollarSign, TrendingUp, Clock, Activity, Crown
+  DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3
 } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
   id: string;
@@ -147,6 +148,91 @@ const Admin = () => {
     return created > weekAgo;
   }).length;
 
+  // Chart data: signups over last 14 days
+  const signupChartData = useMemo(() => {
+    const data: { date: string; signups: number; paid: number; revenue: number }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const dayUsers = users.filter((u) => {
+        const created = new Date(u.created_at);
+        return created.toISOString().split('T')[0] === dateStr;
+      });
+      
+      const paidCount = dayUsers.filter((u) => u.has_lifetime_access).length;
+      
+      data.push({
+        date: displayDate,
+        signups: dayUsers.length,
+        paid: paidCount,
+        revenue: paidCount * 4.99,
+      });
+    }
+    return data;
+  }, [users]);
+
+  // Pie chart data for user breakdown
+  const userBreakdownData = useMemo(() => [
+    { name: 'Paid Users', value: paidUsers, color: 'hsl(var(--primary))' },
+    { name: 'Free Users', value: freeUsers, color: 'hsl(var(--muted-foreground))' },
+  ], [paidUsers, freeUsers]);
+
+  // Top categories from trends
+  const categoryData = useMemo(() => {
+    const categories: Record<string, number> = {};
+    trends.forEach((t) => {
+      const cat = t.category || 'Unknown';
+      categories[cat] = (categories[cat] || 0) + t.search_count;
+    });
+    return Object.entries(categories)
+      .map(([name, searches]) => ({ name, searches }))
+      .sort((a, b) => b.searches - a.searches)
+      .slice(0, 6);
+  }, [trends]);
+
+  // CSV Export functions
+  const exportUsersCSV = () => {
+    const headers = ['Email', 'Status', 'Searches', 'Roles', 'Joined', 'Last Sign In'];
+    const rows = users.map((u) => [
+      u.email,
+      u.has_lifetime_access ? 'Lifetime' : 'Free',
+      u.search_count.toString(),
+      u.roles.join('; '),
+      u.created_at,
+      u.last_sign_in_at || 'Never',
+    ]);
+    
+    const csvContent = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+    downloadCSV(csvContent, 'users-export.csv');
+    toast.success('Users exported successfully');
+  };
+
+  const exportTrendsCSV = () => {
+    const headers = ['Celebrity', 'Category', 'Search Count', 'Last Searched'];
+    const rows = trends.map((t) => [
+      t.celebrity_name,
+      t.category || 'Unknown',
+      t.search_count.toString(),
+      t.last_searched_at,
+    ]);
+    
+    const csvContent = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+    downloadCSV(csvContent, 'search-trends-export.csv');
+    toast.success('Trends exported successfully');
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
   const handleRefresh = () => {
     fetchUsers();
     fetchTrends();
@@ -206,10 +292,16 @@ const Admin = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Monitor your app's performance and users</p>
           </div>
-          <Button onClick={handleRefresh} variant="outline" disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={exportUsersCSV} variant="outline" size="sm" disabled={loading || users.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Users
+            </Button>
+            <Button onClick={handleRefresh} variant="outline" disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Revenue & Key Stats */}
@@ -275,6 +367,92 @@ const Admin = () => {
           </Card>
         </div>
 
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Signups & Revenue Chart */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Signups & Revenue (14 days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={signupChartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                      formatter={(value: number, name: string) => {
+                        if (name === 'revenue') return [`$${value.toFixed(2)}`, 'Revenue'];
+                        return [value, name === 'signups' ? 'Signups' : 'Paid'];
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="signups" 
+                      stroke="hsl(var(--primary))" 
+                      fill="hsl(var(--primary))" 
+                      fillOpacity={0.2}
+                      name="signups"
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="paid" 
+                      stroke="hsl(var(--chart-2))" 
+                      fill="hsl(var(--chart-2))" 
+                      fillOpacity={0.3}
+                      name="paid"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Category Breakdown */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top Search Categories
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                {categoryData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis type="number" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis dataKey="name" type="category" width={80} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="searches" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground">
+                    No category data yet
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card className="border-primary/20">
@@ -327,11 +505,17 @@ const Admin = () => {
 
           <TabsContent value="users">
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle>All Users</CardTitle>
-                <CardDescription>
-                  View and manage all registered users
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>All Users</CardTitle>
+                  <CardDescription>
+                    View and manage all registered users
+                  </CardDescription>
+                </div>
+                <Button onClick={exportUsersCSV} variant="outline" size="sm" disabled={users.length === 0}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -405,11 +589,17 @@ const Admin = () => {
 
           <TabsContent value="trends">
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle>Top Searched Celebrities</CardTitle>
-                <CardDescription>
-                  Most popular celebrity searches across all users
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Top Searched Celebrities</CardTitle>
+                  <CardDescription>
+                    Most popular celebrity searches across all users
+                  </CardDescription>
+                </div>
+                <Button onClick={exportTrendsCSV} variant="outline" size="sm" disabled={trends.length === 0}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
               </CardHeader>
               <CardContent>
                 {trends.length === 0 ? (
