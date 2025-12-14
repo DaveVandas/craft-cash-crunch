@@ -88,6 +88,10 @@ export default {
         'slide-up': {
           from: { opacity: '0', transform: 'translateY(20px)' },
           to: { opacity: '1', transform: 'translateY(0)' }
+        },
+        'shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
         }
       },
       animation: {
