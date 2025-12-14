@@ -83,39 +83,39 @@ function errorResponse(message: string, code: string = 'ERROR') {
 async function fetchWikipediaImage(name: string): Promise<string | null> {
   try {
     const encodedName = encodeURIComponent(name);
-    let url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
     
-    let response = await fetch(url);
-    if (!response.ok) return null;
-    
-    let data = await response.json();
-    let pages = data.query?.pages;
+    // Always use search first for more reliable results (handles "Patrick Mahomes" → "Patrick Mahomes II")
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&srlimit=3&format=json&origin=*`;
+    const searchResponse = await fetch(searchUrl);
+    if (!searchResponse.ok) return null;
 
-    // If direct title lookup failed, try a search-based lookup
-    if (!pages || Object.keys(pages)[0] === '-1') {
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&format=json&origin=*`;
-      const searchResponse = await fetch(searchUrl);
-      if (!searchResponse.ok) return null;
+    const searchData = await searchResponse.json();
+    const searchResults = searchData?.query?.search;
+    if (!searchResults || searchResults.length === 0) return null;
 
-      const searchData = await searchResponse.json();
-      const firstResult = searchData?.query?.search?.[0];
-      if (!firstResult?.title) return null;
+    // Try each search result until we find one with an image
+    for (const result of searchResults) {
+      const title = result?.title;
+      if (!title) continue;
 
-      const searchTitle = encodeURIComponent(firstResult.title);
-      url = `https://en.wikipedia.org/w/api.php?action=query&titles=${searchTitle}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
-      response = await fetch(url);
-      if (!response.ok) return null;
-      data = await response.json();
-      pages = data.query?.pages;
-      if (!pages) return null;
+      const imageUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
+      const imageResponse = await fetch(imageUrl);
+      if (!imageResponse.ok) continue;
+
+      const imageData = await imageResponse.json();
+      const pages = imageData.query?.pages;
+      if (!pages) continue;
+
+      const pageId = Object.keys(pages)[0];
+      if (pageId === '-1') continue;
+
+      const thumbnailUrl = pages[pageId]?.thumbnail?.source;
+      if (thumbnailUrl) {
+        return thumbnailUrl;
+      }
     }
-    
-    // Get the first page result
-    const pageId = Object.keys(pages)[0];
-    if (pageId === '-1') return null; // Page not found
-    
-    const imageUrl = pages[pageId]?.thumbnail?.source;
-    return imageUrl || null;
+
+    return null;
   } catch (error) {
     console.error('Wikipedia image fetch error:', error);
     return null;
