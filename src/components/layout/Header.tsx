@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2 } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,6 +91,23 @@ const Header = () => {
               <p>{soundEnabled ? 'Mute sounds' : 'Enable sounds'}</p>
             </TooltipContent>
           </Tooltip>
+
+          {/* Share App Button - visible to everyone */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setInviteModalOpen(true)} 
+                className="h-9 w-9"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Share App</p>
+            </TooltipContent>
+          </Tooltip>
           
           {user ? (
             <>
@@ -159,7 +176,6 @@ const Header = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
             </>
           ) : (
             <Link to="/auth">
@@ -170,6 +186,9 @@ const Header = () => {
             </Link>
           )}
         </div>
+        
+        {/* Modal outside user-only block so header share icon works for everyone */}
+        <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
       </div>
     </header>
   );
