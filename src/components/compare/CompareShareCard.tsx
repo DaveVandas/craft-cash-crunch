@@ -1,12 +1,14 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, generateComparisons } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Crown, Trophy, Equal } from 'lucide-react';
+import { Download, Share2, Crown, Trophy, Equal, Flame } from 'lucide-react';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface CompareShareCardProps {
   person1: Celebrity;
@@ -15,6 +17,7 @@ interface CompareShareCardProps {
 
 const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [flexMode, setFlexMode] = useState(false);
 
   const maxEarnings = Math.max(person1.annualEarnings, person2.annualEarnings);
   const minEarnings = Math.min(person1.annualEarnings, person2.annualEarnings);
@@ -35,10 +38,22 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   
   // Get what the winner can buy with just the EXTRA income
   const extraComparisons = generateComparisons(extraIncome);
-  // Pick the most impressive one for the flex
-  const flexComparison = extraComparisons.find(c => 
-    c.item.includes('Private Jet') || c.item.includes('Superyacht') || c.item.includes('Bugatti') || c.item.includes('Mansion')
+  
+  // Pick different comparisons for normal vs flex mode
+  const normalFlex = extraComparisons.find(c => 
+    c.item.includes('Lamborghini') || c.item.includes('Rolex') || c.item.includes('Ferrari')
   ) || extraComparisons.find(c => c.quantity >= 1 && c.quantity <= 50) || extraComparisons[0];
+  
+  // For flex mode, get multiple dramatic comparisons
+  const flexComparisons = extraComparisons
+    .filter(c => c.quantity >= 1)
+    .sort((a, b) => {
+      // Prioritize expensive items with reasonable quantities
+      const priceA = a.item.includes('Jet') ? 5 : a.item.includes('Yacht') ? 4 : a.item.includes('Bugatti') ? 3 : 1;
+      const priceB = b.item.includes('Jet') ? 5 : b.item.includes('Yacht') ? 4 : b.item.includes('Bugatti') ? 3 : 1;
+      return priceB - priceA;
+    })
+    .slice(0, 3);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -51,7 +66,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
       });
       
       const link = document.createElement('a');
-      link.download = `wealth-showdown-${person1.name.replace(/\s+/g, '-')}-vs-${person2.name.replace(/\s+/g, '-')}.png`;
+      link.download = `wealth-showdown-${flexMode ? 'flex-' : ''}${person1.name.replace(/\s+/g, '-')}-vs-${person2.name.replace(/\s+/g, '-')}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       
@@ -62,13 +77,17 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
   };
 
   const handleShare = async () => {
-    const flexText = flexComparison 
-      ? `${flexComparison.emoji} With just the EXTRA income, ${winner.name} buys ${flexComparison.quantity} ${flexComparison.item} ${flexComparison.timeframe}` 
-      : '';
+    const flexText = flexMode && flexComparisons.length > 0
+      ? flexComparisons.map(c => `${c.emoji} ${c.quantity} ${c.item} ${c.timeframe}`).join('\n')
+      : normalFlex 
+        ? `${normalFlex.emoji} ${normalFlex.quantity} ${normalFlex.item} ${normalFlex.timeframe}` 
+        : '';
     
     const text = isTie
       ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings at earningsexplorer.shop`
-      : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
+      : flexMode
+        ? `🔥 FLEX MODE: ${winner.name} vs ${loser.name}\n\n👑 ${winner.name} DOMINATES\n💰 Earns ${ratio.toFixed(1)}x more\n💸 Extra: ${formatCompactCurrency(extraIncome)}/yr\n\nWith just the EXTRA income:\n${flexText}\n\n...while ${loser.name} watches 😅\n\nearningsexplorer.shop`
+        : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
 
     const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
 
@@ -89,7 +108,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
         const file = new File([blob], 'wealth-showdown.png', { type: 'image/png' });
         const shareData: ShareData & { files?: File[] } = {
-          title: 'Wealth Showdown',
+          title: flexMode ? 'Wealth Showdown - FLEX MODE' : 'Wealth Showdown',
           text,
           files: [file],
         };
@@ -133,21 +152,53 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Flex Mode Toggle */}
+      {!isTie && (
+        <div className="flex items-center justify-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50">
+          <Label htmlFor="flex-mode" className="text-sm text-muted-foreground cursor-pointer">
+            Standard
+          </Label>
+          <Switch 
+            id="flex-mode" 
+            checked={flexMode} 
+            onCheckedChange={setFlexMode}
+          />
+          <Label htmlFor="flex-mode" className={`text-sm cursor-pointer flex items-center gap-1 ${flexMode ? 'text-orange-400 font-semibold' : 'text-muted-foreground'}`}>
+            <Flame className={`h-4 w-4 ${flexMode ? 'text-orange-400' : ''}`} />
+            Flex Mode
+          </Label>
+        </div>
+      )}
+
       {/* Shareable Card */}
       <div 
         ref={cardRef}
         className="relative overflow-hidden rounded-2xl p-1"
         style={{
-          background: 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
+          background: flexMode 
+            ? 'linear-gradient(135deg, #f97316, #ea580c, #f97316, #c2410c)' 
+            : 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
         }}
       >
         <div className="rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-5">
           {/* Header */}
           <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-xl">💎</span>
-            <span className="font-serif text-base font-bold text-amber-400">
-              Wealth Showdown
-            </span>
+            {flexMode ? (
+              <>
+                <Flame className="h-5 w-5 text-orange-400" />
+                <span className="font-serif text-base font-bold text-orange-400">
+                  FLEX MODE
+                </span>
+                <Flame className="h-5 w-5 text-orange-400" />
+              </>
+            ) : (
+              <>
+                <span className="text-xl">💎</span>
+                <span className="font-serif text-base font-bold text-amber-400">
+                  Wealth Showdown
+                </span>
+              </>
+            )}
           </div>
 
           {/* VS Layout */}
@@ -155,27 +206,27 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             {/* Person 1 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className="h-16 w-16 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
                   <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                  <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                  <AvatarFallback className={`text-2xl bg-gradient-to-br ${flexMode ? 'from-orange-900/50 to-orange-800/30' : 'from-amber-900/50 to-amber-800/30'}`}>
                     {person1.emoji || getAvatarEmoji(person1.profession)}
                   </AvatarFallback>
                 </Avatar>
                 {!isTie && person1 === winner && (
                   <div className="absolute -top-2 -right-2">
-                    <Crown className="h-6 w-6 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                    <Crown className={`h-6 w-6 drop-shadow-lg ${flexMode ? 'text-orange-400 fill-orange-400' : 'text-amber-400 fill-amber-400'}`} />
                   </div>
                 )}
               </div>
               <p className="font-bold text-white mt-2 text-xs truncate max-w-[90px] mx-auto">{person1.name}</p>
-              <p className="text-[10px] text-amber-400 font-mono">
+              <p className={`text-[10px] font-mono ${flexMode ? 'text-orange-400' : 'text-amber-400'}`}>
                 {formatCompactCurrency(person1.annualEarnings)}/yr
               </p>
             </div>
 
             {/* VS */}
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${flexMode ? 'bg-gradient-to-br from-orange-500 to-orange-700' : 'bg-gradient-to-br from-amber-500 to-amber-700'}`}>
                 <span className="text-black font-bold text-xs">VS</span>
               </div>
             </div>
@@ -183,20 +234,20 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             {/* Person 2 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className="h-16 w-16 mx-auto ring-2 ring-amber-500/50 shadow-lg">
+                <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
                   <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                  <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-900/50 to-amber-800/30">
+                  <AvatarFallback className={`text-2xl bg-gradient-to-br ${flexMode ? 'from-orange-900/50 to-orange-800/30' : 'from-amber-900/50 to-amber-800/30'}`}>
                     {person2.emoji || getAvatarEmoji(person2.profession)}
                   </AvatarFallback>
                 </Avatar>
                 {!isTie && person2 === winner && (
                   <div className="absolute -top-2 -right-2">
-                    <Crown className="h-6 w-6 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                    <Crown className={`h-6 w-6 drop-shadow-lg ${flexMode ? 'text-orange-400 fill-orange-400' : 'text-amber-400 fill-amber-400'}`} />
                   </div>
                 )}
               </div>
               <p className="font-bold text-white mt-2 text-xs truncate max-w-[90px] mx-auto">{person2.name}</p>
-              <p className="text-[10px] text-amber-400 font-mono">
+              <p className={`text-[10px] font-mono ${flexMode ? 'text-orange-400' : 'text-amber-400'}`}>
                 {formatCompactCurrency(person2.annualEarnings)}/yr
               </p>
             </div>
@@ -214,7 +265,53 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
                 Both earn approximately <span className="text-amber-400 font-bold">{formatCompactCurrency(person1.annualEarnings)}/yr</span>
               </p>
             </div>
+          ) : flexMode ? (
+            /* FLEX MODE Content */
+            <>
+              {/* Winner Declaration - More Aggressive */}
+              <div className="bg-gradient-to-r from-orange-900/40 via-orange-800/20 to-orange-900/40 rounded-lg p-3 border border-orange-500/40 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="h-5 w-5 text-orange-400" />
+                  <span className="text-orange-400 font-bold text-base">{winner.name}</span>
+                  <Trophy className="h-5 w-5 text-orange-400" />
+                </div>
+                <p className="text-white text-center text-sm font-bold">
+                  DOMINATES by <span className="text-orange-400">{ratio.toFixed(1)}x</span>
+                </p>
+              </div>
+
+              {/* Multiple Flex Stats */}
+              <div className="bg-gradient-to-r from-orange-900/30 via-red-900/20 to-orange-900/30 rounded-lg p-3 border border-orange-500/30">
+                <p className="text-orange-400 text-[10px] uppercase tracking-wide text-center mb-3 font-bold">
+                  🔥 With the extra <span className="text-white">{formatCompactCurrency(extraIncome)}/yr</span> 🔥
+                </p>
+                
+                <div className="space-y-2">
+                  {flexComparisons.length > 0 ? (
+                    flexComparisons.map((comp, i) => (
+                      <div key={i} className="flex items-center justify-center gap-2 bg-black/30 rounded-md p-2">
+                        <span className="text-xl">{comp.emoji}</span>
+                        <p className="text-white text-xs">
+                          <span className="text-orange-400 font-bold">{comp.quantity}</span>{' '}
+                          {comp.item}{' '}
+                          <span className="text-orange-400 font-bold">{comp.timeframe}</span>
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-white text-xs text-center">
+                      {winner.name} pockets <span className="text-orange-400 font-bold">{formatCurrency(extraBreakdown.perHour)}</span> more per hour
+                    </p>
+                  )}
+                </div>
+                
+                <p className="text-gray-400 text-[10px] text-center mt-3 italic">
+                  ...while {loser.name} watches from the sidelines 💀
+                </p>
+              </div>
+            </>
           ) : (
+            /* Standard Mode Content */
             <>
               {/* Winner Declaration */}
               <div className="bg-gradient-to-r from-amber-900/30 via-amber-800/20 to-amber-900/30 rounded-lg p-3 border border-amber-500/30 mb-3">
@@ -231,20 +328,20 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
                 </p>
               </div>
 
-              {/* The Extra Income Flex - What winner can do with the difference */}
+              {/* The Extra Income Flex */}
               <div className="bg-gradient-to-r from-emerald-900/40 via-emerald-800/20 to-emerald-900/40 rounded-lg p-3 border border-emerald-500/30">
                 <p className="text-emerald-400 text-[10px] uppercase tracking-wide text-center mb-2">
                   💸 With just the extra <span className="font-bold">{formatCompactCurrency(extraIncome)}/yr</span>
                 </p>
-                {flexComparison ? (
+                {normalFlex ? (
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl">{flexComparison.emoji}</span>
+                    <span className="text-2xl">{normalFlex.emoji}</span>
                     <div className="text-center">
                       <p className="text-white text-sm">
-                        <span className="text-emerald-400 font-bold">{flexComparison.quantity}</span>{' '}
-                        {flexComparison.item}
+                        <span className="text-emerald-400 font-bold">{normalFlex.quantity}</span>{' '}
+                        {normalFlex.item}
                       </p>
-                      <p className="text-emerald-400 text-xs font-bold">{flexComparison.timeframe}</p>
+                      <p className="text-emerald-400 text-xs font-bold">{normalFlex.timeframe}</p>
                     </div>
                   </div>
                 ) : (
@@ -272,7 +369,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
           <Download className="h-4 w-4 mr-2" />
           Download
         </Button>
-        <Button onClick={handleShare} className="flex-1 bg-gradient-to-r from-primary to-primary/80">
+        <Button onClick={handleShare} className={`flex-1 ${flexMode ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' : 'bg-gradient-to-r from-primary to-primary/80'}`}>
           <Share2 className="h-4 w-4 mr-2" />
           Share
         </Button>
