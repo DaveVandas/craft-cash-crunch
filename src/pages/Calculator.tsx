@@ -18,6 +18,23 @@ const celebrities = [
 const Calculator = () => {
   const [salary, setSalary] = useState(0);
   const [selectedCeleb, setSelectedCeleb] = useState(celebrities[0]);
+  const [showResults, setShowResults] = useState(false);
+
+  const handleCompare = () => {
+    if (salary > 0) {
+      setShowResults(true);
+    }
+  };
+
+  const handleSalaryChange = (newSalary: number) => {
+    setSalary(newSalary);
+    setShowResults(false); // Reset results when salary changes
+  };
+
+  const handleCelebChange = (celeb: typeof celebrities[0]) => {
+    setSelectedCeleb(celeb);
+    setShowResults(false); // Reset results when celebrity changes
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -34,7 +51,7 @@ const Calculator = () => {
           </div>
 
           <div className="space-y-6">
-            <SalaryInput onSalaryChange={setSalary} currentSalary={salary} />
+            <SalaryInput onSalaryChange={handleSalaryChange} currentSalary={salary} />
 
             <Card className="border-border/50 bg-card/50">
               <CardHeader>
@@ -47,7 +64,7 @@ const Calculator = () => {
                       key={celeb.name}
                       variant={selectedCeleb.name === celeb.name ? "default" : "outline"}
                       className="h-auto py-3 flex-col"
-                      onClick={() => setSelectedCeleb(celeb)}
+                      onClick={() => handleCelebChange(celeb)}
                     >
                       <span className="text-xl mb-1">{celeb.emoji}</span>
                       <span className="text-xs">{celeb.name}</span>
@@ -57,11 +74,22 @@ const Calculator = () => {
               </CardContent>
             </Card>
 
-            <RealityCheckResult
-              userSalary={salary}
-              celebrityName={selectedCeleb.name}
-              celebrityAnnualEarnings={selectedCeleb.earnings}
-            />
+            {/* Compare Button */}
+            <Button 
+              onClick={handleCompare}
+              disabled={salary <= 0}
+              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+            >
+              🔍 Compare My Salary
+            </Button>
+
+            {showResults && (
+              <RealityCheckResult
+                userSalary={salary}
+                celebrityName={selectedCeleb.name}
+                celebrityAnnualEarnings={selectedCeleb.earnings}
+              />
+            )}
           </div>
         </div>
       </main>
