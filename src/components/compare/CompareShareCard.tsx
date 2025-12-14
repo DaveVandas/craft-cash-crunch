@@ -278,6 +278,22 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
                 <p className="text-white text-center text-sm font-bold">
                   DOMINATES by <span className="text-orange-400">{ratio.toFixed(1)}x</span>
                 </p>
+                
+                {/* Key Stats Row */}
+                <div className="flex justify-center gap-4 mt-2 pt-2 border-t border-orange-500/30">
+                  <div className="text-center">
+                    <p className="text-orange-400 text-[10px] uppercase">Net Worth</p>
+                    <p className="text-white text-sm font-bold">{formatCompactCurrency(winner.netWorth)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-orange-400 text-[10px] uppercase">Annual</p>
+                    <p className="text-white text-sm font-bold">{formatCompactCurrency(winner.annualEarnings)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-orange-400 text-[10px] uppercase">Per Hour</p>
+                    <p className="text-white text-sm font-bold">{formatCurrency(calculateEarningsBreakdown(winner.annualEarnings).perHour)}</p>
+                  </div>
+                </div>
               </div>
 
               {/* Multiple Flex Stats */}
