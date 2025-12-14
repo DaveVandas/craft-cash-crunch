@@ -1,21 +1,13 @@
 import { useRef, useState } from 'react';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons } from '@/lib/earnings';
+import { getAvatarEmoji } from '@/lib/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Share2, DollarSign, Clock, TrendingUp, Zap, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
-
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-};
 
 // Custom social icons
 const TwitterIcon = () => (
@@ -248,8 +240,8 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
             <div className="flex justify-center mb-3">
               <Avatar className="h-20 w-20 ring-2 ring-amber-500/50 shadow-lg">
                 <AvatarImage src={celebrity.imageUrl} alt={celebrity.name} className="object-cover" />
-                <AvatarFallback className="bg-gradient-to-br from-amber-900/50 to-amber-800/50 text-2xl font-bold text-amber-200">
-                  {getInitials(celebrity.name)}
+                <AvatarFallback className="bg-gradient-to-br from-amber-900/50 to-amber-800/50 text-3xl text-amber-200">
+                  {getAvatarEmoji(celebrity.profession)}
                 </AvatarFallback>
               </Avatar>
             </div>

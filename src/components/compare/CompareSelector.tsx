@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Celebrity } from '@/lib/types';
+import { getAvatarEmoji } from '@/lib/avatar';
 
 interface CompareSelectorProps {
   label: string;
@@ -12,17 +13,6 @@ interface CompareSelectorProps {
   onSearch: (query: string) => Promise<Celebrity | null>;
   loading: boolean;
 }
-
-const getAvatarEmoji = (profession: string) => {
-  const lower = profession.toLowerCase();
-  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
-  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
-  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
-  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
-  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
-  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
-  return '💰';
-};
 
 const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelectorProps) => {
   const [query, setQuery] = useState('');

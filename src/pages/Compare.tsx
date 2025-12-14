@@ -4,22 +4,12 @@ import Footer from '@/components/layout/Footer';
 import CompareResult from '@/components/compare/CompareResult';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
+import { getAvatarEmoji } from '@/lib/avatar';
 import { Scale, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-
-const getAvatarEmoji = (profession: string) => {
-  const lower = profession.toLowerCase();
-  if (lower.includes('athlete') || lower.includes('player') || lower.includes('sport')) return '🏆';
-  if (lower.includes('actor') || lower.includes('actress') || lower.includes('hollywood')) return '🎬';
-  if (lower.includes('musician') || lower.includes('singer') || lower.includes('artist')) return '🎵';
-  if (lower.includes('tech') || lower.includes('ceo') || lower.includes('founder')) return '💻';
-  if (lower.includes('politician') || lower.includes('president')) return '🏛️';
-  if (lower.includes('influencer') || lower.includes('youtuber') || lower.includes('tiktok')) return '📱';
-  return '💰';
-};
 
 const Compare = () => {
   const [query1, setQuery1] = useState('');
