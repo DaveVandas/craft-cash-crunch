@@ -2,7 +2,17 @@ import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, calculateTimeToEarn } from '@/lib/earnings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Scale, TrendingUp, Clock } from 'lucide-react';
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+};
 
 interface CompareResultProps {
   person1: Celebrity;
@@ -39,7 +49,13 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">{person1.name}</span>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
+                    <AvatarFallback className="text-xs">{getInitials(person1.name)}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{person1.name}</span>
+                </div>
                 <span className="text-primary font-mono">
                   {formatCompactCurrency(person1.annualEarnings)}/yr
                 </span>
@@ -49,7 +65,13 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
             
             <div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">{person2.name}</span>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
+                    <AvatarFallback className="text-xs">{getInitials(person2.name)}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{person2.name}</span>
+                </div>
                 <span className="text-primary font-mono">
                   {formatCompactCurrency(person2.annualEarnings)}/yr
                 </span>

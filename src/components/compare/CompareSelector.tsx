@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Celebrity } from '@/lib/types';
 
 interface CompareSelectorProps {
@@ -11,6 +12,15 @@ interface CompareSelectorProps {
   onSearch: (query: string) => Promise<Celebrity | null>;
   loading: boolean;
 }
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+};
 
 const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelectorProps) => {
   const [query, setQuery] = useState('');
@@ -37,9 +47,12 @@ const CompareSelector = ({ label, selected, onSearch, loading }: CompareSelector
             </Button>
           </div>
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-lg bg-secondary flex items-center justify-center text-3xl">
-              💰
-            </div>
+            <Avatar className="h-16 w-16 rounded-lg">
+              <AvatarImage src={selected.imageUrl} alt={selected.name} className="object-cover rounded-lg" />
+              <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 text-lg font-bold">
+                {getInitials(selected.name)}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <h3 className="font-semibold text-lg">{selected.name}</h3>
               <p className="text-sm text-muted-foreground">{selected.profession}</p>
