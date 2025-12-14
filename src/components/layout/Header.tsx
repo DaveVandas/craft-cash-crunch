@@ -91,7 +91,7 @@ const Header = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {accessInfo && isPremium ? (
+                  {isPremium ? (
                     <Button 
                       variant="outline" 
                       size="icon" 
