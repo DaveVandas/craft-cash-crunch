@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import ProfileHero from '@/components/profile/ProfileHero';
 import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
+import ShareCard from '@/components/share/ShareCard';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
 import { slugToName } from '@/lib/validation';
@@ -80,6 +81,7 @@ const Profile = () => {
         <div className="container py-8 space-y-8">
           <EarningsTicker annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
           <ComparisonGrid annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
+          <ShareCard celebrity={celebrity} />
         </div>
       </main>
       <Footer />

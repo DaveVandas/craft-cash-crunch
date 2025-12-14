@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
 import Compare from "./pages/Compare";
 import Search from "./pages/Search";
+import Category from "./pages/Category";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/category/:id" element={<Category />} />
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/search" element={<Search />} />
