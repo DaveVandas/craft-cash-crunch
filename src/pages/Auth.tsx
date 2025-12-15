@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift } from 'lucide-react';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Please enter a valid email address');
@@ -17,6 +17,8 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const showReferralInfo = searchParams.get('showReferral') === 'true';
   const { user, signIn, signUp, resetPassword, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -334,6 +336,19 @@ const Auth = () => {
                     </form>
                   </TabsContent>
                 </Tabs>
+
+                {showReferralInfo && (
+                  <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Gift className="h-5 w-5 text-primary" />
+                      <span className="font-semibold text-primary">Earn Free Lifetime Access!</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sign up now and invite 3 friends to get <span className="text-primary font-medium">unlimited access for free</span>. 
+                      Share your unique referral link after creating your account.
+                    </p>
+                  </div>
+                )}
 
                 <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/10">
                   <p className="text-sm text-center">
