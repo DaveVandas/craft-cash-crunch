@@ -29,25 +29,20 @@ const DailyCelebritySpotlight = () => {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    // Check if already dismissed today
-    const lastDismissed = localStorage.getItem('spotlight_dismissed');
-    if (lastDismissed) {
-      const dismissedDate = new Date(lastDismissed);
-      const today = new Date();
-      if (dismissedDate.toDateString() === today.toDateString()) {
-        setDismissed(true);
-        return;
-      }
+    // Check if already dismissed this session
+    const dismissed = sessionStorage.getItem('spotlight_dismissed');
+    if (dismissed === 'true') {
+      setDismissed(true);
+      return;
     }
 
-    // Select celebrity based on day of year for consistency
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    const selectedIndex = dayOfYear % spotlightCelebrities.length;
-    setSpotlight(spotlightCelebrities[selectedIndex]);
+    // Select random celebrity on each page load
+    const randomIndex = Math.floor(Math.random() * spotlightCelebrities.length);
+    setSpotlight(spotlightCelebrities[randomIndex]);
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem('spotlight_dismissed', new Date().toISOString());
+    sessionStorage.setItem('spotlight_dismissed', 'true');
     setDismissed(true);
   };
 
@@ -75,7 +70,7 @@ const DailyCelebritySpotlight = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-medium text-primary uppercase tracking-wide">
-                Today's Spotlight
+                Featured
               </span>
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-xs text-muted-foreground">{spotlight.category}</span>
