@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2, Heart, Gift } from 'lucide-react';
-import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart } from 'lucide-react';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,7 +23,6 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -96,15 +94,6 @@ const Header = () => {
             </TooltipContent>
           </Tooltip>
 
-          {/* Share App Button - visible to everyone */}
-          <Button 
-            variant="ghost" 
-            onClick={() => setInviteModalOpen(true)} 
-            className="h-9 px-3"
-          >
-            <Share2 className="h-4 w-4 mr-1.5" />
-            <span className="text-sm">Share</span>
-          </Button>
           
           {user ? (
             <>
@@ -169,10 +158,6 @@ const Header = () => {
                       Upgrade to Unlimited
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => setInviteModalOpen(true)}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Invite Friends
-                  </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Heart className="h-4 w-4 mr-2" />
@@ -191,26 +176,15 @@ const Header = () => {
               </DropdownMenu>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/auth?showReferral=true">
-                <Button variant="ghost" className="text-primary hover:text-primary hover:bg-primary/10">
-                  <Gift className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">Earn Free Access</span>
-                  <span className="sm:hidden">Free</span>
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Sign In</span>
-                </Button>
-              </Link>
-            </div>
+            <Link to="/auth">
+              <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+                <LogIn className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Button>
+            </Link>
           )}
         </div>
         
-        {/* Modal outside user-only block so header share icon works for everyone */}
-        <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
       </div>
     </header>
   );
