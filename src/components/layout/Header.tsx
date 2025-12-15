@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2 } from 'lucide-react';
+import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,7 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -94,7 +96,16 @@ const Header = () => {
             </TooltipContent>
           </Tooltip>
 
-          
+          {/* Share App Button */}
+          <Button 
+            variant="ghost" 
+            onClick={() => setInviteModalOpen(true)} 
+            className="h-9 px-3"
+          >
+            <Share2 className="h-4 w-4 mr-1.5" />
+            <span className="text-sm hidden sm:inline">Share</span>
+          </Button>
+
           {user ? (
             <>
               {/* Only show upgrade button if accessInfo loaded AND user is NOT premium */}
@@ -185,6 +196,7 @@ const Header = () => {
           )}
         </div>
         
+        <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
       </div>
     </header>
   );
