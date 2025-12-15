@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TrendingUp, Users } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const actionPhrases = [
   'just searched for',
@@ -12,15 +13,19 @@ const actionPhrases = [
 
 const SocialProofNotifications = () => {
   const [isActive, setIsActive] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
+    // Only show to non-logged-in users
+    if (user) return;
+
     // Start after a 10-second delay
     const startTimer = setTimeout(() => {
       setIsActive(true);
     }, 10000);
 
     return () => clearTimeout(startTimer);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!isActive) return;
