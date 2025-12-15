@@ -29,7 +29,7 @@ const Index = () => {
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Mind-blowing comparisons that make celebrity earnings tangible. 
-                Elon Musk earns your yearly salary before his morning coffee.
+                Taylor Swift makes more in 10 minutes than most earn in a year. Find out.
               </p>
             </div>
 
