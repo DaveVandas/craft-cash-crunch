@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Flame, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,6 +121,36 @@ const TrendingSearches = () => {
   const [spotlightCategory, setSpotlightCategory] = useState<string>('');
   const [spotlightItems, setSpotlightItems] = useState<TrendingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto-scroll effect for desktop
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || loading || isPaused) return;
+
+    const scrollSpeed = 1; // pixels per frame
+    let animationId: number;
+
+    const scroll = () => {
+      if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft += scrollSpeed;
+      }
+      animationId = requestAnimationFrame(scroll);
+    };
+
+    // Start scrolling after a short delay
+    const timeoutId = setTimeout(() => {
+      animationId = requestAnimationFrame(scroll);
+    }, 2000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      cancelAnimationFrame(animationId);
+    };
+  }, [loading, isPaused]);
 
   useEffect(() => {
     // Rotate category based on current hour
@@ -242,7 +272,12 @@ const TrendingSearches = () => {
             <span className="font-semibold text-sm whitespace-nowrap">Trending Now</span>
           </div>
           
-          <div className="flex-1 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-secondary/30 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-primary/60">
+          <div 
+            ref={scrollContainerRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            className="flex-1 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-secondary/30 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-primary/60"
+          >
             <div className="flex items-center gap-3">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
