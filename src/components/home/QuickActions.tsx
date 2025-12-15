@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Share2 } from 'lucide-react';
+import { Calculator, GitCompareArrows, Share2, Brain } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const actions = [
@@ -23,6 +23,13 @@ const actions = [
     description: 'Generate shareable wealth graphics',
     href: '/share',
     color: 'text-pink-400'
+  },
+  {
+    icon: Brain,
+    title: 'Wealth Quiz',
+    description: 'Test your knowledge of celebrity earnings',
+    href: '/quiz',
+    color: 'text-purple-400'
   }
 ];
 

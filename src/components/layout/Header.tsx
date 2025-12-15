@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2, Heart } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2, Heart, Gift } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
@@ -169,6 +169,10 @@ const Header = () => {
                       Upgrade to Unlimited
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={() => navigate('/referral')}>
+                    <Gift className="h-4 w-4 mr-2" />
+                    Earn Free Access
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setInviteModalOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Invite Friends

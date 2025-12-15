@@ -19,6 +19,8 @@ import Admin from "./pages/Admin";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Quiz from "./pages/Quiz";
+import Referral from "./pages/Referral";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/referral" element={<Referral />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
