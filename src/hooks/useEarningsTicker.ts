@@ -6,7 +6,7 @@ interface UseEarningsTickerOptions {
   updateInterval?: number;
 }
 
-export const useEarningsTicker = ({ annualEarnings, updateInterval = 10000 }: UseEarningsTickerOptions) => {
+export const useEarningsTicker = ({ annualEarnings, updateInterval = 100 }: UseEarningsTickerOptions) => {
   const breakdown = calculateEarningsBreakdown(annualEarnings);
   const [currentEarnings, setCurrentEarnings] = useState(0);
   const [startTime] = useState(() => Date.now());
