@@ -62,6 +62,39 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_email: string
+          referred_user_id: string | null
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_email: string
+          referred_user_id?: string | null
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_email?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       search_trends: {
         Row: {
           category: string | null
@@ -97,6 +130,7 @@ export type Database = {
           created_at: string
           has_lifetime_access: boolean
           id: string
+          referred_by_code: string | null
           search_count: number
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
@@ -107,6 +141,7 @@ export type Database = {
           created_at?: string
           has_lifetime_access?: boolean
           id?: string
+          referred_by_code?: string | null
           search_count?: number
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
@@ -117,6 +152,7 @@ export type Database = {
           created_at?: string
           has_lifetime_access?: boolean
           id?: string
+          referred_by_code?: string | null
           search_count?: number
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
