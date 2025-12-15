@@ -169,10 +169,6 @@ const Header = () => {
                       Upgrade to Unlimited
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => navigate('/referral')}>
-                    <Gift className="h-4 w-4 mr-2" />
-                    Earn Free Access
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setInviteModalOpen(true)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Invite Friends
@@ -196,7 +192,7 @@ const Header = () => {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Link to="/referral">
+              <Link to="/auth?showReferral=true">
                 <Button variant="ghost" className="text-primary hover:text-primary hover:bg-primary/10">
                   <Gift className="h-4 w-4 mr-1.5" />
                   <span className="hidden sm:inline">Earn Free Access</span>
