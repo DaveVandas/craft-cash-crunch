@@ -17,7 +17,10 @@ const SocialProofNotifications = () => {
 
   useEffect(() => {
     // Only show to non-logged-in users
-    if (user) return;
+    if (user) {
+      setIsActive(false);
+      return;
+    }
 
     // Start after a 10-second delay
     const startTimer = setTimeout(() => {
