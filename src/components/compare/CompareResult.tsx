@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Scale, TrendingUp, Clock, Crown, Equal } from 'lucide-react';
 import CompareShareCard from './CompareShareCard';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
 
 interface CompareResultProps {
   person1: Celebrity;
@@ -147,11 +148,15 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
   return (
     <div className="space-y-6 animate-fade-in">
       <Card className="border-border/50 bg-card/50">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-primary" />
             Earnings Comparison
           </CardTitle>
+          <FavoriteButton 
+            content={{ type: 'comparison', person1, person2 }} 
+            size="sm"
+          />
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">

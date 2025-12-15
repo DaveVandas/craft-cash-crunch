@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CompareResult from '@/components/compare/CompareResult';
@@ -12,11 +13,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const Compare = () => {
+  const location = useLocation();
   const [query1, setQuery1] = useState('');
   const [query2, setQuery2] = useState('');
   const [person1, setPerson1] = useState<Celebrity | null>(null);
   const [person2, setPerson2] = useState<Celebrity | null>(null);
   const { fetchCelebrity, loading } = useCelebrityData();
+
+  // Handle navigation from favorites with pre-loaded data
+  useEffect(() => {
+    if (location.state?.person1 && location.state?.person2) {
+      setPerson1(location.state.person1);
+      setPerson2(location.state.person2);
+      setQuery1(location.state.person1.name);
+      setQuery2(location.state.person2.name);
+    }
+  }, [location.state]);
 
   const handleCompare = async () => {
     if (!query1.trim() || !query2.trim()) return;

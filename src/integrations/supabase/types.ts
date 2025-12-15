@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          content: Json
+          created_at: string
+          favorite_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          favorite_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          favorite_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       search_trends: {
         Row: {
           category: string | null

@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Share2, GitCompareArrows, ArrowLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
 
 interface ProfileHeroProps {
   celebrity: Celebrity;
@@ -96,6 +97,10 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <FavoriteButton 
+                content={{ type: 'profile', celebrity }} 
+                className="border border-border/50"
+              />
               <Link to={`/compare?person1=${celebrity.id}`}>
                 <Button variant="outline" className="border-border/50">
                   <GitCompareArrows className="h-4 w-4 mr-2" />
