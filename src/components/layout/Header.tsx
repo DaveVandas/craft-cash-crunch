@@ -195,12 +195,21 @@ const Header = () => {
               </DropdownMenu>
             </>
           ) : (
-            <Link to="/auth">
-              <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
-                <LogIn className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Sign In</span>
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/referral">
+                <Button variant="ghost" className="text-primary hover:text-primary hover:bg-primary/10">
+                  <Gift className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Earn Free Access</span>
+                  <span className="sm:hidden">Free</span>
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
         
