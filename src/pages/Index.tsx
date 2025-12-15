@@ -29,7 +29,7 @@ const Index = () => {
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Mind-blowing comparisons that make celebrity earnings tangible. 
-                How many pizzas does LeBron buy per minute? Find out.
+                Elon Musk earns your yearly salary before his morning coffee.
               </p>
             </div>
 
