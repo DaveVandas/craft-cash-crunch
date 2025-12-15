@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2 } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, UserPlus, Share2, Heart } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
+import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
@@ -13,6 +14,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 
 const Header = () => {
@@ -169,6 +173,15 @@ const Header = () => {
                     <UserPlus className="h-4 w-4 mr-2" />
                     Invite Friends
                   </DropdownMenuItem>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Heart className="h-4 w-4 mr-2" />
+                      My Favorites
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-72 p-0">
+                      <FavoritesDropdown />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
