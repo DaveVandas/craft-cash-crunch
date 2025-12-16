@@ -1,21 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TrendingUp, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const actionPhrases = [
-  'just searched for',
-  'is comparing',
-  'discovered',
-  'just explored',
-];
+const actionPhrases = ['just searched for', 'is comparing', 'discovered', 'just explored'];
 
 const SocialProofNotifications = () => {
   const [isActive, setIsActive] = useState(false);
   const { user } = useAuth();
+  const timerRef = useRef<number | null>(null);
 
+  // Start/stop based on auth state
   useEffect(() => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
     // Only show to non-logged-in users
     if (user) {
       setIsActive(false);
@@ -23,17 +25,28 @@ const SocialProofNotifications = () => {
     }
 
     // Start after a 10-second delay
-    const startTimer = setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       setIsActive(true);
     }, 10000);
 
-    return () => clearTimeout(startTimer);
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [user]);
 
+  // Show notifications on a cadence (and stop immediately if user logs in)
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || user) return;
+
+    let cancelled = false;
 
     const fetchAndShowNotification = async () => {
+      // Extra safety: never show if user is present
+      if (cancelled || user) return;
+
       try {
         const { data, error } = await supabase
           .from('search_trends')
@@ -41,13 +54,12 @@ const SocialProofNotifications = () => {
           .order('last_searched_at', { ascending: false })
           .limit(10);
 
+        if (cancelled || user) return;
         if (error || !data || data.length === 0) return;
 
-        // Pick a random recent search
         const randomSearch = data[Math.floor(Math.random() * data.length)];
         const randomAction = actionPhrases[Math.floor(Math.random() * actionPhrases.length)];
-        
-        // Generate anonymous user identifier
+
         const userNames = ['Someone', 'A user', 'A visitor', 'Someone curious'];
         const randomUser = userNames[Math.floor(Math.random() * userNames.length)];
 
@@ -74,24 +86,33 @@ const SocialProofNotifications = () => {
       }
     };
 
-    // Show first notification after becoming active
-    fetchAndShowNotification();
+    const scheduleNext = () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
 
-    // Then show notifications every 45-90 seconds randomly
-    const showRandomNotification = () => {
       const randomDelay = 45000 + Math.random() * 45000; // 45-90 seconds
-      return setTimeout(() => {
-        fetchAndShowNotification();
-        showRandomNotification();
+      timerRef.current = window.setTimeout(async () => {
+        await fetchAndShowNotification();
+        if (!cancelled && !user) scheduleNext();
       }, randomDelay);
     };
 
-    const timer = showRandomNotification();
+    // Show first notification after becoming active
+    fetchAndShowNotification();
+    scheduleNext();
 
-    return () => clearTimeout(timer);
-  }, [isActive]);
+    return () => {
+      cancelled = true;
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isActive, user]);
 
-  return null; // This component doesn't render anything visible
+  return null;
 };
 
 export default SocialProofNotifications;

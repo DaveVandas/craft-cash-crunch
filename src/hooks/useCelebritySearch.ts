@@ -1,12 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Celebrity } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 import { getFallbackCelebrity } from '@/lib/fallbackCelebrities';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
+
+type GetCelebrityDataResponse = {
+  celebrity: Celebrity | null;
+  celebrities?: Celebrity[] | null;
+  error?: string | null;
+  errorCode?: string | null;
+};
 
 // Get anonymous search count from localStorage
 const getAnonSearchCount = (): number => {
@@ -34,41 +40,39 @@ export const useCelebritySearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, refreshAccess } = useAuth();
-  const navigate = useNavigate();
+
+  const invokeGetCelebrityData = useCallback(async (body: { name?: string; category?: string }) => {
+    const anonCount = getAnonSearchCount();
+
+    const { data, error: fnError } = await supabase.functions.invoke('get-celebrity-data', {
+      body,
+      headers: {
+        // Used by the backend to enforce anonymous free-search limits
+        'X-Anonymous-Search-Count': anonCount.toString(),
+      },
+    });
+
+    if (fnError) {
+      throw fnError;
+    }
+
+    return data as GetCelebrityDataResponse;
+  }, []);
 
   const searchCelebrity = useCallback(async (name: string): Promise<Celebrity | null> => {
     setLoading(true);
     setError(null);
 
     try {
-      // Get current anonymous search count for header
-      const anonCount = getAnonSearchCount();
-      
-      // Get session token if available
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      // Call edge function with custom headers
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-celebrity-data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-          'X-Anonymous-Search-Count': anonCount.toString(),
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      const data = await response.json();
+      const data = await invokeGetCelebrityData({ name });
 
       // Handle soft errors returned as 200 with error field
       if (data?.error) {
         const errorCode = data.errorCode || 'ERROR';
-        
+
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
           toast("You've sampled the goods — now join the winners circle 🏆", {
-            description: "$4.99 once. Unlimited access. No subscriptions. Real mogul energy.",
+            description: '$4.99 once. Unlimited access. No subscriptions. Real mogul energy.',
             action: {
               label: 'Unlock Lifetime Access',
               onClick: async () => {
@@ -114,7 +118,11 @@ export const useCelebritySearch = () => {
       // If we got celebrity data and user is logged in, increment search with tracking info
       if (data?.celebrity && user) {
         const celebrity = data.celebrity as Celebrity;
-        const celebritySlug = celebrity.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const celebritySlug = celebrity.name
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+
         await supabase.functions.invoke('increment-search', {
           body: {
             celebrityName: celebrity.name,
@@ -122,6 +130,7 @@ export const useCelebritySearch = () => {
             category: celebrity.profession,
           },
         });
+
         await refreshAccess();
       }
 
@@ -134,36 +143,21 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, refreshAccess]);
+  }, [invokeGetCelebrityData, refreshAccess, user]);
 
   const searchCelebritiesByCategory = useCallback(async (category: string): Promise<Celebrity[]> => {
     setLoading(true);
     setError(null);
 
     try {
-      const anonCount = getAnonSearchCount();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-celebrity-data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-          'X-Anonymous-Search-Count': anonCount.toString(),
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({ category }),
-      });
-
-      const data = await response.json();
+      const data = await invokeGetCelebrityData({ category });
 
       if (data?.error) {
         const errorCode = data.errorCode || 'ERROR';
-        
+
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
           toast("You've sampled the goods — now join the winners circle 🏆", {
-            description: "$4.99 once. Unlimited access. No subscriptions. Real mogul energy.",
+            description: '$4.99 once. Unlimited access. No subscriptions. Real mogul energy.',
             action: {
               label: 'Unlock Lifetime Access',
               onClick: async () => {
@@ -187,7 +181,7 @@ export const useCelebritySearch = () => {
         await refreshAccess();
       }
 
-      return data.celebrities as Celebrity[];
+      return (data.celebrities || []) as Celebrity[];
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch celebrities';
       setError(message);
@@ -196,7 +190,7 @@ export const useCelebritySearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, navigate, refreshAccess]);
+  }, [invokeGetCelebrityData, refreshAccess, user]);
 
   return {
     loading,
