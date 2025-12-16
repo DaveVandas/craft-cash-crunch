@@ -67,12 +67,16 @@ export const useCelebritySearch = () => {
         const errorCode = data.errorCode || 'ERROR';
         
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
-          toast.error(data.error, {
-            description: 'Create a free account to continue',
+          toast("You've sampled the goods — now join the winners circle 🏆", {
+            description: "$4.99 once. Unlimited access. No subscriptions. Real mogul energy.",
             action: {
-              label: 'Sign Up Free',
-              onClick: () => navigate('/auth'),
+              label: 'Unlock Lifetime Access',
+              onClick: async () => {
+                const { data: paymentData } = await supabase.functions.invoke('create-payment');
+                if (paymentData?.url) window.open(paymentData.url, '_blank');
+              },
             },
+            duration: 8000,
           });
           setError(data.error);
           return null;
@@ -158,12 +162,16 @@ export const useCelebritySearch = () => {
         const errorCode = data.errorCode || 'ERROR';
         
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
-          toast.error(data.error, {
-            description: 'Create a free account to continue',
+          toast("You've sampled the goods — now join the winners circle 🏆", {
+            description: "$4.99 once. Unlimited access. No subscriptions. Real mogul energy.",
             action: {
-              label: 'Sign Up Free',
-              onClick: () => navigate('/auth'),
+              label: 'Unlock Lifetime Access',
+              onClick: async () => {
+                const { data: paymentData } = await supabase.functions.invoke('create-payment');
+                if (paymentData?.url) window.open(paymentData.url, '_blank');
+              },
             },
+            duration: 8000,
           });
         } else {
           toast.error(data.error);
