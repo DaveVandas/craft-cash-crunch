@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -201,6 +201,10 @@ const WealthWisdom = () => {
   const [subscribed, setSubscribed] = useState(false);
   
   const story = getWeeklyStory();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();

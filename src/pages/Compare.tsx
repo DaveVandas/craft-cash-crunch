@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PaywallGate from '@/components/paywall/PaywallGate';
 import CompareResult from '@/components/compare/CompareResult';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity } from '@/lib/types';
@@ -58,6 +59,7 @@ const Compare = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 container py-8 md:py-12">
+        <PaywallGate>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
@@ -163,6 +165,7 @@ const Compare = () => {
             <CompareResult person1={person1} person2={person2} />
           )}
         </div>
+        </PaywallGate>
       </main>
       <Footer />
     </div>
