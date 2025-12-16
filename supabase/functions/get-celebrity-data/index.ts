@@ -415,33 +415,35 @@ async function tryWikipediaPageImages(searchName: string): Promise<string | null
 async function getWikipediaImage(name: string, profession?: string): Promise<string | null> {
   const searchVariants = generateSearchVariants(name, profession);
   
-  // Strategy 1: Try direct page summary for all variants first (fastest)
+  // Strategy 1: Try Wikidata/Commons FIRST (most reliable, not blocking us)
+  console.log(`Starting Wikidata search for: ${name}`);
   for (const variant of searchVariants.slice(0, 4)) {
-    const image = await tryWikipediaPageSummary(variant);
+    const image = await tryWikidata(variant);
     if (image) return image;
   }
   
-  // Strategy 2: Try page images API
+  // Strategy 2: Try MediaWiki Action API (more lenient than REST)
+  console.log(`Trying Action API for: ${name}`);
+  for (const variant of searchVariants.slice(0, 3)) {
+    const image = await tryWikipediaActionAPI(variant);
+    if (image) return image;
+  }
+  
+  // Strategy 3: Try page images API
   for (const variant of searchVariants.slice(0, 3)) {
     const image = await tryWikipediaPageImages(variant);
     if (image) return image;
   }
   
-  // Strategy 3: Try Wikipedia search with profession context
+  // Strategy 4: Try REST API page summary (often blocked)
+  for (const variant of searchVariants.slice(0, 2)) {
+    const image = await tryWikipediaPageSummary(variant);
+    if (image) return image;
+  }
+  
+  // Strategy 5: Try Wikipedia search 
   const searchImage = await tryWikipediaSearch(name, profession);
   if (searchImage) return searchImage;
-  
-  // Strategy 4: Try Wikidata for all variants
-  for (const variant of searchVariants.slice(0, 3)) {
-    const image = await tryWikidata(variant);
-    if (image) return image;
-  }
-  
-  // Strategy 5: Last resort - broader Wikipedia search without profession
-  for (const variant of searchVariants.slice(0, 2)) {
-    const image = await tryWikipediaSearch(variant);
-    if (image) return image;
-  }
   
   console.log(`No Wikipedia image found for ${name} after all strategies`);
   return null;
