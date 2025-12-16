@@ -340,7 +340,7 @@ const Calculator = () => {
                   {hustleResult && (
                     <Card className="mt-4 border-green-500/30 bg-gradient-to-br from-green-500/10 to-emerald-500/10 animate-fade-in">
                       <CardContent className="pt-6">
-                        <div className="grid grid-cols-2 gap-4 text-center">
+                        <div className="grid grid-cols-2 gap-4 text-center mb-4">
                           <div>
                             <p className="text-xs text-muted-foreground mb-1">Monthly Side Income</p>
                             <p className="text-2xl font-bold text-green-500">{formatCurrency(hustleResult.monthly)}</p>
@@ -350,17 +350,53 @@ const Calculator = () => {
                             <p className="text-2xl font-bold gradient-gold-text">{formatCurrency(hustleResult.yearly)}</p>
                           </div>
                         </div>
-                        <div className="mt-4 p-3 rounded-lg bg-background/50 text-center">
+
+                        {/* Volume Breakdown */}
+                        {buyPrice && sellPrice && parseFloat(sellPrice) > parseFloat(buyPrice) && (
+                          <div className="p-3 rounded-lg bg-background/50 border border-border/50 mb-4">
+                            <p className="text-xs text-muted-foreground mb-2 text-center font-medium">📦 What it takes to hit these numbers:</p>
+                            <div className="grid grid-cols-3 gap-2 text-center">
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold text-foreground">
+                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)) / 30)}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">sales/day</p>
+                              </div>
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold text-foreground">
+                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)) / 4)}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">sales/week</p>
+                              </div>
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold text-foreground">
+                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)))}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">sales/month</p>
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground text-center mt-2">
+                              At {formatCurrency(parseFloat(sellPrice) - parseFloat(buyPrice))} profit per sale
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="p-3 rounded-lg bg-background/50 text-center">
                           <p className="text-sm text-muted-foreground">
                             That's <span className="text-foreground font-semibold">{formatCurrency(hustleResult.yearly)}/year</span> extra — 
-                            {hustleResult.yearly >= salary * 0.5 && (
+                            {salary > 0 && hustleResult.yearly >= salary * 0.5 && (
                               <span className="block mt-1 text-primary font-medium">
                                 🔥 That's {((hustleResult.yearly / salary) * 100).toFixed(0)}% of your current salary. Mogul moves!
                               </span>
                             )}
-                            {hustleResult.yearly < salary * 0.5 && hustleResult.yearly > 0 && (
+                            {salary > 0 && hustleResult.yearly < salary * 0.5 && hustleResult.yearly > 0 && (
                               <span className="block mt-1 text-amber-500">
                                 💪 Every dollar counts. Stack it up!
+                              </span>
+                            )}
+                            {salary <= 0 && (
+                              <span className="block mt-1 text-green-500">
+                                💪 That's real money in your pocket!
                               </span>
                             )}
                           </p>
