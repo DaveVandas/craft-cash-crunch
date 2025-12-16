@@ -9,10 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCelebritySearch } from '@/hooks/useCelebritySearch';
 import { Celebrity } from '@/lib/types';
-import { Search, Loader2, Rocket, Zap, TrendingUp, Flame, DollarSign, ArrowRight } from 'lucide-react';
+import { Search, Loader2, Rocket, TrendingUp, Flame, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/earnings';
 
@@ -53,7 +52,6 @@ const Calculator = () => {
   const [buyPrice, setBuyPrice] = useState('');
   const [sellPrice, setSellPrice] = useState('');
   const [salesVolume, setSalesVolume] = useState('');
-  const [period, setPeriod] = useState('month');
   const [hustleResult, setHustleResult] = useState<{ monthly: number; yearly: number } | null>(null);
   const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
   
@@ -105,27 +103,15 @@ const Calculator = () => {
     }
   };
 
-  const calculateHustle = () => {
-    const buy = parseFloat(buyPrice) || 0;
-    const sell = parseFloat(sellPrice) || 0;
-    const sales = parseFloat(salesVolume) || 0;
-    
-    if (sell <= buy || sales <= 0) return;
-    
-    const profit = sell - buy;
-    const multiplier = period === 'week' ? 4 : period === 'day' ? 30 : 1;
-    const monthly = profit * sales * multiplier;
-    setHustleResult({ monthly, yearly: monthly * 12 });
-  };
-
   const applyHustlePreset = (hustle: typeof SIDE_HUSTLE_IDEAS[0]) => {
     setSelectedHustle(hustle);
     
     // Populate the calculator with realistic example values
-    setBuyPrice(String(Math.round(hustle.avgProfit * 0.4))); // Approximate buy price
-    setSellPrice(String(Math.round(hustle.avgProfit * 1.4))); // Sell = buy + profit
+    const buyPriceVal = Math.round(hustle.avgProfit * 0.4);
+    const sellPriceVal = Math.round(hustle.avgProfit * 1.4);
+    setBuyPrice(String(buyPriceVal));
+    setSellPrice(String(sellPriceVal));
     setSalesVolume(String(hustle.salesPerMonth));
-    setPeriod('month');
     
     // Calculate and show results
     const monthly = hustle.avgProfit * hustle.salesPerMonth;
@@ -238,7 +224,7 @@ const Calculator = () => {
                 />
 
                 {/* Path to Wealth Section */}
-                <div className="mt-12 pt-8 border-t border-border/50">
+                <div className="mt-10 pt-8 border-t border-border/50">
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <Rocket className="h-6 w-6 text-primary" />
@@ -246,220 +232,167 @@ const Calculator = () => {
                         Your Path to <span className="gradient-gold-text">Wealth</span>
                       </h2>
                     </div>
-                    <p className="text-muted-foreground text-sm">
-                      Feeling humbled? Good. Now let's talk about stacking that paper. 💰
+                    <p className="text-base text-foreground/70">
+                      Feeling humbled? Good. Now let's talk about building income. 💰
                     </p>
                   </div>
 
-                  {/* Quick Hustle Ideas */}
-                  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-amber-500/5 mb-6">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
+                  {/* Unified Side Hustle Experience */}
+                  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-amber-500/5">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl flex items-center gap-2">
                         <Flame className="h-5 w-5 text-amber-500" />
-                        Hot Side Hustles
+                        Pick a Side Hustle
                       </CardTitle>
-                      <CardDescription>Tap any hustle to see potential earnings</CardDescription>
+                      <CardDescription className="text-base">
+                        Tap one to see realistic earnings — then tweak the numbers if you want
+                      </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <CardContent className="space-y-5">
+                      {/* Hustle Grid */}
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                         {SIDE_HUSTLE_IDEAS.map((hustle) => (
-                          <Button
+                          <button
                             key={hustle.name}
-                            variant={selectedHustle?.name === hustle.name ? "default" : "outline"}
-                            className={`h-auto py-3 flex-col text-left hover:border-primary/50 hover:bg-primary/5 ${selectedHustle?.name === hustle.name ? 'border-primary bg-primary/10' : ''}`}
                             onClick={() => applyHustlePreset(hustle)}
+                            className={`p-3 rounded-xl border text-center transition-all hover:border-primary/50 hover:bg-primary/5 ${
+                              selectedHustle?.name === hustle.name 
+                                ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+                                : 'border-border/50 bg-card/50'
+                            }`}
                           >
-                            <span className="text-xl mb-1">{hustle.emoji}</span>
-                            <span className="text-xs font-medium">{hustle.name}</span>
-                            <span className="text-[10px] text-green-500">+${hustle.avgProfit * hustle.salesPerMonth}/mo</span>
-                          </Button>
+                            <span className="text-2xl block mb-1">{hustle.emoji}</span>
+                            <span className="text-xs font-medium block truncate text-foreground">{hustle.name.split(' ')[0]}</span>
+                          </button>
                         ))}
                       </div>
 
-                      {/* Selected Hustle Summary */}
+                      {/* Results appear when hustle selected */}
                       {selectedHustle && (
-                        <div className="mt-4 p-4 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 to-green-500/5 animate-fade-in">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-2xl">{selectedHustle.emoji}</span>
-                            <div>
-                              <p className="font-semibold">{selectedHustle.name}</p>
-                              <p className="text-xs text-muted-foreground">{selectedHustle.tip}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div className="text-center p-2 rounded bg-green-500/10 border border-green-500/20">
-                              <p className="text-xs text-muted-foreground">Monthly</p>
-                              <p className="text-lg font-bold text-green-500">{formatCurrency(selectedHustle.avgProfit * selectedHustle.salesPerMonth)}</p>
-                            </div>
-                            <div className="text-center p-2 rounded bg-amber-500/10 border border-amber-500/20">
-                              <p className="text-xs text-muted-foreground">Yearly</p>
-                              <p className="text-lg font-bold text-amber-500">{formatCurrency(selectedHustle.avgProfit * selectedHustle.salesPerMonth * 12)}</p>
+                        <div className="animate-fade-in space-y-4">
+                          {/* Hustle Header */}
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50">
+                            <span className="text-3xl">{selectedHustle.emoji}</span>
+                            <div className="flex-1">
+                              <p className="text-lg font-bold text-foreground">{selectedHustle.name}</p>
+                              <p className="text-sm text-primary">💡 {selectedHustle.tip}</p>
                             </div>
                           </div>
 
-                          <div className="p-3 rounded bg-background/50 border border-border/50">
-                            <p className="text-xs text-muted-foreground mb-2 text-center font-medium">📦 What it takes:</p>
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold">{Math.ceil(selectedHustle.salesPerMonth / 30)}</p>
-                                <p className="text-[10px] text-muted-foreground">sales/day</p>
-                              </div>
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold">{Math.ceil(selectedHustle.salesPerMonth / 4)}</p>
-                                <p className="text-[10px] text-muted-foreground">sales/week</p>
-                              </div>
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold">{selectedHustle.salesPerMonth}</p>
-                                <p className="text-[10px] text-muted-foreground">sales/month</p>
+                          {/* Adjustable Inputs */}
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
+                              <div className="relative mt-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                <Input
+                                  type="number"
+                                  value={buyPrice}
+                                  onChange={(e) => {
+                                    setBuyPrice(e.target.value);
+                                    const buy = parseFloat(e.target.value) || 0;
+                                    const sell = parseFloat(sellPrice) || 0;
+                                    const sales = parseFloat(salesVolume) || 0;
+                                    if (sell > buy && sales > 0) {
+                                      const profit = sell - buy;
+                                      const monthly = profit * sales;
+                                      setHustleResult({ monthly, yearly: monthly * 12 });
+                                    }
+                                  }}
+                                  className="pl-7 h-10"
+                                />
                               </div>
                             </div>
-                            <p className="text-[10px] text-muted-foreground text-center mt-2">
-                              At {formatCurrency(selectedHustle.avgProfit)} profit per sale
-                            </p>
+                            <div>
+                              <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
+                              <div className="relative mt-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                <Input
+                                  type="number"
+                                  value={sellPrice}
+                                  onChange={(e) => {
+                                    setSellPrice(e.target.value);
+                                    const buy = parseFloat(buyPrice) || 0;
+                                    const sell = parseFloat(e.target.value) || 0;
+                                    const sales = parseFloat(salesVolume) || 0;
+                                    if (sell > buy && sales > 0) {
+                                      const profit = sell - buy;
+                                      const monthly = profit * sales;
+                                      setHustleResult({ monthly, yearly: monthly * 12 });
+                                    }
+                                  }}
+                                  className="pl-7 h-10"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
+                              <Input
+                                type="number"
+                                value={salesVolume}
+                                onChange={(e) => {
+                                  setSalesVolume(e.target.value);
+                                  const buy = parseFloat(buyPrice) || 0;
+                                  const sell = parseFloat(sellPrice) || 0;
+                                  const sales = parseFloat(e.target.value) || 0;
+                                  if (sell > buy && sales > 0) {
+                                    const profit = sell - buy;
+                                    const monthly = profit * sales;
+                                    setHustleResult({ monthly, yearly: monthly * 12 });
+                                  }
+                                }}
+                                className="h-10 mt-1"
+                              />
+                            </div>
                           </div>
+
+                          {/* Results */}
+                          {hustleResult && hustleResult.monthly > 0 && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="text-center p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+                                <p className="text-xs text-foreground/60 font-medium mb-1">Monthly Income</p>
+                                <p className="text-2xl font-bold text-green-500">{formatCurrency(hustleResult.monthly)}</p>
+                              </div>
+                              <div className="text-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                <p className="text-xs text-foreground/60 font-medium mb-1">Yearly Potential</p>
+                                <p className="text-2xl font-bold text-amber-500">{formatCurrency(hustleResult.yearly)}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Motivational Message */}
+                          {hustleResult && hustleResult.yearly > 0 && (
+                            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                              {salary > 0 && hustleResult.yearly >= salary * 0.5 ? (
+                                <p className="text-base font-semibold text-primary">
+                                  🔥 {formatCurrency(hustleResult.yearly)}/year extra — that's {((hustleResult.yearly / salary) * 100).toFixed(0)}% of your salary!
+                                </p>
+                              ) : (
+                                <p className="text-base font-semibold text-primary">
+                                  💪 {formatCurrency(hustleResult.yearly)}/year — every dollar counts. Keep stacking!
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Prompt when nothing selected */}
+                      {!selectedHustle && (
+                        <div className="text-center py-4 text-muted-foreground">
+                          <p className="text-base">👆 Tap a hustle above to see the breakdown</p>
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
-                  {/* Custom Calculator */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                        Flip Calculator
-                      </CardTitle>
-                      <CardDescription>Buy low, sell high. See the potential.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Buy Price ($)</Label>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={buyPrice}
-                            onChange={(e) => setBuyPrice(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Sell Price ($)</Label>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={sellPrice}
-                            onChange={(e) => setSellPrice(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Sales Volume</Label>
-                          <Input
-                            type="number"
-                            placeholder="10"
-                            value={salesVolume}
-                            onChange={(e) => setSalesVolume(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Per</Label>
-                          <Select value={period} onValueChange={setPeriod}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="day">Day</SelectItem>
-                              <SelectItem value="week">Week</SelectItem>
-                              <SelectItem value="month">Month</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <Button onClick={calculateHustle} className="w-full">
-                        <Zap className="h-4 w-4 mr-2" />
-                        Calculate Potential
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Hustle Results */}
-                  {hustleResult && (
-                    <Card className="mt-4 border-green-500/30 bg-gradient-to-br from-green-500/10 to-emerald-500/10 animate-fade-in">
-                      <CardContent className="pt-6">
-                        <div className="grid grid-cols-2 gap-4 text-center mb-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Monthly Side Income</p>
-                            <p className="text-2xl font-bold text-green-500">{formatCurrency(hustleResult.monthly)}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Yearly Potential</p>
-                            <p className="text-2xl font-bold gradient-gold-text">{formatCurrency(hustleResult.yearly)}</p>
-                          </div>
-                        </div>
-
-                        {/* Volume Breakdown */}
-                        {buyPrice && sellPrice && parseFloat(sellPrice) > parseFloat(buyPrice) && (
-                          <div className="p-3 rounded-lg bg-background/50 border border-border/50 mb-4">
-                            <p className="text-xs text-muted-foreground mb-2 text-center font-medium">📦 What it takes to hit these numbers:</p>
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold text-foreground">
-                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)) / 30)}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground">sales/day</p>
-                              </div>
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold text-foreground">
-                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)) / 4)}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground">sales/week</p>
-                              </div>
-                              <div className="p-2 rounded bg-secondary/30">
-                                <p className="text-lg font-bold text-foreground">
-                                  {Math.ceil(hustleResult.monthly / (parseFloat(sellPrice) - parseFloat(buyPrice)))}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground">sales/month</p>
-                              </div>
-                            </div>
-                            <p className="text-[10px] text-muted-foreground text-center mt-2">
-                              At {formatCurrency(parseFloat(sellPrice) - parseFloat(buyPrice))} profit per sale
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="p-3 rounded-lg bg-background/50 text-center">
-                          <p className="text-sm text-muted-foreground">
-                            That's <span className="text-foreground font-semibold">{formatCurrency(hustleResult.yearly)}/year</span> extra — 
-                            {salary > 0 && hustleResult.yearly >= salary * 0.5 && (
-                              <span className="block mt-1 text-primary font-medium">
-                                🔥 That's {((hustleResult.yearly / salary) * 100).toFixed(0)}% of your current salary. Mogul moves!
-                              </span>
-                            )}
-                            {salary > 0 && hustleResult.yearly < salary * 0.5 && hustleResult.yearly > 0 && (
-                              <span className="block mt-1 text-amber-500">
-                                💪 Every dollar counts. Stack it up!
-                              </span>
-                            )}
-                            {salary <= 0 && (
-                              <span className="block mt-1 text-green-500">
-                                💪 That's real money in your pocket!
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
                   {/* Go Deeper Link */}
-                  <div className="text-center pt-4">
+                  <div className="text-center pt-6">
                     <Link to="/side-hustle">
-                      <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
-                        <Rocket className="h-4 w-4 mr-2" />
-                        Go Deeper: Full Side Hustle Guide
-                        <ArrowRight className="h-4 w-4 ml-2" />
+                      <Button variant="outline" size="lg" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+                        <Rocket className="h-5 w-5 mr-2" />
+                        Explore More Side Hustles
+                        <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
                   </div>
