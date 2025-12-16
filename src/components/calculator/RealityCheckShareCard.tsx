@@ -156,20 +156,23 @@ const RealityCheckShareCard = ({
 
   return (
     <div className="space-y-4">
-      {/* Mode Toggle */}
+      {/* Mode Toggle - Centered */}
       <div className="flex items-center justify-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50">
+        <Label htmlFor="brutal-mode" className="text-sm text-muted-foreground cursor-pointer">
+          Standard
+        </Label>
         <Switch
           id="brutal-mode"
           checked={brutalMode}
           onCheckedChange={setBrutalMode}
+          className="data-[state=checked]:bg-red-500"
         />
         <Label 
           htmlFor="brutal-mode" 
-          className="flex items-center gap-2 cursor-pointer"
+          className={`text-sm cursor-pointer flex items-center gap-1 ${brutalMode ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}
         >
-          <Skull className="h-4 w-4 text-red-500" />
-          <span className="font-medium">Kick Me While I'm Down</span>
-          <Flame className="h-4 w-4 text-orange-500" />
+          <Skull className={`h-4 w-4 ${brutalMode ? 'text-red-500' : ''}`} />
+          Kick Me Mode
         </Label>
       </div>
 
