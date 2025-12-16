@@ -51,24 +51,24 @@ export const formatCompactCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-// Rich comparison items with context and witty descriptions
+// Straightforward luxury comparison items - mogul, swag, beast mode
 const comparisonItems = [
-  { item: 'Lamborghinis', emoji: '🏎️', price: 250000, context: 'Brand new Huracán off the lot' },
+  { item: 'Lamborghinis', emoji: '🏎️', price: 250000, context: 'Brand new Huracán' },
   { item: 'Ferraris', emoji: '🏁', price: 320000, context: 'Ferrari 812 Superfast' },
-  { item: 'Rolexes', emoji: '⌚', price: 12000, context: 'Rolex Submariner in steel' },
-  { item: 'Richard Mille Watches', emoji: '💎', price: 250000, context: 'Skeleton tourbillon flex piece' },
-  { item: 'Private Jets', emoji: '✈️', price: 65000000, context: 'Gulfstream G650, fully specced' },
-  { item: 'Luxury Superyachts', emoji: '🛥️', price: 100000000, context: '200-foot floating mansion' },
-  { item: 'Super Bowl Ads', emoji: '📺', price: 7000000, context: '30-second prime-time flex' },
-  { item: 'Malibu Beach Mansions', emoji: '🌴', price: 25000000, context: 'Oceanfront, glass walls, infinity pool' },
-  { item: 'NYC Penthouses', emoji: '🗽', price: 35000000, context: 'Park-view penthouse in Manhattan' },
-  { item: 'Bugatti Chirons', emoji: '🚀', price: 3300000, context: 'Hypercar for when “fast” isn’t enough' },
-  { item: 'Full Eras Tour VIP Packages', emoji: '🎤', price: 5000, context: 'Floor seats, VIP lounge, the works' },
-  { item: 'First-Class Round-the-World Trips', emoji: '🌍', price: 25000, context: 'First class flights + 5-star hotels' },
-  { item: 'Hermès Birkins', emoji: '👜', price: 20000, context: 'The “sorry, there’s a waitlist” bag' },
-  { item: 'NYC Luxury Rents (month)', emoji: '🏙️', price: 12000, context: 'High-rise, doorman, skyline views' },
-  { item: 'Full-Time Nannies (year)', emoji: '👶', price: 60000, context: '24/7 childcare on payroll' },
-  { item: 'Private Island Week Rentals', emoji: '🏝️', price: 150000, context: 'Fly in, disappear, re-emerge tanned' },
+  { item: 'Bugatti Chirons', emoji: '🚀', price: 3300000, context: 'The ultimate hypercar' },
+  { item: 'Rolexes', emoji: '⌚', price: 12000, context: 'Submariner on the wrist' },
+  { item: 'Rolex Day-Dates', emoji: '💎', price: 40000, context: 'The President watch' },
+  { item: 'Private Jets', emoji: '✈️', price: 65000000, context: 'Gulfstream G650' },
+  { item: 'Superyachts', emoji: '🛥️', price: 100000000, context: '200-foot floating palace' },
+  { item: 'Beach Mansions', emoji: '🏖️', price: 25000000, context: 'Oceanfront paradise' },
+  { item: 'Penthouse Suites', emoji: '🏙️', price: 35000000, context: 'Top floor, skyline views' },
+  { item: 'Birkin Bags', emoji: '👜', price: 20000, context: 'The iconic flex' },
+  { item: 'Teslas', emoji: '⚡', price: 80000, context: 'Model S Plaid' },
+  { item: 'Range Rovers', emoji: '🚙', price: 120000, context: 'Blacked out SVR' },
+  { item: 'Courtside Seats', emoji: '🏀', price: 5000, context: 'Front row at the game' },
+  { item: 'First Class Flights', emoji: '✨', price: 15000, context: 'Round trip anywhere' },
+  { item: 'Vacation Villas', emoji: '🏝️', price: 50000, context: 'Week at a private resort' },
+  { item: 'Diamond Chains', emoji: '💎', price: 25000, context: 'Iced out drip' },
 ];
 
 export interface EnhancedComparison extends Comparison {
