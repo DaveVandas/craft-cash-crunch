@@ -105,125 +105,273 @@ function getProfessionEmoji(profession: string): string {
   return '⭐'; // Default star for general celebrities
 }
 
-// Aggressively try to get Wikipedia image with multiple strategies
-async function getWikipediaImage(name: string): Promise<string | null> {
-  const searchVariants = [
-    name,
-    name.replace(/\./g, ''),  // Remove periods (e.g., "Dr." -> "Dr")
-    name.replace(/\s+Jr\.?$/i, ' Junior'),  // Jr -> Junior
-    name.replace(/\s+Sr\.?$/i, ' Senior'),  // Sr -> Senior
-  ];
+// Generate smart search variants for better Wikipedia matching
+function generateSearchVariants(name: string, profession?: string): string[] {
+  const variants: string[] = [name];
   
-  for (const searchName of searchVariants) {
-    console.log(`Wikipedia search attempt: "${searchName}"`);
-    
-    try {
-      // Strategy 1: Direct page image via API
-      const encodedName = encodeURIComponent(searchName);
-      const pageImageUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedName}`;
-      
-      const pageRes = await fetch(pageImageUrl, {
-        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
-      });
-      
-      if (pageRes.ok) {
-        const pageData = await pageRes.json();
-        
-        // Check for original image (highest quality)
-        if (pageData.originalimage?.source) {
-          console.log(`Found Wikipedia originalimage for ${name}`);
-          return pageData.originalimage.source;
-        }
-        
-        // Fall back to thumbnail
-        if (pageData.thumbnail?.source) {
-          console.log(`Found Wikipedia thumbnail for ${name}`);
-          return pageData.thumbnail.source;
-        }
-      }
-      
-      // Strategy 2: Search API with multiple results
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedName}&format=json&origin=*&srlimit=5`;
-      
-      const searchRes = await fetch(searchUrl, {
-        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
-      });
-      
-      if (searchRes.ok) {
-        const searchData = await searchRes.json();
-        const results = searchData.query?.search || [];
-        
-        // Try each search result
-        for (const result of results) {
-          const pageTitle = encodeURIComponent(result.title);
-          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${pageTitle}`;
-          
-          try {
-            const summaryRes = await fetch(summaryUrl, {
-              headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
-            });
-            
-            if (summaryRes.ok) {
-              const summaryData = await summaryRes.json();
-              
-              // Skip disambiguation pages
-              if (summaryData.type === 'disambiguation') continue;
-              
-              if (summaryData.originalimage?.source) {
-                console.log(`Found Wikipedia image via search for ${name}: ${result.title}`);
-                return summaryData.originalimage.source;
-              }
-              
-              if (summaryData.thumbnail?.source) {
-                console.log(`Found Wikipedia thumbnail via search for ${name}: ${result.title}`);
-                return summaryData.thumbnail.source;
-              }
-            }
-          } catch (e) {
-            console.log(`Error fetching summary for ${result.title}:`, e);
-          }
-        }
-      }
-      
-      // Strategy 3: Wikidata for commons images
-      const wikidataSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodedName}&language=en&format=json&origin=*&limit=3`;
-      
-      const wdSearchRes = await fetch(wikidataSearchUrl, {
-        headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
-      });
-      
-      if (wdSearchRes.ok) {
-        const wdData = await wdSearchRes.json();
-        const entities = wdData.search || [];
-        
-        for (const entity of entities) {
-          const entityUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entity.id}&property=P18&format=json&origin=*`;
-          
-          try {
-            const claimsRes = await fetch(entityUrl, {
-              headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@example.com)' }
-            });
-            
-            if (claimsRes.ok) {
-              const claimsData = await claimsRes.json();
-              const imageClaim = claimsData.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
-              
-              if (imageClaim) {
-                const fileName = imageClaim.replace(/ /g, '_');
-                const commonsUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=400`;
-                console.log(`Found Wikidata/Commons image for ${name}`);
-                return commonsUrl;
-              }
-            }
-          } catch (e) {
-            console.log(`Error fetching Wikidata claims:`, e);
-          }
-        }
-      }
-      
-    } catch (error) {
-      console.log(`Wikipedia search error for "${searchName}":`, error);
+  // Remove periods
+  const noPeriods = name.replace(/\./g, '');
+  if (noPeriods !== name) variants.push(noPeriods);
+  
+  // Handle Jr/Sr
+  variants.push(name.replace(/\s+Jr\.?$/i, ' Junior'));
+  variants.push(name.replace(/\s+Sr\.?$/i, ' Senior'));
+  
+  // Try first + last name only (strip middle names)
+  const nameParts = name.split(/\s+/);
+  if (nameParts.length > 2) {
+    variants.push(`${nameParts[0]} ${nameParts[nameParts.length - 1]}`);
+  }
+  
+  // Add profession disambiguation for common names
+  if (profession) {
+    const profLower = profession.toLowerCase();
+    if (profLower.includes('actor') || profLower.includes('actress')) {
+      variants.push(`${name} (actor)`);
+      variants.push(`${name} actor`);
+    } else if (profLower.includes('singer') || profLower.includes('musician') || profLower.includes('rapper')) {
+      variants.push(`${name} (singer)`);
+      variants.push(`${name} (musician)`);
+      variants.push(`${name} musician`);
+    } else if (profLower.includes('athlete') || profLower.includes('basketball') || profLower.includes('football')) {
+      variants.push(`${name} (athlete)`);
+      variants.push(`${name} athlete`);
+    } else if (profLower.includes('ceo') || profLower.includes('entrepreneur') || profLower.includes('billionaire')) {
+      variants.push(`${name} (businessman)`);
+      variants.push(`${name} entrepreneur`);
     }
+  }
+  
+  // Remove duplicates
+  return [...new Set(variants)];
+}
+
+// Try to fetch image from Wikipedia page summary
+async function tryWikipediaPageSummary(searchName: string): Promise<string | null> {
+  try {
+    const encodedName = encodeURIComponent(searchName);
+    const pageImageUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedName}`;
+    
+    const pageRes = await fetch(pageImageUrl, {
+      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+    });
+    
+    if (pageRes.ok) {
+      const pageData = await pageRes.json();
+      
+      // Skip disambiguation pages
+      if (pageData.type === 'disambiguation') return null;
+      
+      // Check for original image (highest quality)
+      if (pageData.originalimage?.source) {
+        console.log(`Found Wikipedia originalimage for ${searchName}`);
+        return pageData.originalimage.source;
+      }
+      
+      // Fall back to thumbnail
+      if (pageData.thumbnail?.source) {
+        // Get higher res version by modifying URL
+        const thumbUrl = pageData.thumbnail.source;
+        const higherRes = thumbUrl.replace(/\/\d+px-/, '/400px-');
+        console.log(`Found Wikipedia thumbnail for ${searchName}`);
+        return higherRes;
+      }
+    }
+  } catch (error) {
+    console.log(`Wikipedia page summary error for "${searchName}":`, error);
+  }
+  return null;
+}
+
+// Search Wikipedia and get image from top results
+async function tryWikipediaSearch(searchName: string, profession?: string): Promise<string | null> {
+  try {
+    // Add profession to search for better results
+    const searchQuery = profession 
+      ? `${searchName} ${profession.split(' ')[0]}`
+      : searchName;
+    
+    const encodedQuery = encodeURIComponent(searchQuery);
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedQuery}&format=json&origin=*&srlimit=8`;
+    
+    const searchRes = await fetch(searchUrl, {
+      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+    });
+    
+    if (!searchRes.ok) return null;
+    
+    const searchData = await searchRes.json();
+    const results = searchData.query?.search || [];
+    
+    // Score results to find best match
+    const lowerName = searchName.toLowerCase();
+    const scoredResults = results.map((r: any) => {
+      let score = 0;
+      const lowerTitle = r.title.toLowerCase();
+      
+      // Exact match gets highest score
+      if (lowerTitle === lowerName) score += 100;
+      // Title contains full name
+      else if (lowerTitle.includes(lowerName)) score += 50;
+      // Name contains title
+      else if (lowerName.includes(lowerTitle)) score += 30;
+      
+      // Avoid disambiguation pages
+      if (lowerTitle.includes('disambiguation')) score -= 100;
+      
+      return { ...r, score };
+    });
+    
+    // Sort by score
+    scoredResults.sort((a: any, b: any) => b.score - a.score);
+    
+    // Try top 5 results
+    for (const result of scoredResults.slice(0, 5)) {
+      const pageTitle = encodeURIComponent(result.title);
+      const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${pageTitle}`;
+      
+      try {
+        const summaryRes = await fetch(summaryUrl, {
+          headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+        });
+        
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          
+          // Skip disambiguation pages
+          if (summaryData.type === 'disambiguation') continue;
+          
+          if (summaryData.originalimage?.source) {
+            console.log(`Found Wikipedia image via search for ${searchName}: ${result.title}`);
+            return summaryData.originalimage.source;
+          }
+          
+          if (summaryData.thumbnail?.source) {
+            const thumbUrl = summaryData.thumbnail.source;
+            const higherRes = thumbUrl.replace(/\/\d+px-/, '/400px-');
+            console.log(`Found Wikipedia thumbnail via search for ${searchName}: ${result.title}`);
+            return higherRes;
+          }
+        }
+      } catch (e) {
+        // Continue to next result
+      }
+    }
+  } catch (error) {
+    console.log(`Wikipedia search error for "${searchName}":`, error);
+  }
+  return null;
+}
+
+// Try Wikidata for Commons images
+async function tryWikidata(searchName: string): Promise<string | null> {
+  try {
+    const encodedName = encodeURIComponent(searchName);
+    const wikidataSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodedName}&language=en&format=json&origin=*&limit=5`;
+    
+    const wdSearchRes = await fetch(wikidataSearchUrl, {
+      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+    });
+    
+    if (!wdSearchRes.ok) return null;
+    
+    const wdData = await wdSearchRes.json();
+    const entities = wdData.search || [];
+    
+    for (const entity of entities) {
+      // Check if this entity is a human (instance of Q5)
+      const entityUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entity.id}&property=P18&format=json&origin=*`;
+      
+      try {
+        const claimsRes = await fetch(entityUrl, {
+          headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+        });
+        
+        if (claimsRes.ok) {
+          const claimsData = await claimsRes.json();
+          const imageClaim = claimsData.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+          
+          if (imageClaim) {
+            const fileName = imageClaim.replace(/ /g, '_');
+            const commonsUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=400`;
+            console.log(`Found Wikidata/Commons image for ${searchName}`);
+            return commonsUrl;
+          }
+        }
+      } catch (e) {
+        // Continue to next entity
+      }
+    }
+  } catch (error) {
+    console.log(`Wikidata search error for "${searchName}":`, error);
+  }
+  return null;
+}
+
+// Try Wikipedia page images API (gets all images from a page)
+async function tryWikipediaPageImages(searchName: string): Promise<string | null> {
+  try {
+    const encodedName = encodeURIComponent(searchName);
+    const pageImagesUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&origin=*&pithumbsize=400&piprop=thumbnail|original`;
+    
+    const res = await fetch(pageImagesUrl, {
+      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+    });
+    
+    if (!res.ok) return null;
+    
+    const data = await res.json();
+    const pages = data.query?.pages || {};
+    
+    for (const pageId of Object.keys(pages)) {
+      if (pageId === '-1') continue; // Page not found
+      
+      const page = pages[pageId];
+      if (page.original?.source) {
+        console.log(`Found Wikipedia page image for ${searchName}`);
+        return page.original.source;
+      }
+      if (page.thumbnail?.source) {
+        console.log(`Found Wikipedia page thumbnail for ${searchName}`);
+        return page.thumbnail.source;
+      }
+    }
+  } catch (error) {
+    console.log(`Wikipedia page images error for "${searchName}":`, error);
+  }
+  return null;
+}
+
+// Main function to aggressively try to get celebrity image
+async function getWikipediaImage(name: string, profession?: string): Promise<string | null> {
+  const searchVariants = generateSearchVariants(name, profession);
+  
+  // Strategy 1: Try direct page summary for all variants first (fastest)
+  for (const variant of searchVariants.slice(0, 4)) {
+    const image = await tryWikipediaPageSummary(variant);
+    if (image) return image;
+  }
+  
+  // Strategy 2: Try page images API
+  for (const variant of searchVariants.slice(0, 3)) {
+    const image = await tryWikipediaPageImages(variant);
+    if (image) return image;
+  }
+  
+  // Strategy 3: Try Wikipedia search with profession context
+  const searchImage = await tryWikipediaSearch(name, profession);
+  if (searchImage) return searchImage;
+  
+  // Strategy 4: Try Wikidata for all variants
+  for (const variant of searchVariants.slice(0, 3)) {
+    const image = await tryWikidata(variant);
+    if (image) return image;
+  }
+  
+  // Strategy 5: Last resort - broader Wikipedia search without profession
+  for (const variant of searchVariants.slice(0, 2)) {
+    const image = await tryWikipediaSearch(variant);
+    if (image) return image;
   }
   
   console.log(`No Wikipedia image found for ${name} after all strategies`);
@@ -252,8 +400,8 @@ async function getCelebrityImage(
       return { imageUrl: cached.image_url, emoji };
     }
     
-    // Try Wikipedia aggressively
-    const wikiImage = await getWikipediaImage(name);
+    // Try Wikipedia aggressively with profession context
+    const wikiImage = await getWikipediaImage(name, profession);
     
     if (wikiImage) {
       // Cache the Wikipedia URL
