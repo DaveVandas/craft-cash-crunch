@@ -162,47 +162,66 @@ const SideHustle = () => {
     }, 100);
   };
 
+  const inspirationalQuotes = [
+    { quote: "The best time to start was yesterday. The second best time is now.", author: "Unknown" },
+    { quote: "Every expert was once a beginner.", author: "Helen Hayes" },
+    { quote: "Your side hustle could become your main hustle.", author: "Gary Vaynerchuk" },
+    { quote: "Wealth is not about having a lot of money; it's about having a lot of options.", author: "Chris Rock" },
+  ];
+
+  const randomQuote = inspirationalQuotes[Math.floor(Date.now() / 86400000) % inspirationalQuotes.length];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <main className="flex-1 container py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Rocket className="h-7 w-7 text-primary" />
-            <h1 className="font-serif text-3xl md:text-4xl font-bold">
+      <main className="flex-1 container py-10 md:py-12">
+        {/* Hero Section */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Rocket className="h-8 w-8 text-primary" />
+            <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">
               Side Hustle <span className="gradient-gold-text">Guide</span>
             </h1>
           </div>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Pick a hustle, tweak the numbers, see the potential. 💰
+          <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+            Every mogul started somewhere. Pick a hustle, run the numbers, and see what's possible. 💰
           </p>
+          
+          {/* Inspirational Quote */}
+          <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20 max-w-xl mx-auto">
+            <p className="text-base md:text-lg italic text-foreground/90">"{randomQuote.quote}"</p>
+            <p className="text-sm text-muted-foreground mt-2">— {randomQuote.author}</p>
+          </div>
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Hot Hustles Grid */}
           <Card className="border-primary/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Flame className="h-5 w-5 text-amber-500" />
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Flame className="h-6 w-6 text-amber-500" />
                 Pick Your Hustle
               </CardTitle>
+              <CardDescription className="text-base">
+                Tap any option below to see how the numbers break down
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {SIDE_HUSTLE_IDEAS.map((hustle) => (
                   <button
                     key={hustle.name}
                     onClick={() => applyHustle(hustle)}
-                    className={`p-3 rounded-lg border text-left transition-all hover:border-primary/50 hover:bg-primary/5 ${
+                    className={`p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] ${
                       selectedHustle?.name === hustle.name 
-                        ? 'border-primary bg-primary/10' 
+                        ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
                         : 'border-border/50 bg-card/50'
                     }`}
                   >
-                    <span className="text-2xl block mb-1">{hustle.emoji}</span>
-                    <span className="text-xs font-medium block truncate">{hustle.name}</span>
-                    <span className={`text-[10px] ${
+                    <span className="text-3xl block mb-2">{hustle.emoji}</span>
+                    <span className="text-sm font-semibold block truncate text-foreground">{hustle.name}</span>
+                    <span className={`text-xs font-medium ${
                       hustle.difficulty === 'Easy' ? 'text-green-500' :
                       hustle.difficulty === 'Medium' ? 'text-amber-500' : 'text-red-500'
                     }`}>{hustle.difficulty}</span>
@@ -211,9 +230,9 @@ const SideHustle = () => {
               </div>
               
               {!selectedHustle && (
-                <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground text-sm">
-                  <ArrowDown className="h-4 w-4 animate-bounce" />
-                  <span>Tap a hustle to see the breakdown</span>
+                <div className="flex items-center justify-center gap-2 mt-6 text-muted-foreground">
+                  <ArrowDown className="h-5 w-5 animate-bounce" />
+                  <span className="text-base">Tap a hustle above to see the breakdown</span>
                 </div>
               )}
             </CardContent>
@@ -221,53 +240,55 @@ const SideHustle = () => {
 
           {/* Results & Calculator - Shows when hustle selected */}
           {selectedHustle && (
-            <div ref={resultsRef} className="space-y-4 animate-fade-in">
+            <div ref={resultsRef} className="space-y-6 animate-fade-in">
               {/* Selected Hustle Header */}
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <span className="text-3xl">{selectedHustle.emoji}</span>
+              <div className="flex items-center gap-4 p-5 rounded-xl bg-primary/5 border border-primary/20">
+                <span className="text-4xl">{selectedHustle.emoji}</span>
                 <div className="flex-1">
-                  <h3 className="font-semibold">{selectedHustle.name}</h3>
-                  <p className="text-xs text-muted-foreground">{selectedHustle.description}</p>
-                  <p className="text-xs text-primary mt-1">💡 {selectedHustle.tips}</p>
+                  <h3 className="text-xl font-bold text-foreground">{selectedHustle.name}</h3>
+                  <p className="text-base text-foreground/70 mt-1">{selectedHustle.description}</p>
+                  <p className="text-sm text-primary mt-2 font-medium">💡 Pro tip: {selectedHustle.tips}</p>
                 </div>
               </div>
 
               {/* Adjustable Inputs + Results Combined */}
               <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-amber-500/5">
-                <CardContent className="p-4">
+                <CardContent className="p-5 md:p-6">
+                  <p className="text-sm font-semibold text-foreground mb-4">Adjust the numbers to fit your situation:</p>
+                  
                   {/* Inline Adjustable Inputs */}
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-3 gap-4 mb-6">
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">Buy Price</Label>
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                      <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                         <Input
                           type="number"
                           value={buyPrice}
                           onChange={(e) => handleInputChange('buy', e.target.value)}
-                          className="pl-6 h-9 text-sm"
+                          className="pl-7 h-11 text-base font-medium"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">Sell Price</Label>
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                      <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                         <Input
                           type="number"
                           value={sellPrice}
                           onChange={(e) => handleInputChange('sell', e.target.value)}
-                          className="pl-6 h-9 text-sm"
+                          className="pl-7 h-11 text-base font-medium"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">Sales/Month</Label>
+                      <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
                       <Input
                         type="number"
                         value={salesPerPeriod}
                         onChange={(e) => handleInputChange('sales', e.target.value)}
-                        className="h-9 text-sm"
+                        className="h-11 text-base font-medium mt-1"
                       />
                     </div>
                   </div>
@@ -275,59 +296,86 @@ const SideHustle = () => {
                   {result && (
                     <>
                       {/* Results Grid */}
-                      <div className="grid grid-cols-4 gap-2 mb-4">
-                        <div className="text-center p-3 rounded-lg bg-card border border-border/50">
-                          <p className="text-[10px] text-muted-foreground">Profit/Item</p>
-                          <p className="text-lg font-bold text-green-500">{formatCurrency(result.profit)}</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                          <p className="text-xs text-foreground/60 font-medium mb-1">Profit/Item</p>
+                          <p className="text-xl md:text-2xl font-bold text-green-500">{formatCurrency(result.profit)}</p>
                         </div>
-                        <div className="text-center p-3 rounded-lg bg-card border border-border/50">
-                          <p className="text-[10px] text-muted-foreground">Monthly</p>
-                          <p className="text-lg font-bold gradient-gold-text">{formatCurrency(result.monthlyProfit)}</p>
+                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                          <p className="text-xs text-foreground/60 font-medium mb-1">Monthly</p>
+                          <p className="text-xl md:text-2xl font-bold gradient-gold-text">{formatCurrency(result.monthlyProfit)}</p>
                         </div>
-                        <div className="text-center p-3 rounded-lg bg-card border border-border/50">
-                          <p className="text-[10px] text-muted-foreground">Yearly</p>
-                          <p className="text-lg font-bold text-primary">{formatCurrency(result.yearlyProfit)}</p>
+                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                          <p className="text-xs text-foreground/60 font-medium mb-1">Yearly</p>
+                          <p className="text-xl md:text-2xl font-bold text-primary">{formatCurrency(result.yearlyProfit)}</p>
                         </div>
-                        <div className="text-center p-3 rounded-lg bg-card border border-border/50">
-                          <p className="text-[10px] text-muted-foreground">ROI</p>
-                          <p className="text-lg font-bold text-amber-500">{result.roi.toFixed(0)}%</p>
+                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                          <p className="text-xs text-foreground/60 font-medium mb-1">ROI</p>
+                          <p className="text-xl md:text-2xl font-bold text-amber-500">{result.roi.toFixed(0)}%</p>
                         </div>
                       </div>
 
                       {/* Volume Breakdown */}
-                      <div className="p-3 rounded-lg bg-background/50 border border-border/50">
-                        <p className="text-xs text-muted-foreground mb-2 text-center font-medium">📦 What it takes:</p>
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="p-2 rounded bg-secondary/30">
-                            <p className="text-lg font-bold">{result.salesPerDay}</p>
-                            <p className="text-[10px] text-muted-foreground">sales/day</p>
+                      <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                        <p className="text-sm text-foreground/80 mb-3 text-center font-semibold">📦 What it takes to hit these numbers:</p>
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                          <div className="p-3 rounded-lg bg-secondary/30">
+                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerDay}</p>
+                            <p className="text-xs text-foreground/60 font-medium">sales/day</p>
                           </div>
-                          <div className="p-2 rounded bg-secondary/30">
-                            <p className="text-lg font-bold">{result.salesPerWeek}</p>
-                            <p className="text-[10px] text-muted-foreground">sales/week</p>
+                          <div className="p-3 rounded-lg bg-secondary/30">
+                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerWeek}</p>
+                            <p className="text-xs text-foreground/60 font-medium">sales/week</p>
                           </div>
-                          <div className="p-2 rounded bg-secondary/30">
-                            <p className="text-lg font-bold">{result.salesPerMonth}</p>
-                            <p className="text-[10px] text-muted-foreground">sales/month</p>
+                          <div className="p-3 rounded-lg bg-secondary/30">
+                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerMonth}</p>
+                            <p className="text-xs text-foreground/60 font-medium">sales/month</p>
                           </div>
                         </div>
-                        <p className="text-[10px] text-muted-foreground text-center mt-2">
-                          At {formatCurrency(result.profit)} profit per sale
+                        <p className="text-sm text-foreground/60 text-center mt-3">
+                          That's {formatCurrency(result.profit)} profit per sale × {result.salesPerMonth} sales
                         </p>
                       </div>
 
-                      {/* Motivational Message */}
-                      {result.yearlyProfit >= 50000 && (
-                        <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
-                          <p className="text-sm text-primary font-medium">
-                            🔥 {formatCurrency(result.yearlyProfit)}/year — that's serious money!
+                      {/* Motivational Messages based on results */}
+                      <div className="mt-5 p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                        {result.yearlyProfit >= 100000 ? (
+                          <p className="text-base md:text-lg text-primary font-semibold">
+                            🚀 {formatCurrency(result.yearlyProfit)}/year — You could quit your day job!
                           </p>
-                        </div>
-                      )}
+                        ) : result.yearlyProfit >= 50000 ? (
+                          <p className="text-base md:text-lg text-primary font-semibold">
+                            🔥 {formatCurrency(result.yearlyProfit)}/year — That's serious side income!
+                          </p>
+                        ) : result.yearlyProfit >= 20000 ? (
+                          <p className="text-base md:text-lg text-primary font-semibold">
+                            💪 {formatCurrency(result.yearlyProfit)}/year — A solid extra income stream!
+                          </p>
+                        ) : result.yearlyProfit >= 5000 ? (
+                          <p className="text-base md:text-lg text-primary font-semibold">
+                            ✨ {formatCurrency(result.yearlyProfit)}/year — Great start! Scale it up!
+                          </p>
+                        ) : (
+                          <p className="text-base md:text-lg text-primary font-semibold">
+                            🌱 Every empire starts small. Keep building!
+                          </p>
+                        )}
+                      </div>
                     </>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Encouragement Footer */}
+              <div className="text-center p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-amber-500/10 border border-primary/20">
+                <Crown className="h-8 w-8 text-amber-500 mx-auto mb-3" />
+                <p className="text-lg font-semibold text-foreground">
+                  Remember: Consistency beats intensity.
+                </p>
+                <p className="text-base text-foreground/70 mt-2">
+                  Show up every day, learn from mistakes, and watch your hustle grow into something real.
+                </p>
+              </div>
             </div>
           )}
         </div>
