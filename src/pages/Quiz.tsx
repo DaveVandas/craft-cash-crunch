@@ -189,6 +189,9 @@ const Quiz = () => {
       setStreak(0);
     }
 
+    // Longer delay for wrong answers to read the fun fact
+    const delay = correct ? 2000 : 3500;
+    
     setTimeout(() => {
       if (currentQuestion < shuffledQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
@@ -197,7 +200,7 @@ const Quiz = () => {
       } else {
         setGameState('result');
       }
-    }, 2000);
+    }, delay);
   };
 
   const getResultTitle = () => {
