@@ -45,15 +45,15 @@ const QuickActions = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
             </div>
             
-            <CardContent className="p-3 flex items-center gap-2 relative z-10">
-              <div className={`p-1.5 rounded-full bg-secondary group-hover:scale-110 transition-transform flex-shrink-0 ${action.color}`}>
-                <action.icon className="h-4 w-4" />
+            <CardContent className="p-4 flex items-center gap-3 relative z-10">
+              <div className={`p-2.5 rounded-full bg-secondary group-hover:scale-110 transition-transform flex-shrink-0 ${action.color}`}>
+                <action.icon className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-semibold text-xs group-hover:text-primary transition-colors truncate">
+                <h3 className="font-semibold text-sm group-hover:text-primary transition-colors truncate">
                   {action.title}
                 </h3>
-                <p className="text-[10px] text-foreground/70 font-medium truncate">
+                <p className="text-xs text-foreground/70 font-medium truncate">
                   {action.description}
                 </p>
               </div>
