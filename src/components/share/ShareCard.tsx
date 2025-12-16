@@ -212,20 +212,21 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
 
   return (
     <div id="share-card" className="space-y-6">
-      {/* Flex Mode Toggle */}
-      <div className="flex items-center justify-end gap-3 px-2">
-        <div className="flex items-center gap-2">
-          <Flame className={`h-4 w-4 transition-colors ${flexMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
-          <Label htmlFor="flex-mode" className={`text-sm font-medium cursor-pointer ${flexMode ? 'text-orange-500' : 'text-muted-foreground'}`}>
-            Flex Mode
-          </Label>
-        </div>
+      {/* Flex Mode Toggle - Centered */}
+      <div className="flex items-center justify-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50">
+        <Label htmlFor="flex-mode" className="text-sm text-muted-foreground cursor-pointer">
+          Standard
+        </Label>
         <Switch
           id="flex-mode"
           checked={flexMode}
           onCheckedChange={setFlexMode}
           className="data-[state=checked]:bg-orange-500"
         />
+        <Label htmlFor="flex-mode" className={`text-sm cursor-pointer flex items-center gap-1 ${flexMode ? 'text-orange-500 font-semibold' : 'text-muted-foreground'}`}>
+          <Flame className={`h-4 w-4 ${flexMode ? 'text-orange-500' : ''}`} />
+          Flex Mode
+        </Label>
       </div>
 
       {/* Card - Flex Mode or Standard */}
