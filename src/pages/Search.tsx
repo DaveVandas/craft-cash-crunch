@@ -91,10 +91,13 @@ const Search = () => {
                 <div className="text-4xl mb-4">🔐</div>
                 <h3 className="font-semibold text-xl mb-2">Sign In Required</h3>
                 <p className="text-muted-foreground mb-6">
-                  Create a free account to search for celebrities and see their earnings.
+                  Sign in (or create an account) to unlock full earnings profiles.
+                  <span className="block mt-2 text-sm">
+                    Youll get <span className="text-primary font-semibold">3 free searches</span> to start, then its <span className="text-primary font-semibold">$4.99 once</span> for unlimited lifetime access.
+                  </span>
                 </p>
                 <Button onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90">
-                  Sign In / Sign Up
+                  Sign In to Unlock
                 </Button>
               </CardContent>
             </Card>

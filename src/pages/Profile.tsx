@@ -74,10 +74,13 @@ const Profile = () => {
               <div className="text-4xl mb-4">🔐</div>
               <h3 className="font-semibold text-xl mb-2">Sign In Required</h3>
               <p className="text-muted-foreground mb-6">
-                Create a free account to view celebrity earnings and comparisons.
+                Sign in (or create an account) to view earnings, breakdowns, and share cards.
+                <span className="block mt-2 text-sm">
+                  Start with <span className="text-primary font-semibold">3 free searches</span>, then unlock <span className="text-primary font-semibold">lifetime access for $4.99</span>.
+                </span>
               </p>
               <Button onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90">
-                Sign In / Sign Up
+                Sign In to Unlock
               </Button>
             </CardContent>
           </Card>
