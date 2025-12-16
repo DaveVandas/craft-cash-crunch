@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PaywallGate from '@/components/paywall/PaywallGate';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import { getCategoryById, categories } from '@/lib/categories';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,7 @@ const Category = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1">
+        <PaywallGate>
         {/* Hero Section */}
         <section className="relative py-12 md:py-16">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
@@ -117,6 +119,7 @@ const Category = () => {
             ))}
           </div>
         </section>
+        </PaywallGate>
       </main>
       <Footer />
     </div>

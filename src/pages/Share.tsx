@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PaywallGate from '@/components/paywall/PaywallGate';
 import SearchBar from '@/components/home/SearchBar';
 import ShareCard from '@/components/share/ShareCard';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
@@ -23,6 +24,7 @@ const Share = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1">
+        <PaywallGate>
         <section className="relative py-12 md:py-16">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
@@ -65,6 +67,7 @@ const Share = () => {
             )}
           </div>
         </section>
+        </PaywallGate>
       </main>
       <Footer />
     </div>
