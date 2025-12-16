@@ -13,7 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
-  DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3
+  DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
+  Cpu, Zap, AlertTriangle
 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -485,6 +486,139 @@ const Admin = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Usage & Cost Estimator */}
+        <Card className="border-primary/20 mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-primary" />
+              AI Usage & Cost Estimator
+            </CardTitle>
+            <CardDescription>
+              Estimated costs based on Lovable AI (Gemini 2.5 Flash) usage
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {/* Current Usage Stats */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Zap className="h-4 w-4" />
+                  Current AI Calls (Total)
+                </div>
+                <p className="text-2xl font-bold">{totalSearches.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">1 search = 1 AI call</p>
+              </div>
+              
+              {/* Estimated Cost To Date */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                  Est. AI Cost To Date
+                </div>
+                <p className="text-2xl font-bold text-primary">
+                  ${(totalSearches * 0.0001).toFixed(2)}
+                </p>
+                <p className="text-xs text-muted-foreground">~$0.0001 per call</p>
+              </div>
+              
+              {/* Avg Daily Searches */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Activity className="h-4 w-4" />
+                  Avg Searches/Day (est.)
+                </div>
+                <p className="text-2xl font-bold">
+                  {users.length > 0 ? Math.round(totalSearches / Math.max(1, Math.ceil((Date.now() - new Date(users.reduce((min, u) => u.created_at < min ? u.created_at : min, users[0]?.created_at || new Date().toISOString())).getTime()) / 86400000))) : 0}
+                </p>
+                <p className="text-xs text-muted-foreground">based on historical data</p>
+              </div>
+            </div>
+
+            {/* Cost Projections Table */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Scenario</TableHead>
+                    <TableHead className="text-center">Daily Users</TableHead>
+                    <TableHead className="text-center">Searches/User</TableHead>
+                    <TableHead className="text-center">Daily AI Calls</TableHead>
+                    <TableHead className="text-center">Monthly AI Calls</TableHead>
+                    <TableHead className="text-right">Est. Monthly Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">Current (Your App)</TableCell>
+                    <TableCell className="text-center">{recentlyActive}</TableCell>
+                    <TableCell className="text-center">{totalUsers > 0 ? (totalSearches / totalUsers).toFixed(1) : '—'}</TableCell>
+                    <TableCell className="text-center">{Math.round(recentlyActive * (totalUsers > 0 ? totalSearches / totalUsers : 0))}</TableCell>
+                    <TableCell className="text-center">{(Math.round(recentlyActive * (totalUsers > 0 ? totalSearches / totalUsers : 0)) * 30).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-medium">${(Math.round(recentlyActive * (totalUsers > 0 ? totalSearches / totalUsers : 0)) * 30 * 0.0001).toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Small Scale</TableCell>
+                    <TableCell className="text-center">100</TableCell>
+                    <TableCell className="text-center">10</TableCell>
+                    <TableCell className="text-center">1,000</TableCell>
+                    <TableCell className="text-center">30,000</TableCell>
+                    <TableCell className="text-right font-medium">$3.00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Medium Scale</TableCell>
+                    <TableCell className="text-center">500</TableCell>
+                    <TableCell className="text-center">15</TableCell>
+                    <TableCell className="text-center">7,500</TableCell>
+                    <TableCell className="text-center">225,000</TableCell>
+                    <TableCell className="text-right font-medium">$22.50</TableCell>
+                  </TableRow>
+                  <TableRow className="bg-primary/5 border-primary/20">
+                    <TableCell className="font-medium flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-primary" />
+                      Your Question: 1K Users
+                    </TableCell>
+                    <TableCell className="text-center font-bold">1,000</TableCell>
+                    <TableCell className="text-center font-bold">20</TableCell>
+                    <TableCell className="text-center font-bold">20,000</TableCell>
+                    <TableCell className="text-center font-bold">600,000</TableCell>
+                    <TableCell className="text-right font-bold text-primary">$60.00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Large Scale</TableCell>
+                    <TableCell className="text-center">5,000</TableCell>
+                    <TableCell className="text-center">20</TableCell>
+                    <TableCell className="text-center">100,000</TableCell>
+                    <TableCell className="text-center">3,000,000</TableCell>
+                    <TableCell className="text-right font-medium">$300.00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Viral Scale</TableCell>
+                    <TableCell className="text-center">10,000</TableCell>
+                    <TableCell className="text-center">25</TableCell>
+                    <TableCell className="text-center">250,000</TableCell>
+                    <TableCell className="text-center">7,500,000</TableCell>
+                    <TableCell className="text-right font-medium">$750.00</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                Cost Breakdown
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>Model:</strong> Gemini 2.5 Flash (~$0.075/1M input tokens, ~$0.30/1M output tokens)</li>
+                <li>• <strong>Per Search:</strong> ~500 input tokens + ~200 output tokens = ~$0.0001 per call</li>
+                <li>• <strong>For 1,000 daily users × 20 searches:</strong> 600K calls/month = <span className="text-primary font-semibold">~$60/month</span></li>
+                <li>• <strong>Revenue at that scale:</strong> If 10% convert at $4.99 = 100 × $4.99 = <span className="text-green-500 font-semibold">$499/month revenue</span></li>
+                <li>• <strong>Net profit margin:</strong> $499 - $60 = <span className="text-green-500 font-semibold">$439/month (~88% margin)</span></li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs for Users and Trends */}
         <Tabs defaultValue="users" className="space-y-4">
