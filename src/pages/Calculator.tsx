@@ -55,6 +55,7 @@ const Calculator = () => {
   const [salesVolume, setSalesVolume] = useState('');
   const [period, setPeriod] = useState('month');
   const [hustleResult, setHustleResult] = useState<{ monthly: number; yearly: number } | null>(null);
+  const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
   
   const { searchCelebrity } = useCelebritySearch();
 
@@ -118,6 +119,8 @@ const Calculator = () => {
   };
 
   const applyHustlePreset = (hustle: typeof SIDE_HUSTLE_IDEAS[0]) => {
+    setSelectedHustle(hustle);
+    
     // Populate the calculator with realistic example values
     setBuyPrice(String(Math.round(hustle.avgProfit * 0.4))); // Approximate buy price
     setSellPrice(String(Math.round(hustle.avgProfit * 1.4))); // Sell = buy + profit
@@ -262,8 +265,8 @@ const Calculator = () => {
                         {SIDE_HUSTLE_IDEAS.map((hustle) => (
                           <Button
                             key={hustle.name}
-                            variant="outline"
-                            className="h-auto py-3 flex-col text-left hover:border-primary/50 hover:bg-primary/5"
+                            variant={selectedHustle?.name === hustle.name ? "default" : "outline"}
+                            className={`h-auto py-3 flex-col text-left hover:border-primary/50 hover:bg-primary/5 ${selectedHustle?.name === hustle.name ? 'border-primary bg-primary/10' : ''}`}
                             onClick={() => applyHustlePreset(hustle)}
                           >
                             <span className="text-xl mb-1">{hustle.emoji}</span>
@@ -272,6 +275,51 @@ const Calculator = () => {
                           </Button>
                         ))}
                       </div>
+
+                      {/* Selected Hustle Summary */}
+                      {selectedHustle && (
+                        <div className="mt-4 p-4 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 to-green-500/5 animate-fade-in">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-2xl">{selectedHustle.emoji}</span>
+                            <div>
+                              <p className="font-semibold">{selectedHustle.name}</p>
+                              <p className="text-xs text-muted-foreground">{selectedHustle.tip}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div className="text-center p-2 rounded bg-green-500/10 border border-green-500/20">
+                              <p className="text-xs text-muted-foreground">Monthly</p>
+                              <p className="text-lg font-bold text-green-500">{formatCurrency(selectedHustle.avgProfit * selectedHustle.salesPerMonth)}</p>
+                            </div>
+                            <div className="text-center p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                              <p className="text-xs text-muted-foreground">Yearly</p>
+                              <p className="text-lg font-bold text-amber-500">{formatCurrency(selectedHustle.avgProfit * selectedHustle.salesPerMonth * 12)}</p>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded bg-background/50 border border-border/50">
+                            <p className="text-xs text-muted-foreground mb-2 text-center font-medium">📦 What it takes:</p>
+                            <div className="grid grid-cols-3 gap-2 text-center">
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold">{Math.ceil(selectedHustle.salesPerMonth / 30)}</p>
+                                <p className="text-[10px] text-muted-foreground">sales/day</p>
+                              </div>
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold">{Math.ceil(selectedHustle.salesPerMonth / 4)}</p>
+                                <p className="text-[10px] text-muted-foreground">sales/week</p>
+                              </div>
+                              <div className="p-2 rounded bg-secondary/30">
+                                <p className="text-lg font-bold">{selectedHustle.salesPerMonth}</p>
+                                <p className="text-[10px] text-muted-foreground">sales/month</p>
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground text-center mt-2">
+                              At {formatCurrency(selectedHustle.avgProfit)} profit per sale
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
