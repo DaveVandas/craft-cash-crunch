@@ -35,32 +35,32 @@ const DailyCelebritySpotlight = () => {
         <X className="h-4 w-4" />
       </Button>
 
-      <Link to={`/profile/${featured.id}`} className="block p-4">
+      <Link to={`/profile/${featured.id}`} className="block px-4 py-2.5">
         <div 
-          className={`flex items-center gap-4 transition-all duration-150 ${
+          className={`flex items-center gap-3 transition-all duration-150 ${
             isTransitioning ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
           }`}
         >
           <div className="flex-shrink-0">
-            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center animate-pulse-gold">
-              <Star className="h-6 w-6 text-primary" />
+            <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center animate-pulse-gold">
+              <Star className="h-4 w-4 text-primary" />
             </div>
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-medium text-primary uppercase tracking-wide">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-medium text-primary uppercase tracking-wide">
                 Featured
               </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">{featured.title}</span>
+              <span className="text-[10px] text-muted-foreground">•</span>
+              <span className="text-[10px] text-muted-foreground">{featured.title}</span>
             </div>
             
-            <h3 className="font-serif text-lg font-bold truncate">
+            <h3 className="font-serif text-base font-bold truncate leading-tight">
               {featured.name}
             </h3>
             
-            <p className="text-sm text-primary font-medium flex items-center gap-1">
+            <p className="text-xs text-primary font-medium flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               {featured.shockingStat}
             </p>
