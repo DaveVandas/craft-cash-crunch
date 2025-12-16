@@ -112,6 +112,8 @@ const Search = () => {
           {!searching && timedOut && (
             <p className="text-center text-muted-foreground">That search took too long — try again.</p>
           )}
+
+          {!searching && !validationError && result && (
             <Link to={`/profile/${result.id}`}>
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
                 <CardContent className="p-6">
