@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { calculateTimeToEarn, formatCompactCurrency, formatLargeCurrency } from '@/lib/earnings';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Rocket, ArrowDown } from 'lucide-react';
+import { AlertTriangle, TrendingUp, DollarSign, Rocket, ArrowDown } from 'lucide-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 
 const TRANSITION_MESSAGES = [
@@ -44,6 +44,10 @@ const RealityCheckResult = ({
 }: RealityCheckResultProps) => {
   const { currentEarnings, breakdown } = useEarningsTicker({ 
     annualEarnings: userSalary 
+  });
+  
+  const { currentEarnings: celebEarnings, breakdown: celebBreakdown } = useEarningsTicker({ 
+    annualEarnings: celebrityAnnualEarnings 
   });
 
   // Pick a random message each time celebrity changes
@@ -113,33 +117,37 @@ const RealityCheckResult = ({
               </div>
             </div>
 
-            {/* Right: Comparison Stats */}
+            {/* Right: Celebrity Live Earnings */}
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">vs {celebrityName}</span>
+                <span className="text-sm font-semibold text-primary">{celebrityName}'s Live Earnings</span>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Earns your salary in</span>
-                  </div>
-                  <span className="text-sm font-bold text-primary">{timeToEarnUserSalary}</span>
+              <div className="text-center mb-3">
+                <p className="text-xs text-muted-foreground mb-1">Earned since opening</p>
+                <div className="font-mono text-2xl md:text-3xl font-bold text-primary ticker-number">
+                  {formatLargeCurrency(celebEarnings)}
                 </div>
-                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-emerald-400" />
-                    <span className="text-xs text-muted-foreground">Makes</span>
-                  </div>
-                  <span className="text-sm font-bold text-emerald-400">{ratio.toLocaleString()}x more</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="text-center p-2 rounded bg-secondary/30">
+                  <p className="text-[10px] text-muted-foreground">Per Second</p>
+                  <p className="font-mono text-xs font-semibold text-primary">${celebBreakdown.perSecond.toFixed(2)}</p>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-blue-400" />
-                    <span className="text-xs text-muted-foreground">Years to match</span>
-                  </div>
-                  <span className="text-sm font-bold text-blue-400">{yearsToCatchUp.toLocaleString()}</span>
+                <div className="text-center p-2 rounded bg-secondary/30">
+                  <p className="text-[10px] text-muted-foreground">Per Hour</p>
+                  <p className="font-mono text-xs font-semibold text-primary">${celebBreakdown.perHour.toLocaleString()}</p>
+                </div>
+              </div>
+              {/* Quick comparison stats */}
+              <div className="pt-2 border-t border-border/30 space-y-1.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Earns your salary in</span>
+                  <span className="font-semibold text-primary">{timeToEarnUserSalary}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Makes</span>
+                  <span className="font-semibold text-amber-400">{ratio.toLocaleString()}x more</span>
                 </div>
               </div>
             </div>
