@@ -90,9 +90,8 @@ const Calculator = () => {
         setSearchQuery('');
         setShowResults(false);
         toast.success(`Found ${result.name}!`);
-      } else {
-        toast.error('Celebrity not found. Try another name.');
       }
+      // If result is null, the search hook already surfaced the reason via toast (paywall, rate limit, AI error, etc.)
     } catch (error) {
       toast.error('Search failed. Please try again.');
     } finally {
