@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SearchBarWithAutocompleteProps {
   placeholder?: string;
+  categoryId?: string;
 }
 
 interface Suggestion {
@@ -14,14 +15,25 @@ interface Suggestion {
   searchCount: number;
 }
 
-// Popular fallback suggestions when no matches
+// Popular fallback suggestions by category
+const POPULAR_BY_CATEGORY: Record<string, string[]> = {
+  'athletes': ['LeBron James', 'Cristiano Ronaldo', 'Lionel Messi', 'Patrick Mahomes', 'Stephen Curry', 'Serena Williams', 'Tom Brady', 'Tiger Woods', 'Lewis Hamilton', 'Shohei Ohtani'],
+  'hollywood': ['Dwayne Johnson', 'Scarlett Johansson', 'Tom Cruise', 'Leonardo DiCaprio', 'Margot Robbie', 'Robert Downey Jr', 'Ryan Reynolds', 'Jennifer Lawrence', 'Brad Pitt', 'Chris Hemsworth'],
+  'musicians': ['Taylor Swift', 'Drake', 'Beyoncé', 'Ed Sheeran', 'Bad Bunny', 'The Weeknd', 'Rihanna', 'Travis Scott', 'Billie Eilish', 'Adele'],
+  'tech-billionaires': ['Elon Musk', 'Jeff Bezos', 'Mark Zuckerberg', 'Bill Gates', 'Sundar Pichai', 'Tim Cook', 'Jensen Huang', 'Satya Nadella', 'Larry Ellison', 'Sam Altman'],
+  'politicians': ['Donald Trump', 'Joe Biden', 'Barack Obama', 'Vladimir Putin', 'Emmanuel Macron', 'Rishi Sunak', 'Justin Trudeau', 'Angela Merkel', 'Nancy Pelosi', 'Bernie Sanders'],
+  'influencers': ['MrBeast', 'Kylie Jenner', 'Logan Paul', 'PewDiePie', 'Charli D\'Amelio', 'Kim Kardashian', 'Jake Paul', 'KSI', 'Ninja', 'Pokimane'],
+  'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Mansa Musa', 'Henry Ford', 'Cleopatra', 'Genghis Khan', 'J.P. Morgan', 'Cornelius Vanderbilt', 'King Solomon', 'Augustus Caesar'],
+};
+
+// General popular celebrities
 const POPULAR_CELEBRITIES = [
   'Elon Musk', 'Taylor Swift', 'LeBron James', 'Beyoncé', 'Jeff Bezos',
   'Cristiano Ronaldo', 'Kim Kardashian', 'Drake', 'Oprah Winfrey', 'Jay-Z',
   'Rihanna', 'Michael Jordan', 'Lionel Messi', 'The Rock', 'Kanye West'
 ];
 
-const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlete, or billionaire..." }: SearchBarWithAutocompleteProps) => {
+const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlete, or billionaire...", categoryId }: SearchBarWithAutocompleteProps) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -34,20 +46,31 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
   // Fetch suggestions from search_trends
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (query.length < 2) {
+      // Get category-specific popular celebrities
+      const popularPool = categoryId ? (POPULAR_BY_CATEGORY[categoryId] || POPULAR_CELEBRITIES) : POPULAR_CELEBRITIES;
+      
+      if (query.length < 1) {
+        // Show popular suggestions when focused but no query
         setSuggestions([]);
         return;
       }
 
       setLoading(true);
       try {
-        // Search from trending data
-        const { data: trendingData } = await supabase
+        // Build query for trending data
+        let dbQuery = supabase
           .from('search_trends')
-          .select('celebrity_name, search_count')
+          .select('celebrity_name, search_count, category')
           .ilike('celebrity_name', `%${query}%`)
           .order('search_count', { ascending: false })
           .limit(5);
+
+        // Filter by category if provided
+        if (categoryId) {
+          dbQuery = dbQuery.eq('category', categoryId);
+        }
+
+        const { data: trendingData } = await dbQuery;
 
         const trendingSuggestions: Suggestion[] = (trendingData || []).map(d => ({
           name: d.celebrity_name,
@@ -55,7 +78,7 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
         }));
 
         // Add popular matches if we don't have enough
-        const popularMatches = POPULAR_CELEBRITIES
+        const popularMatches = popularPool
           .filter(name => name.toLowerCase().includes(query.toLowerCase()))
           .filter(name => !trendingSuggestions.find(s => s.name.toLowerCase() === name.toLowerCase()))
           .slice(0, 5 - trendingSuggestions.length)
@@ -69,9 +92,9 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
       }
     };
 
-    const debounce = setTimeout(fetchSuggestions, 200);
+    const debounce = setTimeout(fetchSuggestions, 150);
     return () => clearTimeout(debounce);
-  }, [query]);
+  }, [query, categoryId]);
 
   // Close on outside click
   useEffect(() => {
