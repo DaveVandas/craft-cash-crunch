@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PaywallGate from '@/components/paywall/PaywallGate';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -157,10 +158,10 @@ const SideHustle = () => {
       <Header />
       
       <main className="flex-1 container py-10 md:py-12">
+        <PaywallGate>
         {/* Hero Section */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Rocket className="h-8 w-8 text-primary" />
             <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">
               Side Hustle <span className="gradient-gold-text">Guide</span>
             </h1>
@@ -360,6 +361,7 @@ const SideHustle = () => {
             </div>
           )}
         </div>
+        </PaywallGate>
       </main>
 
       <Footer />

@@ -34,12 +34,10 @@ const Index = () => {
             </div>
 
             <SearchBarWithAutocomplete />
+            <div className="mt-2">
+              <DailyWealthFact />
+            </div>
           </div>
-        </section>
-
-        {/* Daily Wealth Fact - Under Search */}
-        <section className="container -mt-8 mb-8">
-          <DailyWealthFact />
         </section>
 
         {/* Featured Section - Stacked */}
