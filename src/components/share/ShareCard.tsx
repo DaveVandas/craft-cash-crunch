@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons, getMostDramaticComparison } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
@@ -53,9 +53,15 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [flexMode, setFlexMode] = useState(false);
+  const navigate = useNavigate();
   const breakdown = calculateEarningsBreakdown(celebrity.annualEarnings);
   const comparisons = generateComparisons(celebrity.annualEarnings);
   const dramaticComparison = getMostDramaticComparison(celebrity.annualEarnings);
+  
+  const handleSuggestionClick = (slug: string) => {
+    navigate(`/profile/${slug}`);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
   
   // Get diverse comparisons for visual appeal
   const topComparisons = comparisons.slice(0, 4);
@@ -626,11 +632,10 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {getSimilarCelebrities(celebrity.name, celebrity.category, 4).map((similar) => (
-                <Link
+                <button
                   key={similar.name}
-                  to={`/profile/${nameToSlug(similar.name)}`}
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="group relative overflow-hidden rounded-lg border border-border/40 hover:border-primary/40 bg-secondary/20 hover:bg-secondary/40 transition-all"
+                  onClick={() => handleSuggestionClick(nameToSlug(similar.name))}
+                  className="group relative overflow-hidden rounded-lg border border-border/40 hover:border-primary/40 bg-secondary/20 hover:bg-secondary/40 transition-all text-left"
                 >
                   {/* Card content */}
                   <div className="p-2.5 flex items-center gap-2.5">
@@ -646,7 +651,7 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
                       </p>
                     </div>
                   </div>
-                </Link>
+                </button>
               ))}
             </div>
           </div>
