@@ -10,17 +10,38 @@ import ShareCard from '@/components/share/ShareCard';
 import TimeOnPageCounter from '@/components/profile/TimeOnPageCounter';
 import MoneyRain from '@/components/effects/MoneyRain';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
+import { useAuth } from '@/contexts/AuthContext';
 import { Celebrity } from '@/lib/types';
 import { slugToName } from '@/lib/validation';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
+
+const getAnonSearchCount = (): number => {
+  try {
+    return parseInt(localStorage.getItem(ANON_SEARCH_KEY) || '0', 10);
+  } catch {
+    return 0;
+  }
+};
+
 const Profile = () => {
   const { id } = useParams<{ id: string }>();
   const { fetchCelebrity, loading } = useCelebrityData();
+  const { user, accessInfo, loading: authLoading } = useAuth();
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
 
+  // Check if user is blocked BEFORE fetching
+  const anonSearchCount = getAnonSearchCount();
+  const isAnonBlocked = !user && anonSearchCount >= 3;
+  const isUserBlocked = user && accessInfo && !accessInfo.hasAccess;
+  const shouldBlock = isAnonBlocked || isUserBlocked;
+
   useEffect(() => {
+    // Don't fetch if blocked
+    if (shouldBlock || authLoading) return;
+    
     if (id) {
       // Validate the URL parameter before making API call
       const validatedName = slugToName(id);
@@ -34,9 +55,24 @@ const Profile = () => {
       setValidationError(false);
       fetchCelebrity(validatedName).then(setCelebrity);
     }
-  }, [id, fetchCelebrity]);
+  }, [id, fetchCelebrity, shouldBlock, authLoading]);
 
-  if (loading) {
+  // Show paywall FIRST if blocked
+  if (shouldBlock && !authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1">
+          <PaywallGate>
+            <div />
+          </PaywallGate>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />

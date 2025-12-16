@@ -62,7 +62,10 @@ export const useCelebrityData = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch celebrity data';
       setError(message);
-      toast.error(message);
+      // Don't show toast for limit reached - PaywallGate handles it
+      if (!message.toLowerCase().includes('free searches') && !message.toLowerCase().includes('sign up')) {
+        toast.error(message);
+      }
       return null;
     } finally {
       setLoading(false);
@@ -100,7 +103,10 @@ export const useCelebrityData = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch celebrities';
       setError(message);
-      toast.error(message);
+      // Don't show toast for limit reached - PaywallGate handles it
+      if (!message.toLowerCase().includes('free searches') && !message.toLowerCase().includes('sign up')) {
+        toast.error(message);
+      }
       return [];
     } finally {
       setLoading(false);
