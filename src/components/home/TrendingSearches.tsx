@@ -284,7 +284,8 @@ const TrendingSearches = () => {
                   <div key={i} className="h-14 w-52 bg-secondary/30 rounded-xl animate-pulse shrink-0" />
                 ))
               ) : (
-                displayItems.map((person, index) => (
+                // Duplicate items for seamless infinite scroll
+                [...displayItems, ...displayItems].map((person, index) => (
                   <Link
                     key={`${person.name}-${index}`}
                     to={`/profile/${nameToSlug(person.name)}`}
