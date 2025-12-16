@@ -267,3 +267,16 @@
 .animate-pulse-scale {
   animation: pulse-scale 2s ease-in-out infinite;
 }
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 30s linear infinite;
+}

@@ -124,33 +124,7 @@ const TrendingSearches = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Auto-scroll effect for desktop
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || loading || isPaused) return;
-
-    const scrollSpeed = 1; // pixels per frame
-    let animationId: number;
-
-    const scroll = () => {
-      if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
-        container.scrollLeft = 0;
-      } else {
-        container.scrollLeft += scrollSpeed;
-      }
-      animationId = requestAnimationFrame(scroll);
-    };
-
-    // Start scrolling after a short delay
-    const timeoutId = setTimeout(() => {
-      animationId = requestAnimationFrame(scroll);
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeoutId);
-      cancelAnimationFrame(animationId);
-    };
-  }, [loading, isPaused]);
+  // No longer using JS-based scroll - using CSS animation instead
 
   useEffect(() => {
     // Rotate category based on current hour
@@ -276,9 +250,12 @@ const TrendingSearches = () => {
             ref={scrollContainerRef}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="flex-1 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-secondary/30 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-primary/60"
+            className="flex-1 overflow-hidden"
           >
-            <div className="flex items-center gap-3">
+            <div 
+              className={`flex items-center gap-3 ${!loading && !isPaused ? 'animate-scroll-infinite' : ''}`}
+              style={{ width: 'max-content' }}
+            >
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-14 w-52 bg-secondary/30 rounded-xl animate-pulse shrink-0" />

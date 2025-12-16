@@ -65,17 +65,17 @@ const FeaturedTicker = () => {
 
             {/* Main content */}
             <div
-              className={`p-6 md:p-8 transition-all duration-200 ${
+              className={`p-8 md:p-10 transition-all duration-200 ${
                 isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
               }`}
             >
-              <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex flex-col md:flex-row items-center gap-8">
                 {/* Avatar and info */}
                 <Link
                   to={`/profile/${featured.id}`}
-                  className="flex flex-col md:flex-row items-center gap-4 group"
+                  className="flex flex-col md:flex-row items-center gap-5 group"
                 >
-                  <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
+                  <Avatar className="h-24 w-24 md:h-28 md:w-28 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
                     <AvatarImage
                       src={featured.imageUrl}
                       alt={featured.name}
@@ -102,7 +102,7 @@ const FeaturedTicker = () => {
                     <TrendingUp className="h-4 w-4 text-primary" />
                     <span>Earned since you opened this page</span>
                   </div>
-                  <div className="font-mono text-3xl md:text-4xl font-bold gradient-gold-text ticker-number tabular-nums">
+                  <div className="font-mono text-4xl md:text-5xl font-bold gradient-gold-text ticker-number tabular-nums">
                     {formatLargeCurrency(currentEarnings)}
                   </div>
                   <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
