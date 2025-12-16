@@ -1,7 +1,35 @@
+import { useMemo } from 'react';
 import { calculateTimeToEarn, formatCompactCurrency, formatLargeCurrency } from '@/lib/earnings';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Info, Rocket, ArrowDown } from 'lucide-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
+
+const TRANSITION_MESSAGES = [
+  {
+    headline: "Real talk? This next part might sting a little. 🫣",
+    body: "But here's the thing — every mogul started somewhere. The gap you're about to see? It's not a wall, it's a blueprint. Scroll down and I'll show you exactly how to start closing it."
+  },
+  {
+    headline: "Okay, deep breath... 😤",
+    body: "What you're about to see might hurt. But pain is temporary — hustle is forever. Keep scrolling and I'll show you how to flip the script."
+  },
+  {
+    headline: "No sugarcoating here. 🍬❌",
+    body: "These numbers are wild. But remember: comparison is the thief of joy... unless you use it as fuel. Let's turn that frustration into motivation below."
+  },
+  {
+    headline: "Brace yourself, champ. 💪",
+    body: "This reality check hits different. But every empire started with a single brick. Stick with me — the path forward is just below."
+  },
+  {
+    headline: "Warning: ego check incoming. 😅",
+    body: "Look, these numbers aren't meant to discourage you — they're meant to ignite you. The gap is real, but so is your potential. Let's build."
+  },
+  {
+    headline: "This might feel like a gut punch. 🥊",
+    body: "But champions get back up. The wealth gap is massive, sure — but every journey starts with awareness. Your comeback plan is waiting below."
+  }
+];
 
 interface RealityCheckResultProps {
   userSalary: number;
@@ -17,6 +45,11 @@ const RealityCheckResult = ({
   const { currentEarnings, breakdown } = useEarningsTicker({ 
     annualEarnings: userSalary 
   });
+
+  // Pick a random message each time celebrity changes
+  const transitionMessage = useMemo(() => {
+    return TRANSITION_MESSAGES[Math.floor(Math.random() * TRANSITION_MESSAGES.length)];
+  }, [celebrityName]);
 
   if (!userSalary || userSalary <= 0) return null;
 
@@ -63,11 +96,10 @@ const RealityCheckResult = ({
             </div>
           </div>
           <p className="text-lg font-semibold text-amber-200 mb-2">
-            Real talk? This next part might sting a little. 🫣
+            {transitionMessage.headline}
           </p>
           <p className="text-muted-foreground mb-3">
-            But here's the thing — every mogul started somewhere. The gap you're about to see? 
-            It's not a wall, it's a blueprint. Scroll down and I'll show you exactly how to start closing it.
+            {transitionMessage.body}
           </p>
           <div className="flex items-center justify-center gap-2 text-amber-400 text-sm font-medium">
             <span>Side hustle strategies below</span>
