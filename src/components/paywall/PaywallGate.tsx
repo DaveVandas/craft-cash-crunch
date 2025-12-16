@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Crown, Lock, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const ANON_SEARCH_KEY = 'wealth_anon_searches';
+const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
 const getAnonSearchCount = (): number => {
   try {
