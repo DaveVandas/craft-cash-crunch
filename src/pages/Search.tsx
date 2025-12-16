@@ -28,38 +28,49 @@ const Search = () => {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    if (rawQuery) {
-      const validatedQuery = validateCelebrityName(rawQuery);
-      
-      if (!validatedQuery) {
-        setValidationError(true);
-        setResult(null);
+    const performSearch = async () => {
+      if (rawQuery) {
+        const validatedQuery = validateCelebrityName(rawQuery);
+        
+        if (!validatedQuery) {
+          setValidationError(true);
+          setResult(null);
+          setAccessDenied(null);
+          setSearching(false);
+          return;
+        }
+        
+        // Check auth before searching; paywall is handled inside the search hook
+        if (!user) {
+          setAccessDenied('signin');
+          setResult(null);
+          setValidationError(false);
+          setSearching(false);
+          return;
+        }
+        
+        setValidationError(false);
         setAccessDenied(null);
-        return;
-      }
-      
-      // Check auth before searching; paywall is handled inside the search hook
-      if (!user) {
-        setAccessDenied('signin');
+        setSearching(true);
+        
+        try {
+          const res = await searchCelebrity(validatedQuery);
+          setResult(res);
+        } catch (error) {
+          console.error('Search error:', error);
+          setResult(null);
+        } finally {
+          setSearching(false);
+        }
+      } else {
         setResult(null);
         setValidationError(false);
+        setAccessDenied(null);
         setSearching(false);
-        return;
       }
-      
-      setValidationError(false);
-      setAccessDenied(null);
-      setSearching(true);
-      searchCelebrity(validatedQuery).then((res) => {
-        setResult(res);
-        setSearching(false);
-      });
-    } else {
-      setResult(null);
-      setValidationError(false);
-      setAccessDenied(null);
-      setSearching(false);
-    }
+    };
+    
+    performSearch();
   }, [rawQuery, searchCelebrity, user]);
 
   const handleUpgrade = async () => {
