@@ -98,6 +98,10 @@ const Footer = () => {
         
         <div className="mt-6 pt-4 border-t border-border/30 flex flex-col items-center gap-3">
           <div className="flex items-center gap-4 text-xs">
+            <Link to="/wealth-wisdom" className="text-primary hover:text-primary/80 transition-colors font-medium">
+              📚 Wealth Wisdom Blog
+            </Link>
+            <span className="text-border">•</span>
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
               About & FAQ
             </Link>
