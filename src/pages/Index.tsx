@@ -37,10 +37,14 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Daily Wealth Fact - Under Search */}
+        <section className="container mb-8">
+          <DailyWealthFact />
+        </section>
+
         {/* Featured Section - Stacked */}
         <section className="container mb-12">
           <div className="space-y-1">
-            <DailyWealthFact />
             <DailyCelebritySpotlight />
             <FeaturedTicker />
           </div>
