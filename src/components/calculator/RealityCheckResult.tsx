@@ -1,6 +1,6 @@
 import { calculateTimeToEarn, formatCompactCurrency, formatLargeCurrency } from '@/lib/earnings';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Info } from 'lucide-react';
+import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Info, Rocket, ArrowDown } from 'lucide-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 
 interface RealityCheckResultProps {
@@ -53,6 +53,28 @@ const RealityCheckResult = ({
         <AlertTriangle className="h-5 w-5" />
         <span className="font-semibold">Reality Check Results</span>
       </div>
+
+      {/* Empathetic Transition Message */}
+      <Card className="border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-card to-amber-900/10 overflow-hidden">
+        <CardContent className="p-6 text-center">
+          <div className="flex justify-center mb-3">
+            <div className="p-3 rounded-full bg-amber-500/20">
+              <Rocket className="h-6 w-6 text-amber-400" />
+            </div>
+          </div>
+          <p className="text-lg font-semibold text-amber-200 mb-2">
+            Real talk? This next part might sting a little. 🫣
+          </p>
+          <p className="text-muted-foreground mb-3">
+            But here's the thing — every mogul started somewhere. The gap you're about to see? 
+            It's not a wall, it's a blueprint. Scroll down and I'll show you exactly how to start closing it.
+          </p>
+          <div className="flex items-center justify-center gap-2 text-amber-400 text-sm font-medium">
+            <span>Side hustle strategies below</span>
+            <ArrowDown className="h-4 w-4 animate-bounce" />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* User's Live Earnings Ticker */}
       <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-card to-emerald-900/10 overflow-hidden">
