@@ -2,3 +2,9 @@ project_id = "gzhrgnoowzhifpbnnevp"
 
 [functions.admin-get-users]
 verify_jwt = false
+
+[functions.get-celebrity-data]
+verify_jwt = false
+
+[functions.increment-search]
+verify_jwt = false
