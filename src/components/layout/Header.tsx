@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2 } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,13 @@ const Header = () => {
           >
             <Calculator className="h-4 w-4" />
             <span>Reality Check</span>
+          </Link>
+          <Link 
+            to="/wealth-wisdom" 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary transition-all"
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Wisdom</span>
           </Link>
         </nav>
 

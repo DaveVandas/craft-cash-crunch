@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_subscribers: {
+        Row: {
+          email: string
+          id: string
+          is_active: boolean
+          name: string | null
+          source: string | null
+          subscribed_at: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          source?: string | null
+          subscribed_at?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          source?: string | null
+          subscribed_at?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           content: Json

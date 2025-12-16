@@ -6,6 +6,7 @@ import CategoryCard from '@/components/home/CategoryCard';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
 import DailyWealthFact from '@/components/home/DailyWealthFact';
+import WealthWisdomPromo from '@/components/home/WealthWisdomPromo';
 import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
@@ -51,11 +52,14 @@ const Index = () => {
           <FeaturedTicker />
         </section>
 
-        {/* Quick Actions */}
+        {/* Quick Actions + Wealth Wisdom Promo */}
         <section className="container mb-12">
           <h2 className="font-serif text-2xl font-bold mb-5">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
             <QuickActions />
+            <div className="col-span-2 sm:col-span-4 lg:col-span-1">
+              <WealthWisdomPromo />
+            </div>
           </div>
         </section>
 
