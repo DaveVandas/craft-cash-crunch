@@ -20,47 +20,48 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-12 md:py-20">
+        <section className="relative py-16 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
-            <div className="text-center mb-8 animate-fade-in">
-              <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">
+            <div className="text-center mb-10 animate-fade-in">
+              <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4">
                 See Wealth in <span className="gradient-gold-text">Perspective</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Mind-blowing comparisons that make celebrity earnings tangible.
               </p>
             </div>
 
             <SearchBarWithAutocomplete />
-
-            {/* Daily Wealth Fact - compact */}
-            <div className="mt-6 max-w-xl mx-auto">
-              <DailyWealthFact />
-            </div>
           </div>
         </section>
 
-        {/* Quick Actions - moved up for engagement */}
-        <section className="container mb-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <QuickActions />
-          </div>
-        </section>
-
-        {/* Featured Ticker - now compact inline bar */}
-        <section className="container mb-8">
+        {/* Featured Ticker */}
+        <section className="container mb-12">
           <FeaturedTicker />
         </section>
 
+        {/* Daily Wealth Fact */}
+        <section className="container mb-12">
+          <DailyWealthFact />
+        </section>
+
         {/* Daily Celebrity Spotlight */}
-        <section className="container mb-8">
+        <section className="container mb-12">
           <DailyCelebritySpotlight />
         </section>
 
         {/* Trending */}
-        <section className="container mb-10">
+        <section className="container mb-12">
           <TrendingSearches />
+        </section>
+
+        {/* Quick Actions */}
+        <section className="container mb-12">
+          <h2 className="font-serif text-2xl font-bold mb-5">Quick Actions</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <QuickActions />
+          </div>
         </section>
 
         {/* Categories */}
@@ -80,4 +81,3 @@ const Index = () => {
 };
 
 export default Index;
-
