@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { calculateTimeToEarn, formatCompactCurrency, formatLargeCurrency } from '@/lib/earnings';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Info, Rocket, ArrowDown } from 'lucide-react';
+import { AlertTriangle, Clock, TrendingUp, Calendar, DollarSign, Rocket, ArrowDown } from 'lucide-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 
 const TRANSITION_MESSAGES = [
@@ -57,29 +57,6 @@ const RealityCheckResult = ({
   const ratio = Math.round(celebrityAnnualEarnings / userSalary);
   const yearsToCatchUp = Math.round(celebrityAnnualEarnings / userSalary);
 
-  const stats = [
-    {
-      icon: Clock,
-      label: `${celebrityName} earns your yearly salary in`,
-      value: timeToEarnUserSalary,
-      color: 'text-primary'
-    },
-    {
-      icon: TrendingUp,
-      label: 'They make',
-      value: `${ratio.toLocaleString()}x`,
-      suffix: 'what you make',
-      color: 'text-emerald-400'
-    },
-    {
-      icon: Calendar,
-      label: 'It would take you',
-      value: `${yearsToCatchUp.toLocaleString()} years`,
-      suffix: 'to earn what they make in 1 year',
-      color: 'text-blue-400'
-    }
-  ];
-
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center gap-2 text-primary">
@@ -108,104 +85,75 @@ const RealityCheckResult = ({
         </CardContent>
       </Card>
 
-      {/* User's Live Earnings Ticker */}
-      <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-card to-emerald-900/10 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="h-5 w-5 text-emerald-400" />
-            <span className="font-semibold text-emerald-400">Your Live Earnings</span>
-          </div>
-          
-          <div className="text-center mb-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              You've earned since opening this page
-            </p>
-            <div className="font-mono text-4xl md:text-5xl font-bold text-emerald-400 ticker-number">
-              {formatLargeCurrency(currentEarnings)}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="text-center p-3 rounded-lg bg-secondary/50">
-              <p className="text-xs text-muted-foreground mb-1">Per Second</p>
-              <p className="font-mono text-sm font-semibold text-emerald-400">
-                ${breakdown.perSecond.toFixed(4)}
-              </p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-secondary/50">
-              <p className="text-xs text-muted-foreground mb-1">Per Minute</p>
-              <p className="font-mono text-sm font-semibold text-emerald-400">
-                ${breakdown.perMinute.toFixed(2)}
-              </p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-secondary/50">
-              <p className="text-xs text-muted-foreground mb-1">Per Hour</p>
-              <p className="font-mono text-sm font-semibold text-emerald-400">
-                ${breakdown.perHour.toFixed(2)}
-              </p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-secondary/50">
-              <p className="text-xs text-muted-foreground mb-1">Per Day</p>
-              <p className="font-mono text-sm font-semibold text-emerald-400">
-                ${breakdown.perDay.toFixed(0)}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
-            <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium">How we calculate this:</span> Your annual salary divided across 24 hours a day, 7 days a week, 365 days a year. This gives you a real perspective on how your earnings break down over time.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4">
-        {stats.map((stat, index) => (
-          <Card 
-            key={stat.label}
-            className="border-border/50 bg-card/50 overflow-hidden animate-slide-up"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-full bg-secondary ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {stat.label}
-                  </p>
-                  <p className={`text-3xl font-bold ${stat.color}`}>
-                    {stat.value}
-                  </p>
-                  {stat.suffix && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {stat.suffix}
-                    </p>
-                  )}
+      {/* Combined Results Card */}
+      <Card className="border-border/50 bg-card/50 overflow-hidden">
+        <CardContent className="p-4 md:p-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Left: Your Live Earnings */}
+            <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+              <div className="flex items-center gap-2 mb-3">
+                <DollarSign className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-semibold text-emerald-400">Your Live Earnings</span>
+              </div>
+              <div className="text-center mb-3">
+                <p className="text-xs text-muted-foreground mb-1">Earned since opening</p>
+                <div className="font-mono text-2xl md:text-3xl font-bold text-emerald-400 ticker-number">
+                  {formatLargeCurrency(currentEarnings)}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center p-2 rounded bg-secondary/30">
+                  <p className="text-[10px] text-muted-foreground">Per Second</p>
+                  <p className="font-mono text-xs font-semibold text-emerald-400">${breakdown.perSecond.toFixed(4)}</p>
+                </div>
+                <div className="text-center p-2 rounded bg-secondary/30">
+                  <p className="text-[10px] text-muted-foreground">Per Hour</p>
+                  <p className="font-mono text-xs font-semibold text-emerald-400">${breakdown.perHour.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
 
-      <Card className="border-primary/30 bg-gradient-to-br from-card to-primary/5">
-        <CardContent className="p-6 text-center">
-          <p className="text-lg mb-2">
-            💡 While {celebrityName} makes{' '}
-            <span className="font-bold text-primary">
-              {formatCompactCurrency(celebrityAnnualEarnings)}
-            </span>{' '}
-            per year...
-          </p>
-          <p className="text-muted-foreground">
-            Remember: wealth isn't everything. But it sure makes for some wild comparisons! 🎉
-          </p>
+            {/* Right: Comparison Stats */}
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold text-primary">vs {celebrityName}</span>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span className="text-xs text-muted-foreground">Earns your salary in</span>
+                  </div>
+                  <span className="text-sm font-bold text-primary">{timeToEarnUserSalary}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-emerald-400" />
+                    <span className="text-xs text-muted-foreground">Makes</span>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400">{ratio.toLocaleString()}x more</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded bg-secondary/30">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs text-muted-foreground">Years to match</span>
+                  </div>
+                  <span className="text-sm font-bold text-blue-400">{yearsToCatchUp.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Quick Takeaway */}
+      <div className="text-center p-3 rounded-lg bg-primary/5 border border-primary/20">
+        <p className="text-sm text-muted-foreground">
+          💡 {celebrityName} makes <span className="font-bold text-primary">{formatCompactCurrency(celebrityAnnualEarnings)}</span>/year — 
+          but every mogul started somewhere!
+        </p>
+      </div>
     </div>
   );
 };
