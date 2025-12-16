@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import SearchBar from '@/components/home/SearchBar';
+import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import { getCategoryById, categories } from '@/lib/categories';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -96,7 +96,7 @@ const Category = () => {
               <p className="text-muted-foreground mb-6">
                 Search for any {category.name.toLowerCase()} to see their earnings in perspective.
               </p>
-              <SearchBar placeholder={`Search ${category.name.toLowerCase()}...`} />
+              <SearchBarWithAutocomplete placeholder={`Search ${category.name.toLowerCase()}...`} categoryId={category.id} />
             </div>
           </div>
         </section>
