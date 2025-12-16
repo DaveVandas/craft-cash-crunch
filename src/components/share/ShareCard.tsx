@@ -472,14 +472,14 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               <p className="text-xs text-amber-300/70 uppercase tracking-widest text-center">
                 🛒 What This Buys
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {topComparisons.map((comparison, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center gap-2 p-3 rounded-lg border border-amber-500/30"
+                    className="flex items-center gap-1.5 p-2 rounded-lg border border-amber-500/30"
                     style={{ background: 'rgba(184,134,11,0.1)' }}
                   >
-                    <span className="text-2xl">{comparison.emoji}</span>
+                    <span className="text-lg">{comparison.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <p 
                         className="text-sm font-bold truncate"
