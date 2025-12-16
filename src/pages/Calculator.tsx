@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SalaryInput from '@/components/calculator/SalaryInput';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCelebritySearch } from '@/hooks/useCelebritySearch';
 import { Celebrity } from '@/lib/types';
-import { Search, Loader2, Rocket, Zap, TrendingUp, Flame, DollarSign } from 'lucide-react';
+import { Search, Loader2, Rocket, Zap, TrendingUp, Flame, DollarSign, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/earnings';
 
@@ -363,6 +364,17 @@ const Calculator = () => {
                       </CardContent>
                     </Card>
                   )}
+
+                  {/* Go Deeper Link */}
+                  <div className="text-center pt-4">
+                    <Link to="/side-hustle">
+                      <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+                        <Rocket className="h-4 w-4 mr-2" />
+                        Go Deeper: Full Side Hustle Guide
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </>
             )}
