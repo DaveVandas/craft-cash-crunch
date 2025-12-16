@@ -19,88 +19,68 @@ interface CalculationResult {
   salesPerMonth: number;
 }
 
-const SIDE_HUSTLE_IDEAS = [
-  {
-    name: 'Reselling Sneakers',
-    emoji: '👟',
-    avgBuyPrice: 180,
-    avgSellPrice: 280,
-    salesPerMonth: 8,
-    difficulty: 'Medium',
-    description: 'Buy limited releases, flip for profit.',
-    tips: 'Follow @snkr_twitr, use bots for drops'
-  },
-  {
-    name: 'Print on Demand',
-    emoji: '👕',
-    avgBuyPrice: 12,
-    avgSellPrice: 28,
-    salesPerMonth: 30,
-    difficulty: 'Easy',
-    description: 'Design once, sell forever.',
-    tips: 'Printful + Etsy = passive income'
-  },
-  {
-    name: 'Dropshipping',
-    emoji: '📦',
-    avgBuyPrice: 8,
-    avgSellPrice: 25,
-    salesPerMonth: 50,
-    difficulty: 'Medium',
-    description: 'Sell without touching product.',
-    tips: 'Find winners on TikTok'
-  },
-  {
-    name: 'Thrift Flipping',
-    emoji: '🏷️',
-    avgBuyPrice: 5,
-    avgSellPrice: 35,
-    salesPerMonth: 20,
-    difficulty: 'Easy',
-    description: "Goodwill to gold.",
-    tips: 'Vintage & designer on Poshmark'
-  },
-  {
-    name: 'Freelance Design',
-    emoji: '🎨',
-    avgBuyPrice: 0,
-    avgSellPrice: 150,
-    salesPerMonth: 6,
-    difficulty: 'Medium',
-    description: 'Turn creativity into cash.',
-    tips: 'Start Fiverr, build portfolio'
-  },
-  {
-    name: 'Amazon FBA',
-    emoji: '📈',
-    avgBuyPrice: 15,
-    avgSellPrice: 40,
-    salesPerMonth: 100,
-    difficulty: 'Hard',
-    description: 'Let Amazon do the lifting.',
-    tips: 'Use Jungle Scout for research'
-  },
-  {
-    name: 'Social Media Mgmt',
-    emoji: '📱',
-    avgBuyPrice: 0,
-    avgSellPrice: 500,
-    salesPerMonth: 3,
-    difficulty: 'Medium',
-    description: 'Get paid to post.',
-    tips: 'Package content + scheduling'
-  },
-  {
-    name: 'Digital Products',
-    emoji: '💻',
-    avgBuyPrice: 0,
-    avgSellPrice: 29,
-    salesPerMonth: 40,
-    difficulty: 'Medium',
-    description: 'Build once, sell infinitely.',
-    tips: 'Notion templates are hot'
-  }
+// Extended pool of side hustles for rotation
+const ALL_SIDE_HUSTLES = [
+  { name: 'Reselling Sneakers', emoji: '👟', avgBuyPrice: 180, avgSellPrice: 280, salesPerMonth: 8, difficulty: 'Medium', description: 'Buy limited releases, flip for profit.', tips: 'Follow @snkr_twitr, use bots for drops' },
+  { name: 'Print on Demand', emoji: '👕', avgBuyPrice: 12, avgSellPrice: 28, salesPerMonth: 30, difficulty: 'Easy', description: 'Design once, sell forever.', tips: 'Printful + Etsy = passive income' },
+  { name: 'Dropshipping', emoji: '📦', avgBuyPrice: 8, avgSellPrice: 25, salesPerMonth: 50, difficulty: 'Medium', description: 'Sell without touching product.', tips: 'Find winners on TikTok' },
+  { name: 'Thrift Flipping', emoji: '🏷️', avgBuyPrice: 5, avgSellPrice: 35, salesPerMonth: 20, difficulty: 'Easy', description: "Goodwill to gold.", tips: 'Vintage & designer on Poshmark' },
+  { name: 'Freelance Design', emoji: '🎨', avgBuyPrice: 0, avgSellPrice: 150, salesPerMonth: 6, difficulty: 'Medium', description: 'Turn creativity into cash.', tips: 'Start Fiverr, build portfolio' },
+  { name: 'Amazon FBA', emoji: '📈', avgBuyPrice: 15, avgSellPrice: 40, salesPerMonth: 100, difficulty: 'Hard', description: 'Let Amazon do the lifting.', tips: 'Use Jungle Scout for research' },
+  { name: 'Social Media Mgmt', emoji: '📱', avgBuyPrice: 0, avgSellPrice: 500, salesPerMonth: 3, difficulty: 'Medium', description: 'Get paid to post.', tips: 'Package content + scheduling' },
+  { name: 'Digital Products', emoji: '💻', avgBuyPrice: 0, avgSellPrice: 29, salesPerMonth: 40, difficulty: 'Medium', description: 'Build once, sell infinitely.', tips: 'Notion templates are hot' },
+  { name: 'Online Tutoring', emoji: '📚', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 20, difficulty: 'Easy', description: 'Share knowledge, get paid.', tips: 'Wyzant, Varsity Tutors' },
+  { name: 'Handmade Crafts', emoji: '🧶', avgBuyPrice: 10, avgSellPrice: 45, salesPerMonth: 15, difficulty: 'Easy', description: 'Turn hobbies into income.', tips: 'Etsy is your best friend' },
+  { name: 'Car Detailing', emoji: '🚗', avgBuyPrice: 20, avgSellPrice: 150, salesPerMonth: 12, difficulty: 'Medium', description: 'Mobile detailing = flexibility.', tips: 'Start with friends & family' },
+  { name: 'Pet Sitting', emoji: '🐕', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 15, difficulty: 'Easy', description: 'Get paid to hang with pets.', tips: 'Rover app for bookings' },
+  { name: 'YouTube Channel', emoji: '🎬', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Hard', description: 'Build audience, monetize.', tips: 'Consistency > perfection' },
+  { name: 'Pressure Washing', emoji: '💦', avgBuyPrice: 30, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Medium', description: 'Satisfying work, great margins.', tips: 'Before/after pics sell' },
+  { name: 'Flipping Furniture', emoji: '🪑', avgBuyPrice: 25, avgSellPrice: 120, salesPerMonth: 6, difficulty: 'Medium', description: 'Facebook finds to profit.', tips: 'Paint & hardware = magic' },
+  { name: 'Photography', emoji: '📸', avgBuyPrice: 0, avgSellPrice: 300, salesPerMonth: 4, difficulty: 'Medium', description: 'Capture moments, charge premium.', tips: 'Start with events & portraits' },
+  { name: 'Lawn Care', emoji: '🌿', avgBuyPrice: 10, avgSellPrice: 75, salesPerMonth: 16, difficulty: 'Easy', description: 'Simple service, recurring income.', tips: 'Upsell seasonal services' },
+  { name: 'Consulting', emoji: '💼', avgBuyPrice: 0, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Hard', description: 'Monetize your expertise.', tips: 'Package your knowledge' },
+  { name: 'Voiceover Work', emoji: '🎙️', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Medium', description: 'Your voice = your product.', tips: 'Fiverr & Voices.com' },
+  { name: 'Affiliate Marketing', emoji: '🔗', avgBuyPrice: 0, avgSellPrice: 30, salesPerMonth: 50, difficulty: 'Medium', description: 'Recommend products, earn commissions.', tips: 'Build an email list' },
+  { name: 'Stock Photography', emoji: '🖼️', avgBuyPrice: 0, avgSellPrice: 5, salesPerMonth: 200, difficulty: 'Easy', description: 'Upload once, earn forever.', tips: 'Shutterstock + Adobe Stock' },
+  { name: 'Cleaning Service', emoji: '🧹', avgBuyPrice: 15, avgSellPrice: 120, salesPerMonth: 12, difficulty: 'Easy', description: 'Always in demand.', tips: 'Residential or Airbnb focus' },
+  { name: 'Bookkeeping', emoji: '📊', avgBuyPrice: 0, avgSellPrice: 400, salesPerMonth: 5, difficulty: 'Medium', description: 'Numbers = money.', tips: 'QuickBooks certification helps' },
+  { name: 'Food Delivery', emoji: '🍕', avgBuyPrice: 5, avgSellPrice: 25, salesPerMonth: 60, difficulty: 'Easy', description: 'Flexible hours, instant pay.', tips: 'Multi-app for max earnings' },
 ];
+
+const INSPIRATIONAL_QUOTES = [
+  { quote: "The best time to start was yesterday. The second best time is now.", author: "Unknown" },
+  { quote: "Every expert was once a beginner.", author: "Helen Hayes" },
+  { quote: "Your side hustle could become your main hustle.", author: "Gary Vaynerchuk" },
+  { quote: "Wealth is not about having a lot of money; it's about having a lot of options.", author: "Chris Rock" },
+  { quote: "Don't be afraid to give up the good to go for the great.", author: "John D. Rockefeller" },
+  { quote: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { quote: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { quote: "The harder you work, the luckier you get.", author: "Gary Player" },
+  { quote: "Stop waiting for the perfect moment. Take the moment and make it perfect.", author: "Unknown" },
+  { quote: "Your income is directly related to your philosophy, not the economy.", author: "Jim Rohn" },
+  { quote: "Rich people have small TVs and big libraries. Poor people have small libraries and big TVs.", author: "Zig Ziglar" },
+  { quote: "It's not about money or connections. It's the willingness to outwork everyone.", author: "Mark Cuban" },
+  { quote: "The goal isn't more money. The goal is living life on your terms.", author: "Chris Brogan" },
+  { quote: "Formal education will make you a living; self-education will make you a fortune.", author: "Jim Rohn" },
+  { quote: "I never dreamed about success. I worked for it.", author: "Estée Lauder" },
+];
+
+// Get rotated hustles based on day (changes daily)
+const getRotatedHustles = () => {
+  const dayOfYear = Math.floor(Date.now() / 86400000);
+  const shuffled = [...ALL_SIDE_HUSTLES].sort((a, b) => {
+    const hashA = (a.name.charCodeAt(0) + dayOfYear) % 100;
+    const hashB = (b.name.charCodeAt(0) + dayOfYear) % 100;
+    return hashA - hashB;
+  });
+  return shuffled.slice(0, 8);
+};
+
+// Get random quote (changes on each page load/visit)
+const getRandomQuote = () => {
+  const randomIndex = Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length);
+  return INSPIRATIONAL_QUOTES[randomIndex];
+};
 
 const SideHustle = () => {
   const [buyPrice, setBuyPrice] = useState<string>('');
@@ -108,8 +88,12 @@ const SideHustle = () => {
   const [salesPerPeriod, setSalesPerPeriod] = useState<string>('');
   const [period, setPeriod] = useState<string>('month');
   const [result, setResult] = useState<CalculationResult | null>(null);
-  const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
+  const [selectedHustle, setSelectedHustle] = useState<typeof ALL_SIDE_HUSTLES[0] | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  
+  // Get rotated content on mount
+  const [displayedHustles] = useState(() => getRotatedHustles());
+  const [displayedQuote] = useState(() => getRandomQuote());
 
   const calculateResult = (buy: number, sell: number, sales: number, periodType: string) => {
     if (sell <= buy || sales <= 0) {
@@ -147,7 +131,7 @@ const SideHustle = () => {
     calculateResult(buy, sell, sales, period);
   };
 
-  const applyHustle = (hustle: typeof SIDE_HUSTLE_IDEAS[0]) => {
+  const applyHustle = (hustle: typeof ALL_SIDE_HUSTLES[0]) => {
     setSelectedHustle(hustle);
     setBuyPrice(hustle.avgBuyPrice.toString());
     setSellPrice(hustle.avgSellPrice.toString());
@@ -162,14 +146,6 @@ const SideHustle = () => {
     }, 100);
   };
 
-  const inspirationalQuotes = [
-    { quote: "The best time to start was yesterday. The second best time is now.", author: "Unknown" },
-    { quote: "Every expert was once a beginner.", author: "Helen Hayes" },
-    { quote: "Your side hustle could become your main hustle.", author: "Gary Vaynerchuk" },
-    { quote: "Wealth is not about having a lot of money; it's about having a lot of options.", author: "Chris Rock" },
-  ];
-
-  const randomQuote = inspirationalQuotes[Math.floor(Date.now() / 86400000) % inspirationalQuotes.length];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -190,8 +166,8 @@ const SideHustle = () => {
           
           {/* Inspirational Quote */}
           <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20 max-w-xl mx-auto">
-            <p className="text-base md:text-lg italic text-foreground/90">"{randomQuote.quote}"</p>
-            <p className="text-sm text-muted-foreground mt-2">— {randomQuote.author}</p>
+            <p className="text-base md:text-lg italic text-foreground/90">"{displayedQuote.quote}"</p>
+            <p className="text-sm text-muted-foreground mt-2">— {displayedQuote.author}</p>
           </div>
         </div>
 
@@ -209,7 +185,7 @@ const SideHustle = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {SIDE_HUSTLE_IDEAS.map((hustle) => (
+                {displayedHustles.map((hustle) => (
                   <button
                     key={hustle.name}
                     onClick={() => applyHustle(hustle)}
