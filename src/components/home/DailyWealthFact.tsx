@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Lightbulb, RefreshCw } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const wealthFacts = [
@@ -97,37 +96,26 @@ const DailyWealthFact = () => {
   };
 
   return (
-    <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 group hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] transition-all duration-300">
-      {/* Gold shimmer border on hover */}
-      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="absolute inset-0 rounded-lg border-2 border-primary/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-      </div>
-      
-      <CardContent className="p-4 flex items-start gap-3 relative z-10">
-        <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-          <Lightbulb className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-primary font-medium mb-1">Daily Wealth Fact</p>
-          <p 
-            className={`text-sm text-foreground transition-all duration-300 ${
-              isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-            }`}
-          >
-            {wealthFacts[factIndex]}
-          </p>
-        </div>
+    <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 px-4 py-2.5 group hover:border-primary/40 transition-all duration-300">
+      <div className="flex items-center gap-3">
+        <Lightbulb className="h-4 w-4 text-primary flex-shrink-0" />
+        <p 
+          className={`text-sm text-muted-foreground flex-1 transition-all duration-300 ${
+            isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <span className="text-primary font-medium">Did you know?</span> {wealthFacts[factIndex]}
+        </p>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 flex-shrink-0"
+          className="h-7 w-7 flex-shrink-0"
           onClick={shuffleFact}
         >
-          <RefreshCw className={`h-4 w-4 ${isAnimating ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-3.5 w-3.5 ${isAnimating ? 'animate-spin' : ''}`} />
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -37,12 +37,12 @@ const Index = () => {
         </section>
 
         {/* Daily Wealth Fact */}
-        <section className="container mb-12">
+        <section className="container mb-8">
           <DailyWealthFact />
         </section>
 
         {/* Daily Celebrity Spotlight */}
-        <section className="container mb-12">
+        <section className="container mb-6">
           <DailyCelebritySpotlight />
         </section>
 
