@@ -180,7 +180,7 @@ const Search = () => {
                         src={result.imageUrl}
                         alt={result.name}
                         className="object-cover rounded-lg"
-                        referrerPolicy="no-referrer"
+                        loading="lazy"
                         onError={(e) => {
                           e.currentTarget.src = '';
                         }}

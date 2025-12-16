@@ -58,7 +58,7 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
               src={celebrity.imageUrl}
               alt={celebrity.name}
               className="object-cover rounded-2xl"
-              referrerPolicy="no-referrer"
+              loading="lazy"
               onError={(e) => {
                 e.currentTarget.src = '';
               }}
