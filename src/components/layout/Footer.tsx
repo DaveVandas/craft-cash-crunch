@@ -114,6 +114,9 @@ const Footer = () => {
             Disclaimer: Earnings and net worth figures are estimates based on publicly available information and may not reflect actual values. 
             Wealth calculations can vary significantly due to complex financial structures, investments, and undisclosed assets.
           </p>
+          <p className="text-xs text-muted-foreground/50 mt-2">
+            © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Dave Vandas.
+          </p>
         </div>
       </div>
     </footer>

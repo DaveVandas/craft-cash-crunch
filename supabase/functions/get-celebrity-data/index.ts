@@ -371,20 +371,22 @@ serve(async (req) => {
 - profession: their primary profession
 - category: one of (athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical)
 - netWorth: number in USD (no commas or symbols)
-- annualEarnings: number in USD (no commas or symbols)
+- annualEarnings: number in USD (no commas or symbols) - MUST be > 0
+- biggestDeal: their most famous/lucrative known deal or contract (string, e.g. "LeBron's $1B lifetime Nike deal" or "Taylor's $200M UMG deal")
 - source: cite the specific Forbes/Bloomberg list and year (e.g., "Forbes 400 2024", "Bloomberg Billionaires 2024")
 
 CRITICAL RULES:
 1. Use ONLY the most recent Forbes or Bloomberg published figures. Do not estimate or interpolate.
-2. For billionaires: Use their TOTAL annual wealth change from Forbes/Bloomberg tracking, not salary.
-3. For athletes/entertainers: Use Forbes highest-paid lists (athletes, celebrities, musicians).
+2. For billionaires: Use their TOTAL annual wealth change from Forbes/Bloomberg tracking, not salary. If wealth grew $10B in a year, annual earnings = $10B.
+3. For athletes/entertainers: Use Forbes highest-paid lists (athletes, celebrities, musicians). Include endorsements, sponsorships, NOT just salary.
 4. For historical figures (pre-1950): Adjust to 2024 USD and note the original figure.
 5. If you cannot find verified Forbes/Bloomberg data, use the most authoritative financial source available.
 6. Be CONSISTENT - if Forbes says $50M, report $50M exactly.
-7. NEVER return 0 for annualEarnings - estimate based on net worth if needed (assume 5-10% annual return).
+7. NEVER return 0 for annualEarnings - estimate based on net worth if needed (5-10% of net worth as minimum).
+8. ALWAYS include biggestDeal - research their most famous contract, acquisition, or deal. Be specific with amounts.
 
 Return ONLY valid JSON, no markdown or explanation.`
-      : `List 6 notable people in the ${category} category. Return ONLY a JSON array with objects containing: name, profession, category, netWorth (number), annualEarnings (number). Use Forbes/Bloomberg published figures only. Never return 0 for annualEarnings. No markdown.`;
+      : `List 6 notable people in the ${category} category. Return ONLY a JSON array with objects containing: name, profession, category, netWorth (number), annualEarnings (number), biggestDeal (string describing their most famous deal). Use Forbes/Bloomberg published figures only. Never return 0 for annualEarnings. No markdown.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

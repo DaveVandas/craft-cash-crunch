@@ -1,7 +1,7 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
-import SearchBar from '@/components/home/SearchBar';
+import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import CategoryCard from '@/components/home/CategoryCard';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
@@ -33,7 +33,7 @@ const Index = () => {
               </p>
             </div>
 
-            <SearchBar />
+            <SearchBarWithAutocomplete />
             
             {/* Daily Wealth Fact */}
             <div className="mt-8 max-w-2xl mx-auto">
