@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-anonymous-search-count',
 };
 
+// Wikipedia requires a proper User-Agent - using MediaWiki bot format
+const WIKI_USER_AGENT = 'WealthPerspectiveBot/1.0 (https://earningsexplorer.shop/; admin@earningsexplorer.shop)';
+
 // Valid categories for validation
 const VALID_CATEGORIES = [
   'athletes',
@@ -146,31 +149,40 @@ function generateSearchVariants(name: string, profession?: string): string[] {
   return [...new Set(variants)];
 }
 
-// Try to fetch image from Wikipedia page summary
+// Try to fetch image from Wikipedia page summary (REST API)
 async function tryWikipediaPageSummary(searchName: string): Promise<string | null> {
   try {
-    const encodedName = encodeURIComponent(searchName);
-    const pageImageUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedName}`;
+    // Wikipedia prefers underscores for spaces in URLs
+    const wikiTitle = searchName.trim().replace(/\s+/g, '_');
+    const pageImageUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
+    
+    console.log(`Trying Wikipedia REST API: ${pageImageUrl}`);
     
     const pageRes = await fetch(pageImageUrl, {
-      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+      headers: { 
+        'User-Agent': WIKI_USER_AGENT,
+        'Api-User-Agent': WIKI_USER_AGENT,
+        'Accept': 'application/json'
+      }
     });
+    
+    console.log(`Wikipedia REST API status: ${pageRes.status} for ${searchName}`);
     
     if (pageRes.ok) {
       const pageData = await pageRes.json();
       
       // Skip disambiguation pages
-      if (pageData.type === 'disambiguation') return null;
+      if (pageData.type === 'disambiguation') {
+        console.log(`Skipping disambiguation page for ${searchName}`);
+        return null;
+      }
       
-      // Check for original image (highest quality)
       if (pageData.originalimage?.source) {
         console.log(`Found Wikipedia originalimage for ${searchName}`);
         return pageData.originalimage.source;
       }
       
-      // Fall back to thumbnail
       if (pageData.thumbnail?.source) {
-        // Get higher res version by modifying URL
         const thumbUrl = pageData.thumbnail.source;
         const higherRes = thumbUrl.replace(/\/\d+px-/, '/400px-');
         console.log(`Found Wikipedia thumbnail for ${searchName}`);
@@ -178,7 +190,49 @@ async function tryWikipediaPageSummary(searchName: string): Promise<string | nul
       }
     }
   } catch (error) {
-    console.log(`Wikipedia page summary error for "${searchName}":`, error);
+    console.log(`Wikipedia REST API error for "${searchName}":`, error);
+  }
+  return null;
+}
+
+// Try MediaWiki Action API (more lenient than REST API)
+async function tryWikipediaActionAPI(searchName: string): Promise<string | null> {
+  try {
+    const wikiTitle = searchName.trim().replace(/\s+/g, '_');
+    // Use prop=pageimages for main infobox image
+    const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(wikiTitle)}&prop=pageimages&format=json&origin=*&pithumbsize=500&piprop=original|thumbnail`;
+    
+    console.log(`Trying Wikipedia Action API for: ${searchName}`);
+    
+    const res = await fetch(apiUrl, {
+      headers: { 
+        'User-Agent': WIKI_USER_AGENT,
+        'Api-User-Agent': WIKI_USER_AGENT
+      }
+    });
+    
+    console.log(`Wikipedia Action API status: ${res.status}`);
+    
+    if (res.ok) {
+      const data = await res.json();
+      const pages = data.query?.pages || {};
+      
+      for (const pageId of Object.keys(pages)) {
+        if (pageId === '-1') continue;
+        
+        const page = pages[pageId];
+        if (page.original?.source) {
+          console.log(`Found image via Action API for ${searchName}`);
+          return page.original.source;
+        }
+        if (page.thumbnail?.source) {
+          console.log(`Found thumbnail via Action API for ${searchName}`);
+          return page.thumbnail.source;
+        }
+      }
+    }
+  } catch (error) {
+    console.log(`Wikipedia Action API error for "${searchName}":`, error);
   }
   return null;
 }
@@ -195,7 +249,7 @@ async function tryWikipediaSearch(searchName: string, profession?: string): Prom
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodedQuery}&format=json&origin=*&srlimit=8`;
     
     const searchRes = await fetch(searchUrl, {
-      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+      headers: { 'User-Agent': WIKI_USER_AGENT, 'Api-User-Agent': WIKI_USER_AGENT }
     });
     
     if (!searchRes.ok) return null;
@@ -232,7 +286,7 @@ async function tryWikipediaSearch(searchName: string, profession?: string): Prom
       
       try {
         const summaryRes = await fetch(summaryUrl, {
-          headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+          headers: { 'User-Agent': WIKI_USER_AGENT, 'Api-User-Agent': WIKI_USER_AGENT }
         });
         
         if (summaryRes.ok) {
@@ -270,7 +324,7 @@ async function tryWikidata(searchName: string): Promise<string | null> {
     const wikidataSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodedName}&language=en&format=json&origin=*&limit=5`;
     
     const wdSearchRes = await fetch(wikidataSearchUrl, {
-      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+      headers: { 'User-Agent': WIKI_USER_AGENT, 'Api-User-Agent': WIKI_USER_AGENT }
     });
     
     if (!wdSearchRes.ok) return null;
@@ -284,7 +338,7 @@ async function tryWikidata(searchName: string): Promise<string | null> {
       
       try {
         const claimsRes = await fetch(entityUrl, {
-          headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+          headers: { 'User-Agent': WIKI_USER_AGENT, 'Api-User-Agent': WIKI_USER_AGENT }
         });
         
         if (claimsRes.ok) {
@@ -311,22 +365,37 @@ async function tryWikidata(searchName: string): Promise<string | null> {
 // Try Wikipedia page images API (gets all images from a page)
 async function tryWikipediaPageImages(searchName: string): Promise<string | null> {
   try {
-    const encodedName = encodeURIComponent(searchName);
-    const pageImagesUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedName}&prop=pageimages&format=json&origin=*&pithumbsize=400&piprop=thumbnail|original`;
+    // Wikipedia prefers underscores for spaces
+    const wikiTitle = searchName.trim().replace(/\s+/g, '_');
+    const pageImagesUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(wikiTitle)}&prop=pageimages&format=json&origin=*&pithumbsize=400&piprop=thumbnail|original`;
+    
+    console.log(`Trying Wikipedia page images API for: ${searchName}`);
     
     const res = await fetch(pageImagesUrl, {
-      headers: { 'User-Agent': 'WealthPerspective/1.0 (contact@wealthperspective.app)' }
+      headers: { 
+        'User-Agent': 'WealthPerspective/1.0 (https://earningsexplorer.shop; contact@earningsexplorer.shop) fetch/1.0',
+        'Accept': 'application/json'
+      }
     });
+    
+    console.log(`Wikipedia page images response status: ${res.status}`);
     
     if (!res.ok) return null;
     
     const data = await res.json();
     const pages = data.query?.pages || {};
     
+    console.log(`Wikipedia page images pages found: ${Object.keys(pages).length}`);
+    
     for (const pageId of Object.keys(pages)) {
-      if (pageId === '-1') continue; // Page not found
+      if (pageId === '-1') {
+        console.log(`Page not found for ${searchName}`);
+        continue;
+      }
       
       const page = pages[pageId];
+      console.log(`Page ${pageId} has original: ${!!page.original}, thumbnail: ${!!page.thumbnail}`);
+      
       if (page.original?.source) {
         console.log(`Found Wikipedia page image for ${searchName}`);
         return page.original.source;
@@ -378,13 +447,14 @@ async function getWikipediaImage(name: string, profession?: string): Promise<str
   return null;
 }
 
-// Get celebrity image with aggressive Wikipedia fetching, emoji fallback
+// Get celebrity image - try multiple name variations
 async function getCelebrityImage(
-  name: string, 
+  aiName: string,        // Name returned by AI (e.g., "Robyn Rihanna Fenty")
+  originalSearch: string, // Original user search term (e.g., "Rihanna")  
   profession: string,
   supabaseClient: any
 ): Promise<{ imageUrl: string | null; emoji: string }> {
-  const slug = name.toLowerCase().replace(/\s+/g, '-');
+  const slug = aiName.toLowerCase().replace(/\s+/g, '-');
   const emoji = getProfessionEmoji(profession);
   
   try {
@@ -396,12 +466,34 @@ async function getCelebrityImage(
       .maybeSingle();
     
     if (cached?.image_url) {
-      console.log(`Cache hit for ${name}`);
+      console.log(`Cache hit for ${aiName}`);
       return { imageUrl: cached.image_url, emoji };
     }
     
-    // Try Wikipedia aggressively with profession context
-    const wikiImage = await getWikipediaImage(name, profession);
+    // Also check cache with original search term
+    const originalSlug = originalSearch.toLowerCase().replace(/\s+/g, '-');
+    if (originalSlug !== slug) {
+      const { data: cachedOriginal } = await supabaseClient
+        .from('celebrity_images')
+        .select('image_url')
+        .eq('celebrity_slug', originalSlug)
+        .maybeSingle();
+      
+      if (cachedOriginal?.image_url) {
+        console.log(`Cache hit for original search: ${originalSearch}`);
+        return { imageUrl: cachedOriginal.image_url, emoji };
+      }
+    }
+    
+    // Try original search term FIRST (more likely to match Wikipedia)
+    console.log(`Trying Wikipedia with original search: "${originalSearch}"`);
+    let wikiImage = await getWikipediaImage(originalSearch, profession);
+    
+    // If that fails and AI name is different, try AI name
+    if (!wikiImage && aiName.toLowerCase() !== originalSearch.toLowerCase()) {
+      console.log(`Trying Wikipedia with AI name: "${aiName}"`);
+      wikiImage = await getWikipediaImage(aiName, profession);
+    }
     
     if (wikiImage) {
       // Cache the Wikipedia URL
@@ -409,28 +501,16 @@ async function getCelebrityImage(
         .from('celebrity_images')
         .upsert({
           celebrity_slug: slug,
-          celebrity_name: name,
+          celebrity_name: aiName,
           image_url: wikiImage
         }, { onConflict: 'celebrity_slug' });
       
-      console.log(`Cached Wikipedia image for ${name}`);
+      console.log(`Cached Wikipedia image for ${aiName}`);
       return { imageUrl: wikiImage, emoji };
     }
     
-    // Check cache again in case another parallel request cached it while we were searching
-    const { data: cachedAfter } = await supabaseClient
-      .from('celebrity_images')
-      .select('image_url')
-      .eq('celebrity_slug', slug)
-      .maybeSingle();
-    
-    if (cachedAfter?.image_url) {
-      console.log(`Cache hit (after Wikipedia search) for ${name}`);
-      return { imageUrl: cachedAfter.image_url, emoji };
-    }
-    
     // No image found, return emoji only
-    console.log(`No image for ${name}, using emoji: ${emoji}`);
+    console.log(`No image for ${aiName}, using emoji: ${emoji}`);
     return { imageUrl: null, emoji };
     
   } catch (error) {
@@ -595,7 +675,8 @@ Return ONLY valid JSON, no markdown or explanation.`
       }
       
       // Get image with aggressive Wikipedia + emoji fallback
-      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, parsed.profession || 'celebrity', supabaseClient);
+      // Try original search term first (what user typed), then AI name
+      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, name, parsed.profession || 'celebrity', supabaseClient);
       
       // Ensure numeric values are properly parsed
       const netWorth = Number(parsed.netWorth) || 0;
@@ -623,7 +704,8 @@ Return ONLY valid JSON, no markdown or explanation.`
       // Get images for all celebrities in parallel
       const celebritiesWithImages = await Promise.all(
         parsed.map(async (p: any) => {
-          const { imageUrl, emoji } = await getCelebrityImage(p.name, p.profession || 'celebrity', supabaseClient);
+          // For category searches, use the name as both AI name and search term
+          const { imageUrl, emoji } = await getCelebrityImage(p.name, p.name, p.profession || 'celebrity', supabaseClient);
           return {
             id: p.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
             imageUrl,
