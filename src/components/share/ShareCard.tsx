@@ -630,27 +630,14 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
               <Sparkles className="h-4 w-4 text-muted-foreground" />
               <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/50" />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {getSimilarCelebrities(celebrity.name, celebrity.category, 4).map((similar) => (
                 <button
                   key={similar.name}
                   onClick={() => handleSuggestionClick(nameToSlug(similar.name))}
-                  className="group relative overflow-hidden rounded-lg border border-border/40 hover:border-primary/40 bg-secondary/20 hover:bg-secondary/40 transition-all text-left"
+                  className="px-3 py-1.5 text-sm text-foreground border border-border/60 rounded-full hover:border-primary/60 hover:text-primary transition-colors"
                 >
-                  {/* Card content */}
-                  <div className="p-2.5 flex items-center gap-2.5">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-muted to-secondary flex items-center justify-center text-lg flex-shrink-0 group-hover:scale-105 transition-transform">
-                      {similar.emoji}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium truncate group-hover:text-primary transition-colors">
-                        {similar.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {similar.hourlyEarnings}
-                      </p>
-                    </div>
-                  </div>
+                  {similar.name}
                 </button>
               ))}
             </div>
