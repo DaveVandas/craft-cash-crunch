@@ -38,7 +38,7 @@ const Index = () => {
         </section>
 
         {/* Daily Wealth Fact - Under Search */}
-        <section className="container mb-8">
+        <section className="container -mt-8 mb-8">
           <DailyWealthFact />
         </section>
 
