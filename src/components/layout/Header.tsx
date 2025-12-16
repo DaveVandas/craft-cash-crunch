@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import { Button } from '@/components/ui/button';
@@ -55,34 +55,39 @@ const Header = () => {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-2">
+        <nav className="hidden md:flex items-center gap-6">
           <Link 
             to="/search" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
           <Link 
             to="/compare" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
           >
             <GitCompareArrows className="h-4 w-4" />
             <span>Compare</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
           <Link 
             to="/calculator" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
           >
             <Calculator className="h-4 w-4" />
             <span>Reality Check</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
           <Link 
             to="/wealth-wisdom" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary transition-all"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors relative group"
           >
             <BookOpen className="h-4 w-4" />
             <span>Wisdom</span>
+            <Sparkles className="h-3 w-3 text-amber-500" />
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
         </nav>
 
