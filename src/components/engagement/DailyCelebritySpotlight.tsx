@@ -1,39 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useFeaturedCelebrity } from '@/contexts/FeaturedCelebrityContext';
 import { Link } from 'react-router-dom';
-import { Star, TrendingUp, X } from 'lucide-react';
+import { Star, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFeaturedCelebrity } from '@/contexts/FeaturedCelebrityContext';
 
 const DailyCelebritySpotlight = () => {
-  const [dismissed, setDismissed] = useState(false);
   const { featured, isTransitioning } = useFeaturedCelebrity();
-
-  useEffect(() => {
-    // Check if already dismissed this session
-    const wasDismissed = sessionStorage.getItem('spotlight_dismissed');
-    if (wasDismissed === 'true') {
-      setDismissed(true);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    sessionStorage.setItem('spotlight_dismissed', 'true');
-    setDismissed(true);
-  };
-
-  if (dismissed) return null;
 
   return (
     <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-card to-primary/5">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 h-6 w-6 opacity-50 hover:opacity-100 z-10"
-        onClick={handleDismiss}
-      >
-        <X className="h-4 w-4" />
-      </Button>
 
       <Link to={`/profile/${featured.id}`} className="block px-4 py-2.5">
         <div 
