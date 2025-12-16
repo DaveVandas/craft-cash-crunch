@@ -172,7 +172,7 @@ const RealityCheckShareCard = ({
           className={`text-sm cursor-pointer flex items-center gap-1 ${brutalMode ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}
         >
           <Skull className={`h-4 w-4 ${brutalMode ? 'text-red-500' : ''}`} />
-          Kick Me Mode
+          Kick Me While I'm Down
         </Label>
       </div>
 
