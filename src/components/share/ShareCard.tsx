@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons, getMostDramaticComparison } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
+import { getSimilarCelebrities, nameToSlug } from '@/lib/similarCelebrities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Share2, DollarSign, Clock, TrendingUp, Zap, Download, Loader2, Flame } from 'lucide-react';
+import { Share2, DollarSign, Clock, TrendingUp, Zap, Download, Loader2, Flame, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import { Switch } from '@/components/ui/switch';
@@ -611,6 +613,35 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
                 <TikTokIcon />
               )}
             </Button>
+          </div>
+
+          {/* You Might Also Like Section */}
+          <div className="mt-6 pt-4 border-t border-border/50">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-muted-foreground">You might also like</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {getSimilarCelebrities(celebrity.name, celebrity.category, 4).map((similar) => (
+                <Link
+                  key={similar.name}
+                  to={`/profile/${nameToSlug(similar.name)}`}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-sm flex-shrink-0">
+                    {getAvatarEmoji(celebrity.profession)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium truncate group-hover:text-primary transition-colors">
+                      {similar.name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {similar.hourlyEarnings}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
