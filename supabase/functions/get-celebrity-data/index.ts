@@ -309,30 +309,42 @@ serve(async (req) => {
   );
 
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    console.warn("No auth header - blocking unauthenticated request");
-    return errorResponse('Please sign in to search for celebrities.', 'AUTH_REQUIRED');
+  let user = null;
+  let isAnonymous = false;
+  let anonymousSearchCount = 0;
+
+  // Check for anonymous search count from header (client tracks this)
+  const anonCountHeader = req.headers.get("X-Anonymous-Search-Count");
+  if (anonCountHeader) {
+    anonymousSearchCount = parseInt(anonCountHeader, 10) || 0;
   }
 
-  const token = authHeader.replace("Bearer ", "");
-  const { data: userData } = await supabaseClient.auth.getUser(token);
-  const user = userData.user;
+  if (authHeader && authHeader !== "Bearer null" && authHeader !== "Bearer undefined") {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData } = await supabaseClient.auth.getUser(token);
+    user = userData.user;
+  }
 
   if (!user) {
-    console.warn("Invalid token - blocking request");
-    return errorResponse('Please sign in to search for celebrities.', 'AUTH_REQUIRED');
-  }
+    // Allow anonymous users but check their search count
+    isAnonymous = true;
+    if (anonymousSearchCount >= FREE_SEARCH_LIMIT) {
+      console.log(`Anonymous user exceeded free search limit: ${anonymousSearchCount}`);
+      return errorResponse('Free searches used! Sign up to continue exploring celebrity earnings.', 'ANON_LIMIT_REACHED');
+    }
+    console.log(`Anonymous search allowed. Count: ${anonymousSearchCount + 1}/${FREE_SEARCH_LIMIT}`);
+  } else {
+    // Check authenticated user access
+    const { data: accessData } = await supabaseClient
+      .from("user_access")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  // Check user access
-  const { data: accessData } = await supabaseClient
-    .from("user_access")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
-    console.log(`User ${user.id} has exceeded free search limit`);
-    return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED');
+    if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
+      console.log(`User ${user.id} has exceeded free search limit`);
+      return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED');
+    }
   }
 
   try {
