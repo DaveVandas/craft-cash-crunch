@@ -7,6 +7,7 @@ export interface Celebrity {
   emoji?: string;
   netWorth: number;
   annualEarnings: number;
+  biggestDeal?: string;
   source?: string;
   funFacts?: string[];
 }

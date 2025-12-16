@@ -5,7 +5,7 @@ import { getAvatarEmoji } from '@/lib/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Share2, GitCompareArrows, ArrowLeft, Search } from 'lucide-react';
+import { Share2, GitCompareArrows, ArrowLeft, Search, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
@@ -81,7 +81,7 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
               {celebrity.profession}
             </p>
 
-            <div className="flex flex-wrap gap-6 mb-6">
+            <div className="flex flex-wrap gap-6 mb-4">
               <div>
                 <p className="text-sm text-muted-foreground">Net Worth</p>
                 <p className="text-2xl font-bold gradient-gold-text">
@@ -95,6 +95,16 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
                 </p>
               </div>
             </div>
+
+            {celebrity.biggestDeal && (
+              <div className="mb-6 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-amber-500/10 border border-primary/20">
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <Trophy className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-wide">Biggest Deal</span>
+                </div>
+                <p className="text-sm text-foreground/90">{celebrity.biggestDeal}</p>
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <FavoriteButton 

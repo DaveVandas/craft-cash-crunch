@@ -103,7 +103,7 @@ const Header = () => {
             className="h-9 px-3"
           >
             <Share2 className="h-4 w-4 mr-1.5" />
-            <span className="text-sm hidden sm:inline">Share</span>
+            <span className="text-sm">Share</span>
           </Button>
 
           {user ? (
