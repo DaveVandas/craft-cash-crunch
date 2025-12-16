@@ -17,29 +17,40 @@ const Index = () => {
       <Header />
       <ExitIntentPopup />
       <SocialProofNotifications />
-      
+
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-16 md:py-24">
+        <section className="relative py-12 md:py-20">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4">
+            <div className="text-center mb-8 animate-fade-in">
+              <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">
                 See Wealth in <span className="gradient-gold-text">Perspective</span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Mind-blowing comparisons that make celebrity earnings tangible. 
-                How fast does Taylor Swift earn your annual salary? Find out.
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+                Mind-blowing comparisons that make celebrity earnings tangible.
               </p>
             </div>
 
             <SearchBarWithAutocomplete />
-            
-            {/* Daily Wealth Fact */}
-            <div className="mt-8 max-w-2xl mx-auto">
+
+            {/* Daily Wealth Fact - compact */}
+            <div className="mt-6 max-w-xl mx-auto">
               <DailyWealthFact />
             </div>
           </div>
+        </section>
+
+        {/* Quick Actions - moved up for engagement */}
+        <section className="container mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <QuickActions />
+          </div>
+        </section>
+
+        {/* Featured Ticker - now compact inline bar */}
+        <section className="container mb-8">
+          <FeaturedTicker />
         </section>
 
         {/* Daily Celebrity Spotlight */}
@@ -47,27 +58,14 @@ const Index = () => {
           <DailyCelebritySpotlight />
         </section>
 
-        {/* Featured Ticker */}
-        <section className="container mb-12">
-          <FeaturedTicker />
-        </section>
-
-        {/* Quick Actions */}
-        <section className="container mb-8">
-          <h2 className="font-serif text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <QuickActions />
-          </div>
-        </section>
-
         {/* Trending */}
-        <section className="container mb-12">
+        <section className="container mb-10">
           <TrendingSearches />
         </section>
 
         {/* Categories */}
         <section className="container pb-16">
-          <h2 className="font-serif text-2xl font-bold mb-6">Browse by Category</h2>
+          <h2 className="font-serif text-2xl font-bold mb-5">Browse by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category, index) => (
               <CategoryCard key={category.id} category={category} index={index} />
@@ -82,3 +80,4 @@ const Index = () => {
 };
 
 export default Index;
+
