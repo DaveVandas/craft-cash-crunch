@@ -36,14 +36,14 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Featured Ticker */}
-        <section className="container mb-12">
-          <FeaturedTicker />
-        </section>
-
         {/* Daily Wealth Fact */}
         <section className="container mb-12">
           <DailyWealthFact />
+        </section>
+
+        {/* Featured Ticker */}
+        <section className="container mb-12">
+          <FeaturedTicker />
         </section>
 
         {/* Daily Celebrity Spotlight */}
