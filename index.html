@@ -3,25 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://esm.sh;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com data:;
+      img-src 'self' https: data: blob:;
+      connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.wikipedia.org https://*.wikimedia.org wss://*.supabase.co;
+      frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self' https://checkout.stripe.com;
+      upgrade-insecure-requests;
+    " />
+    
     <title>Wealth Perspective</title>
-    <meta name="description" content="Putting wealth into perspective, one mind blowing comparison at a time!">
-    <meta name="author" content="Lovable" />
-
-    <!-- TODO: Update og:title to match your application name -->
+    <meta name="description" content="Putting wealth into perspective, one mind blowing comparison at a time!" />
+    <meta name="author" content="Dave Vandas" />
+    <meta name="robots" content="index, follow" />
     
-    
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="Wealth Perspective" />
+    <meta property="og:description" content="Putting wealth into perspective, one mind blowing comparison at a time!" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
+    <meta property="og:site_name" content="Wealth Perspective" />
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:title" content="Wealth Perspective" />
+    <meta name="twitter:description" content="Putting wealth into perspective, one mind blowing comparison at a time!" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <meta property="og:title" content="Wealth Perspective">
-  <meta name="twitter:title" content="Wealth Perspective">
-  <meta property="og:description" content="Putting wealth into perspective, one mind blowing comparison at a time!">
-  <meta name="twitter:description" content="Putting wealth into perspective, one mind blowing comparison at a time!">
-</head>
+  </head>
 
   <body>
     <div id="root"></div>
