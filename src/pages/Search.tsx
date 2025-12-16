@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -22,56 +22,80 @@ const Search = () => {
   const displayQuery = sanitizeSearchQuery(rawQuery);
   const { searchCelebrity } = useCelebritySearch();
   const { user } = useAuth();
+  const userId = user?.id ?? null;
+
   const [result, setResult] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
   const [accessDenied, setAccessDenied] = useState<'signin' | 'upgrade' | null>(null);
   const [searching, setSearching] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
+  // Avoid re-running the search effect due to searchCelebrity callback identity changes.
+  const searchCelebrityRef = useRef(searchCelebrity);
+  useEffect(() => {
+    searchCelebrityRef.current = searchCelebrity;
+  }, [searchCelebrity]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const performSearch = async () => {
-      if (rawQuery) {
-        const validatedQuery = validateCelebrityName(rawQuery);
-        
-        if (!validatedQuery) {
-          setValidationError(true);
-          setResult(null);
-          setAccessDenied(null);
-          setSearching(false);
-          return;
-        }
-        
-        // Check auth before searching; paywall is handled inside the search hook
-        if (!user) {
-          setAccessDenied('signin');
-          setResult(null);
-          setValidationError(false);
-          setSearching(false);
-          return;
-        }
-        
-        setValidationError(false);
-        setAccessDenied(null);
-        setSearching(true);
-        
-        try {
-          const res = await searchCelebrity(validatedQuery);
-          setResult(res);
-        } catch (error) {
-          console.error('Search error:', error);
-          setResult(null);
-        } finally {
-          setSearching(false);
-        }
-      } else {
+      if (!rawQuery) {
         setResult(null);
         setValidationError(false);
         setAccessDenied(null);
         setSearching(false);
+        return;
+      }
+
+      const validatedQuery = validateCelebrityName(rawQuery);
+
+      if (!validatedQuery) {
+        setValidationError(true);
+        setResult(null);
+        setAccessDenied(null);
+        setSearching(false);
+        return;
+      }
+
+      // Keep existing behavior: this page requires auth (Reality Check allows anonymous sampling)
+      if (!userId) {
+        setAccessDenied('signin');
+        setResult(null);
+        setValidationError(false);
+        setSearching(false);
+        return;
+      }
+
+      setValidationError(false);
+      setAccessDenied(null);
+      setTimedOut(false);
+      setSearching(true);
+
+      try {
+        const timeoutMs = 15000;
+        const res = await Promise.race([
+          searchCelebrityRef.current(validatedQuery),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('SEARCH_TIMEOUT')), timeoutMs)),
+        ]);
+
+        if (!cancelled) setResult(res as Celebrity | null);
+      } catch (error) {
+        console.error('Search error:', error);
+        if (!cancelled) {
+          setResult(null);
+          setTimedOut(error instanceof Error && error.message === 'SEARCH_TIMEOUT');
+        }
+      } finally {
+        if (!cancelled) setSearching(false);
       }
     };
-    
+
     performSearch();
-  }, [rawQuery, searchCelebrity, user]);
+    return () => {
+      cancelled = true;
+    };
+  }, [rawQuery, userId]);
 
   const handleUpgrade = async () => {
     const { data } = await supabase.functions.invoke('create-payment');
@@ -104,7 +128,8 @@ const Search = () => {
                 <p className="text-muted-foreground mb-6">
                   Sign in (or create an account) to unlock full earnings profiles.
                   <span className="block mt-2 text-sm">
-                    Youll get <span className="text-primary font-semibold">3 free searches</span> to start, then its <span className="text-primary font-semibold">$4.99 once</span> for unlimited lifetime access.
+                    You'll get <span className="text-primary font-semibold">3 free searches</span> to start, then it's{' '}
+                    <span className="text-primary font-semibold">$4.99 once</span> for unlimited lifetime access.
                   </span>
                 </p>
                 <Button onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90">
@@ -119,32 +144,30 @@ const Search = () => {
               <CardContent className="p-8 text-center">
                 <div className="text-4xl mb-4">✨</div>
                 <h3 className="font-semibold text-xl mb-2">Free Searches Used</h3>
-                <p className="text-muted-foreground mb-2">
-                  You've used all 3 of your free searches.
-                </p>
+                <p className="text-muted-foreground mb-2">You've used all 3 of your free searches.</p>
                 <p className="text-muted-foreground mb-6">
-                  Unlock <span className="text-primary font-semibold">unlimited access</span> for just $4.99 — one time, forever.
+                  Unlock <span className="text-primary font-semibold">unlimited access</span> for just $4.99 — one time,
+                  forever.
                 </p>
                 <Button onClick={handleUpgrade} className="bg-primary hover:bg-primary/90">
                   Unlock Unlimited Access — $4.99
                 </Button>
                 <p className="text-xs text-muted-foreground/60 mt-3">
-                  All sales final. <Link to="/terms" className="underline hover:text-muted-foreground">Terms</Link>
+                  All sales final.{' '}
+                  <Link to="/terms" className="underline hover:text-muted-foreground">
+                    Terms
+                  </Link>
                 </p>
               </CardContent>
             </Card>
           )}
 
           {!searching && !accessDenied && validationError && displayQuery && (
-            <p className="text-center text-muted-foreground">
-              Invalid search query. Please use only letters, spaces, and hyphens.
-            </p>
+            <p className="text-center text-muted-foreground">Invalid search query. Please use only letters, spaces, and hyphens.</p>
           )}
 
           {!searching && !accessDenied && !validationError && displayQuery && !result && (
-            <p className="text-center text-muted-foreground">
-              No results found for "{displayQuery}". Try another search.
-            </p>
+            <p className="text-center text-muted-foreground">No results found for "{displayQuery}". Try another search.</p>
           )}
 
           {!searching && !accessDenied && !validationError && result && (
@@ -172,20 +195,12 @@ const Search = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-muted-foreground">Annual</p>
-                      <p className="text-xl font-bold text-primary">
-                        {formatCompactCurrency(result.annualEarnings)}
-                      </p>
+                      <p className="text-xl font-bold text-primary">{formatCompactCurrency(result.annualEarnings)}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </Link>
-          )}
-
-          {!searching && !accessDenied && !validationError && displayQuery && !result && (
-            <p className="text-center text-muted-foreground">
-              No results found for "{displayQuery}". Try another search.
-            </p>
           )}
         </div>
       </main>

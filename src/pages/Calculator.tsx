@@ -89,7 +89,6 @@ const Calculator = () => {
         });
         setSearchQuery('');
         setShowResults(false);
-        toast.success(`Found ${result.name}!`);
       }
       // If result is null, the search hook already surfaced the reason via toast (paywall, rate limit, AI error, etc.)
     } catch (error) {
