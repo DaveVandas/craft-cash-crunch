@@ -41,14 +41,14 @@ const Index = () => {
           <DailyWealthFact />
         </section>
 
-        {/* Featured Ticker */}
-        <section className="container mb-12">
-          <FeaturedTicker />
-        </section>
-
         {/* Daily Celebrity Spotlight */}
         <section className="container mb-12">
           <DailyCelebritySpotlight />
+        </section>
+
+        {/* Featured Ticker */}
+        <section className="container mb-12">
+          <FeaturedTicker />
         </section>
 
         {/* Trending */}
