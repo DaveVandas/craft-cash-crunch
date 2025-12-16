@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -94,6 +94,11 @@ const SideHustle = () => {
   // Get rotated content on mount
   const [displayedHustles] = useState(() => getRotatedHustles());
   const [displayedQuote] = useState(() => getRandomQuote());
+
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const calculateResult = (buy: number, sell: number, sales: number, periodType: string) => {
     if (sell <= buy || sales <= 0) {
