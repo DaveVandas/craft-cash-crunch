@@ -616,29 +616,44 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
           </div>
 
           {/* You Might Also Like Section */}
-          <div className="mt-6 pt-4 border-t border-border/50">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">You might also like</span>
+          <div className="mt-6 pt-5 border-t-2 border-primary/30">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-sm font-bold uppercase tracking-wider text-primary">You Might Also Like</span>
+              <Sparkles className="h-5 w-5 text-primary" />
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {getSimilarCelebrities(celebrity.name, celebrity.category, 4).map((similar) => (
                 <Link
                   key={similar.name}
                   to={`/profile/${nameToSlug(similar.name)}`}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group"
+                  className="group relative overflow-hidden rounded-xl border-2 border-primary/30 hover:border-primary/60 transition-all hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
+                  style={{ background: 'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--secondary)/0.5) 100%)' }}
                 >
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-sm flex-shrink-0">
-                    {getAvatarEmoji(celebrity.profession)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium truncate group-hover:text-primary transition-colors">
+                  {/* Mini gold banner */}
+                  <div className="px-2 py-1 bg-gradient-to-r from-primary/80 via-primary to-primary/80">
+                    <p className="text-[9px] font-bold text-primary-foreground uppercase tracking-wider text-center truncate">
                       {similar.name}
                     </p>
-                    <p className="text-[10px] text-muted-foreground truncate">
+                  </div>
+                  
+                  {/* Card content */}
+                  <div className="p-2.5 flex flex-col items-center">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-primary/30 flex items-center justify-center text-2xl mb-1.5 ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all group-hover:scale-110">
+                      {similar.emoji}
+                    </div>
+                    <p className="text-primary font-bold text-xs text-center">
                       {similar.hourlyEarnings}
                     </p>
+                    <p className="text-[9px] text-muted-foreground">
+                      {similar.netWorth} net worth
+                    </p>
                   </div>
+                  
+                  {/* Shimmer effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
                 </Link>
               ))}
             </div>
