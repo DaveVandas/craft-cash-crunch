@@ -49,18 +49,20 @@ const FeaturedTicker = () => {
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
         <CardContent className="p-0">
           <div className="relative">
-            {/* Navigation buttons */}
+            {/* Navigation arrows - always visible */}
             <button
               onClick={goToPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-background/80 hover:bg-background shadow-lg transition-all"
+              className="absolute left-1 md:left-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-background/90 hover:bg-primary/20 border border-border/50 shadow-lg transition-all hover:scale-110"
+              aria-label="Previous"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-background/80 hover:bg-background shadow-lg transition-all"
+              className="absolute right-1 md:right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-background/90 hover:bg-primary/20 border border-border/50 shadow-lg transition-all hover:scale-110"
+              aria-label="Next"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
             </button>
 
             {/* Main content */}
@@ -135,25 +137,26 @@ const FeaturedTicker = () => {
         </CardContent>
       </Card>
 
-      {/* Pagination dots */}
-      <div className="flex justify-center gap-2 mt-4">
-        {featuredPeople.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => goToIndex(idx)}
-            className={`h-2 rounded-full transition-all ${
-              idx === currentIndex
-                ? 'bg-primary w-6'
-                : 'bg-muted hover:bg-muted-foreground w-2'
-            }`}
-          />
-        ))}
+      {/* Pagination dots with count indicator */}
+      <div className="flex items-center justify-center gap-3 mt-4">
+        <span className="text-xs text-muted-foreground font-medium">
+          {currentIndex + 1} / {totalCount}
+        </span>
+        <div className="flex gap-2">
+          {featuredPeople.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => goToIndex(idx)}
+              className={`h-2 rounded-full transition-all ${
+                idx === currentIndex
+                  ? 'bg-primary w-6'
+                  : 'bg-muted hover:bg-muted-foreground w-2'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
       </div>
-
-      {/* Mobile swipe hint */}
-      <p className="text-center text-xs text-muted-foreground mt-2 md:hidden">
-        Swipe to see more
-      </p>
     </div>
   );
 };
