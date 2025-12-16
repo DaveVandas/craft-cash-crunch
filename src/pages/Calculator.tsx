@@ -118,9 +118,15 @@ const Calculator = () => {
   };
 
   const applyHustlePreset = (hustle: typeof SIDE_HUSTLE_IDEAS[0]) => {
+    // Populate the calculator with realistic example values
+    setBuyPrice(String(Math.round(hustle.avgProfit * 0.4))); // Approximate buy price
+    setSellPrice(String(Math.round(hustle.avgProfit * 1.4))); // Sell = buy + profit
+    setSalesVolume(String(hustle.salesPerMonth));
+    setPeriod('month');
+    
+    // Calculate and show results
     const monthly = hustle.avgProfit * hustle.salesPerMonth;
     setHustleResult({ monthly, yearly: monthly * 12 });
-    toast.success(`${hustle.emoji} ${hustle.name} loaded!`);
   };
 
   return (
