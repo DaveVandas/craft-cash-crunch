@@ -1,36 +1,39 @@
 import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { BookOpen, Sparkles, ArrowRight } from 'lucide-react';
 
 const WealthWisdomPromo = () => {
   return (
-    <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-card to-amber-500/10 overflow-hidden relative">
-      <div className="absolute top-4 right-4 text-4xl opacity-30">📚</div>
-      <CardContent className="p-6">
-        <Badge className="mb-3 bg-primary/20 text-primary border-primary/30">
-          <Sparkles className="h-3 w-3 mr-1" />
-          New Weekly Stories
-        </Badge>
+    <div className="relative rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-card to-amber-500/5 p-4 md:p-5 overflow-hidden">
+      <div className="absolute top-2 right-4 text-3xl opacity-20">📚</div>
+      
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+            <BookOpen className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-serif text-lg font-bold">Wealth Wisdom</h3>
+              <span className="flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                <Sparkles className="h-3 w-3" />
+                New
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Weekly rags-to-riches stories from billionaires who started with nothing.
+            </p>
+          </div>
+        </div>
         
-        <h3 className="font-serif text-xl font-bold mb-2">
-          Wealth Wisdom Blog
-        </h3>
-        
-        <p className="text-muted-foreground text-sm mb-4">
-          Inspiring rags-to-riches stories. Real lessons from billionaires who started with nothing.
-        </p>
-        
-        <Link to="/wealth-wisdom">
-          <Button className="w-full group">
-            <BookOpen className="h-4 w-4 mr-2" />
-            Read This Week's Story
-            <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+        <Link to="/wealth-wisdom" className="shrink-0">
+          <Button size="sm" className="group w-full sm:w-auto">
+            Read Story
+            <ArrowRight className="h-4 w-4 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </Link>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -52,15 +52,17 @@ const Index = () => {
           <FeaturedTicker />
         </section>
 
-        {/* Quick Actions + Wealth Wisdom Promo */}
-        <section className="container mb-12">
+        {/* Quick Actions */}
+        <section className="container mb-8">
           <h2 className="font-serif text-2xl font-bold mb-5">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <QuickActions />
-            <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-              <WealthWisdomPromo />
-            </div>
           </div>
+        </section>
+
+        {/* Wealth Wisdom Promo */}
+        <section className="container mb-12">
+          <WealthWisdomPromo />
         </section>
 
         {/* Trending */}
