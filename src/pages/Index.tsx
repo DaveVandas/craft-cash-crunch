@@ -51,17 +51,17 @@ const Index = () => {
           <FeaturedTicker />
         </section>
 
-        {/* Trending */}
-        <section className="container mb-12">
-          <TrendingSearches />
-        </section>
-
         {/* Quick Actions */}
         <section className="container mb-12">
           <h2 className="font-serif text-2xl font-bold mb-5">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <QuickActions />
           </div>
+        </section>
+
+        {/* Trending */}
+        <section className="container mb-12">
+          <TrendingSearches />
         </section>
 
         {/* Categories */}
