@@ -622,7 +622,7 @@ const ShareCard = ({ celebrity, userSalary }: ShareCardProps) => {
           </div>
 
           {/* You Might Also Like Section */}
-          <div className="mt-6 pt-4 border-t border-border/30">
+          <div className="mt-6 p-4 rounded-lg border border-border/50 bg-secondary/10">
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/50" />
               <Sparkles className="h-4 w-4 text-muted-foreground" />
