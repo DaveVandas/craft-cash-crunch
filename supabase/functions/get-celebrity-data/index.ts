@@ -55,8 +55,8 @@ function validateName(name: unknown): string | null {
   const trimmed = name.trim();
   if (trimmed.length === 0 || trimmed.length > 100) return null;
   
-  // Only allow letters, spaces, hyphens, apostrophes, and periods (for names like "Jr." or "O'Brien")
-  const namePattern = /^[a-zA-Z\s\-'.]+$/;
+  // Allow Unicode letters (accents), numbers, spaces, hyphens, apostrophes, and periods (e.g., "Beyoncé", "50 Cent", "O'Brien")
+  const namePattern = /^[\p{L}\p{M}0-9\s\-'.]+$/u;
   if (!namePattern.test(trimmed)) return null;
   
   return trimmed;
