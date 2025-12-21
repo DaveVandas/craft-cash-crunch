@@ -49,6 +49,20 @@ export const categories: CategoryInfo[] = [
     icon: '📜',
     description: 'Adjusted for inflation',
     gradient: 'from-amber-600 to-yellow-500'
+  },
+  {
+    id: 'royalty',
+    name: 'Royalty',
+    icon: '👑',
+    description: 'Kings, queens & princes',
+    gradient: 'from-yellow-400 to-amber-500'
+  },
+  {
+    id: 'business-titans',
+    name: 'Business Titans',
+    icon: '💼',
+    description: 'CEOs & investors',
+    gradient: 'from-indigo-500 to-purple-600'
   }
 ];
 
