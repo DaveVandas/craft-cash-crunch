@@ -5,6 +5,7 @@ import PaywallGate from '@/components/paywall/PaywallGate';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumericInput } from '@/components/ui/numeric-input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -290,33 +291,32 @@ const DebtDestroyer = () => {
                       <div>
                         <Label className="text-xs text-foreground/60">Balance</Label>
                         <div className="relative">
-                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="number"
+                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                          <NumericInput
                             value={debt.balance}
-                            onChange={(e) => updateDebt(debt.id, 'balance', Number(e.target.value))}
+                            onChange={(val) => updateDebt(debt.id, 'balance', val)}
                             className="pl-7"
+                            allowDecimals={false}
                           />
                         </div>
                       </div>
                       <div>
                         <Label className="text-xs text-foreground/60">Interest Rate (%)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
+                        <NumericInput
                           value={debt.interestRate}
-                          onChange={(e) => updateDebt(debt.id, 'interestRate', Number(e.target.value))}
+                          onChange={(val) => updateDebt(debt.id, 'interestRate', val)}
+                          allowDecimals={true}
                         />
                       </div>
                       <div>
                         <Label className="text-xs text-foreground/60">Min Payment</Label>
                         <div className="relative">
-                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="number"
+                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                          <NumericInput
                             value={debt.minimumPayment}
-                            onChange={(e) => updateDebt(debt.id, 'minimumPayment', Number(e.target.value))}
+                            onChange={(val) => updateDebt(debt.id, 'minimumPayment', val)}
                             className="pl-7"
+                            allowDecimals={false}
                           />
                         </div>
                       </div>

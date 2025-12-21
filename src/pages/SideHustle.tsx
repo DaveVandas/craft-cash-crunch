@@ -245,9 +245,13 @@ const SideHustle = () => {
                       <div className="relative mt-1">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={buyPrice}
-                          onChange={(e) => handleInputChange('buy', e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '');
+                            handleInputChange('buy', value);
+                          }}
                           className="pl-7 h-11 text-base font-medium"
                         />
                       </div>
@@ -257,9 +261,13 @@ const SideHustle = () => {
                       <div className="relative mt-1">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={sellPrice}
-                          onChange={(e) => handleInputChange('sell', e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '');
+                            handleInputChange('sell', value);
+                          }}
                           className="pl-7 h-11 text-base font-medium"
                         />
                       </div>
@@ -267,9 +275,13 @@ const SideHustle = () => {
                     <div>
                       <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         value={salesPerPeriod}
-                        onChange={(e) => handleInputChange('sales', e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          handleInputChange('sales', value);
+                        }}
                         className="h-11 text-base font-medium mt-1"
                       />
                     </div>
