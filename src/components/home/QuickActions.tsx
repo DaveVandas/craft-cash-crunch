@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Brain, Rocket, HardHat } from 'lucide-react';
+import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const actions = [
@@ -37,6 +37,13 @@ const actions = [
     description: 'Test your knowledge of celebrity earnings',
     href: '/quiz',
     color: 'text-purple-400'
+  },
+  {
+    icon: Skull,
+    title: 'Debt Destroyer',
+    description: 'Crush debt & see interest savings',
+    href: '/debt-destroyer',
+    color: 'text-red-400'
   }
 ];
 
