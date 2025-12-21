@@ -27,8 +27,15 @@ import {
   Rocket,
   ChevronRight,
   CheckCircle2,
-  XCircle
+  XCircle,
+  MapPin,
+  ExternalLink,
+  Building2,
+  Users,
+  BookOpen,
+  Search
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatCompactCurrency } from '@/lib/earnings';
 
 interface TradeData {
@@ -702,6 +709,9 @@ const Trades = () => {
               </CardContent>
             </Card>
 
+            {/* Find Apprenticeships Section */}
+            <FindApprenticeships selectedTrade={selectedTrade} />
+
             {/* CTA */}
             <div className="text-center py-8">
               <p className="text-lg text-foreground/80 mb-4">
@@ -728,6 +738,285 @@ const Trades = () => {
       
       <Footer />
     </div>
+  );
+};
+
+// Find Apprenticeships Component
+const FindApprenticeships = ({ selectedTrade }: { selectedTrade: TradeData }) => {
+  const [selectedState, setSelectedState] = useState<string>('');
+
+  const STATES = [
+    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 
+    'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 
+    'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 
+    'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 
+    'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 
+    'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 
+    'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 
+    'Wisconsin', 'Wyoming'
+  ];
+
+  const NATIONAL_RESOURCES = [
+    {
+      name: 'ApprenticeshipUSA',
+      url: 'https://www.apprenticeship.gov/apprenticeship-job-finder',
+      description: 'Official U.S. Department of Labor apprenticeship finder',
+      icon: Building2,
+      type: 'Government'
+    },
+    {
+      name: 'IBEW (Electricians)',
+      url: 'https://www.ibew.org/Tools/Local-Union-Directory',
+      description: 'International Brotherhood of Electrical Workers - Find local unions',
+      icon: Zap,
+      type: 'Union'
+    },
+    {
+      name: 'UA (Plumbers & Pipefitters)',
+      url: 'https://www.ua.org/locals',
+      description: 'United Association - Plumber and pipefitter locals',
+      icon: Droplets,
+      type: 'Union'
+    },
+    {
+      name: 'SMWIA (Sheet Metal)',
+      url: 'https://smart-union.org/locals/',
+      description: 'Sheet Metal, Air, Rail & Transportation Workers',
+      icon: Flame,
+      type: 'Union'
+    },
+    {
+      name: 'UBC (Carpenters)',
+      url: 'https://www.carpenters.org/find-a-council/',
+      description: 'United Brotherhood of Carpenters - Regional councils',
+      icon: HardHat,
+      type: 'Union'
+    },
+    {
+      name: 'AWS (Welders)',
+      url: 'https://www.aws.org/education/schools-directory',
+      description: 'American Welding Society - Accredited welding schools',
+      icon: Factory,
+      type: 'Association'
+    }
+  ];
+
+  const TRADE_SCHOOL_FINDERS = [
+    {
+      name: 'Trade-Schools.net',
+      url: 'https://www.trade-schools.net/',
+      description: 'Search vocational programs by trade and location'
+    },
+    {
+      name: 'SkillsUSA',
+      url: 'https://www.skillsusa.org/',
+      description: 'Career and technical education organization'
+    },
+    {
+      name: 'CareerOneStop',
+      url: 'https://www.careeronestop.org/FindTraining/find-training.aspx',
+      description: 'U.S. DOL sponsored training program finder'
+    }
+  ];
+
+  const stateAbbrev = (state: string) => {
+    const abbrevs: Record<string, string> = {
+      'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
+      'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
+      'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
+      'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+      'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
+      'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
+      'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
+      'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+      'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
+      'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+    };
+    return abbrevs[state] || state;
+  };
+
+  const getStateSearchUrl = (state: string) => {
+    const abbrev = stateAbbrev(state);
+    return `https://www.apprenticeship.gov/apprenticeship-job-finder?location=${encodeURIComponent(state)}&location_type=state`;
+  };
+
+  const getTradeSpecificUrl = (trade: string, state: string) => {
+    const tradeKeywords: Record<string, string> = {
+      'Electrician': 'electrician',
+      'Plumber': 'plumber',
+      'HVAC Technician': 'hvac',
+      'Welder': 'welder',
+      'Carpenter': 'carpenter',
+      'Auto Mechanic': 'automotive',
+      'Industrial Mechanic': 'industrial maintenance',
+      'IT Technician': 'information technology'
+    };
+    const keyword = tradeKeywords[trade] || trade.toLowerCase();
+    return `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(keyword)}${state ? `&location=${encodeURIComponent(state)}&location_type=state` : ''}`;
+  };
+
+  return (
+    <Card className="border-primary/20">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <MapPin className="h-6 w-6 text-primary" />
+          Find Your Apprenticeship
+        </CardTitle>
+        <CardDescription className="text-base">
+          Real programs. Real unions. Real opportunity. Start your journey today.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* State Selector */}
+        <div className="p-5 rounded-xl bg-primary/5 border border-primary/20">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Search by Location
+          </h4>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Select value={selectedState} onValueChange={setSelectedState}>
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder="Select your state" />
+              </SelectTrigger>
+              <SelectContent className="max-h-64">
+                {STATES.map((state) => (
+                  <SelectItem key={state} value={state}>{state}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              asChild 
+              disabled={!selectedState}
+              className="bg-gradient-to-r from-primary to-primary/80"
+            >
+              <a 
+                href={selectedState ? getTradeSpecificUrl(selectedTrade.name, selectedState) : '#'}
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Find {selectedTrade.name} Apprenticeships {selectedState && `in ${selectedState}`}
+                <ExternalLink className="h-3 w-3 ml-2" />
+              </a>
+            </Button>
+          </div>
+          {selectedState && (
+            <p className="text-sm text-muted-foreground mt-3">
+              Opens ApprenticeshipUSA with {selectedTrade.name} programs in {selectedState}
+            </p>
+          )}
+        </div>
+
+        {/* Union Halls & National Resources */}
+        <div>
+          <h4 className="font-semibold mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Union Halls & National Programs
+          </h4>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {NATIONAL_RESOURCES.map((resource) => {
+              const Icon = resource.icon;
+              return (
+                <a
+                  key={resource.name}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-secondary">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                          {resource.name}
+                        </span>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {resource.description}
+                      </p>
+                      <span className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium ${
+                        resource.type === 'Government' ? 'bg-blue-500/20 text-blue-400' :
+                        resource.type === 'Union' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-emerald-500/20 text-emerald-400'
+                      }`}>
+                        {resource.type}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Trade Schools */}
+        <div>
+          <h4 className="font-semibold mb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            Trade School Finders
+          </h4>
+          <div className="grid md:grid-cols-3 gap-3">
+            {TRADE_SCHOOL_FINDERS.map((finder) => (
+              <a
+                key={finder.name}
+                href={finder.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-xl border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-sm group-hover:text-primary transition-colors">
+                    {finder.name}
+                  </span>
+                  <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {finder.description}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Pro Tips */}
+        <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Crown className="h-4 w-4 text-primary" />
+            Mogul Tips for Getting Accepted
+          </h4>
+          <ul className="grid md:grid-cols-2 gap-2 text-sm">
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Apply to multiple unions - acceptance rates vary</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Get your driver&apos;s license and reliable transportation</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Take algebra - most aptitude tests include math</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Physical fitness matters - trades require stamina</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Show up early to interviews - first impressions count</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <span>Get letters of recommendation from employers or teachers</span>
+            </li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
