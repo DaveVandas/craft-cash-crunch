@@ -86,27 +86,41 @@ const DebtDestroyer = () => {
     let totalMonths = 0;
     let totalInterestPaid = 0;
     let totalPaid = 0;
+    let hasUnpayableDebt = false;
 
     debts.forEach(debt => {
+      if (debt.balance <= 0 || debt.minimumPayment <= 0) return;
+      
       let balance = debt.balance;
       let months = 0;
       let interestPaid = 0;
       const monthlyRate = debt.interestRate / 100 / 12;
 
-      while (balance > 0 && months < 360) { // Cap at 30 years
+      // Check if minimum payment covers at least the interest
+      const firstMonthInterest = balance * monthlyRate;
+      if (debt.minimumPayment <= firstMonthInterest) {
+        hasUnpayableDebt = true;
+      }
+
+      while (balance > 0.01 && months < 360) {
         const interest = balance * monthlyRate;
         interestPaid += interest;
         const payment = Math.min(debt.minimumPayment, balance + interest);
-        balance = balance + interest - payment;
+        balance = Math.max(0, balance + interest - payment);
         totalPaid += payment;
         months++;
+      }
+
+      // If there's still a balance after 360 months, add it to what needs to be paid
+      if (balance > 0.01) {
+        totalPaid += balance; // Would need to pay off remaining balance eventually
       }
 
       totalMonths = Math.max(totalMonths, months);
       totalInterestPaid += interestPaid;
     });
 
-    return { months: totalMonths, interestPaid: totalInterestPaid, totalPaid };
+    return { months: totalMonths, interestPaid: totalInterestPaid, totalPaid, hasUnpayableDebt };
   }, [debts]);
 
   // Calculate avalanche method (highest interest first) with extra payment
@@ -432,17 +446,27 @@ const DebtDestroyer = () => {
                           <AlertTriangle className="h-5 w-5 text-red-400" />
                           <h4 className="font-semibold text-lg">Minimum Payments Only</h4>
                         </div>
+                        {minimumPaymentTimeline.hasUnpayableDebt && (
+                          <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 mb-4">
+                            <p className="text-sm text-red-300 font-medium">
+                              ⚠️ Warning: Your minimum payment doesn't cover the monthly interest on some debts. 
+                              The balance will grow forever!
+                            </p>
+                          </div>
+                        )}
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-foreground/70">Time to Freedom:</span>
-                            <span className="font-bold text-red-400">{formatMonths(minimumPaymentTimeline.months)}</span>
+                            <span className="font-bold text-red-400">
+                              {minimumPaymentTimeline.months >= 360 ? '30+ years' : formatMonths(minimumPaymentTimeline.months)}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-foreground/70">Total Interest Paid:</span>
+                            <span className="text-foreground/70">Interest Accrued:</span>
                             <span className="font-bold text-red-400">{formatCurrency(minimumPaymentTimeline.interestPaid)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-foreground/70">Total Paid:</span>
+                            <span className="text-foreground/70">Total to Pay Off:</span>
                             <span className="font-bold">{formatCurrency(minimumPaymentTimeline.totalPaid)}</span>
                           </div>
                         </div>
