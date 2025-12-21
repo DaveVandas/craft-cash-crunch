@@ -136,6 +136,8 @@ function getAllSuggestionsForCategory(categoryId: string): string[] {
     'politicians': ['Donald Trump', 'Joe Biden', 'Rishi Sunak', 'Emmanuel Macron', 'Barack Obama', 'Vladimir Putin', 'Xi Jinping', 'Justin Trudeau', 'Angela Merkel', 'Boris Johnson', 'Nancy Pelosi', 'Bernie Sanders'],
     'influencers': ['MrBeast', 'Kylie Jenner', 'Charli D\'Amelio', 'Logan Paul', 'PewDiePie', 'Jake Paul', 'Addison Rae', 'David Dobrik', 'Emma Chamberlain', 'Kim Kardashian', 'Khaby Lame', 'Markiplier', 'Ninja', 'Pokimane', 'KSI'],
     'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Cleopatra', 'Genghis Khan', 'Mansa Musa', 'Henry Ford', 'J.P. Morgan', 'Cornelius Vanderbilt', 'King Solomon', 'Augustus Caesar', 'Akbar I', 'William the Conqueror', 'Mir Osman Ali Khan', 'Jakob Fugger'],
+    'royalty': ['King Charles III', 'Prince William', 'Queen Elizabeth II', 'Prince Harry', 'King Salman', 'Mohammed bin Salman', 'Sultan of Brunei', 'King of Thailand', 'Prince Albert II', 'Sheikh Mohammed', 'King Felipe VI', 'Princess Diana'],
+    'business-titans': ['Warren Buffett', 'Jamie Dimon', 'Ray Dalio', 'Carl Icahn', 'George Soros', 'Ken Griffin', 'Stephen Schwarzman', 'David Solomon', 'Bernard Arnault', 'Mukesh Ambani', 'Gautam Adani', 'Rupert Murdoch', 'Charles Koch', 'Michael Bloomberg'],
   };
   return suggestions[categoryId] || [];
 }
