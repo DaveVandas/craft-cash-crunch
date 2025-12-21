@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Share2, Brain, Rocket } from 'lucide-react';
+import { Calculator, GitCompareArrows, Brain, Rocket, HardHat } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const actions = [
@@ -16,6 +16,13 @@ const actions = [
     description: 'Compare any two people head-to-head',
     href: '/compare',
     color: 'text-blue-400'
+  },
+  {
+    icon: HardHat,
+    title: 'Who Needs College?',
+    description: 'Trades vs degree wealth comparison',
+    href: '/trades',
+    color: 'text-orange-400'
   },
   {
     icon: Rocket,

@@ -24,6 +24,7 @@ import Quiz from "./pages/Quiz";
 import Referral from "./pages/Referral";
 import SideHustle from "./pages/SideHustle";
 import WealthWisdom from "./pages/WealthWisdom";
+import Trades from "./pages/Trades";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/referral" element={<Referral />} />
                 <Route path="/side-hustle" element={<SideHustle />} />
                 <Route path="/wealth-wisdom" element={<WealthWisdom />} />
+                <Route path="/trades" element={<Trades />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
