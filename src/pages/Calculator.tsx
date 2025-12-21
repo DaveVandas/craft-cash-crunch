@@ -288,11 +288,13 @@ const Calculator = () => {
                               <div className="relative mt-1">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                                 <Input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   value={buyPrice}
                                   onChange={(e) => {
-                                    setBuyPrice(e.target.value);
-                                    const buy = parseFloat(e.target.value) || 0;
+                                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                                    setBuyPrice(value);
+                                    const buy = parseFloat(value) || 0;
                                     const sell = parseFloat(sellPrice) || 0;
                                     const sales = parseFloat(salesVolume) || 0;
                                     if (sell > buy && sales > 0) {
@@ -310,12 +312,14 @@ const Calculator = () => {
                               <div className="relative mt-1">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                                 <Input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   value={sellPrice}
                                   onChange={(e) => {
-                                    setSellPrice(e.target.value);
+                                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                                    setSellPrice(value);
                                     const buy = parseFloat(buyPrice) || 0;
-                                    const sell = parseFloat(e.target.value) || 0;
+                                    const sell = parseFloat(value) || 0;
                                     const sales = parseFloat(salesVolume) || 0;
                                     if (sell > buy && sales > 0) {
                                       const profit = sell - buy;
@@ -330,13 +334,15 @@ const Calculator = () => {
                             <div>
                               <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
                               <Input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 value={salesVolume}
                                 onChange={(e) => {
-                                  setSalesVolume(e.target.value);
+                                  const value = e.target.value.replace(/[^0-9]/g, '');
+                                  setSalesVolume(value);
                                   const buy = parseFloat(buyPrice) || 0;
                                   const sell = parseFloat(sellPrice) || 0;
-                                  const sales = parseFloat(e.target.value) || 0;
+                                  const sales = parseFloat(value) || 0;
                                   if (sell > buy && sales > 0) {
                                     const profit = sell - buy;
                                     const monthly = profit * sales;
