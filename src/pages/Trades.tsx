@@ -356,7 +356,7 @@ const Trades = () => {
             </Card>
 
             {/* Selected Trade Details */}
-            <div ref={careerProgressionRef} className="grid md:grid-cols-2 gap-6 scroll-mt-4">
+            <div ref={careerProgressionRef} className="grid md:grid-cols-2 gap-6 scroll-mt-20">
               {/* Trade Info Card */}
               <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-amber-500/5">
                 <CardHeader>
