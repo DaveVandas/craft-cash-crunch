@@ -32,13 +32,11 @@ const Category = () => {
   const category = id ? getCategoryById(id) : undefined;
   const [displayedSuggestions, setDisplayedSuggestions] = useState<string[]>([]);
 
-  // Rotate suggestions every hour based on timestamp
+  // Shuffle suggestions randomly on every visit
   useEffect(() => {
     if (category) {
       const allSuggestions = getAllSuggestionsForCategory(category.id);
-      // Create a seed based on current hour - changes every hour
-      const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
-      const shuffled = shuffleWithSeed(allSuggestions, hourSeed + category.id.length);
+      const shuffled = [...allSuggestions].sort(() => Math.random() - 0.5);
       setDisplayedSuggestions(shuffled.slice(0, 5));
     }
   }, [category]);
