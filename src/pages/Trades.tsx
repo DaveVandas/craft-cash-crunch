@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -175,6 +175,17 @@ const Trades = () => {
   const [yearsToProject, setYearsToProject] = useState(20);
   const [annualReturn, setAnnualReturn] = useState(10);
   const [displayedQuote] = useState(() => INSPIRATIONAL_QUOTES[Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)]);
+  const careerProgressionRef = useRef<HTMLDivElement>(null);
+
+  const handleTradeSelect = (trade: TradeData) => {
+    setSelectedTrade(trade);
+    // Scroll to career progression on mobile
+    if (window.innerWidth < 768 && careerProgressionRef.current) {
+      setTimeout(() => {
+        careerProgressionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -324,7 +335,7 @@ const Trades = () => {
                     return (
                       <button
                         key={trade.name}
-                        onClick={() => setSelectedTrade(trade)}
+                        onClick={() => handleTradeSelect(trade)}
                         className={`p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] ${
                           selectedTrade.name === trade.name 
                             ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
@@ -345,7 +356,7 @@ const Trades = () => {
             </Card>
 
             {/* Selected Trade Details */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div ref={careerProgressionRef} className="grid md:grid-cols-2 gap-6 scroll-mt-4">
               {/* Trade Info Card */}
               <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-amber-500/5">
                 <CardHeader>
