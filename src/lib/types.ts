@@ -19,7 +19,9 @@ export type Category =
   | 'tech-billionaires'
   | 'politicians'
   | 'influencers'
-  | 'historical';
+  | 'historical'
+  | 'royalty'
+  | 'business-titans';
 
 export interface CategoryInfo {
   id: Category;
