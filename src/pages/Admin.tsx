@@ -495,7 +495,7 @@ const Admin = () => {
               AI Usage & Cost Estimator
             </CardTitle>
             <CardDescription>
-              Estimated costs based on Lovable AI (Gemini 2.5 Flash) usage
+              Estimated costs based on AI (Gemini 2.5 Flash) usage
             </CardDescription>
           </CardHeader>
           <CardContent>
