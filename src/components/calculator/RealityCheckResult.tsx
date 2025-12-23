@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { calculateTimeToEarn, formatCompactCurrency, formatLargeCurrency } from '@/lib/earnings';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, TrendingUp, DollarSign, Rocket, ArrowDown } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { AlertTriangle, TrendingUp, DollarSign, Rocket, ArrowDown, User } from 'lucide-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
-
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/contexts/AuthContext';
 const TRANSITION_MESSAGES = [
   {
     headline: "Real talk? This next part might sting a little. 🫣",
@@ -35,13 +37,18 @@ interface RealityCheckResultProps {
   userSalary: number;
   celebrityName: string;
   celebrityAnnualEarnings: number;
+  celebrityImageUrl?: string;
 }
 
 const RealityCheckResult = ({ 
   userSalary, 
   celebrityName, 
-  celebrityAnnualEarnings 
+  celebrityAnnualEarnings,
+  celebrityImageUrl
 }: RealityCheckResultProps) => {
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
+  
   const { currentEarnings, breakdown } = useEarningsTicker({ 
     annualEarnings: userSalary 
   });
@@ -63,6 +70,57 @@ const RealityCheckResult = ({
 
   return (
     <div className="space-y-4 animate-fade-in">
+      {/* Avatar Face-off */}
+      <Card className="border-primary/30 bg-gradient-to-r from-emerald-950/20 via-card to-primary/10 overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center gap-4 md:gap-8">
+            {/* User Avatar */}
+            <div className="text-center">
+              <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-emerald-500/50 mx-auto mb-2">
+                <AvatarImage 
+                  src={profile?.avatar_url || undefined} 
+                  alt="You" 
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                  <User className="h-8 w-8 md:h-10 md:w-10" />
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-sm font-medium text-emerald-400">
+                {profile?.display_name || user?.email?.split('@')[0] || 'You'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {formatCompactCurrency(userSalary)}/yr
+              </p>
+            </div>
+
+            {/* VS Badge */}
+            <div className="flex flex-col items-center">
+              <div className="text-2xl md:text-3xl font-bold text-muted-foreground">VS</div>
+              <div className="text-xs text-primary font-medium">{ratio.toLocaleString()}x gap</div>
+            </div>
+
+            {/* Celebrity Avatar */}
+            <div className="text-center">
+              <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-primary/50 mx-auto mb-2">
+                <AvatarImage 
+                  src={celebrityImageUrl} 
+                  alt={celebrityName} 
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+                  💰
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-sm font-medium text-primary">{celebrityName}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatCompactCurrency(celebrityAnnualEarnings)}/yr
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center gap-2 text-primary">
         <AlertTriangle className="h-5 w-5" />
         <span className="font-semibold">Reality Check Results</span>

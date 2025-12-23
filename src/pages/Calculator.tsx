@@ -230,6 +230,7 @@ const Calculator = () => {
                   userSalary={salary}
                   celebrityName={selectedCeleb.name}
                   celebrityAnnualEarnings={selectedCeleb.earnings}
+                  celebrityImageUrl={selectedCeleb.imageUrl}
                 />
                 
                 <RealityCheckShareCard
