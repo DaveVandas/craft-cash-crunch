@@ -111,12 +111,14 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
                 content={{ type: 'profile', celebrity }} 
                 className="border border-border/50"
               />
-              <Link to={`/compare?person1=${celebrity.id}`}>
-                <Button variant="outline" className="border-border/50">
-                  <GitCompareArrows className="h-4 w-4 mr-2" />
-                  Compare
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="border-border/50"
+                onClick={() => navigate('/compare', { state: { person1: celebrity } })}
+              >
+                <GitCompareArrows className="h-4 w-4 mr-2" />
+                Compare
+              </Button>
               <Button 
                 variant="outline" 
                 className="border-border/50"
