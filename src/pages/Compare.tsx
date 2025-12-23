@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import CompareResult from '@/components/compare/CompareResult';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
-import { Celebrity } from '@/lib/types';
+import { Celebrity, Category } from '@/lib/types';
 import { getAvatarEmoji } from '@/lib/avatar';
-import { Scale, Search, X } from 'lucide-react';
+import { getSimilarCelebrities, getCategoryEmoji } from '@/lib/similarCelebrities';
+import { Scale, Search, X, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,15 +22,29 @@ const Compare = () => {
   const [person2, setPerson2] = useState<Celebrity | null>(null);
   const { fetchCelebrity, loading } = useCelebrityData();
 
-  // Handle navigation from favorites with pre-loaded data
+  // Handle navigation from profile or favorites with pre-loaded data
   useEffect(() => {
-    if (location.state?.person1 && location.state?.person2) {
+    if (location.state?.person1) {
       setPerson1(location.state.person1);
-      setPerson2(location.state.person2);
       setQuery1(location.state.person1.name);
+    }
+    if (location.state?.person2) {
+      setPerson2(location.state.person2);
       setQuery2(location.state.person2.name);
     }
   }, [location.state]);
+
+  // Get suggested comparisons based on person1's category
+  const suggestions = useMemo(() => {
+    if (!person1?.category) return [];
+    return getSimilarCelebrities(person1.name, person1.category as Category, 6);
+  }, [person1]);
+
+  const handleSuggestionClick = async (name: string) => {
+    setQuery2(name);
+    const result = await fetchCelebrity(name);
+    setPerson2(result);
+  };
 
   const handleCompare = async () => {
     if (!query1.trim() || !query2.trim()) return;
@@ -160,6 +175,36 @@ const Compare = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Category Suggestions */}
+          {person1 && !person2 && suggestions.length > 0 && (
+            <Card className="border-border/50 bg-card/50 mb-8 animate-fade-in">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-medium">You might like to compare with</h3>
+                  <span className="text-lg">{getCategoryEmoji(person1.category as Category)}</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {suggestions.map((celeb) => (
+                    <Button
+                      key={celeb.name}
+                      variant="outline"
+                      className="h-auto py-3 px-4 justify-start border-border/50 hover:border-primary/50 hover:bg-primary/5"
+                      onClick={() => handleSuggestionClick(celeb.name)}
+                      disabled={loading}
+                    >
+                      <span className="mr-2 text-lg">{celeb.emoji}</span>
+                      <div className="text-left">
+                        <p className="font-medium text-sm">{celeb.name}</p>
+                        <p className="text-xs text-muted-foreground">{celeb.netWorth}</p>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {person1 && person2 && (
             <CompareResult person1={person1} person2={person2} />
