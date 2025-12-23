@@ -6,8 +6,27 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Download, Share2, TrendingDown, Skull, Flame } from 'lucide-react';
+import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+// Social media icons
+const TwitterIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
 
 interface RealityCheckShareCardProps {
   userSalary: number;
@@ -69,89 +88,51 @@ const RealityCheckShareCard = ({
   const perSecond = celebrityAnnualEarnings / secondsPerYear;
   const yearsToMatch = Math.round(celebrityAnnualEarnings / userSalary);
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    
-    try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#0a0a0a',
-        scale: 2,
-        logging: false,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `reality-check-vs-${celebrityName.replace(/\s+/g, '-')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      
-      toast.success('Card downloaded!');
-    } catch (error) {
-      toast.error('Failed to generate image');
-    }
+  const getShareText = () => {
+    return brutalMode
+      ? `💀 Kick Me While I'm Down\n\n${brutalComparison.text}\n${brutalComparison.detail}\n\n${celebrityName} makes ${ratio.toLocaleString()}x what I make.\n\nCheck yours at earningsexplorer.shop`
+      : `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at earningsexplorer.shop`;
   };
 
-  const handleShare = async () => {
-    const text = `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings with Wealth Perspective`;
+  const getShareUrl = () => {
+    return `${window.location.origin}/calculator`;
+  };
 
-    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
-
-    try {
-      if (cardRef.current) {
-        const canvas = await html2canvas(cardRef.current, {
-          backgroundColor: '#0a0a0a',
-          scale: 2,
-          logging: false,
-        });
-
-        const blob = await new Promise<Blob>((resolve, reject) => {
-          canvas.toBlob((b) => {
-            if (b) resolve(b);
-            else reject(new Error('Failed to create image blob'));
-          }, 'image/png');
-        });
-
-        const file = new File([blob], 'reality-check.png', { type: 'image/png' });
-        const shareData: ShareData & { files?: File[] } = {
-          title: 'Reality Check',
-          text,
-          files: [file],
-        };
-
-        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          toast.success('Shared card image!');
-          return;
-        }
-
-        if (isMobile) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'reality-check.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast.success('Card saved! Share it from your photos/gallery.');
-          return;
-        }
-      }
-    } catch (err) {
-      // Fall through to text/clipboard share
-    }
-
-  if (navigator.share && !isMobile) {
-    try {
-      await navigator.share({ text });
-      toast.success('Shared successfully!');
-      return;
-    } catch (err) {
-      // User cancelled
-    }
-  }
-
+  const handleCopyLink = async () => {
+    const text = getShareText();
     await navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
+  };
+
+  const handleTwitterShare = () => {
+    const text = getShareText();
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleFacebookShare = () => {
+    const url = getShareUrl();
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(getShareText())}`;
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleNativeShare = async () => {
+    const text = getShareText();
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
+          text,
+          url: getShareUrl(),
+        });
+        toast.success('Shared!');
+      } catch (err) {
+        // User cancelled
+      }
+    } else {
+      await handleCopyLink();
+    }
   };
 
   return (
@@ -314,12 +295,34 @@ const RealityCheckShareCard = ({
         </div>
       </div>
 
-      {/* Action Button */}
+      {/* Share Menu */}
       <div className="flex justify-center">
-        <Button onClick={handleShare} className="w-full max-w-xs bg-gradient-to-r from-primary to-primary/80">
-          <Share2 className="h-4 w-4 mr-2" />
-          Share Result
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="w-full max-w-xs bg-gradient-to-r from-primary to-primary/80">
+              <Share2 className="h-4 w-4 mr-2" />
+              Share Result
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-48">
+            <DropdownMenuItem onClick={handleTwitterShare} className="cursor-pointer">
+              <TwitterIcon />
+              <span className="ml-2">Share on X</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleFacebookShare} className="cursor-pointer">
+              <FacebookIcon />
+              <span className="ml-2">Share on Facebook</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+              <MessageCircle className="h-4 w-4" />
+              <span className="ml-2">Text / More</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
+              <Copy className="h-4 w-4" />
+              <span className="ml-2">Copy to Clipboard</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
