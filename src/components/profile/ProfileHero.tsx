@@ -5,7 +5,7 @@ import { getAvatarEmoji } from '@/lib/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Share2, GitCompareArrows, ArrowLeft, Search, Trophy } from 'lucide-react';
+import { Share2, GitCompareArrows, ArrowLeft, Search, Trophy, Scale } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
@@ -118,6 +118,14 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
               >
                 <GitCompareArrows className="h-4 w-4 mr-2" />
                 Compare
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-border/50"
+                onClick={() => navigate('/calculator', { state: { celebrity } })}
+              >
+                <Scale className="h-4 w-4 mr-2" />
+                Reality Check
               </Button>
               <Button 
                 variant="outline" 
