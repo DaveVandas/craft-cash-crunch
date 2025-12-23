@@ -29,11 +29,12 @@ serve(async (req) => {
 
     const token = authHeader.replace("Bearer ", "");
     
-    // Use admin API to get user from token
-    const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(
-      // First decode the token to get user id
-      JSON.parse(atob(token.split('.')[1])).sub
-    );
+    // Create anon client to properly verify JWT signature
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseAnonClient = createClient(supabaseUrl, anonKey);
+    
+    // Properly verify JWT signature and get user
+    const { data: userData, error: userError } = await supabaseAnonClient.auth.getUser(token);
     
     if (userError || !userData.user) {
       console.error("Auth error:", userError);
