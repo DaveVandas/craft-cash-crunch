@@ -89,9 +89,10 @@ const RealityCheckShareCard = ({
   const yearsToMatch = Math.round(celebrityAnnualEarnings / userSalary);
 
   const getShareText = () => {
+    const url = 'https://earningsexplorer.shop/calculator';
     return brutalMode
-      ? `💀 Kick Me While I'm Down\n\n${brutalComparison.text}\n${brutalComparison.detail}\n\n${celebrityName} makes ${ratio.toLocaleString()}x what I make.\n\nCheck yours at earningsexplorer.shop`
-      : `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings at earningsexplorer.shop`;
+      ? `💀 Kick Me While I'm Down\n\n${brutalComparison.text}\n${brutalComparison.detail}\n\n${celebrityName} makes ${ratio.toLocaleString()}x what I make.\n\nCheck yours: ${url}`
+      : `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings: ${url}`;
   };
 
   const getShareUrl = () => {
@@ -114,7 +115,7 @@ const RealityCheckShareCard = ({
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
           resolve(blob);
-        }, 'image/png');
+        }, 'image/jpeg', 0.92);
       });
     } catch (err) {
       console.error('Failed to generate image:', err);
@@ -155,7 +156,7 @@ const RealityCheckShareCard = ({
       const text = getShareText();
       
       if (imageBlob && navigator.canShare) {
-        const file = new File([imageBlob], 'reality-check.png', { type: 'image/png' });
+        const file = new File([imageBlob], 'reality-check.jpg', { type: 'image/jpeg' });
         const shareData = {
           title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
           text,
@@ -201,7 +202,7 @@ const RealityCheckShareCard = ({
         const url = URL.createObjectURL(imageBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.png`;
+        link.download = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
