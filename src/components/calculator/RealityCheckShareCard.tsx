@@ -314,15 +314,11 @@ const RealityCheckShareCard = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button onClick={handleDownload} className="flex-1" variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download
-        </Button>
-        <Button onClick={handleShare} className="flex-1 bg-gradient-to-r from-primary to-primary/80">
+      {/* Action Button */}
+      <div className="flex justify-center">
+        <Button onClick={handleShare} className="w-full max-w-xs bg-gradient-to-r from-primary to-primary/80">
           <Share2 className="h-4 w-4 mr-2" />
-          Share
+          Share Result
         </Button>
       </div>
     </div>
