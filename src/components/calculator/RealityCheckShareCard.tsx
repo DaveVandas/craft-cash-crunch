@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle } from 'lucide-react';
+import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -98,6 +98,30 @@ const RealityCheckShareCard = ({
     return `${window.location.origin}/calculator`;
   };
 
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+
+  const generateCardImage = async (): Promise<Blob | null> => {
+    if (!cardRef.current) return null;
+    
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      });
+    } catch (err) {
+      console.error('Failed to generate image:', err);
+      return null;
+    }
+  };
+
   const handleCopyLink = async () => {
     try {
       const text = getShareText();
@@ -110,42 +134,86 @@ const RealityCheckShareCard = ({
     }
   };
 
-  const handleTwitterShare = () => {
+  const handleTwitterShare = async () => {
+    // Twitter doesn't support image upload via URL, just share text with link
     const text = getShareText();
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleFacebookShare = () => {
-    // Note: Facebook sharing requires a publicly accessible URL with proper meta tags
-    // It may not work correctly on preview/development environments
     const url = 'https://earningsexplorer.shop/calculator';
     const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleNativeShare = async () => {
-    const text = getShareText();
+    setIsGeneratingImage(true);
     
-    if (navigator.share) {
-      try {
+    try {
+      const imageBlob = await generateCardImage();
+      const text = getShareText();
+      
+      if (imageBlob && navigator.canShare) {
+        const file = new File([imageBlob], 'reality-check.png', { type: 'image/png' });
+        const shareData = {
+          title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
+          text,
+          url: getShareUrl(),
+          files: [file],
+        };
+        
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          setIsGeneratingImage(false);
+          return;
+        }
+      }
+      
+      // Fallback to sharing without image
+      if (navigator.share) {
         await navigator.share({
           title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
           text,
           url: getShareUrl(),
         });
-      } catch (err) {
-        // User cancelled - don't show error
-        if ((err as Error).name !== 'AbortError') {
-          toast.error('Failed to share');
-        }
+      } else {
+        toast.info('Share not available in browser', {
+          description: 'Copying to clipboard instead...',
+        });
+        await handleCopyLink();
       }
-    } else {
-      // Desktop fallback - copy to clipboard with clear feedback
-      toast.info('Opening text message not available in browser', {
-        description: 'Copying to clipboard instead...',
-      });
-      await handleCopyLink();
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Failed to share');
+      }
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    setIsGeneratingImage(true);
+    
+    try {
+      const imageBlob = await generateCardImage();
+      if (imageBlob) {
+        const url = URL.createObjectURL(imageBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success('Image saved!', {
+          description: 'Share it anywhere you like',
+        });
+      }
+    } catch (err) {
+      toast.error('Failed to save image');
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -313,12 +381,27 @@ const RealityCheckShareCard = ({
       <div className="flex justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="w-full max-w-xs bg-gradient-to-r from-primary to-primary/80">
-              <Share2 className="h-4 w-4 mr-2" />
+            <Button 
+              className="w-full max-w-xs bg-gradient-to-r from-primary to-primary/80"
+              disabled={isGeneratingImage}
+            >
+              {isGeneratingImage ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
               Share Result
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center" className="w-48">
+            <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+              <MessageCircle className="h-4 w-4" />
+              <span className="ml-2">Share with Image</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDownloadImage} className="cursor-pointer">
+              <Download className="h-4 w-4" />
+              <span className="ml-2">Save Image</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleTwitterShare} className="cursor-pointer">
               <TwitterIcon />
               <span className="ml-2">Share on X</span>
@@ -327,13 +410,9 @@ const RealityCheckShareCard = ({
               <FacebookIcon />
               <span className="ml-2">Share on Facebook</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
-              <MessageCircle className="h-4 w-4" />
-              <span className="ml-2">Text / More</span>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
               <Copy className="h-4 w-4" />
-              <span className="ml-2">Copy to Clipboard</span>
+              <span className="ml-2">Copy Text</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
