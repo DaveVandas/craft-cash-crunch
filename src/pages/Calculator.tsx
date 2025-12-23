@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -43,6 +43,7 @@ type SelectedCelebrity = {
 };
 
 const Calculator = () => {
+  const location = useLocation();
   const [salary, setSalary] = useState(0);
   const [selectedCeleb, setSelectedCeleb] = useState<SelectedCelebrity | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -57,6 +58,20 @@ const Calculator = () => {
   const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
   
   const { searchCelebrity } = useCelebritySearch();
+
+  // Handle navigation from profile with pre-selected celebrity
+  useEffect(() => {
+    if (location.state?.celebrity) {
+      const celeb = location.state.celebrity as Celebrity;
+      setSelectedCeleb({
+        name: celeb.name,
+        earnings: celeb.annualEarnings,
+        emoji: undefined,
+        profession: celeb.profession,
+        imageUrl: celeb.imageUrl,
+      });
+    }
+  }, [location.state]);
 
   const handleCompare = () => {
     if (salary > 0 && selectedCeleb) {
