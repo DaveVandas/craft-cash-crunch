@@ -152,10 +152,35 @@ const Calculator = () => {
           <div className="space-y-6">
             <SalaryInput onSalaryChange={handleSalaryChange} currentSalary={salary} />
 
+            {/* Selected Celebrity Display - Right below salary */}
+            {selectedCeleb && (
+              <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/30 animate-fade-in">
+                <p className="text-sm text-muted-foreground">Comparing with</p>
+                <div className="flex items-center justify-center gap-3 mt-2">
+                  {selectedCeleb.imageUrl && (
+                    <img 
+                      src={selectedCeleb.imageUrl} 
+                      alt={selectedCeleb.name}
+                      className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/30"
+                    />
+                  )}
+                  <p className="text-lg font-bold text-primary">
+                    {selectedCeleb.emoji && <span className="mr-2">{selectedCeleb.emoji}</span>}
+                    {selectedCeleb.name}
+                  </p>
+                </div>
+                {selectedCeleb.profession && (
+                  <p className="text-xs text-muted-foreground mt-1">{selectedCeleb.profession}</p>
+                )}
+              </div>
+            )}
+
             {/* Celebrity Search */}
             <Card className="border-border/50 bg-card/50">
               <CardHeader>
-                <CardTitle className="text-lg">Search any celebrity</CardTitle>
+                <CardTitle className="text-lg">
+                  {selectedCeleb ? 'Pick another celebrity' : 'Search any celebrity'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -203,17 +228,6 @@ const Calculator = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Selected Celebrity Display */}
-            {selectedCeleb && (
-              <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/30 animate-fade-in">
-                <p className="text-sm text-muted-foreground">Comparing with</p>
-                <p className="text-lg font-bold text-primary">
-                  {selectedCeleb.emoji && <span className="mr-2">{selectedCeleb.emoji}</span>}
-                  {selectedCeleb.name}
-                </p>
-              </div>
-            )}
 
             {/* Compare Button */}
             <Button 
