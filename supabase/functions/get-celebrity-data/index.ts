@@ -1,11 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  // Include custom headers used by the client (e.g., X-Anonymous-Search-Count) so browser CORS preflight succeeds
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-anonymous-search-count',
-};
+// CORS configuration - restrict to allowed origins
+const ALLOWED_ORIGINS = [
+  'https://earningsexplorer.shop',
+  'https://www.earningsexplorer.shop',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:8080',
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-anonymous-search-count',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
 
 // Wikipedia requires a proper User-Agent - using MediaWiki bot format
 const WIKI_USER_AGENT = 'WealthPerspectiveBot/1.0 (https://earningsexplorer.shop/; admin@earningsexplorer.shop)';
@@ -22,11 +37,8 @@ const VALID_CATEGORIES = [
 ] as const;
 
 const FREE_SEARCH_LIMIT = 3;
-
-// Simple in-memory rate limiting (resets on function cold start)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 30;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 
 function getClientIP(req: Request): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
@@ -34,21 +46,26 @@ function getClientIP(req: Request): string {
          'unknown';
 }
 
-function isRateLimited(clientIP: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(clientIP);
-  
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+// Database-backed rate limiting that persists across cold starts
+async function isRateLimited(clientIP: string, supabaseClient: any): Promise<boolean> {
+  try {
+    const { data, error } = await supabaseClient.rpc('check_rate_limit', {
+      p_ip_address: clientIP,
+      p_max_requests: MAX_REQUESTS_PER_WINDOW,
+      p_window_seconds: RATE_LIMIT_WINDOW_SECONDS
+    });
+    
+    if (error) {
+      console.error('Rate limit check error:', error);
+      // Fail open but log - don't break the app if rate limiting fails
+      return false;
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Rate limit exception:', error);
     return false;
   }
-  
-  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-  
-  record.count++;
-  return false;
 }
 
 // Input validation functions
@@ -76,7 +93,7 @@ function validateCategory(category: unknown): string | null {
 }
 
 // Helper to return 200 with error field (prevents frontend global error dialog)
-function errorResponse(message: string, code: string = 'ERROR') {
+function errorResponse(message: string, code: string = 'ERROR', corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify({ error: message, errorCode: code, celebrity: null, celebrities: null }), {
     status: 200,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -522,22 +539,25 @@ async function getCelebrityImage(
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limiting check
-  const clientIP = getClientIP(req);
-  if (isRateLimited(clientIP)) {
-    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
-    return errorResponse('Too many requests. Please try again later.', 'RATE_LIMITED');
-  }
-
-  // Backend access control check
+  // Backend access control check - create client early for rate limiting
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
+
+  // Rate limiting check using database
+  const clientIP = getClientIP(req);
+  if (await isRateLimited(clientIP, supabaseClient)) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return errorResponse('Too many requests. Please try again later.', 'RATE_LIMITED', corsHeaders);
+  }
 
   const authHeader = req.headers.get("Authorization");
   let user = null;
@@ -561,7 +581,7 @@ serve(async (req) => {
     isAnonymous = true;
     if (anonymousSearchCount >= FREE_SEARCH_LIMIT) {
       console.log(`Anonymous user exceeded free search limit: ${anonymousSearchCount}`);
-      return errorResponse('Free searches used! Sign up to continue exploring celebrity earnings.', 'ANON_LIMIT_REACHED');
+      return errorResponse('Free searches used! Sign up to continue exploring celebrity earnings.', 'ANON_LIMIT_REACHED', corsHeaders);
     }
     console.log(`Anonymous search allowed. Count: ${anonymousSearchCount + 1}/${FREE_SEARCH_LIMIT}`);
   } else {
@@ -574,7 +594,7 @@ serve(async (req) => {
 
     if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
       console.log(`User ${user.id} has exceeded free search limit`);
-      return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED');
+      return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED', corsHeaders);
     }
   }
 
@@ -587,24 +607,24 @@ serve(async (req) => {
     
     // Ensure at least one valid parameter
     if (!name && !category) {
-      return errorResponse('Please provide a valid name or category.', 'INVALID_INPUT');
+      return errorResponse('Please provide a valid name or category.', 'INVALID_INPUT', corsHeaders);
     }
     
     // If name was provided but invalid
     if (body.name && !name) {
-      return errorResponse('Invalid name format. Please use only letters, spaces, and hyphens.', 'INVALID_INPUT');
+      return errorResponse('Invalid name format. Please use only letters, spaces, and hyphens.', 'INVALID_INPUT', corsHeaders);
     }
     
     // If category was provided but invalid
     if (body.category && !category) {
-      return errorResponse('Invalid category. Please select a valid category.', 'INVALID_INPUT');
+      return errorResponse('Invalid category. Please select a valid category.', 'INVALID_INPUT', corsHeaders);
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY not configured');
-      return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE');
+      return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE', corsHeaders);
     }
 
     // Build sanitized prompt with specific instructions for consistent, verifiable data
@@ -649,7 +669,7 @@ Return ONLY valid JSON, no markdown or explanation.`
 
     if (!response.ok) {
       console.error('AI Gateway error:', response.status);
-      return errorResponse('Unable to fetch data right now. Please try again.', 'AI_ERROR');
+      return errorResponse('Unable to fetch data right now. Please try again.', 'AI_ERROR', corsHeaders);
     }
 
     const data = await response.json();
@@ -662,7 +682,7 @@ Return ONLY valid JSON, no markdown or explanation.`
     const jsonMatch = content.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('Invalid AI response format');
-      return errorResponse('Unable to process data. Please try again.', 'PARSE_ERROR');
+      return errorResponse('Unable to process data. Please try again.', 'PARSE_ERROR', corsHeaders);
     }
     
     const parsed = JSON.parse(jsonMatch[0]);
@@ -725,6 +745,8 @@ Return ONLY valid JSON, no markdown or explanation.`
     }
   } catch (error) {
     console.error('Function error:', error);
-    return errorResponse('An unexpected error occurred. Please try again.', 'UNEXPECTED_ERROR');
+    const origin = req.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
+    return errorResponse('An unexpected error occurred. Please try again.', 'UNEXPECTED_ERROR', corsHeaders);
   }
 });

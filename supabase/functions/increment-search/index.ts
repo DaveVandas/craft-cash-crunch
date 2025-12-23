@@ -1,13 +1,29 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// CORS configuration - restrict to allowed origins
+const ALLOWED_ORIGINS = [
+  'https://earningsexplorer.shop',
+  'https://www.earningsexplorer.shop',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:8080',
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
 
 // Helper to return 200 with error field (prevents frontend global error dialog)
-function errorResponse(message: string) {
+function errorResponse(message: string, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify({ success: false, error: message, searchCount: null }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -15,6 +31,9 @@ function errorResponse(message: string) {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -27,7 +46,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return errorResponse("Unauthorized");
+      return errorResponse("Unauthorized", corsHeaders);
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -35,7 +54,7 @@ serve(async (req) => {
     const user = userData.user;
     
     if (!user) {
-      return errorResponse("Unauthorized");
+      return errorResponse("Unauthorized", corsHeaders);
     }
 
     // Parse body for celebrity info (optional - for tracking trends)
@@ -90,7 +109,7 @@ serve(async (req) => {
 
     if (fetchError) {
       console.error("Failed to fetch access record:", fetchError);
-      return errorResponse("Failed to fetch access record");
+      return errorResponse("Failed to fetch access record", corsHeaders);
     }
 
     // Don't increment if user has lifetime access
@@ -114,7 +133,7 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Failed to update search count:", updateError);
-      return errorResponse("Failed to update search count");
+      return errorResponse("Failed to update search count", corsHeaders);
     }
 
     return new Response(JSON.stringify({ 
@@ -128,6 +147,6 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Error incrementing search:", error);
-    return errorResponse(errorMessage);
+    return errorResponse(errorMessage, corsHeaders);
   }
 });
