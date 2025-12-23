@@ -99,9 +99,15 @@ const RealityCheckShareCard = ({
   };
 
   const handleCopyLink = async () => {
-    const text = getShareText();
-    await navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+    try {
+      const text = getShareText();
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard!', {
+        description: 'Paste it anywhere to share',
+      });
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const handleTwitterShare = () => {
@@ -111,8 +117,10 @@ const RealityCheckShareCard = ({
   };
 
   const handleFacebookShare = () => {
-    const url = getShareUrl();
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(getShareText())}`;
+    // Note: Facebook sharing requires a publicly accessible URL with proper meta tags
+    // It may not work correctly on preview/development environments
+    const url = 'https://earningsexplorer.shop/calculator';
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -126,11 +134,17 @@ const RealityCheckShareCard = ({
           text,
           url: getShareUrl(),
         });
-        toast.success('Shared!');
       } catch (err) {
-        // User cancelled
+        // User cancelled - don't show error
+        if ((err as Error).name !== 'AbortError') {
+          toast.error('Failed to share');
+        }
       }
     } else {
+      // Desktop fallback - copy to clipboard with clear feedback
+      toast.info('Opening text message not available in browser', {
+        description: 'Copying to clipboard instead...',
+      });
       await handleCopyLink();
     }
   };
