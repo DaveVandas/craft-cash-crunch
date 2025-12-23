@@ -68,6 +68,11 @@ const RealityCheckResult = ({
   const ratio = Math.round(celebrityAnnualEarnings / userSalary);
   const yearsToCatchUp = Math.round(celebrityAnnualEarnings / userSalary);
 
+  // Determine winner and assign emojis
+  const userWins = userSalary >= celebrityAnnualEarnings;
+  const winnerEmoji = '😎';
+  const humbledEmoji = '😅';
+
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Avatar Face-off */}
@@ -76,17 +81,23 @@ const RealityCheckResult = ({
           <div className="flex items-center justify-center gap-4 md:gap-8">
             {/* User Avatar */}
             <div className="text-center">
-              <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-emerald-500/50 mx-auto mb-2">
-                <AvatarImage 
-                  src={profile?.avatar_url || undefined} 
-                  alt="You" 
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                  <User className="h-8 w-8 md:h-10 md:w-10" />
-                </AvatarFallback>
-              </Avatar>
-              <p className="text-sm font-medium text-emerald-400">
+              <div className="relative inline-block">
+                <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-emerald-500/50 mx-auto">
+                  <AvatarImage 
+                    src={profile?.avatar_url || undefined} 
+                    alt="You" 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                    <User className="h-8 w-8 md:h-10 md:w-10" />
+                  </AvatarFallback>
+                </Avatar>
+                {/* Emoji overlay */}
+                <span className="absolute -bottom-1 -right-1 text-2xl md:text-3xl drop-shadow-lg">
+                  {userWins ? winnerEmoji : humbledEmoji}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-emerald-400 mt-2">
                 {profile?.display_name || user?.email?.split('@')[0] || 'You'}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -102,17 +113,23 @@ const RealityCheckResult = ({
 
             {/* Celebrity Avatar */}
             <div className="text-center">
-              <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-primary/50 mx-auto mb-2">
-                <AvatarImage 
-                  src={celebrityImageUrl} 
-                  alt={celebrityName} 
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-                  💰
-                </AvatarFallback>
-              </Avatar>
-              <p className="text-sm font-medium text-primary">{celebrityName}</p>
+              <div className="relative inline-block">
+                <Avatar className="h-20 w-20 md:h-24 md:w-24 ring-2 ring-primary/50 mx-auto">
+                  <AvatarImage 
+                    src={celebrityImageUrl} 
+                    alt={celebrityName} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+                    💰
+                  </AvatarFallback>
+                </Avatar>
+                {/* Emoji overlay */}
+                <span className="absolute -bottom-1 -right-1 text-2xl md:text-3xl drop-shadow-lg">
+                  {userWins ? humbledEmoji : winnerEmoji}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-primary mt-2">{celebrityName}</p>
               <p className="text-xs text-muted-foreground">
                 {formatCompactCurrency(celebrityAnnualEarnings)}/yr
               </p>
