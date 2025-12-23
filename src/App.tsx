@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { FeaturedCelebrityProvider } from "@/contexts/FeaturedCelebrityContext";
+import ProfileSetupGuard from "@/components/onboarding/ProfileSetupGuard";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
@@ -36,33 +37,35 @@ const App = () => (
       <AuthProvider>
         <SoundProvider>
           <FeaturedCelebrityProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/profile/:id" element={<Profile />} />
-                <Route path="/category/:id" element={<Category />} />
-                <Route path="/calculator" element={<Calculator />} />
-                <Route path="/compare" element={<Compare />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/share" element={<Share />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/quiz" element={<Quiz />} />
-                <Route path="/referral" element={<Referral />} />
-                <Route path="/side-hustle" element={<SideHustle />} />
-                <Route path="/wealth-wisdom" element={<WealthWisdom />} />
-                <Route path="/trades" element={<Trades />} />
-                <Route path="/debt-destroyer" element={<DebtDestroyer />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <ProfileSetupGuard>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/profile/:id" element={<Profile />} />
+                  <Route path="/category/:id" element={<Category />} />
+                  <Route path="/calculator" element={<Calculator />} />
+                  <Route path="/compare" element={<Compare />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/share" element={<Share />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/quiz" element={<Quiz />} />
+                  <Route path="/referral" element={<Referral />} />
+                  <Route path="/side-hustle" element={<SideHustle />} />
+                  <Route path="/wealth-wisdom" element={<WealthWisdom />} />
+                  <Route path="/trades" element={<Trades />} />
+                  <Route path="/debt-destroyer" element={<DebtDestroyer />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </ProfileSetupGuard>
           </FeaturedCelebrityProvider>
         </SoundProvider>
       </AuthProvider>
