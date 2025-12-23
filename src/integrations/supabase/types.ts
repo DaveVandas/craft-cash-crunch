@@ -113,6 +113,24 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          ip_address: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          ip_address: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          ip_address?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           converted_at: string | null
@@ -238,6 +256,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_ip_address: string
+          p_max_requests?: number
+          p_window_seconds?: number
+        }
+        Returns: boolean
+      }
+      cleanup_rate_limits: {
+        Args: { p_older_than_minutes?: number }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
