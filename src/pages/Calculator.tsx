@@ -175,6 +175,17 @@ const Calculator = () => {
               </div>
             )}
 
+            {/* Compare Button - Right after comparing with */}
+            {selectedCeleb && (
+              <Button 
+                onClick={handleCompare}
+                disabled={salary <= 0}
+                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              >
+                🔍 Compare My Salary
+              </Button>
+            )}
+
             {/* Celebrity Search */}
             <Card className="border-border/50 bg-card/50">
               <CardHeader>
@@ -228,15 +239,6 @@ const Calculator = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Compare Button */}
-            <Button 
-              onClick={handleCompare}
-              disabled={salary <= 0 || !selectedCeleb}
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-            >
-              🔍 Compare My Salary
-            </Button>
 
             {showResults && selectedCeleb && (
               <>
