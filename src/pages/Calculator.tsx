@@ -76,6 +76,11 @@ const Calculator = () => {
   const handleCompare = () => {
     if (salary > 0 && selectedCeleb) {
       setShowResults(true);
+      window.setTimeout(() => {
+        document
+          .getElementById('reality-check-results')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
     }
   };
 
@@ -241,7 +246,7 @@ const Calculator = () => {
             </Card>
 
             {showResults && selectedCeleb && (
-              <>
+              <div id="reality-check-results" className="space-y-6 scroll-mt-24">
                 <RealityCheckResult
                   userSalary={salary}
                   celebrityName={selectedCeleb.name}
@@ -437,7 +442,7 @@ const Calculator = () => {
                     </Link>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
