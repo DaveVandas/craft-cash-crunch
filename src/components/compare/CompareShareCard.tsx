@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, generateComparisons } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Download, Share2, Crown, Trophy, Equal, Flame } from 'lucide-react';
-import { toast } from 'sonner';
+import { Crown, Trophy, Equal, Flame } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useShareCard } from '@/hooks/useShareCard';
+import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 
 interface CompareShareCardProps {
   person1: Celebrity;
@@ -55,104 +54,45 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
     })
     .slice(0, 3);
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    
-    try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#0a0a0a',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `wealth-showdown-${flexMode ? 'flex-' : ''}${person1.name.replace(/\s+/g, '-')}-vs-${person2.name.replace(/\s+/g, '-')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      
-      toast.success('Card downloaded!');
-    } catch (error) {
-      toast.error('Failed to generate image');
-    }
-  };
-
-  const handleShare = async () => {
+  const getShareText = () => {
     const flexText = flexMode && flexComparisons.length > 0
       ? flexComparisons.map(c => `${c.emoji} ${c.quantity} ${c.item} ${c.timeframe}`).join('\n')
       : normalFlex 
         ? `${normalFlex.emoji} ${normalFlex.quantity} ${normalFlex.item} ${normalFlex.timeframe}` 
         : '';
     
-    const text = isTie
-      ? `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year\n\nCompare celebrity earnings at earningsexplorer.shop`
-      : flexMode
-        ? `🔥 FLEX MODE: ${winner.name} vs ${loser.name}\n\n👑 ${winner.name} DOMINATES\n💰 Earns ${ratio.toFixed(1)}x more\n💸 Extra: ${formatCompactCurrency(extraIncome)}/yr\n\nWith just the EXTRA income:\n${flexText}\n\n...while ${loser.name} watches 😅\n\nearningsexplorer.shop`
-        : `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}\n${flexText ? `\n${flexText}` : ''}\n\nCompare celebrity earnings at earningsexplorer.shop`;
-
-    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
-
-    try {
-      if (cardRef.current) {
-        const canvas = await html2canvas(cardRef.current, {
-          backgroundColor: '#0a0a0a',
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-        });
-
-        const blob = await new Promise<Blob>((resolve, reject) => {
-          canvas.toBlob((b) => {
-            if (b) resolve(b);
-            else reject(new Error('Failed to create image blob'));
-          }, 'image/png');
-        });
-
-        const file = new File([blob], 'wealth-showdown.png', { type: 'image/png' });
-        const shareData: ShareData & { files?: File[] } = {
-          title: flexMode ? 'Wealth Showdown - FLEX MODE' : 'Wealth Showdown',
-          text,
-          files: [file],
-        };
-
-        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          toast.success('Shared card image!');
-          return;
-        }
-
-        if (isMobile) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'wealth-showdown.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast.success('Card saved! Share it from your photos/gallery.');
-          return;
-        }
-      }
-    } catch (err) {
-      // Fall through to text/clipboard share
+    if (isTie) {
+      return `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year`;
     }
-
-    if (navigator.share && !isMobile) {
-      try {
-        await navigator.share({ text });
-        toast.success('Shared successfully!');
-        return;
-      } catch (err) {
-        // User cancelled or error - fall through to clipboard
-      }
+    
+    if (flexMode) {
+      return `🔥 FLEX MODE: ${winner.name} vs ${loser.name}\n\n👑 ${winner.name} DOMINATES\n💰 Earns ${ratio.toFixed(1)}x more\n💸 Extra: ${formatCompactCurrency(extraIncome)}/yr\n\nWith just the EXTRA income:\n${flexText}\n\n...while ${loser.name} watches 😅`;
     }
-
-    await navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+    
+    return `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}${flexText ? `\n${flexText}` : ''}`;
   };
+
+  const shareUrl = 'https://earningsexplorer.shop/compare';
+  const imageName = `wealth-showdown-${flexMode ? 'flex-' : ''}${person1.name.replace(/\s+/g, '-')}-vs-${person2.name.replace(/\s+/g, '-')}`;
+
+  const {
+    isGeneratingImage,
+    handleCopyLink,
+    handleTwitterShare,
+    handleFacebookShare,
+    handleWhatsAppShare,
+    handleLinkedInShare,
+    handleSaveImage,
+    handleTextShare,
+    handleInstagramShare,
+    handleTikTokShare,
+  } = useShareCard({
+    cardRef: cardRef as React.RefObject<HTMLDivElement>,
+    shareText: getShareText(),
+    shareUrl,
+    imageName,
+    title: flexMode ? 'Wealth Showdown - FLEX MODE' : 'Wealth Showdown',
+  });
 
   return (
     <div className="space-y-4">
@@ -383,17 +323,21 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button onClick={handleDownload} className="flex-1" variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download
-        </Button>
-        <Button onClick={handleShare} className={`flex-1 ${flexMode ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' : 'bg-gradient-to-r from-primary to-primary/80'}`}>
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button>
-      </div>
+      {/* Share Menu */}
+      <ShareMenuDropdown
+        isGeneratingImage={isGeneratingImage}
+        onTextShare={handleTextShare}
+        onWhatsAppShare={handleWhatsAppShare}
+        onTwitterShare={handleTwitterShare}
+        onFacebookShare={handleFacebookShare}
+        onLinkedInShare={handleLinkedInShare}
+        onInstagramShare={handleInstagramShare}
+        onTikTokShare={handleTikTokShare}
+        onSaveImage={handleSaveImage}
+        onCopyLink={handleCopyLink}
+        buttonClassName={`w-full ${flexMode ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' : 'bg-gradient-to-r from-primary to-primary/80'}`}
+        buttonText="Share Showdown"
+      />
     </div>
   );
 };
