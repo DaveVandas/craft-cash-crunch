@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -6,9 +6,10 @@ import PaywallGate from '@/components/paywall/PaywallGate';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Trophy, Share2, RotateCcw, CheckCircle, XCircle, Flame, Zap, Crown, Sparkles, Play } from 'lucide-react';
+import { Brain, Trophy, RotateCcw, CheckCircle, XCircle, Flame, Zap, Crown, Sparkles, Play } from 'lucide-react';
 import { formatLargeCurrency } from '@/lib/earnings';
-
+import { useShareCard } from '@/hooks/useShareCard';
+import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 interface QuizQuestion {
   celebrity: string;
   emoji: string;
@@ -147,10 +148,43 @@ const Quiz = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
   const [showStreakMessage, setShowStreakMessage] = useState(false);
+  const resultsCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const getResultTitle = () => {
+    const percentage = shuffledQuestions.length > 0 ? (score / shuffledQuestions.length) * 100 : 0;
+    return RESULT_TITLES.find(r => percentage >= r.min && percentage <= r.max) || RESULT_TITLES[0];
+  };
+
+  const getShareText = () => {
+    const result = getResultTitle();
+    return `🎯 I'm a "${result.title}" ${result.emoji}\n\nScored ${score}/${shuffledQuestions.length} on the Wealth Quiz!\n💰 ${totalPoints} points\n\nCan you beat me?`;
+  };
+
+  const shareUrl = 'https://earningsexplorer.shop/quiz';
+  const imageName = `wealth-quiz-${getResultTitle().title.replace(/\s+/g, '-').toLowerCase()}`;
+
+  const {
+    isGeneratingImage,
+    handleCopyLink,
+    handleTwitterShare,
+    handleFacebookShare,
+    handleWhatsAppShare,
+    handleLinkedInShare,
+    handleSaveImage,
+    handleTextShare,
+    handleInstagramShare,
+    handleTikTokShare,
+  } = useShareCard({
+    cardRef: resultsCardRef as React.RefObject<HTMLDivElement>,
+    shareText: getShareText(),
+    shareUrl,
+    imageName,
+    title: 'Wealth Quiz Results',
+  });
 
   const startQuiz = () => {
     const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
@@ -204,31 +238,9 @@ const Quiz = () => {
     }, delay);
   };
 
-  const getResultTitle = () => {
-    const percentage = (score / shuffledQuestions.length) * 100;
-    return RESULT_TITLES.find(r => percentage >= r.min && percentage <= r.max) || RESULT_TITLES[0];
-  };
-
   const getStreakMessage = () => {
     return STREAK_MESSAGES.find(s => s.streak === streak) || STREAK_MESSAGES[STREAK_MESSAGES.length - 1];
   };
-
-  const handleShare = async () => {
-    const result = getResultTitle();
-    const shareText = `🎯 I'm a "${result.title}" ${result.emoji}\n\nScored ${score}/${shuffledQuestions.length} on the Wealth Quiz!\n💰 ${totalPoints} points\n\nCan you beat me?`;
-    const shareUrl = window.location.origin + '/quiz';
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Wealth Quiz Results', text: shareText, url: shareUrl });
-      } catch (err) {
-        console.error('Share error:', err);
-      }
-    } else {
-      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-    }
-  };
-
   const question = shuffledQuestions[currentQuestion];
   const progress = shuffledQuestions.length > 0 ? ((currentQuestion + 1) / shuffledQuestions.length) * 100 : 0;
 
@@ -412,62 +424,80 @@ const Quiz = () => {
 
           {/* RESULTS SCREEN */}
           {gameState === 'result' && (
-            <div className="animate-fade-in">
-              <Card className="border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
-                <CardContent className="p-8 text-center">
-                  {/* Result Badge */}
-                  <div className="relative mb-6">
-                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto">
-                      <span className="text-5xl">{getResultTitle().emoji}</span>
-                    </div>
-                    {score === shuffledQuestions.length && (
-                      <div className="absolute -top-2 -right-2 left-0 right-0 mx-auto w-fit">
-                        <Crown className="h-8 w-8 text-amber-400 animate-pulse" />
+            <div className="animate-fade-in space-y-4">
+              {/* Results Card - Capturable for sharing */}
+              <div ref={resultsCardRef}>
+                <Card className="border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
+                  <CardContent className="p-8 text-center">
+                    {/* Result Badge */}
+                    <div className="relative mb-6">
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto">
+                        <span className="text-5xl">{getResultTitle().emoji}</span>
                       </div>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-primary font-medium mb-2">You are a...</p>
-                  <h2 className="font-serif text-3xl md:text-4xl font-bold mb-2 gradient-gold-text">
-                    {getResultTitle().title}
-                  </h2>
-                  <p className="text-foreground/70 mb-6">{getResultTitle().desc}</p>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                      <p className="text-3xl font-bold text-primary">{score}/{shuffledQuestions.length}</p>
-                      <p className="text-xs text-muted-foreground">Correct Answers</p>
+                      {score === shuffledQuestions.length && (
+                        <div className="absolute -top-2 -right-2 left-0 right-0 mx-auto w-fit">
+                          <Crown className="h-8 w-8 text-amber-400 animate-pulse" />
+                        </div>
+                      )}
                     </div>
-                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <p className="text-3xl font-bold text-amber-500">{totalPoints}</p>
-                      <p className="text-xs text-muted-foreground">Total Points</p>
+
+                    <p className="text-sm text-primary font-medium mb-2">You are a...</p>
+                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-2 gradient-gold-text">
+                      {getResultTitle().title}
+                    </h2>
+                    <p className="text-foreground/70 mb-6">{getResultTitle().desc}</p>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                        <p className="text-3xl font-bold text-primary">{score}/{shuffledQuestions.length}</p>
+                        <p className="text-xs text-muted-foreground">Correct Answers</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <p className="text-3xl font-bold text-amber-500">{totalPoints}</p>
+                        <p className="text-xs text-muted-foreground">Total Points</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button onClick={startQuiz} variant="outline" size="lg">
-                      <RotateCcw className="mr-2 h-4 w-4" />
-                      Play Again
-                    </Button>
-                    <Button onClick={handleShare} size="lg" className="bg-gradient-to-r from-primary to-amber-500">
-                      <Share2 className="mr-2 h-4 w-4" />
-                      Share Results
-                    </Button>
-                  </div>
+                    {/* Branding Footer */}
+                    <div className="text-center pt-4 border-t border-border/50">
+                      <p className="text-muted-foreground text-xs">earningsexplorer.shop</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                  <div className="mt-8 pt-6 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Want to explore more wealth comparisons?
-                    </p>
-                    <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline font-medium">
-                      <Sparkles className="h-4 w-4" />
-                      Browse Celebrity Profiles
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Actions */}
+              <div className="flex flex-col gap-3 justify-center">
+                <ShareMenuDropdown
+                  isGeneratingImage={isGeneratingImage}
+                  onTextShare={handleTextShare}
+                  onWhatsAppShare={handleWhatsAppShare}
+                  onTwitterShare={handleTwitterShare}
+                  onFacebookShare={handleFacebookShare}
+                  onLinkedInShare={handleLinkedInShare}
+                  onInstagramShare={handleInstagramShare}
+                  onTikTokShare={handleTikTokShare}
+                  onSaveImage={handleSaveImage}
+                  onCopyLink={handleCopyLink}
+                  buttonClassName="w-full bg-gradient-to-r from-primary to-amber-500"
+                  buttonText="Share Results"
+                />
+                <Button onClick={startQuiz} variant="outline" size="lg" className="w-full">
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Play Again
+                </Button>
+              </div>
+
+              <div className="pt-4 border-t border-border/50 text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Want to explore more wealth comparisons?
+                </p>
+                <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline font-medium">
+                  <Sparkles className="h-4 w-4" />
+                  Browse Celebrity Profiles
+                </Link>
+              </div>
             </div>
           )}
         </div>
