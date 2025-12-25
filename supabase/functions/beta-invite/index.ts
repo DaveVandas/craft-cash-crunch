@@ -87,8 +87,30 @@ serve(async (req) => {
 
       const baseUrl = Deno.env.get('SITE_URL') || 'https://earningsexplorer.shop';
       const inviteLink = `${baseUrl}/beta?code=${inviteCode}`;
+      
+      const recipientGreeting = recipientName ? `Hi ${recipientName}!` : 'Hi there!';
 
-      const inviteMessage = `🎉 You've been chosen!\n\nYou're invited to beta test Wealth Perspective - our exciting new app launching soon!\n\nWe hold your opinions in high regard and would truly appreciate your participation as one of our exclusive beta testers.\n\n✨ Your invite includes:\n• 7 days of unlimited access\n• Early access to all features\n• Direct influence on the final product\n\nClick here to get started: ${inviteLink}\n\nThis invite expires in 7 days.\n\nThank you for being part of our journey!`;
+      const inviteMessage = `🎉 ${recipientGreeting}
+
+You've been personally selected to be one of our exclusive beta testers for Wealth Perspective!
+
+We genuinely value your opinion and feedback. As a beta tester, you'll have the unique opportunity to shape the final product. Your insights matter deeply to us – every suggestion you make could directly influence how we build and improve the app.
+
+✨ Your exclusive beta access includes:
+• 7 days of unlimited, full-featured access
+• Early access to features before anyone else
+• Direct influence on the final product through your feedback
+• A voice that truly matters in our development process
+
+We're not just looking for testers – we're looking for partners who can help us create something amazing. Your honest feedback, whether it's praise or constructive criticism, will help us make Wealth Perspective the best it can be.
+
+👉 Click here to get started: ${inviteLink}
+
+This invite expires in 7 days, so don't wait!
+
+Thank you for being part of our journey. We can't wait to hear what you think!
+
+— The Wealth Perspective Team`;
 
       return new Response(JSON.stringify({
         invite,
