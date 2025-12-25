@@ -38,13 +38,15 @@ interface RealityCheckResultProps {
   celebrityName: string;
   celebrityAnnualEarnings: number;
   celebrityImageUrl?: string;
+  celebritySource?: string;
 }
 
 const RealityCheckResult = ({ 
   userSalary, 
   celebrityName, 
   celebrityAnnualEarnings,
-  celebrityImageUrl
+  celebrityImageUrl,
+  celebritySource
 }: RealityCheckResultProps) => {
   const { user } = useAuth();
   const { profile } = useUserProfile();
@@ -236,6 +238,11 @@ const RealityCheckResult = ({
           💡 {celebrityName} makes <span className="font-bold text-primary">{formatCompactCurrency(celebrityAnnualEarnings)}</span>/year — 
           but every mogul started somewhere!
         </p>
+        {celebritySource && (
+          <p className="text-xs text-muted-foreground/60 mt-2">
+            Source: {celebritySource.split(' - http')[0].split(' - https')[0]}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -271,6 +271,16 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
         </>
       )}
 
+      {/* Source Attribution */}
+      {(person1.source || person2.source) && (
+        <p className="text-xs text-muted-foreground/60 text-center">
+          Sources: {[
+            person1.source?.split(' - http')[0].split(' - https')[0],
+            person2.source?.split(' - http')[0].split(' - https')[0]
+          ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
+        </p>
+      )}
+
       {/* Share Card */}
       <CompareShareCard person1={person1} person2={person2} />
     </div>
