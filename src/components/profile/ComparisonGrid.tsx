@@ -1,78 +1,69 @@
-import { useState, useEffect } from 'react';
-import { generateComparisons, EnhancedComparison } from '@/lib/earnings';
+import { generateMogulComparisons, EnhancedComparison } from '@/lib/earnings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Crown } from 'lucide-react';
 
 interface ComparisonGridProps {
   annualEarnings: number;
   name: string;
 }
 
+const periodLabels = {
+  week: { label: 'Weekly Power', gradient: 'from-amber-500/20 to-amber-600/10' },
+  month: { label: 'Monthly Empire', gradient: 'from-purple-500/20 to-purple-600/10' },
+  year: { label: 'Annual Dynasty', gradient: 'from-emerald-500/20 to-emerald-600/10' },
+};
+
 const ComparisonGrid = ({ annualEarnings, name }: ComparisonGridProps) => {
-  const allComparisons = generateComparisons(annualEarnings);
-  const [displayedComparisons, setDisplayedComparisons] = useState<EnhancedComparison[]>([]);
-  const [shuffleKey, setShuffleKey] = useState(0);
+  const comparisons = generateMogulComparisons(annualEarnings);
 
-  // Shuffle and pick 9 comparisons for display
-  useEffect(() => {
-    const shuffled = [...allComparisons].sort(() => Math.random() - 0.5);
-    setDisplayedComparisons(shuffled.slice(0, 9));
-  }, [annualEarnings, shuffleKey]);
-
-  const handleShuffle = () => {
-    setShuffleKey(prev => prev + 1);
-  };
+  if (comparisons.length === 0) return null;
 
   return (
     <Card className="border-border/50 bg-card/50">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Mind-Blowing Comparisons
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            What {name}'s earnings could buy — prepare to feel humbled
-          </p>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleShuffle}
-          className="text-muted-foreground hover:text-primary"
-        >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Shuffle
-        </Button>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Crown className="h-5 w-5 text-primary" />
+          Mogul Moves
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          What {name} could acquire — real power plays
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayedComparisons.map((comparison, index) => (
-            <div
-              key={`${comparison.item}-${shuffleKey}`}
-              className="p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 hover:bg-secondary/50 transition-all duration-300 animate-slide-up group"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-3xl group-hover:scale-110 transition-transform">{comparison.emoji}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-2xl text-primary">
-                    {comparison.quantity.toLocaleString()}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {comparison.item}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {comparison.context}
-                  </p>
-                  <p className="text-xs font-medium text-primary/80 mt-2 italic">
-                    {comparison.timeframe}
-                  </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {comparisons.map((comparison, index) => {
+            const config = periodLabels[comparison.period];
+            return (
+              <div
+                key={comparison.period}
+                className={`p-5 rounded-xl bg-gradient-to-br ${config.gradient} border border-border/30 hover:border-primary/40 transition-all duration-300 animate-slide-up group`}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                  {config.label}
                 </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl group-hover:scale-110 transition-transform">
+                    {comparison.emoji}
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-bold text-3xl text-primary">
+                      {comparison.quantity.toLocaleString()}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {comparison.item}{comparison.quantity > 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {comparison.context}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs font-medium text-primary/80 mt-3 text-right italic">
+                  {comparison.timeframe}
+                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

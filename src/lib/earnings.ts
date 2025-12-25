@@ -51,67 +51,84 @@ export const formatCompactCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-// Straightforward luxury comparison items - mogul, swag, beast mode
-const comparisonItems = [
-  { item: 'Lamborghinis', emoji: '🏎️', price: 250000, context: 'Brand new Huracán' },
-  { item: 'Ferraris', emoji: '🏁', price: 320000, context: 'Ferrari 812 Superfast' },
-  { item: 'Bugatti Chirons', emoji: '🚀', price: 3300000, context: 'The ultimate hypercar' },
-  { item: 'Rolexes', emoji: '⌚', price: 12000, context: 'Submariner on the wrist' },
-  { item: 'Rolex Day-Dates', emoji: '💎', price: 40000, context: 'The President watch' },
-  { item: 'Private Jets', emoji: '✈️', price: 65000000, context: 'Gulfstream G650' },
-  { item: 'Superyachts', emoji: '🛥️', price: 100000000, context: '200-foot floating palace' },
-  { item: 'Beach Mansions', emoji: '🏖️', price: 25000000, context: 'Oceanfront paradise' },
-  { item: 'Penthouse Suites', emoji: '🏙️', price: 35000000, context: 'Top floor, skyline views' },
-  { item: 'Birkin Bags', emoji: '👜', price: 20000, context: 'The iconic flex' },
-  { item: 'Teslas', emoji: '⚡', price: 80000, context: 'Model S Plaid' },
-  { item: 'Range Rovers', emoji: '🚙', price: 120000, context: 'Blacked out SVR' },
-  { item: 'Courtside Seats', emoji: '🏀', price: 5000, context: 'Front row at the game' },
-  { item: 'First Class Flights', emoji: '✨', price: 15000, context: 'Round trip anywhere' },
-  { item: 'Vacation Villas', emoji: '🏝️', price: 50000, context: 'Week at a private resort' },
-  { item: 'Diamond Chains', emoji: '💎', price: 25000, context: 'Iced out drip' },
-];
+// Ultra-mogul luxury items - dramatic flex pieces only
+const mogulItems = {
+  week: [
+    { item: 'Bugatti Chiron', emoji: '🚀', price: 3300000, context: 'The $3.3M hypercar' },
+    { item: 'Rolls-Royce Phantom', emoji: '👑', price: 500000, context: 'The ultimate status symbol' },
+    { item: 'Richard Mille Watch', emoji: '⌚', price: 250000, context: 'Worn by champions' },
+    { item: 'Ferrari SF90', emoji: '🏎️', price: 625000, context: 'Hybrid supercar perfection' },
+  ],
+  month: [
+    { item: 'Private Island', emoji: '🏝️', price: 15000000, context: 'Your own paradise' },
+    { item: 'Penthouse NYC', emoji: '🏙️', price: 50000000, context: 'Billionaire\'s Row views' },
+    { item: 'Mega Yacht', emoji: '🛥️', price: 75000000, context: '200ft floating palace' },
+    { item: 'Gulfstream G700', emoji: '✈️', price: 78000000, context: 'The ultimate private jet' },
+  ],
+  year: [
+    { item: 'NFL Team', emoji: '🏈', price: 4000000000, context: 'Own the game' },
+    { item: 'Skyscraper', emoji: '🏗️', price: 1500000000, context: 'Your name on the skyline' },
+    { item: 'Space Mission', emoji: '🚀', price: 500000000, context: 'Fund your own rocket' },
+    { item: 'Art Collection', emoji: '🎨', price: 200000000, context: 'Museum-worthy pieces' },
+  ],
+};
 
 export interface EnhancedComparison extends Comparison {
   context: string;
+  period: 'week' | 'month' | 'year';
 }
 
-export const generateComparisons = (annualEarnings: number): EnhancedComparison[] => {
+export const generateMogulComparisons = (annualEarnings: number): EnhancedComparison[] => {
   const breakdown = calculateEarningsBreakdown(annualEarnings);
-  
-  return comparisonItems.map((item) => {
-    const perMinute = breakdown.perMinute;
-    const perHour = breakdown.perHour;
-    const perDay = breakdown.perDay;
-    const perWeek = breakdown.perWeek;
-    
-    let quantity: number;
-    let timeframe: string;
-    
-    if (item.price <= perMinute) {
-      quantity = Math.floor(perMinute / item.price);
-      timeframe = 'every minute';
-    } else if (item.price <= perHour) {
-      quantity = Math.floor(perHour / item.price);
-      timeframe = 'every hour';
-    } else if (item.price <= perDay) {
-      quantity = Math.floor(perDay / item.price);
-      timeframe = 'every day';
-    } else if (item.price <= perWeek) {
-      quantity = Math.floor(perWeek / item.price);
-      timeframe = 'every week';
-    } else {
-      quantity = Math.floor(annualEarnings / item.price);
-      timeframe = 'every year';
+  const results: EnhancedComparison[] = [];
+
+  // Pick best item for each timeframe
+  const timeframes: { period: 'week' | 'month' | 'year'; earnings: number; label: string }[] = [
+    { period: 'week', earnings: breakdown.perWeek, label: 'In a week' },
+    { period: 'month', earnings: breakdown.perMonth, label: 'In a month' },
+    { period: 'year', earnings: breakdown.perYear, label: 'In a year' },
+  ];
+
+  for (const tf of timeframes) {
+    const items = mogulItems[tf.period];
+    // Find the most dramatic item they can afford multiple of, or at least 1
+    let bestItem = null;
+    let bestScore = 0;
+
+    for (const item of items) {
+      const quantity = Math.floor(tf.earnings / item.price);
+      if (quantity >= 1) {
+        // Score: prefer items where quantity is impressive but not absurd
+        const score = Math.min(quantity, 50) * (item.price / 1000000);
+        if (score > bestScore) {
+          bestScore = score;
+          bestItem = { ...item, quantity, timeframe: tf.label };
+        }
+      }
     }
 
-    return {
-      ...item,
-      quantity: Math.max(1, quantity),
-      timeframe,
-      context: item.context,
-    };
-  }).filter(c => c.quantity >= 1);
+    // If can't afford any, show what fraction of the most expensive they could get
+    if (!bestItem) {
+      const cheapest = items.reduce((a, b) => a.price < b.price ? a : b);
+      const quantity = Math.floor(tf.earnings / cheapest.price);
+      if (quantity >= 1) {
+        bestItem = { ...cheapest, quantity, timeframe: tf.label };
+      }
+    }
+
+    if (bestItem) {
+      results.push({
+        ...bestItem,
+        period: tf.period,
+      });
+    }
+  }
+
+  return results;
 };
+
+// Legacy function for backwards compatibility
+export const generateComparisons = generateMogulComparisons;
 
 export const calculateTimeToEarn = (amount: number, annualEarnings: number): string => {
   const perSecond = annualEarnings / (365 * 24 * 60 * 60);
@@ -136,40 +153,10 @@ export const calculateTimeToEarn = (amount: number, annualEarnings: number): str
 };
 
 // Get the single most dramatic comparison for Flex Mode
-// Prioritizes high-value items with impressive quantities or fast timeframes
 export const getMostDramaticComparison = (annualEarnings: number): EnhancedComparison | null => {
-  const comparisons = generateComparisons(annualEarnings);
-  
+  const comparisons = generateMogulComparisons(annualEarnings);
   if (comparisons.length === 0) return null;
   
-  // Score each comparison by drama factor:
-  // - Prefer expensive items (jets, yachts, Bugattis)
-  // - Prefer impressive quantities or fast timeframes
-  const scored = comparisons.map(c => {
-    const item = comparisonItems.find(i => i.item === c.item);
-    const price = item?.price || 1;
-    
-    // Drama score = price tier * quantity factor * timeframe bonus
-    const priceTier = price >= 1000000 ? 5 : price >= 100000 ? 4 : price >= 10000 ? 3 : 2;
-    const quantityFactor = Math.min(c.quantity, 100); // Cap to avoid boring "1000 watches"
-    const timeframeBonus = 
-      c.timeframe === 'every minute' ? 10 :
-      c.timeframe === 'every hour' ? 8 :
-      c.timeframe === 'every day' ? 6 :
-      c.timeframe === 'every week' ? 4 : 2;
-    
-    // Sweet spot: prefer quantity between 1-20 for expensive items
-    const sweetSpotBonus = (c.quantity >= 1 && c.quantity <= 20 && priceTier >= 3) ? 3 : 1;
-    
-    return {
-      comparison: c,
-      score: priceTier * quantityFactor * timeframeBonus * sweetSpotBonus
-    };
-  });
-  
-  // Sort by score and pick randomly from top 5 most dramatic
-  scored.sort((a, b) => b.score - a.score);
-  const topCandidates = scored.slice(0, 5);
-  const randomIndex = Math.floor(Math.random() * topCandidates.length);
-  return topCandidates[randomIndex]?.comparison || null;
+  // Pick the yearly one for max drama, or the highest quantity available
+  return comparisons.find(c => c.period === 'year') || comparisons[comparisons.length - 1];
 };
