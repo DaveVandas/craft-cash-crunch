@@ -222,22 +222,23 @@ export const useShareCard = ({
   };
 
   const handleSaveImage = async () => {
+    // iOS Safari requires navigator.share() to be called from a direct user gesture.
+    // If the image isn't pre-generated yet, don't generate it here (async) because it can lose
+    // the user gesture and force a download fallback.
+    if (!preGeneratedImageRef.current) {
+      void handleMenuOpen();
+      toast.info('Preparing image…', {
+        description: 'Give it a second, then tap “Save to Photos” again.',
+        duration: 3500,
+      });
+      return;
+    }
+
     setIsGeneratingImage(true);
 
     try {
-      // Use pre-generated image if available, otherwise generate now
-      let imageBlob: Blob | null = preGeneratedImageRef.current?.blob ?? null;
-      let file: File | null = preGeneratedImageRef.current?.file ?? null;
-      
-      if (!imageBlob) {
-        imageBlob = await generateCardImage();
-        if (!imageBlob) {
-          toast.error('Failed to generate image');
-          return;
-        }
-        const filename = `${imageName}.jpg`;
-        file = new File([imageBlob], filename, { type: 'image/jpeg' });
-      }
+      const imageBlob = preGeneratedImageRef.current.blob;
+      const file = preGeneratedImageRef.current.file;
 
       // ALWAYS try native share sheet first on mobile - this is the only way to "Save to Photos"
       if (navigator.share && file) {

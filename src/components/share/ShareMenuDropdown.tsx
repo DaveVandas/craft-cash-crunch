@@ -90,6 +90,7 @@ const ShareMenuDropdown = ({
           <Button 
             className={buttonClassName}
             disabled={isGeneratingImage}
+            onPointerDown={() => onMenuOpen?.()}
           >
             {isGeneratingImage ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -128,7 +129,7 @@ const ShareMenuDropdown = ({
             <TikTokIcon />
             <span className="ml-2">TikTok</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onSaveImage} className="cursor-pointer">
+          <DropdownMenuItem onClick={onSaveImage} className="cursor-pointer" disabled={isPreGenerating}>
             <Image className="h-4 w-4" />
             <span className="ml-2">Save to Photos</span>
             {isPreGenerating && <Loader2 className="h-3 w-3 ml-auto animate-spin opacity-50" />}
