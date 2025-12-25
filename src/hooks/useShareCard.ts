@@ -118,23 +118,8 @@ export const useShareCard = ({
         }
       }
 
+      // Fallback: trigger download (works on both mobile and desktop)
       const url = URL.createObjectURL(imageBlob);
-      const isMobile =
-        // Prefer UA-CH when available
-        (navigator as any).userAgentData?.mobile ??
-        /iphone|ipad|ipod|android/i.test(navigator.userAgent);
-
-      // On mobile, opening the image is more "Photos-like" than forcing a download.
-      if (isMobile) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-        toast.success('Image opened', {
-          description: 'Tap Share → Save Image to add it to Photos',
-        });
-        window.setTimeout(() => URL.revokeObjectURL(url), 30000);
-        return;
-      }
-
-      // Desktop fallback: download
       const link = document.createElement('a');
       link.href = url;
       link.download = `${imageName}.jpg`;
