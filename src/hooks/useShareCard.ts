@@ -87,7 +87,9 @@ export const useShareCard = ({
           if (navigator.canShare(shareData)) {
             try {
               await navigator.share(shareData);
-              toast.success('Image ready to save!');
+              toast.success('Image saved to Photos!', {
+                description: 'Check your photo gallery',
+              });
               setIsGeneratingImage(false);
               return;
             } catch (err) {
