@@ -51,25 +51,35 @@ export const formatCompactCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-// Ultra-mogul luxury items - dramatic flex pieces only
+// Ultra-mogul luxury items - dramatic flex pieces by tier
 const mogulItems = {
   week: [
     { item: 'Bugatti Chiron', emoji: '🚀', price: 3300000, context: 'The $3.3M hypercar' },
+    { item: 'Ferrari SF90', emoji: '🏎️', price: 625000, context: 'Hybrid supercar perfection' },
     { item: 'Rolls-Royce Phantom', emoji: '👑', price: 500000, context: 'The ultimate status symbol' },
     { item: 'Richard Mille Watch', emoji: '⌚', price: 250000, context: 'Worn by champions' },
-    { item: 'Ferrari SF90', emoji: '🏎️', price: 625000, context: 'Hybrid supercar perfection' },
+    { item: 'Lamborghini Huracán', emoji: '🏁', price: 250000, context: 'Italian excellence' },
+    { item: 'Patek Philippe', emoji: '💎', price: 80000, context: 'Generational wealth on wrist' },
   ],
   month: [
-    { item: 'Private Island', emoji: '🏝️', price: 15000000, context: 'Your own paradise' },
-    { item: 'Penthouse NYC', emoji: '🏙️', price: 50000000, context: 'Billionaire\'s Row views' },
     { item: 'Mega Yacht', emoji: '🛥️', price: 75000000, context: '200ft floating palace' },
-    { item: 'Gulfstream G700', emoji: '✈️', price: 78000000, context: 'The ultimate private jet' },
+    { item: 'Penthouse NYC', emoji: '🏙️', price: 50000000, context: 'Billionaire\'s Row views' },
+    { item: 'Private Island', emoji: '🏝️', price: 15000000, context: 'Your own paradise' },
+    { item: 'Gulfstream G650', emoji: '✈️', price: 65000000, context: 'Ultimate private jet' },
+    { item: 'Beach Mansion', emoji: '🏖️', price: 25000000, context: 'Oceanfront estate' },
+    { item: 'Luxury Penthouse', emoji: '🌃', price: 10000000, context: 'Top floor living' },
+    { item: 'Vineyard Estate', emoji: '🍷', price: 5000000, context: 'Make your own wine' },
+    { item: 'Helicopter', emoji: '🚁', price: 3000000, context: 'Skip the traffic' },
   ],
   year: [
     { item: 'NFL Team', emoji: '🏈', price: 4000000000, context: 'Own the game' },
     { item: 'Skyscraper', emoji: '🏗️', price: 1500000000, context: 'Your name on the skyline' },
     { item: 'Space Mission', emoji: '🚀', price: 500000000, context: 'Fund your own rocket' },
     { item: 'Art Collection', emoji: '🎨', price: 200000000, context: 'Museum-worthy pieces' },
+    { item: 'Sports Franchise', emoji: '🏆', price: 100000000, context: 'Own a winning team' },
+    { item: 'Private Jet Fleet', emoji: '✈️', price: 50000000, context: 'Jets for every mood' },
+    { item: 'Superyacht', emoji: '⛵', price: 30000000, context: 'Sail the world in style' },
+    { item: 'Hotel', emoji: '🏨', price: 20000000, context: 'Your own luxury resort' },
   ],
 };
 
