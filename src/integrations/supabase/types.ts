@@ -14,6 +14,124 @@ export type Database = {
   }
   public: {
     Tables: {
+      beta_feedback: {
+        Row: {
+          additional_comments: string | null
+          beta_invite_id: string | null
+          created_at: string
+          experience_rating: number
+          id: string
+          overall_rating: number
+          user_id: string
+          what_liked: string | null
+          what_to_improve: string | null
+        }
+        Insert: {
+          additional_comments?: string | null
+          beta_invite_id?: string | null
+          created_at?: string
+          experience_rating: number
+          id?: string
+          overall_rating: number
+          user_id: string
+          what_liked?: string | null
+          what_to_improve?: string | null
+        }
+        Update: {
+          additional_comments?: string | null
+          beta_invite_id?: string | null
+          created_at?: string
+          experience_rating?: number
+          id?: string
+          overall_rating?: number
+          user_id?: string
+          what_liked?: string | null
+          what_to_improve?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_feedback_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beta_invites: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          invite_code: string
+          recipient_email: string | null
+          recipient_name: string | null
+          status: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          invite_code: string
+          recipient_email?: string | null
+          recipient_name?: string | null
+          status?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          invite_code?: string
+          recipient_email?: string | null
+          recipient_name?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      beta_sessions: {
+        Row: {
+          beta_invite_id: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          beta_invite_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          beta_invite_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_sessions_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       celebrity_images: {
         Row: {
           celebrity_name: string
@@ -196,6 +314,8 @@ export type Database = {
       }
       user_access: {
         Row: {
+          beta_expires_at: string | null
+          beta_invite_id: string | null
           created_at: string
           has_lifetime_access: boolean
           id: string
@@ -207,6 +327,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          beta_expires_at?: string | null
+          beta_invite_id?: string | null
           created_at?: string
           has_lifetime_access?: boolean
           id?: string
@@ -218,6 +340,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          beta_expires_at?: string | null
+          beta_invite_id?: string | null
           created_at?: string
           has_lifetime_access?: boolean
           id?: string
@@ -228,7 +352,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_access_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

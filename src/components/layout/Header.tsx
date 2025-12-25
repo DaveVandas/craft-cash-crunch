@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles, MessageSquare } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
+import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
@@ -25,18 +26,24 @@ const Header = () => {
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const [isAdmin, setIsAdmin] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [isBetaUser, setIsBetaUser] = useState(false);
 
   useEffect(() => {
-    const checkAdminRole = async () => {
+    const checkRoles = async () => {
       if (!user) {
         setIsAdmin(false);
+        setIsBetaUser(false);
         return;
       }
       const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
       setIsAdmin(data === true);
+      
+      // Check beta access from accessInfo
+      setIsBetaUser(!!(accessInfo as any)?.hasBetaAccess);
     };
-    checkAdminRole();
-  }, [user]);
+    checkRoles();
+  }, [user, accessInfo]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -175,6 +182,12 @@ const Header = () => {
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
+                  {isBetaUser && (
+                    <DropdownMenuItem onClick={() => setFeedbackModalOpen(true)}>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Give Feedback
+                    </DropdownMenuItem>
+                  )}
                   {accessInfo && !isPremium && (
                     <DropdownMenuItem onClick={initiatePayment}>
                       <Crown className="h-4 w-4 mr-2" />
@@ -209,6 +222,7 @@ const Header = () => {
         </div>
         
         <InviteFriendsModal open={inviteModalOpen} onOpenChange={setInviteModalOpen} />
+        <BetaFeedbackModal open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen} />
       </div>
     </header>
   );

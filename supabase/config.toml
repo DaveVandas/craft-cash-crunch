@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.increment-search]
 verify_jwt = false
+
+[functions.beta-invite]
+verify_jwt = false
+
+[functions.beta-feedback]
+verify_jwt = false
+
+[functions.admin-get-beta-data]
+verify_jwt = false
