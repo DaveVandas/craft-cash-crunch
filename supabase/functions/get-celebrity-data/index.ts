@@ -25,6 +25,96 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
 // Wikipedia requires a proper User-Agent - using MediaWiki bot format
 const WIKI_USER_AGENT = 'WealthPerspectiveBot/1.0 (https://earningsexplorer.shop/; admin@earningsexplorer.shop)';
 
+// Perplexity API for real-time grounded search
+async function fetchNetWorthFromPerplexity(name: string): Promise<{
+  netWorth: number | null;
+  annualEarnings: number | null;
+  profession: string | null;
+  category: string | null;
+  biggestDeal: string | null;
+  source: string | null;
+} | null> {
+  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+  
+  if (!PERPLEXITY_API_KEY) {
+    console.log('PERPLEXITY_API_KEY not configured, skipping Perplexity search');
+    return null;
+  }
+
+  try {
+    console.log(`Fetching net worth from Perplexity for: ${name}`);
+    
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a financial data assistant. Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object.' 
+          },
+          { 
+            role: 'user', 
+            content: `What is ${name}'s current net worth and annual earnings? Return a JSON object with these exact fields:
+- netWorth: number in USD (e.g., 1000000000 for $1 billion)
+- annualEarnings: number in USD (estimated annual income or wealth growth)
+- profession: their primary profession
+- category: one of (athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical)
+- biggestDeal: their most famous deal or contract
+- source: the source of this data (e.g., "Forbes Real-Time Billionaires 2024")
+
+Return ONLY the JSON object, no other text.`
+          }
+        ],
+        search_recency_filter: 'month',
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Perplexity API error:', response.status, await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    console.log(`Perplexity raw response: ${content.substring(0, 500)}`);
+    
+    // Parse JSON from response
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.log('Could not parse JSON from Perplexity response');
+      return null;
+    }
+    
+    const parsed = JSON.parse(jsonMatch[0]);
+    
+    // Add citations if available
+    const citations = data.citations;
+    if (citations && citations.length > 0) {
+      parsed.source = `${parsed.source || 'Perplexity Search'} - ${citations[0]}`;
+    }
+    
+    console.log(`Perplexity parsed data: netWorth=${parsed.netWorth}, annualEarnings=${parsed.annualEarnings}`);
+    
+    return {
+      netWorth: Number(parsed.netWorth) || null,
+      annualEarnings: Number(parsed.annualEarnings) || null,
+      profession: parsed.profession || null,
+      category: parsed.category || null,
+      biggestDeal: parsed.biggestDeal || null,
+      source: parsed.source || null,
+    };
+  } catch (error) {
+    console.error('Perplexity fetch error:', error);
+    return null;
+  }
+}
+
 // Valid categories for validation
 const VALID_CATEGORIES = [
   'athletes',
@@ -691,34 +781,69 @@ Return ONLY valid JSON, no markdown or explanation.`
       // Log the raw parsed data for debugging
       console.log(`AI parsed data for "${name}": netWorth=${parsed.netWorth}, annualEarnings=${parsed.annualEarnings}`);
       
+      // Try to get more accurate data from Perplexity (real-time web search)
+      const perplexityData = await fetchNetWorthFromPerplexity(name);
+      
+      // Merge Perplexity data with AI data (Perplexity takes priority for financial data)
+      let finalNetWorth = Number(parsed.netWorth) || 0;
+      let finalAnnualEarnings = Number(parsed.annualEarnings) || 0;
+      let finalSource = parsed.source || 'AI estimate';
+      let finalBiggestDeal = parsed.biggestDeal;
+      let finalProfession = parsed.profession || 'celebrity';
+      let finalCategory = parsed.category;
+      
+      if (perplexityData) {
+        // Use Perplexity's financial data if available (more up-to-date)
+        if (perplexityData.netWorth && perplexityData.netWorth > 0) {
+          finalNetWorth = perplexityData.netWorth;
+          console.log(`Using Perplexity netWorth: $${finalNetWorth}`);
+        }
+        if (perplexityData.annualEarnings && perplexityData.annualEarnings > 0) {
+          finalAnnualEarnings = perplexityData.annualEarnings;
+          console.log(`Using Perplexity annualEarnings: $${finalAnnualEarnings}`);
+        }
+        if (perplexityData.source) {
+          finalSource = perplexityData.source;
+        }
+        if (perplexityData.biggestDeal) {
+          finalBiggestDeal = perplexityData.biggestDeal;
+        }
+        if (perplexityData.profession) {
+          finalProfession = perplexityData.profession;
+        }
+        if (perplexityData.category) {
+          finalCategory = perplexityData.category;
+        }
+      }
+      
       // Validate earnings data - if 0 or missing, log warning
-      if (!parsed.annualEarnings || parsed.annualEarnings === 0) {
-        console.warn(`WARNING: Zero/missing annualEarnings for ${parsed.name || name}, netWorth: ${parsed.netWorth}`);
+      if (!finalAnnualEarnings || finalAnnualEarnings === 0) {
+        console.warn(`WARNING: Zero/missing annualEarnings for ${parsed.name || name}, netWorth: ${finalNetWorth}`);
       }
       
       // Get image with aggressive Wikipedia + emoji fallback
       // Try original search term first (what user typed), then AI name
-      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, name, parsed.profession || 'celebrity', supabaseClient);
-      
-      // Ensure numeric values are properly parsed
-      const netWorth = Number(parsed.netWorth) || 0;
-      let annualEarnings = Number(parsed.annualEarnings) || 0;
+      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, name, finalProfession, supabaseClient);
       
       // Fallback: If earnings are 0 but we have net worth, estimate at 5% annual return
-      if (annualEarnings === 0 && netWorth > 0) {
-        annualEarnings = Math.round(netWorth * 0.05);
-        console.log(`Estimated annualEarnings for ${parsed.name} at 5% of netWorth: $${annualEarnings}`);
+      if (finalAnnualEarnings === 0 && finalNetWorth > 0) {
+        finalAnnualEarnings = Math.round(finalNetWorth * 0.05);
+        console.log(`Estimated annualEarnings for ${parsed.name} at 5% of netWorth: $${finalAnnualEarnings}`);
       }
       
       const celebrity = {
         id: parsed.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
         imageUrl,
         emoji,
-        ...parsed,
-        annualEarnings,
-        netWorth,
+        name: parsed.name,
+        profession: finalProfession,
+        category: finalCategory,
+        netWorth: finalNetWorth,
+        annualEarnings: finalAnnualEarnings,
+        biggestDeal: finalBiggestDeal,
+        source: finalSource,
       };
-      console.log(`Fetched celebrity: ${parsed.name}, earnings: $${annualEarnings}, netWorth: $${netWorth}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
+      console.log(`Fetched celebrity: ${parsed.name}, earnings: $${finalAnnualEarnings}, netWorth: $${finalNetWorth}, source: ${finalSource}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
       return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
