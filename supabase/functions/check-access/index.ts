@@ -100,12 +100,20 @@ serve(async (req) => {
 
     const hasLifetimeAccess = accessData.has_lifetime_access;
     const searchCount = accessData.search_count;
-    const searchesRemaining = hasLifetimeAccess ? -1 : Math.max(0, FREE_SEARCH_LIMIT - searchCount);
-    const hasAccess = hasLifetimeAccess || searchCount < FREE_SEARCH_LIMIT;
+    
+    // Check for active beta access
+    const hasBetaAccess = accessData.beta_expires_at 
+      ? new Date(accessData.beta_expires_at) > new Date() 
+      : false;
+    
+    const searchesRemaining = (hasLifetimeAccess || hasBetaAccess) ? -1 : Math.max(0, FREE_SEARCH_LIMIT - searchCount);
+    const hasAccess = hasLifetimeAccess || hasBetaAccess || searchCount < FREE_SEARCH_LIMIT;
 
     return new Response(JSON.stringify({
       hasAccess,
       hasLifetimeAccess,
+      hasBetaAccess,
+      betaExpiresAt: accessData.beta_expires_at,
       searchCount,
       searchesRemaining,
     }), {

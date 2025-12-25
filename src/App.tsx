@@ -30,6 +30,7 @@ import DebtDestroyer from "./pages/DebtDestroyer";
 import LandingVariantA from "./pages/landing/LandingVariantA";
 import LandingVariantB from "./pages/landing/LandingVariantB";
 import LandingVariantC from "./pages/landing/LandingVariantC";
+import BetaInvite from "./pages/BetaInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
                   <Route path="/landing/a" element={<LandingVariantA />} />
                   <Route path="/landing/b" element={<LandingVariantB />} />
                   <Route path="/landing/c" element={<LandingVariantC />} />
+                  <Route path="/beta" element={<BetaInvite />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

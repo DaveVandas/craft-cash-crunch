@@ -14,8 +14,9 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical
 } from 'lucide-react';
+import BetaManagement from '@/components/admin/BetaManagement';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
