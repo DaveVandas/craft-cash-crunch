@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -15,6 +15,30 @@ import { Celebrity } from '@/lib/types';
 import { slugToName } from '@/lib/validation';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Preview data passed from "You Might Also Like" navigation
+interface PreviewData {
+  name: string;
+  netWorth: string;
+  hourlyEarnings: string;
+  emoji: string;
+}
+
+// Parse currency string like "$1.2B" to number
+const parseCurrencyString = (str: string): number => {
+  const cleaned = str.replace(/[^0-9.BMK]/gi, '');
+  const num = parseFloat(cleaned) || 0;
+  if (str.includes('B')) return num * 1_000_000_000;
+  if (str.includes('M')) return num * 1_000_000;
+  if (str.includes('K')) return num * 1_000;
+  return num;
+};
+
+// Parse hourly earnings like "$14,000/hr" to annual
+const parseHourlyToAnnual = (str: string): number => {
+  const hourly = parseCurrencyString(str.replace('/hr', ''));
+  return hourly * 2080; // ~40hrs/week * 52 weeks
+};
+
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
 const getAnonSearchCount = (): number => {
@@ -27,10 +51,25 @@ const getAnonSearchCount = (): number => {
 
 const Profile = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const { fetchCelebrity, loading } = useCelebrityData();
   const { user, accessInfo, loading: authLoading } = useAuth();
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
+
+  // Get preview data from navigation state (from "You Might Also Like" clicks)
+  const preview = (location.state as { preview?: PreviewData })?.preview;
+
+  // Create a preview celebrity for instant display while loading
+  const previewCelebrity: Celebrity | null = preview ? {
+    id: id || '',
+    name: preview.name,
+    profession: 'Loading...',
+    netWorth: parseCurrencyString(preview.netWorth),
+    annualEarnings: parseHourlyToAnnual(preview.hourlyEarnings),
+    category: 'hollywood', // Will be updated when full data loads
+    source: 'Loading...',
+  } : null;
 
   // Check if user is blocked BEFORE fetching
   const anonSearchCount = getAnonSearchCount();
@@ -72,7 +111,12 @@ const Profile = () => {
     );
   }
 
-  if (loading || authLoading) {
+  // Use preview data for instant display, or show skeleton if no preview
+  const displayCelebrity = celebrity || previewCelebrity;
+  const isLoadingWithPreview = loading && previewCelebrity;
+  const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity;
+
+  if (isLoadingWithoutPreview) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
@@ -98,7 +142,7 @@ const Profile = () => {
     );
   }
 
-  if (!celebrity) {
+  if (!displayCelebrity) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
@@ -112,7 +156,7 @@ const Profile = () => {
   }
 
   // Show money rain for billionaires
-  const isBillionaire = celebrity.annualEarnings >= 1000000000;
+  const isBillionaire = displayCelebrity.annualEarnings >= 1000000000;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -121,16 +165,16 @@ const Profile = () => {
       <main className="flex-1">
         <PaywallGate>
           <>
-            <ProfileHero celebrity={celebrity} />
+            <ProfileHero celebrity={displayCelebrity} isLoading={!!isLoadingWithPreview} />
             <div className="container py-8 space-y-8">
-              <EarningsTicker annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
-              <ComparisonGrid annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
-              <ShareCard celebrity={celebrity} />
+              <EarningsTicker annualEarnings={displayCelebrity.annualEarnings} name={displayCelebrity.name} />
+              <ComparisonGrid annualEarnings={displayCelebrity.annualEarnings} name={displayCelebrity.name} />
+              <ShareCard celebrity={displayCelebrity} />
             </div>
           </>
         </PaywallGate>
       </main>
-      <TimeOnPageCounter annualEarnings={celebrity.annualEarnings} name={celebrity.name} />
+      <TimeOnPageCounter annualEarnings={displayCelebrity.annualEarnings} name={displayCelebrity.name} />
       <Footer />
     </div>
   );

@@ -12,9 +12,10 @@ import FavoriteButton from '@/components/favorites/FavoriteButton';
 
 interface ProfileHeroProps {
   celebrity: Celebrity;
+  isLoading?: boolean;
 }
 
-const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
+const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
   const navigate = useNavigate();
   
   const categoryConfig: Record<string, { bgGradient: string }> = {
@@ -69,15 +70,22 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
           </Avatar>
 
           <div className="flex-1 animate-fade-in">
-            <Badge variant="outline" className="mb-3 border-primary/50 text-primary">
-              {celebrity.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </Badge>
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline" className="border-primary/50 text-primary">
+                {celebrity.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
+              {isLoading && (
+                <Badge variant="secondary" className="animate-pulse">
+                  Loading full profile...
+                </Badge>
+              )}
+            </div>
             
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-2">
               {celebrity.name}
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-6">
+            <p className={cn("text-xl text-muted-foreground mb-6", isLoading && "animate-pulse")}>
               {celebrity.profession}
             </p>
 
