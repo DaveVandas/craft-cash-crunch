@@ -1,150 +1,208 @@
-import { useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 import { formatLargeCurrency } from '@/lib/earnings';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useFeaturedCelebrity, featuredPeople } from '@/contexts/FeaturedCelebrityContext';
+import { featuredPeople, FeaturedPerson } from '@/contexts/FeaturedCelebrityContext';
 
-const FeaturedTicker = () => {
-  const touchStartX = useRef<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const {
-    currentIndex,
-    featured,
-    isTransitioning,
-    goToNext,
-    goToPrev,
-    goToIndex,
-    totalCount,
-  } = useFeaturedCelebrity();
-
+const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
   const { currentEarnings, breakdown } = useEarningsTicker({
-    annualEarnings: featured.annualEarnings,
+    annualEarnings: person.annualEarnings,
   });
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? goToNext() : goToPrev();
-    }
-    touchStartX.current = null;
-  };
-
   return (
-    <div
-      ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      className="relative select-none"
-    >
-      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
+    <div className="flex-[0_0_100%] min-w-0">
+      <Card className="mx-2 overflow-hidden border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
         <CardContent className="p-0">
-          <div className="relative">
-
-            {/* Main content */}
-            <div
-              className={`p-8 md:p-10 transition-all duration-200 ${
-                isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-              }`}
-            >
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                {/* Avatar and info */}
-                <Link
-                  to={`/profile/${featured.id}`}
-                  className="flex flex-col md:flex-row items-center gap-5 group"
-                >
-                  <Avatar className="h-24 w-24 md:h-28 md:w-28 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
+          <div className="p-5 md:p-8 lg:p-10">
+            {/* Mobile: Stacked compact layout */}
+            <div className="flex flex-col gap-5 md:hidden">
+              {/* Top row: Avatar + Name + CTA */}
+              <div className="flex items-center gap-4">
+                <Link to={`/profile/${person.id}`} className="shrink-0">
+                  <Avatar className="h-16 w-16 ring-2 ring-primary/30 shadow-lg shadow-primary/20">
                     <AvatarImage
-                      src={featured.imageUrl}
-                      alt={featured.name}
+                      src={person.imageUrl}
+                      alt={person.name}
                       className="object-cover"
                     />
                     <AvatarFallback
-                      className={`bg-gradient-to-br ${featured.bgGradient} text-2xl font-bold`}
+                      className={`bg-gradient-to-br ${person.bgGradient} text-lg font-bold`}
                     >
-                      {featured.initials}
+                      {person.initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="text-center md:text-left">
-                    <p className="text-sm text-muted-foreground mb-1">Featured</p>
-                    <h3 className="font-serif text-2xl md:text-3xl font-bold group-hover:text-primary transition-colors">
-                      {featured.name}
-                    </h3>
-                    <p className="text-muted-foreground">{featured.title}</p>
-                  </div>
                 </Link>
-
-                {/* Live earnings counter */}
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    <span>Earned since you opened this page</span>
-                  </div>
-                  <div className="font-mono text-4xl md:text-5xl font-bold gradient-gold-text ticker-number tabular-nums">
-                    {formatLargeCurrency(currentEarnings)}
-                  </div>
-                  <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
-                    <span>
-                      <span className="text-primary font-semibold">
-                        {formatLargeCurrency(breakdown.perSecond)}
-                      </span>
-                      /sec
-                    </span>
-                    <span>
-                      <span className="text-primary font-semibold">
-                        {formatLargeCurrency(breakdown.perMinute)}
-                      </span>
-                      /min
-                    </span>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Featured</p>
+                  <Link to={`/profile/${person.id}`}>
+                    <h3 className="font-serif text-lg font-bold truncate hover:text-primary transition-colors">
+                      {person.name}
+                    </h3>
+                  </Link>
+                  <p className="text-sm text-muted-foreground truncate">{person.title}</p>
                 </div>
-
-                {/* CTA */}
                 <Link
-                  to={`/profile/${featured.id}`}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+                  to={`/profile/${person.id}`}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold"
                 >
-                  View Profile
-                  <ArrowRight className="h-4 w-4" />
+                  View
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
+
+              {/* Earnings ticker */}
+              <div className="text-center py-3 bg-background/50 rounded-lg">
+                <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  <span>Earned since page opened</span>
+                </div>
+                <div className="font-mono text-2xl font-bold gradient-gold-text ticker-number tabular-nums">
+                  {formatLargeCurrency(currentEarnings)}
+                </div>
+                <div className="flex justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <span>
+                    <span className="text-primary font-semibold">{formatLargeCurrency(breakdown.perSecond)}</span>/sec
+                  </span>
+                  <span>
+                    <span className="text-primary font-semibold">{formatLargeCurrency(breakdown.perMinute)}</span>/min
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop: Horizontal layout */}
+            <div className="hidden md:flex items-center gap-8">
+              <Link
+                to={`/profile/${person.id}`}
+                className="flex items-center gap-5 group shrink-0"
+              >
+                <Avatar className="h-24 w-24 lg:h-28 lg:w-28 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
+                  <AvatarImage
+                    src={person.imageUrl}
+                    alt={person.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback
+                    className={`bg-gradient-to-br ${person.bgGradient} text-2xl font-bold`}
+                  >
+                    {person.initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Featured</p>
+                  <h3 className="font-serif text-2xl lg:text-3xl font-bold group-hover:text-primary transition-colors">
+                    {person.name}
+                  </h3>
+                  <p className="text-muted-foreground">{person.title}</p>
+                </div>
+              </Link>
+
+              {/* Live earnings counter */}
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <span>Earned since you opened this page</span>
+                </div>
+                <div className="font-mono text-4xl lg:text-5xl font-bold gradient-gold-text ticker-number tabular-nums">
+                  {formatLargeCurrency(currentEarnings)}
+                </div>
+                <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
+                  <span>
+                    <span className="text-primary font-semibold">{formatLargeCurrency(breakdown.perSecond)}</span>/sec
+                  </span>
+                  <span>
+                    <span className="text-primary font-semibold">{formatLargeCurrency(breakdown.perMinute)}</span>/min
+                  </span>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <Link
+                to={`/profile/${person.id}`}
+                className="shrink-0 flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+              >
+                View Profile
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+};
 
-      {/* Navigation controls below the card */}
+const FeaturedTicker = () => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      skipSnaps: false,
+      startIndex: Math.floor(Math.random() * featuredPeople.length),
+    },
+    [Autoplay({ delay: 30000, stopOnInteraction: true, stopOnMouseEnter: true })]
+  );
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <div className="relative">
+      {/* Carousel container */}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex touch-pan-y">
+          {featuredPeople.map((person) => (
+            <FeaturedSlide key={person.id} person={person} />
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation controls */}
       <div className="flex items-center justify-center gap-4 mt-4">
         <button
-          onClick={goToPrev}
+          onClick={scrollPrev}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-background hover:bg-primary/20 border border-border/50 transition-all hover:scale-110"
-          aria-label="Previous"
+          aria-label="Previous celebrity"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground font-medium">
-            {currentIndex + 1} / {totalCount}
+          <span className="text-xs text-muted-foreground font-medium tabular-nums">
+            {selectedIndex + 1} / {featuredPeople.length}
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {featuredPeople.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => goToIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  idx === currentIndex
-                    ? 'bg-primary w-6'
-                    : 'bg-muted hover:bg-muted-foreground w-2'
+                onClick={() => scrollTo(idx)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  idx === selectedIndex
+                    ? 'bg-primary w-5'
+                    : 'bg-muted hover:bg-muted-foreground/50 w-2'
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -153,9 +211,9 @@ const FeaturedTicker = () => {
         </div>
         
         <button
-          onClick={goToNext}
+          onClick={scrollNext}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-background hover:bg-primary/20 border border-border/50 transition-all hover:scale-110"
-          aria-label="Next"
+          aria-label="Next celebrity"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
