@@ -138,38 +138,56 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
 };
 
 const FeaturedTicker = () => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  
+  const [isNavigating, setIsNavigating] = useState(false);
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { 
+    {
       loop: true,
       skipSnaps: false,
+      slidesToScroll: 1,
       startIndex: Math.floor(Math.random() * featuredPeople.length),
-      duration: 30,
+      // Higher = slower animation (less "sporadic" feel)
+      duration: 140,
       dragFree: false,
     },
     [Autoplay({ delay: 30000, stopOnInteraction: true, stopOnMouseEnter: true })]
   );
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
   useEffect(() => {
     if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
+
+    const onSettle = () => setIsNavigating(false);
+    emblaApi.on('settle', onSettle);
+    emblaApi.on('reInit', onSettle);
+
     return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
+      emblaApi.off('settle', onSettle);
+      emblaApi.off('reInit', onSettle);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi]);
+
+  const resetAutoplay = useCallback(() => {
+    // Autoplay doesn't always treat external nav buttons as "interaction".
+    // Reset/stop here to prevent an extra auto-advance right after a manual click.
+    const plugins = (emblaApi?.plugins?.() ?? {}) as Record<string, any>;
+    const autoplay = plugins.autoplay;
+    autoplay?.reset?.();
+    autoplay?.stop?.();
+  }, [emblaApi]);
+
+  const scrollPrev = useCallback(() => {
+    if (!emblaApi || isNavigating) return;
+    resetAutoplay();
+    setIsNavigating(true);
+    emblaApi.scrollPrev();
+  }, [emblaApi, isNavigating, resetAutoplay]);
+
+  const scrollNext = useCallback(() => {
+    if (!emblaApi || isNavigating) return;
+    resetAutoplay();
+    setIsNavigating(true);
+    emblaApi.scrollNext();
+  }, [emblaApi, isNavigating, resetAutoplay]);
 
   return (
     <div className="relative">
@@ -186,16 +204,18 @@ const FeaturedTicker = () => {
       <div className="flex items-center justify-center gap-6 mt-4">
         <button
           onClick={scrollPrev}
-          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group"
+          disabled={isNavigating}
+          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Previous celebrity"
         >
           <ChevronLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
           <span className="text-sm font-medium">Back</span>
         </button>
-        
+
         <button
           onClick={scrollNext}
-          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group"
+          disabled={isNavigating}
+          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Next celebrity"
         >
           <span className="text-sm font-medium">Next</span>
