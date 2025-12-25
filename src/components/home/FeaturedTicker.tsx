@@ -145,6 +145,8 @@ const FeaturedTicker = () => {
       loop: true,
       skipSnaps: false,
       startIndex: Math.floor(Math.random() * featuredPeople.length),
+      duration: 30,
+      dragFree: false,
     },
     [Autoplay({ delay: 30000, stopOnInteraction: true, stopOnMouseEnter: true })]
   );
