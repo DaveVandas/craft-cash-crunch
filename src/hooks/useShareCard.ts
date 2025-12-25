@@ -10,6 +10,32 @@ interface UseShareCardOptions {
   title?: string;
 }
 
+// Detect iOS (iPhone, iPad, iPod)
+const isIOS = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
+// Detect if running in a mobile browser
+const isMobile = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    ((navigator as unknown as { userAgentData?: { mobile?: boolean } }).userAgentData?.mobile ?? false);
+};
+
+// Check if native share with files is supported
+const canShareFiles = async (file: File): Promise<boolean> => {
+  if (!navigator.share) return false;
+  if (!navigator.canShare) return false;
+  
+  try {
+    return navigator.canShare({ files: [file] });
+  } catch {
+    return false;
+  }
+};
+
 export const useShareCard = ({
   cardRef,
   shareText,
@@ -23,7 +49,6 @@ export const useShareCard = ({
     if (!cardRef.current) return null;
 
     try {
-      // Get the actual dimensions of the element including all content
       const element = cardRef.current;
       const rect = element.getBoundingClientRect();
 
@@ -33,12 +58,10 @@ export const useShareCard = ({
         useCORS: true,
         allowTaint: true,
         logging: false,
-        // Ensure full element is captured regardless of scroll position
         scrollX: 0,
         scrollY: 0,
         windowWidth: document.documentElement.scrollWidth,
         windowHeight: document.documentElement.scrollHeight,
-        // Force the canvas to match the element's full height
         width: rect.width,
         height: rect.height,
         x: rect.left + window.scrollX,
@@ -56,6 +79,20 @@ export const useShareCard = ({
     }
   };
 
+  // Download fallback - works on all platforms
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Delay revoke to ensure download starts
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareText + '\n' + shareUrl);
@@ -63,7 +100,20 @@ export const useShareCard = ({
         description: 'Paste it anywhere to share',
       });
     } catch {
-      toast.error('Failed to copy to clipboard');
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText + '\n' + shareUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        toast.success('Copied to clipboard!');
+      } catch {
+        toast.error('Failed to copy to clipboard');
+      }
+      document.body.removeChild(textArea);
     }
   };
 
@@ -92,46 +142,49 @@ export const useShareCard = ({
 
     try {
       const imageBlob = await generateCardImage();
-      if (!imageBlob) return;
+      if (!imageBlob) {
+        toast.error('Failed to generate image');
+        return;
+      }
 
-      const file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
+      const filename = `${imageName}.jpg`;
+      const file = new File([imageBlob], filename, { type: 'image/jpeg' });
 
-      // Prefer the native share sheet on mobile (users can choose “Save Image” / Photos)
-      if (navigator.share) {
+      // Try native share API with file (best experience on mobile)
+      if (await canShareFiles(file)) {
         try {
-          const canShareFiles =
-            !('canShare' in navigator) ||
-            !navigator.canShare ||
-            navigator.canShare({ files: [file] });
-
-          if (canShareFiles) {
-            await navigator.share({ title, files: [file] } as unknown as ShareData);
-            toast.success('Ready to save to Photos', {
-              description: 'In the share sheet, choose “Save Image”',
-            });
-            return;
-          }
+          await navigator.share({ files: [file] });
+          // User completed share sheet action - no toast needed as they chose what to do
+          return;
         } catch (err) {
-          // User cancelled
+          // AbortError = user cancelled, which is fine
           if ((err as Error).name === 'AbortError') return;
-          // Fall through to fallback
+          // Other errors: fall through to download
+          console.log('Share API failed, falling back to download:', err);
         }
       }
 
-      // Fallback: trigger download (works on both mobile and desktop)
-      const url = URL.createObjectURL(imageBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${imageName}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success('Image saved!', {
-        description: 'Check your downloads folder',
-      });
-    } catch {
+      // Fallback: trigger download
+      triggerDownload(imageBlob, filename);
+      
+      if (isMobile()) {
+        if (isIOS()) {
+          toast.success('Image downloaded!', {
+            description: 'Find it in Files app → Downloads, then save to Photos',
+            duration: 5000,
+          });
+        } else {
+          toast.success('Image downloaded!', {
+            description: 'Check your Downloads folder',
+          });
+        }
+      } else {
+        toast.success('Image saved!', {
+          description: 'Check your downloads folder',
+        });
+      }
+    } catch (err) {
+      console.error('handleSaveImage error:', err);
       toast.error('Failed to save image');
     } finally {
       setIsGeneratingImage(false);
@@ -142,40 +195,71 @@ export const useShareCard = ({
     setIsGeneratingImage(true);
     
     try {
+      // First try to generate the image
       const imageBlob = await generateCardImage();
       
-      // Try native share with image first (works on mobile)
+      // Mobile: try native share
       if (navigator.share) {
-        if (imageBlob && navigator.canShare) {
+        // Try with image first
+        if (imageBlob) {
           const file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
-          const shareData = {
-            title,
-            text: shareText,
-            url: shareUrl,
-            files: [file],
-          };
           
-          if (navigator.canShare(shareData)) {
-            await navigator.share(shareData);
-            setIsGeneratingImage(false);
-            return;
+          if (await canShareFiles(file)) {
+            try {
+              await navigator.share({
+                title,
+                text: shareText,
+                files: [file],
+              });
+              return; // Success
+            } catch (err) {
+              if ((err as Error).name === 'AbortError') return;
+              // Continue to try without file
+              console.log('Share with file failed, trying without:', err);
+            }
           }
         }
         
-        // Share without image
-        await navigator.share({
-          title,
-          text: shareText,
-          url: shareUrl,
-        });
-      } else {
-        // Desktop fallback - copy to clipboard
+        // Try share without image (text + URL only)
+        try {
+          await navigator.share({
+            title,
+            text: shareText,
+            url: shareUrl,
+          });
+          return; // Success
+        } catch (err) {
+          if ((err as Error).name === 'AbortError') return;
+          // Continue to clipboard fallback
+          console.log('Share without file failed, using clipboard:', err);
+        }
+      }
+      
+      // Desktop/fallback: copy to clipboard
+      try {
         await navigator.clipboard.writeText(shareText + '\n' + shareUrl);
         toast.success('Copied to clipboard!', {
           description: 'Paste it in your text message',
         });
+      } catch {
+        // Final fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = shareText + '\n' + shareUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success('Copied to clipboard!');
+        } catch {
+          toast.error('Could not share. Please copy the link manually.');
+        }
+        document.body.removeChild(textArea);
       }
     } catch (err) {
+      console.error('handleTextShare error:', err);
+      // Don't show error for user cancellation
       if ((err as Error).name !== 'AbortError') {
         toast.error('Failed to share');
       }
@@ -188,19 +272,18 @@ export const useShareCard = ({
     setIsGeneratingImage(true);
     try {
       const blob = await generateCardImage();
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${imageName}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success('Card saved! Open Instagram → Stories → Select the image from your gallery', {
-          duration: 6000,
-        });
+      if (!blob) {
+        toast.error('Failed to generate image');
+        return;
       }
+      
+      const filename = `${imageName}.jpg`;
+      triggerDownload(blob, filename);
+      
+      toast.success('Card saved!', {
+        description: 'Open Instagram → Stories → Select the image from your gallery',
+        duration: 6000,
+      });
     } catch {
       toast.error('Failed to download card');
     } finally {
@@ -212,19 +295,18 @@ export const useShareCard = ({
     setIsGeneratingImage(true);
     try {
       const blob = await generateCardImage();
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${imageName}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success('Card saved! Open TikTok → Create → Add the image from your gallery', {
-          duration: 6000,
-        });
+      if (!blob) {
+        toast.error('Failed to generate image');
+        return;
       }
+      
+      const filename = `${imageName}.jpg`;
+      triggerDownload(blob, filename);
+      
+      toast.success('Card saved!', {
+        description: 'Open TikTok → Create → Add the image from your gallery',
+        duration: 6000,
+      });
     } catch {
       toast.error('Failed to download card');
     } finally {
