@@ -21,16 +21,30 @@ export const useShareCard = ({
 
   const generateCardImage = async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;
-    
+
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      // Get the actual dimensions of the element including all content
+      const element = cardRef.current;
+      const rect = element.getBoundingClientRect();
+
+      const canvas = await html2canvas(element, {
         backgroundColor: '#0a0a0a',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
+        // Ensure full element is captured regardless of scroll position
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        // Force the canvas to match the element's full height
+        width: rect.width,
+        height: rect.height,
+        x: rect.left + window.scrollX,
+        y: rect.top + window.scrollY,
       });
-      
+
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
           resolve(blob);
