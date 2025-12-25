@@ -152,7 +152,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               style={{ background: 'linear-gradient(145deg, rgba(249,115,22,0.2) 0%, rgba(10,10,11,0.9) 100%)' }}
             >
               <p className="text-orange-300/80 text-sm uppercase tracking-widest mb-4">
-                Earns
+                5-Year Empire
               </p>
               <div className="flex items-center justify-center gap-4 mb-4">
                 <span className="text-6xl">{dramaticComparison.emoji}</span>
