@@ -77,6 +77,12 @@ const Profile = () => {
   const isUserBlocked = user && accessInfo && !accessInfo.hasAccess;
   const shouldBlock = isAnonBlocked || isUserBlocked;
 
+  // Reset celebrity when route changes to show preview immediately
+  useEffect(() => {
+    setCelebrity(null);
+    setValidationError(false);
+  }, [id]);
+
   useEffect(() => {
     // Don't fetch if blocked
     if (shouldBlock || authLoading) return;
