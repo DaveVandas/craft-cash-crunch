@@ -636,6 +636,10 @@ const Admin = () => {
               <Clock className="h-4 w-4" />
               Recent Signups
             </TabsTrigger>
+            <TabsTrigger value="beta" className="gap-2">
+              <FlaskConical className="h-4 w-4" />
+              Beta Testers
+            </TabsTrigger>
             <TabsTrigger value="landing" className="gap-2">
               <Megaphone className="h-4 w-4" />
               Landing Pages
@@ -855,6 +859,11 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Beta Testers Tab */}
+          <TabsContent value="beta">
+            <BetaManagement />
           </TabsContent>
 
           {/* Landing Pages Tab */}
