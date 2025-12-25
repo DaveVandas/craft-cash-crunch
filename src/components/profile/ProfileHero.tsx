@@ -98,7 +98,7 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
             
             {celebrity.source && (
               <p className="text-xs text-muted-foreground/60 mb-4">
-                Source: {celebrity.source}
+                Source: {celebrity.source.split(' - http')[0].split(' - https')[0]}
               </p>
             )}
 
