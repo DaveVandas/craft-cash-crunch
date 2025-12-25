@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink
 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -635,6 +635,10 @@ const Admin = () => {
               <Clock className="h-4 w-4" />
               Recent Signups
             </TabsTrigger>
+            <TabsTrigger value="landing" className="gap-2">
+              <Megaphone className="h-4 w-4" />
+              Landing Pages
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -848,6 +852,124 @@ const Admin = () => {
                     </Table>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Landing Pages Tab */}
+          <TabsContent value="landing">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="h-5 w-5" />
+                  Landing Page Variations
+                </CardTitle>
+                <CardDescription>
+                  Promotional landing pages to drive signups. Share these links or use them in marketing campaigns.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {/* Variant A */}
+                  <div className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant="outline" className="text-primary border-primary/30">Variant A</Badge>
+                      <span className="text-xs text-muted-foreground">Aspirational</span>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">"Think Like The 1%"</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Focus on stats and the wealth gap. Creates urgency with real-time earnings comparisons. Best for social media ads.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" className="flex-1">
+                        <a href="/landing/a" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Preview
+                        </a>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/landing/a`);
+                          toast.success('Link copied to clipboard!');
+                        }}
+                      >
+                        Copy URL
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Variant B */}
+                  <div className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant="outline" className="text-destructive border-destructive/30">Variant B</Badge>
+                      <span className="text-xs text-muted-foreground">Wake-Up Call</span>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">"You're Not Broke"</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Direct, confrontational approach. Shows real-time earnings while reading. Great for email campaigns.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" className="flex-1">
+                        <a href="/landing/b" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Preview
+                        </a>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/landing/b`);
+                          toast.success('Link copied to clipboard!');
+                        }}
+                      >
+                        Copy URL
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Variant C */}
+                  <div className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant="outline" className="border-chart-2/30 text-[hsl(var(--chart-2))]">Variant C</Badge>
+                      <span className="text-xs text-muted-foreground">Inspirational</span>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">"Your Salary in 42 Seconds"</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Softer, more inspirational tone. Focus on perspective and thinking bigger. Best for content marketing.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" className="flex-1">
+                        <a href="/landing/c" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Preview
+                        </a>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/landing/c`);
+                          toast.success('Link copied to clipboard!');
+                        }}
+                      >
+                        Copy URL
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 p-4 bg-muted/30 rounded-lg">
+                  <h4 className="font-semibold mb-2">Usage Tips</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• <strong>Variant A:</strong> Best for Facebook/Instagram ads targeting aspiring entrepreneurs</li>
+                    <li>• <strong>Variant B:</strong> Works well for email marketing and retargeting campaigns</li>
+                    <li>• <strong>Variant C:</strong> Great for SEO content, blog posts, and organic social</li>
+                    <li>• Test each variant with different audiences to see which converts best</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
