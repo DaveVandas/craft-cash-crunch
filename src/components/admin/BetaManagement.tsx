@@ -279,33 +279,36 @@ const BetaManagement = () => {
           </Button>
 
           {newInvite && (
-            <div className="mt-4 p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-3">
+            <div className="mt-4 p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-4">
               <div>
-                <Label className="text-sm font-medium">Invite Link</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input value={newInvite.link} readOnly className="font-mono text-sm" />
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => copyToClipboard(newInvite.link, 'Link')}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                <Label className="text-sm font-medium mb-2 block">Shareable Message Preview</Label>
+                <div className="bg-background rounded-lg border p-4 max-h-64 overflow-y-auto">
+                  <pre className="whitespace-pre-wrap text-sm text-foreground/90 font-sans">
+                    {newInvite.message}
+                  </pre>
                 </div>
               </div>
-              <div>
-                <Label className="text-sm font-medium">Invite Message</Label>
-                <div className="flex gap-2 mt-1">
-                  <Button 
-                    variant="outline"
-                    onClick={() => copyToClipboard(newInvite.message, 'Message')}
-                    className="w-full"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Full Message
-                  </Button>
-                </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => copyToClipboard(newInvite.message, 'Full message')}
+                  className="flex-1"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Full Message
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => copyToClipboard(newInvite.link, 'Link only')}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Link Only
+                </Button>
               </div>
+
+              <p className="text-xs text-muted-foreground">
+                The full message includes the personal touch about valuing their feedback and how they can influence the product.
+              </p>
             </div>
           )}
         </CardContent>
