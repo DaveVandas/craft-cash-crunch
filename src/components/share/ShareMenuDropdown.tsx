@@ -46,6 +46,8 @@ export const TikTokIcon = () => (
 
 interface ShareMenuDropdownProps {
   isGeneratingImage: boolean;
+  isPreGenerating?: boolean;
+  onMenuOpen?: () => void;
   onTextShare: () => void;
   onWhatsAppShare: () => void;
   onTwitterShare: () => void;
@@ -61,6 +63,8 @@ interface ShareMenuDropdownProps {
 
 const ShareMenuDropdown = ({
   isGeneratingImage,
+  isPreGenerating = false,
+  onMenuOpen,
   onTextShare,
   onWhatsAppShare,
   onTwitterShare,
@@ -73,9 +77,15 @@ const ShareMenuDropdown = ({
   buttonClassName = 'w-full max-w-xs bg-gradient-to-r from-primary to-primary/80',
   buttonText = 'Share Card',
 }: ShareMenuDropdownProps) => {
+  const handleOpenChange = (open: boolean) => {
+    if (open && onMenuOpen) {
+      onMenuOpen();
+    }
+  };
+
   return (
     <div className="flex justify-center">
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>
           <Button 
             className={buttonClassName}
@@ -121,6 +131,7 @@ const ShareMenuDropdown = ({
           <DropdownMenuItem onClick={onSaveImage} className="cursor-pointer">
             <Image className="h-4 w-4" />
             <span className="ml-2">Save to Photos</span>
+            {isPreGenerating && <Loader2 className="h-3 w-3 ml-auto animate-spin opacity-50" />}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onCopyLink} className="cursor-pointer">
             <Copy className="h-4 w-4" />
