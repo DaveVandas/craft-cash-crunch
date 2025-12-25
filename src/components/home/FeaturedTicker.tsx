@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 import { formatLargeCurrency } from '@/lib/earnings';
@@ -7,11 +7,29 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { featuredPeople, FeaturedPerson, useFeaturedCelebrity } from '@/contexts/FeaturedCelebrityContext';
+import { Celebrity } from '@/lib/types';
 
-const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
+// Convert FeaturedPerson to Celebrity for prefetching
+const toCelebrity = (p: FeaturedPerson): Celebrity => ({
+  id: p.id,
+  name: p.name,
+  profession: p.title,
+  category: 'hollywood', // Default category
+  netWorth: p.annualEarnings * 10,
+  annualEarnings: p.annualEarnings,
+  imageUrl: p.imageUrl,
+  source: 'Featured data',
+});
+
+const FeaturedSlide = ({ person, onNavigate }: { person: FeaturedPerson; onNavigate: (p: FeaturedPerson) => void }) => {
   const { currentEarnings, breakdown } = useEarningsTicker({
     annualEarnings: person.annualEarnings,
   });
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onNavigate(person);
+  };
 
   return (
     <div className="flex-[0_0_100%] min-w-0">
@@ -22,7 +40,7 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
             <div className="flex flex-col gap-5 md:hidden">
               {/* Top row: Avatar + Name + CTA */}
               <div className="flex items-center gap-4">
-                <Link to={`/profile/${person.id}`} className="shrink-0">
+                <a href={`/profile/${person.id}`} onClick={handleClick} className="shrink-0">
                   <Avatar className="h-16 w-16 ring-2 ring-primary/30 shadow-lg shadow-primary/20">
                     <AvatarImage
                       src={person.imageUrl}
@@ -35,23 +53,24 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
                       {person.initials}
                     </AvatarFallback>
                   </Avatar>
-                </Link>
+                </a>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">Featured</p>
-                  <Link to={`/profile/${person.id}`}>
+                  <a href={`/profile/${person.id}`} onClick={handleClick}>
                     <h3 className="font-serif text-lg font-bold truncate hover:text-primary transition-colors">
                       {person.name}
                     </h3>
-                  </Link>
+                  </a>
                   <p className="text-sm text-muted-foreground truncate">{person.title}</p>
                 </div>
-                <Link
-                  to={`/profile/${person.id}`}
+                <a
+                  href={`/profile/${person.id}`}
+                  onClick={handleClick}
                   className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold"
                 >
                   View
                   <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
+                </a>
               </div>
 
               {/* Earnings ticker */}
@@ -76,8 +95,9 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
 
             {/* Desktop: Horizontal layout */}
             <div className="hidden md:flex items-center gap-8">
-              <Link
-                to={`/profile/${person.id}`}
+              <a
+                href={`/profile/${person.id}`}
+                onClick={handleClick}
                 className="flex items-center gap-5 group shrink-0"
               >
                 <Avatar className="h-24 w-24 lg:h-28 lg:w-28 ring-4 ring-primary/30 shadow-xl shadow-primary/20">
@@ -99,7 +119,7 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
                   </h3>
                   <p className="text-muted-foreground">{person.title}</p>
                 </div>
-              </Link>
+              </a>
 
               {/* Live earnings counter */}
               <div className="flex-1 flex flex-col items-center justify-center">
@@ -121,13 +141,14 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
               </div>
 
               {/* CTA */}
-              <Link
-                to={`/profile/${person.id}`}
+              <a
+                href={`/profile/${person.id}`}
+                onClick={handleClick}
                 className="shrink-0 flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
               >
                 View Profile
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </a>
             </div>
           </div>
         </CardContent>
@@ -137,11 +158,18 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
 };
 
 const FeaturedTicker = () => {
+  const navigate = useNavigate();
   const { currentIndex, goToIndex } = useFeaturedCelebrity();
 
   const [isNavigating, setIsNavigating] = useState(false);
   const navTimeoutRef = useRef<number | null>(null);
   const initialIndexRef = useRef(currentIndex);
+
+  // Navigate to profile with prefetched data for instant loading
+  const handleNavigate = useCallback((person: FeaturedPerson) => {
+    const celebrity = toCelebrity(person);
+    navigate(`/profile/${person.id}`, { state: { celebrity } });
+  }, [navigate]);
 
   const emblaOptions = useMemo(
     () => ({
@@ -241,7 +269,7 @@ const FeaturedTicker = () => {
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y">
           {featuredPeople.map((person) => (
-            <FeaturedSlide key={person.id} person={person} />
+            <FeaturedSlide key={person.id} person={person} onNavigate={handleNavigate} />
           ))}
         </div>
       </div>
