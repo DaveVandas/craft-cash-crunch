@@ -181,41 +181,23 @@ const FeaturedTicker = () => {
       </div>
 
       {/* Navigation controls */}
-      <div className="flex items-center justify-center gap-4 mt-4">
+      <div className="flex items-center justify-center gap-6 mt-4">
         <button
           onClick={scrollPrev}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-background hover:bg-primary/20 border border-border/50 transition-all hover:scale-110"
+          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group"
           aria-label="Previous celebrity"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-sm font-medium">Back</span>
         </button>
-        
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground font-medium tabular-nums">
-            {selectedIndex + 1} / {featuredPeople.length}
-          </span>
-          <div className="flex gap-1.5">
-            {featuredPeople.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => scrollTo(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === selectedIndex
-                    ? 'bg-primary w-5'
-                    : 'bg-muted hover:bg-muted-foreground/50 w-2'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-        </div>
         
         <button
           onClick={scrollNext}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-background hover:bg-primary/20 border border-border/50 transition-all hover:scale-110"
+          className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group"
           aria-label="Next celebrity"
         >
-          <ChevronRight className="h-4 w-4" />
+          <span className="text-sm font-medium">Next</span>
+          <ChevronRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
     </div>
