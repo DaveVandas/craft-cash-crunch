@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, generateComparisons, getMostDramaticComparison } from '@/lib/earnings';
+import { pluralizeItem } from '@/lib/utils';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { getSimilarCelebrities, nameToSlug } from '@/lib/similarCelebrities';
 import { Card, CardContent } from '@/components/ui/card';
@@ -169,7 +170,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
                     {dramaticComparison.quantity.toLocaleString()}
                   </p>
                   <p className="text-2xl text-orange-100 font-bold">
-                    {dramaticComparison.item}
+                    {pluralizeItem(dramaticComparison.item, dramaticComparison.quantity)}
                   </p>
                 </div>
               </div>

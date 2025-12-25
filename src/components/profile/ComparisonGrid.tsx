@@ -1,4 +1,5 @@
 import { generateMogulComparisons, EnhancedComparison } from '@/lib/earnings';
+import { pluralizeItem } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown } from 'lucide-react';
 
@@ -51,7 +52,7 @@ const ComparisonGrid = ({ annualEarnings, name }: ComparisonGridProps) => {
                       {comparison.quantity.toLocaleString()}
                     </p>
                     <p className="text-sm font-semibold text-foreground">
-                      {comparison.item}{comparison.quantity > 1 ? 's' : ''}
+                      {pluralizeItem(comparison.item, comparison.quantity)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {comparison.context}
