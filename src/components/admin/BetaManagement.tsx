@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
   Users, Send, Copy, RefreshCw, Star, Clock, MessageSquare,
-  CheckCircle, XCircle, AlertCircle, Loader2
+  CheckCircle, XCircle, AlertCircle, Loader2, Trash2
 } from 'lucide-react';
 
 interface BetaInvite {
@@ -120,6 +120,28 @@ const BetaManagement = () => {
       toast.error(err.message || 'Failed to create invite');
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleDeleteInvite = async (inviteId: string) => {
+    if (!confirm('Are you sure you want to delete this invite?')) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('beta-invite', {
+        body: {
+          action: 'delete',
+          inviteId,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success('Invite deleted');
+      fetchData();
+    } catch (err: any) {
+      console.error('Error deleting invite:', err);
+      toast.error(err.message || 'Failed to delete invite');
     }
   };
 
@@ -355,12 +377,13 @@ const BetaManagement = () => {
                   <TableHead>Created</TableHead>
                   <TableHead>Expires</TableHead>
                   <TableHead>Claimed By</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {invites.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       No invites yet
                     </TableCell>
                   </TableRow>
@@ -375,6 +398,16 @@ const BetaManagement = () => {
                       <TableCell className="text-sm">{formatDate(invite.created_at)}</TableCell>
                       <TableCell className="text-sm">{formatDate(invite.expires_at)}</TableCell>
                       <TableCell>{invite.claimedByEmail || '-'}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteInvite(invite.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
