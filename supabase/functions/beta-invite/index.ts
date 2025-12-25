@@ -261,6 +261,63 @@ Thank you for being part of our journey. We can't wait to hear what you think!
       });
     }
 
+    // DELETE: Admin deletes an invite
+    if (action === 'delete') {
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: userData } = await supabaseClient.auth.getUser(token);
+      
+      if (!userData.user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Check admin role
+      const { data: isAdmin } = await supabaseClient.rpc('has_role', {
+        _user_id: userData.user.id,
+        _role: 'admin',
+      });
+
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const { inviteId } = params;
+
+      if (!inviteId) {
+        return new Response(JSON.stringify({ error: 'Invite ID required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const { error } = await supabaseClient
+        .from('beta_invites')
+        .delete()
+        .eq('id', inviteId);
+
+      if (error) {
+        console.error('Error deleting invite:', error);
+        throw new Error('Failed to delete invite');
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: 'Invalid action' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
