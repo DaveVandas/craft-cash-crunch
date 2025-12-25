@@ -171,47 +171,80 @@ const RealityCheckShareCard = ({
     window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
   };
 
+  // Helper: detect iOS
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // Helper: detect mobile
+  const isMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Helper: check if can share files
+  const canShareFiles = async (file: File): Promise<boolean> => {
+    if (!navigator.share || !navigator.canShare) return false;
+    try {
+      return navigator.canShare({ files: [file] });
+    } catch {
+      return false;
+    }
+  };
+
+  // Helper: download fallback
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const handleSaveImage = async () => {
     setIsGeneratingImage(true);
     
     try {
       const imageBlob = await generateCardImage();
-      if (imageBlob) {
-        // Try to use share API to save to photos on mobile
-        if (navigator.share && navigator.canShare) {
-          const file = new File([imageBlob], 'reality-check.jpg', { type: 'image/jpeg' });
-          const shareData = { files: [file] };
-          
-          if (navigator.canShare(shareData)) {
-            try {
-              await navigator.share(shareData);
-              toast.success('Image ready to save!');
-              setIsGeneratingImage(false);
-              return;
-            } catch (err) {
-              // User cancelled or share failed, fall through to download
-              if ((err as Error).name === 'AbortError') {
-                setIsGeneratingImage(false);
-                return;
-              }
-            }
-          }
+      if (!imageBlob) {
+        toast.error('Failed to generate image');
+        return;
+      }
+
+      const filename = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+      const file = new File([imageBlob], filename, { type: 'image/jpeg' });
+
+      // Try native share API with file
+      if (await canShareFiles(file)) {
+        try {
+          await navigator.share({ files: [file] });
+          return; // Success
+        } catch (err) {
+          if ((err as Error).name === 'AbortError') return;
+          console.log('Share API failed, falling back to download:', err);
         }
-        
-        // Fallback to download
-        const url = URL.createObjectURL(imageBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      }
+
+      // Fallback to download
+      triggerDownload(imageBlob, filename);
+      
+      if (isMobile()) {
+        if (isIOS()) {
+          toast.success('Image downloaded!', {
+            description: 'Find it in Files app → Downloads, then save to Photos',
+            duration: 5000,
+          });
+        } else {
+          toast.success('Image downloaded!', {
+            description: 'Check your Downloads folder',
+          });
+        }
+      } else {
         toast.success('Image saved!', {
           description: 'Check your downloads folder',
         });
       }
     } catch (err) {
+      console.error('handleSaveImage error:', err);
       toast.error('Failed to save image');
     } finally {
       setIsGeneratingImage(false);
@@ -224,37 +257,66 @@ const RealityCheckShareCard = ({
     try {
       const imageBlob = await generateCardImage();
       const text = getShareText();
+      const shareTitle = brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check';
       
-      // Try native share with image first (works on mobile)
+      // Mobile: try native share
       if (navigator.share) {
-        if (imageBlob && navigator.canShare) {
+        // Try with image first
+        if (imageBlob) {
           const file = new File([imageBlob], 'reality-check.jpg', { type: 'image/jpeg' });
-          const shareData = {
-            title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
-            text,
-            files: [file],
-          };
           
-          if (navigator.canShare(shareData)) {
-            await navigator.share(shareData);
-            setIsGeneratingImage(false);
-            return;
+          if (await canShareFiles(file)) {
+            try {
+              await navigator.share({
+                title: shareTitle,
+                text,
+                files: [file],
+              });
+              return; // Success
+            } catch (err) {
+              if ((err as Error).name === 'AbortError') return;
+              console.log('Share with file failed, trying without:', err);
+            }
           }
         }
         
-        // Share without image
-        await navigator.share({
-          title: brutalMode ? 'Kick Me While I\'m Down' : 'Reality Check',
-          text,
-        });
-      } else {
-        // Desktop fallback - copy to clipboard
+        // Try share without image
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text,
+          });
+          return; // Success
+        } catch (err) {
+          if ((err as Error).name === 'AbortError') return;
+          console.log('Share without file failed, using clipboard:', err);
+        }
+      }
+      
+      // Desktop/fallback: copy to clipboard
+      try {
         await navigator.clipboard.writeText(text);
         toast.success('Copied to clipboard!', {
           description: 'Paste it in your text message',
         });
+      } catch {
+        // Final fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success('Copied to clipboard!');
+        } catch {
+          toast.error('Could not share. Please copy the link manually.');
+        }
+        document.body.removeChild(textArea);
       }
     } catch (err) {
+      console.error('handleTextShare error:', err);
       if ((err as Error).name !== 'AbortError') {
         toast.error('Failed to share');
       }
