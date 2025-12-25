@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle, Download, Loader2 } from 'lucide-react';
+import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle, Image, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -461,8 +461,8 @@ const RealityCheckShareCard = ({
               <span className="ml-2">LinkedIn</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSaveImage} className="cursor-pointer">
-              <Download className="h-4 w-4" />
-              <span className="ml-2">Save Image</span>
+              <Image className="h-4 w-4" />
+              <span className="ml-2">Save to Photos</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
               <Copy className="h-4 w-4" />
