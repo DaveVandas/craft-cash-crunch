@@ -129,10 +129,10 @@ const Profile = () => {
     );
   }
 
-  // Use preview data for instant display, or show skeleton if no preview
-  const displayCelebrity = celebrity || previewCelebrity;
-  const isLoadingWithPreview = loading && previewCelebrity;
-  const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity;
+  // Use navigation state for instant display when available
+  const displayCelebrity = celebrity || prefetchedCelebrity || previewCelebrity;
+  const isLoadingWithPreview = loading && !!(previewCelebrity || prefetchedCelebrity);
+  const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity && !prefetchedCelebrity;
 
   if (isLoadingWithoutPreview) {
     return (

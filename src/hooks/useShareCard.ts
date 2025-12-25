@@ -206,21 +206,22 @@ export const useShareCard = ({
       const filename = `${imageName}.jpg`;
       const file = new File([imageBlob], filename, { type: 'image/jpeg' });
 
-      // Try native share API with file (best experience on mobile)
-      if (await canShareFiles(file)) {
+      // Prefer native share sheet on mobile (this is the only reliable way to "Save to Photos")
+      if (navigator.share) {
         try {
-          await navigator.share({ files: [file] });
-          // User completed share sheet action - no toast needed as they chose what to do
+          await navigator.share({
+            title,
+            files: [file],
+          });
           return;
         } catch (err) {
-          // AbortError = user cancelled, which is fine
           if ((err as Error).name === 'AbortError') return;
-          // Other errors: fall through to download
-          console.log('Share API failed, falling back to download:', err);
+          // continue to fallbacks
+          console.log('Native share failed, falling back:', err);
         }
       }
 
-      // Fallback: trigger download
+      // Fallback: trigger download / open
       triggerDownload(imageBlob, filename);
       
       if (isMobile()) {
