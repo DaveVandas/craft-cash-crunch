@@ -75,46 +75,63 @@ export const useShareCard = ({
 
   const handleSaveImage = async () => {
     setIsGeneratingImage(true);
-    
+
     try {
       const imageBlob = await generateCardImage();
-      if (imageBlob) {
-        // Try to use share API to save to photos on mobile
-        if (navigator.share && navigator.canShare) {
-          const file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
-          const shareData = { files: [file] };
-          
-          if (navigator.canShare(shareData)) {
-            try {
-              await navigator.share(shareData);
-              toast.success('Image saved to Photos!', {
-                description: 'Check your photo gallery',
-              });
-              setIsGeneratingImage(false);
-              return;
-            } catch (err) {
-              // User cancelled or share failed, fall through to download
-              if ((err as Error).name === 'AbortError') {
-                setIsGeneratingImage(false);
-                return;
-              }
-            }
+      if (!imageBlob) return;
+
+      const file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
+
+      // Prefer the native share sheet on mobile (users can choose “Save Image” / Photos)
+      if (navigator.share) {
+        try {
+          const canShareFiles =
+            !('canShare' in navigator) ||
+            !navigator.canShare ||
+            navigator.canShare({ files: [file] });
+
+          if (canShareFiles) {
+            await navigator.share({ title, files: [file] } as unknown as ShareData);
+            toast.success('Ready to save to Photos', {
+              description: 'In the share sheet, choose “Save Image”',
+            });
+            return;
           }
+        } catch (err) {
+          // User cancelled
+          if ((err as Error).name === 'AbortError') return;
+          // Fall through to fallback
         }
-        
-        // Fallback to download
-        const url = URL.createObjectURL(imageBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${imageName}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast.success('Image saved!', {
-          description: 'Check your downloads folder',
-        });
       }
+
+      const url = URL.createObjectURL(imageBlob);
+      const isMobile =
+        // Prefer UA-CH when available
+        (navigator as any).userAgentData?.mobile ??
+        /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+
+      // On mobile, opening the image is more "Photos-like" than forcing a download.
+      if (isMobile) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        toast.success('Image opened', {
+          description: 'Tap Share → Save Image to add it to Photos',
+        });
+        window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+        return;
+      }
+
+      // Desktop fallback: download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${imageName}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Image saved!', {
+        description: 'Check your downloads folder',
+      });
     } catch {
       toast.error('Failed to save image');
     } finally {
