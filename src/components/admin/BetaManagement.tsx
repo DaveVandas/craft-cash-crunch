@@ -289,10 +289,24 @@ const BetaManagement = () => {
                 </div>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                {recipientEmail && (
+                  <Button 
+                    asChild
+                    className="flex-1"
+                  >
+                    <a 
+                      href={`mailto:${recipientEmail}?subject=${encodeURIComponent("You're Invited to Beta Test Wealth Perspective! 🎉")}&body=${encodeURIComponent(newInvite.message)}`}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Email to {recipientName || recipientEmail}
+                    </a>
+                  </Button>
+                )}
                 <Button 
+                  variant={recipientEmail ? "outline" : "default"}
                   onClick={() => copyToClipboard(newInvite.message, 'Full message')}
-                  className="flex-1"
+                  className={recipientEmail ? "" : "flex-1"}
                 >
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Full Message
