@@ -1,4 +1,4 @@
-import { useState, RefObject } from 'react';
+import { useState, useRef, useCallback, RefObject } from 'react';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 
@@ -92,6 +92,7 @@ const copyToClipboardRobust = async (text: string): Promise<boolean> => {
     return false;
   }
 };
+
 export const useShareCard = ({
   cardRef,
   shareText,
@@ -100,8 +101,10 @@ export const useShareCard = ({
   title = 'Wealth Perspective',
 }: UseShareCardOptions) => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isPreGenerating, setIsPreGenerating] = useState(false);
+  const preGeneratedImageRef = useRef<{ blob: Blob; file: File } | null>(null);
 
-  const generateCardImage = async (): Promise<Blob | null> => {
+  const generateCardImage = useCallback(async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;
 
     try {
@@ -133,7 +136,32 @@ export const useShareCard = ({
       console.error('Failed to generate image:', err);
       return null;
     }
-  };
+  }, [cardRef]);
+
+  // Pre-generate image when menu opens for instant "Save to Photos"
+  const handleMenuOpen = useCallback(async () => {
+    // Don't re-generate if we already have one
+    if (preGeneratedImageRef.current || isPreGenerating) return;
+    
+    setIsPreGenerating(true);
+    try {
+      const blob = await generateCardImage();
+      if (blob) {
+        const filename = `${imageName}.jpg`;
+        const file = new File([blob], filename, { type: 'image/jpeg' });
+        preGeneratedImageRef.current = { blob, file };
+      }
+    } catch (err) {
+      console.error('Pre-generation failed:', err);
+    } finally {
+      setIsPreGenerating(false);
+    }
+  }, [generateCardImage, imageName, isPreGenerating]);
+
+  // Clear pre-generated image (call when card content changes)
+  const clearPreGeneratedImage = useCallback(() => {
+    preGeneratedImageRef.current = null;
+  }, []);
 
   // Download fallback - works on all platforms
   const triggerDownload = (blob: Blob, filename: string) => {
@@ -197,38 +225,50 @@ export const useShareCard = ({
     setIsGeneratingImage(true);
 
     try {
-      const imageBlob = await generateCardImage();
+      // Use pre-generated image if available, otherwise generate now
+      let imageBlob: Blob | null = preGeneratedImageRef.current?.blob ?? null;
+      let file: File | null = preGeneratedImageRef.current?.file ?? null;
+      
       if (!imageBlob) {
-        toast.error('Failed to generate image');
-        return;
+        imageBlob = await generateCardImage();
+        if (!imageBlob) {
+          toast.error('Failed to generate image');
+          return;
+        }
+        const filename = `${imageName}.jpg`;
+        file = new File([imageBlob], filename, { type: 'image/jpeg' });
       }
 
-      const filename = `${imageName}.jpg`;
-      const file = new File([imageBlob], filename, { type: 'image/jpeg' });
-
-      // Prefer native share sheet on mobile (this is the only reliable way to "Save to Photos")
-      if (navigator.share) {
+      // ALWAYS try native share sheet first on mobile - this is the only way to "Save to Photos"
+      if (navigator.share && file) {
         try {
           await navigator.share({
             title,
             files: [file],
           });
+          // Clear pre-generated after successful share
+          preGeneratedImageRef.current = null;
           return;
         } catch (err) {
-          if ((err as Error).name === 'AbortError') return;
-          // continue to fallbacks
+          if ((err as Error).name === 'AbortError') {
+            // User cancelled - don't clear, they might try again
+            return;
+          }
+          // Share failed, continue to fallback
           console.log('Native share failed, falling back:', err);
         }
       }
 
-      // Fallback: trigger download / open
+      // Fallback: trigger download
+      const filename = `${imageName}.jpg`;
       triggerDownload(imageBlob, filename);
+      preGeneratedImageRef.current = null;
       
       if (isMobile()) {
         if (isIOS()) {
-          toast.success('Image downloaded!', {
-            description: 'Find it in Files app → Downloads, then save to Photos',
-            duration: 5000,
+          toast.info('Image saved to Files', {
+            description: 'To save to Photos: Open Files app → Downloads → Tap image → Tap share icon → "Save Image"',
+            duration: 8000,
           });
         } else {
           toast.success('Image downloaded!', {
@@ -252,28 +292,33 @@ export const useShareCard = ({
     setIsGeneratingImage(true);
     
     try {
-      // First try to generate the image
-      const imageBlob = await generateCardImage();
+      // Use pre-generated image if available
+      let imageBlob: Blob | null = preGeneratedImageRef.current?.blob ?? null;
+      let file: File | null = preGeneratedImageRef.current?.file ?? null;
+      
+      if (!imageBlob) {
+        imageBlob = await generateCardImage();
+        if (imageBlob) {
+          file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
+        }
+      }
       
       // Mobile: try native share
       if (navigator.share) {
         // Try with image first
-        if (imageBlob) {
-          const file = new File([imageBlob], `${imageName}.jpg`, { type: 'image/jpeg' });
-          
-          if (await canShareFiles(file)) {
-            try {
-              await navigator.share({
-                title,
-                text: shareText,
-                files: [file],
-              });
-              return; // Success
-            } catch (err) {
-              if ((err as Error).name === 'AbortError') return;
-              // Continue to try without file
-              console.log('Share with file failed, trying without:', err);
-            }
+        if (file && await canShareFiles(file)) {
+          try {
+            await navigator.share({
+              title,
+              text: shareText,
+              files: [file],
+            });
+            preGeneratedImageRef.current = null;
+            return; // Success
+          } catch (err) {
+            if ((err as Error).name === 'AbortError') return;
+            // Continue to try without file
+            console.log('Share with file failed, trying without:', err);
           }
         }
         
@@ -317,7 +362,13 @@ export const useShareCard = ({
   const handleInstagramShare = async () => {
     setIsGeneratingImage(true);
     try {
-      const blob = await generateCardImage();
+      // Use pre-generated image if available
+      let blob: Blob | null = preGeneratedImageRef.current?.blob ?? null;
+      
+      if (!blob) {
+        blob = await generateCardImage();
+      }
+      
       if (!blob) {
         toast.error('Failed to generate image');
         return;
@@ -325,6 +376,7 @@ export const useShareCard = ({
       
       const filename = `${imageName}.jpg`;
       triggerDownload(blob, filename);
+      preGeneratedImageRef.current = null;
       
       toast.success('Card saved!', {
         description: 'Open Instagram → Stories → Select the image from your gallery',
@@ -340,7 +392,13 @@ export const useShareCard = ({
   const handleTikTokShare = async () => {
     setIsGeneratingImage(true);
     try {
-      const blob = await generateCardImage();
+      // Use pre-generated image if available
+      let blob: Blob | null = preGeneratedImageRef.current?.blob ?? null;
+      
+      if (!blob) {
+        blob = await generateCardImage();
+      }
+      
       if (!blob) {
         toast.error('Failed to generate image');
         return;
@@ -348,6 +406,7 @@ export const useShareCard = ({
       
       const filename = `${imageName}.jpg`;
       triggerDownload(blob, filename);
+      preGeneratedImageRef.current = null;
       
       toast.success('Card saved!', {
         description: 'Open TikTok → Create → Add the image from your gallery',
@@ -362,6 +421,9 @@ export const useShareCard = ({
 
   return {
     isGeneratingImage,
+    isPreGenerating,
+    handleMenuOpen,
+    clearPreGeneratedImage,
     handleCopyLink,
     handleTwitterShare,
     handleFacebookShare,

@@ -46,6 +46,8 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
 
   const {
     isGeneratingImage,
+    isPreGenerating,
+    handleMenuOpen,
     handleCopyLink,
     handleTwitterShare,
     handleFacebookShare,
@@ -339,6 +341,8 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
           {/* Share Menu Dropdown */}
           <ShareMenuDropdown
             isGeneratingImage={isGeneratingImage}
+            isPreGenerating={isPreGenerating}
+            onMenuOpen={handleMenuOpen}
             onTextShare={handleTextShare}
             onWhatsAppShare={handleWhatsAppShare}
             onTwitterShare={handleTwitterShare}

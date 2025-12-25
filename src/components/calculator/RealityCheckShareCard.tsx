@@ -213,11 +213,11 @@ const RealityCheckShareCard = ({
       const filename = `reality-check-${celebrityName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
       const file = new File([imageBlob], filename, { type: 'image/jpeg' });
 
-      // Try native share API with file
-      if (await canShareFiles(file)) {
+      // ALWAYS try native share sheet first - this is the only way to "Save to Photos"
+      if (navigator.share) {
         try {
-          await navigator.share({ files: [file] });
-          return; // Success
+          await navigator.share({ title: 'Reality Check', files: [file] });
+          return;
         } catch (err) {
           if ((err as Error).name === 'AbortError') return;
           console.log('Share API failed, falling back to download:', err);
@@ -229,9 +229,9 @@ const RealityCheckShareCard = ({
       
       if (isMobile()) {
         if (isIOS()) {
-          toast.success('Image downloaded!', {
-            description: 'Find it in Files app → Downloads, then save to Photos',
-            duration: 5000,
+          toast.info('Image saved to Files', {
+            description: 'To save to Photos: Open Files app → Downloads → Tap image → Tap share icon → "Save Image"',
+            duration: 8000,
           });
         } else {
           toast.success('Image downloaded!', {

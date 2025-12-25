@@ -77,6 +77,8 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
 
   const {
     isGeneratingImage,
+    isPreGenerating,
+    handleMenuOpen,
     handleCopyLink,
     handleTwitterShare,
     handleFacebookShare,
@@ -326,6 +328,8 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
       {/* Share Menu */}
       <ShareMenuDropdown
         isGeneratingImage={isGeneratingImage}
+        isPreGenerating={isPreGenerating}
+        onMenuOpen={handleMenuOpen}
         onTextShare={handleTextShare}
         onWhatsAppShare={handleWhatsAppShare}
         onTwitterShare={handleTwitterShare}
