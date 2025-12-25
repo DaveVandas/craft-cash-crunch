@@ -80,11 +80,17 @@ export function getSimilarCelebrities(
   limit: number = 4
 ): SimilarCelebrity[] {
   const celebrities = categorySpotlights[category] || categorySpotlights.hollywood;
+  const normalizedCurrent = currentName.toLowerCase().trim();
   
-  // Filter out current celebrity and return random selection
-  const filtered = celebrities.filter(
-    c => c.name.toLowerCase() !== currentName.toLowerCase()
-  );
+  // Filter out current celebrity - check both exact match and partial matches
+  // to handle cases like "Robyn Rihanna Fenty" vs "Rihanna"
+  const filtered = celebrities.filter(c => {
+    const normalizedSuggestion = c.name.toLowerCase().trim();
+    // Exclude if exact match, or if one name contains the other
+    return normalizedSuggestion !== normalizedCurrent &&
+           !normalizedSuggestion.includes(normalizedCurrent) &&
+           !normalizedCurrent.includes(normalizedSuggestion);
+  });
   
   // Shuffle and return limited results
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
