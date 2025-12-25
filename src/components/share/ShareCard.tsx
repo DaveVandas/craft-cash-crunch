@@ -26,8 +26,11 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
   const comparisons = generateComparisons(celebrity.annualEarnings);
   const dramaticComparison = getMostDramaticComparison(celebrity.annualEarnings);
   
-  const handleSuggestionClick = (slug: string) => {
-    navigate(`/profile/${slug}`);
+  const handleSuggestionClick = (slug: string, previewData: { name: string; netWorth: string; hourlyEarnings: string; emoji: string }) => {
+    // Pass preview data via navigation state for instant display
+    navigate(`/profile/${slug}`, { 
+      state: { preview: previewData }
+    });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
   
@@ -362,7 +365,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               {getSimilarCelebrities(celebrity.name, celebrity.category, 4).map((similar) => (
                 <button
                   key={similar.name}
-                  onClick={() => handleSuggestionClick(nameToSlug(similar.name))}
+                  onClick={() => handleSuggestionClick(nameToSlug(similar.name), similar)}
                   className="px-3 py-1.5 text-sm text-foreground border border-border/60 rounded-full hover:border-primary/60 hover:text-primary transition-colors"
                 >
                   {similar.name}
