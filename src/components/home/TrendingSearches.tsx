@@ -1,10 +1,39 @@
-import { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, Flame, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { nameToSlug } from '@/lib/validation';
 import { supabase } from '@/integrations/supabase/client';
+import { Celebrity, Category } from '@/lib/types';
+
+// Parse currency strings like "$1.2B" or "$14,000/hr"
+const parseCurrencyString = (str: string): number => {
+  const cleaned = str.replace(/[^0-9.BMK]/gi, '');
+  const num = parseFloat(cleaned) || 0;
+  if (str.includes('B')) return num * 1_000_000_000;
+  if (str.includes('M')) return num * 1_000_000;
+  if (str.includes('K')) return num * 1_000;
+  return num;
+};
+
+const parseHourlyToAnnual = (str: string): number => {
+  const hourly = parseCurrencyString(str.replace('/hr', ''));
+  return hourly * 2080; // ~40hrs/week * 52 weeks
+};
+
+const categoryToType = (cat?: string): Category => {
+  if (!cat) return 'hollywood';
+  const map: Record<string, Category> = {
+    Athletes: 'athletes',
+    Musicians: 'musicians',
+    'Tech Billionaires': 'tech-billionaires',
+    Hollywood: 'hollywood',
+    Influencers: 'influencers',
+    Historical: 'historical',
+  };
+  return map[cat] || 'hollywood';
+};
 
 // Category to gradient and emoji mapping
 const categoryStyles: Record<string, { gradient: string; emoji: string }> = {
@@ -117,6 +146,7 @@ function formatSearchCount(count: number): string {
 }
 
 const TrendingSearches = () => {
+  const navigate = useNavigate();
   const [realTrends, setRealTrends] = useState<TrendingItem[]>([]);
   const [spotlightCategory, setSpotlightCategory] = useState<string>('');
   const [spotlightItems, setSpotlightItems] = useState<TrendingItem[]>([]);
@@ -212,6 +242,24 @@ const TrendingSearches = () => {
   // Display featured celebrities (10 on desktop, 5 on mobile)
   const displayItems: TrendingItem[] = spotlightItems;
 
+  // Navigate with prefetched celebrity data for instant loading
+  const handleNavigate = useCallback((person: TrendingItem) => {
+    const netWorth = parseCurrencyString(person.netWorth || '$0');
+    const annualEarnings = parseHourlyToAnnual(person.hourlyEarnings || '$0/hr');
+
+    const celebrity: Celebrity = {
+      id: nameToSlug(person.name),
+      name: person.name,
+      profession: person.category || 'Celebrity',
+      category: categoryToType(person.category),
+      netWorth,
+      annualEarnings,
+      source: 'Trending data',
+    };
+
+    navigate(`/profile/${nameToSlug(person.name)}`, { state: { celebrity } });
+  }, [navigate]);
+
   return (
     <div className="w-full">
       {/* Mobile: Card layout */}
@@ -241,10 +289,10 @@ const TrendingSearches = () => {
             ) : (
               <div className="flex flex-col gap-2">
                 {displayItems.map((person, index) => (
-                  <Link
+                  <button
                     key={`${person.name}-${index}`}
-                    to={`/profile/${nameToSlug(person.name)}`}
-                    className="flex items-center justify-between gap-3 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group"
+                    onClick={() => handleNavigate(person)}
+                    className="flex items-center justify-between gap-3 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 border border-border/30 hover:border-primary/30 transition-all group w-full text-left"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground font-mono text-sm w-4">
@@ -260,7 +308,7 @@ const TrendingSearches = () => {
                     <Badge variant="secondary" className="text-xs">
                       {person.searches}
                     </Badge>
-                  </Link>
+                  </button>
                 ))}
               </div>
             )}
@@ -293,10 +341,10 @@ const TrendingSearches = () => {
               ) : (
                 // Duplicate items for seamless infinite scroll
                 [...displayItems, ...displayItems].map((person, index) => (
-                  <Link
+                  <button
                     key={`${person.name}-${index}`}
-                    to={`/profile/${nameToSlug(person.name)}`}
-                    className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/30 hover:from-primary/20 hover:to-primary/10 border border-border/50 transition-all group shrink-0 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] overflow-hidden"
+                    onClick={() => handleNavigate(person)}
+                    className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/30 hover:from-primary/20 hover:to-primary/10 border border-border/50 transition-all group shrink-0 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] overflow-hidden text-left"
                   >
                     {/* Gold shimmer border on hover */}
                     <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -327,7 +375,7 @@ const TrendingSearches = () => {
                         <span className="text-foreground/60">{person.hourlyEarnings}</span>
                       </div>
                     </div>
-                  </Link>
+                  </button>
                 ))
               )}
             </div>
