@@ -50,26 +50,22 @@ export const FeaturedCelebrityProvider = ({ children }: { children: ReactNode })
 
   const goToNext = useCallback(() => {
     setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % featuredPeople.length);
-      setIsTransitioning(false);
-    }, 150);
+    setCurrentIndex((prev) => (prev + 1) % featuredPeople.length);
+    window.setTimeout(() => setIsTransitioning(false), 150);
   }, []);
 
   const goToPrev = useCallback(() => {
     setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(prev => (prev - 1 + featuredPeople.length) % featuredPeople.length);
-      setIsTransitioning(false);
-    }, 150);
+    setCurrentIndex((prev) => (prev - 1 + featuredPeople.length) % featuredPeople.length);
+    window.setTimeout(() => setIsTransitioning(false), 150);
   }, []);
 
   const goToIndex = useCallback((index: number) => {
     setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsTransitioning(false);
-    }, 150);
+    const len = featuredPeople.length;
+    const next = ((index % len) + len) % len;
+    setCurrentIndex(next);
+    window.setTimeout(() => setIsTransitioning(false), 150);
   }, []);
 
   // Auto-rotate every 30 seconds

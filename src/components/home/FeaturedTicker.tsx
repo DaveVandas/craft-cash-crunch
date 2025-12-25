@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
 import { formatLargeCurrency } from '@/lib/earnings';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { featuredPeople, FeaturedPerson } from '@/contexts/FeaturedCelebrityContext';
+import { featuredPeople, FeaturedPerson, useFeaturedCelebrity } from '@/contexts/FeaturedCelebrityContext';
 
 const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
   const { currentEarnings, breakdown } = useEarningsTicker({
@@ -138,9 +137,11 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
 };
 
 const FeaturedTicker = () => {
+  const { currentIndex, goToIndex } = useFeaturedCelebrity();
+
   const [isNavigating, setIsNavigating] = useState(false);
   const navTimeoutRef = useRef<number | null>(null);
-  const initialIndexRef = useRef(Math.floor(Math.random() * featuredPeople.length));
+  const initialIndexRef = useRef(currentIndex);
 
   const emblaOptions = useMemo(
     () => ({
@@ -148,17 +149,14 @@ const FeaturedTicker = () => {
       skipSnaps: false,
       slidesToScroll: 1,
       startIndex: initialIndexRef.current,
-      // Higher = slower animation (but keep it snappy)
+      // Keep it smooth but not "floaty"
       duration: 60,
       dragFree: false,
     }),
     []
   );
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    emblaOptions,
-    [Autoplay({ delay: 30000, stopOnInteraction: true, stopOnMouseEnter: true })]
-  );
+  const [emblaRef, emblaApi] = useEmblaCarousel(emblaOptions);
 
   const clearNavLock = useCallback(() => {
     if (navTimeoutRef.current) {
@@ -186,13 +184,33 @@ const FeaturedTicker = () => {
     };
   }, []);
 
-  const resetAutoplay = useCallback(() => {
-    // Autoplay doesn't always treat external nav buttons as "interaction".
-    // Reset the timer so it won't auto-advance right after a manual click.
-    const plugins = (emblaApi?.plugins?.() ?? {}) as Record<string, any>;
-    const autoplay = plugins.autoplay;
-    autoplay?.reset?.();
-  }, [emblaApi]);
+  // Keep the top "Featured" spotlight and carousel in sync (user swipes/clicks)
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      const selected = emblaApi.selectedScrollSnap();
+      if (selected !== currentIndex) {
+        goToIndex(selected);
+      }
+    };
+
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, currentIndex, goToIndex]);
+
+  // When the spotlight auto-rotates, scroll the carousel to match.
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (emblaApi.selectedScrollSnap() !== currentIndex) {
+      emblaApi.scrollTo(currentIndex);
+    }
+  }, [emblaApi, currentIndex]);
 
   const lockWithFailsafe = useCallback(() => {
     setIsNavigating(true);
@@ -207,17 +225,15 @@ const FeaturedTicker = () => {
 
   const scrollPrev = useCallback(() => {
     if (!emblaApi || isNavigating) return;
-    resetAutoplay();
     lockWithFailsafe();
     emblaApi.scrollPrev();
-  }, [emblaApi, isNavigating, lockWithFailsafe, resetAutoplay]);
+  }, [emblaApi, isNavigating, lockWithFailsafe]);
 
   const scrollNext = useCallback(() => {
     if (!emblaApi || isNavigating) return;
-    resetAutoplay();
     lockWithFailsafe();
     emblaApi.scrollNext();
-  }, [emblaApi, isNavigating, lockWithFailsafe, resetAutoplay]);
+  }, [emblaApi, isNavigating, lockWithFailsafe]);
 
   return (
     <div className="relative">
