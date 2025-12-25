@@ -1,11 +1,12 @@
 import { useFeaturedCelebrity } from '@/contexts/FeaturedCelebrityContext';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Star, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Celebrity } from '@/lib/types';
 
 const DailyCelebritySpotlight = () => {
+  const navigate = useNavigate();
   const { featured, isTransitioning } = useFeaturedCelebrity();
 
   // Prefetch minimal celebrity data so Profile can render instantly (no skeleton flash)
@@ -20,9 +21,14 @@ const DailyCelebritySpotlight = () => {
     source: 'Featured data',
   };
 
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    navigate(`/profile/${featured.id}`, { state: { celebrity: prefetchedCelebrity } });
+  };
+
   return (
     <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-card to-primary/5">
-      <Link to={`/profile/${featured.id}`} state={{ celebrity: prefetchedCelebrity }} className="block px-4 py-2.5">
+      <button onClick={handleClick} className="block w-full px-4 py-2.5 text-left">
         <div
           className={`flex items-center gap-3 transition-all duration-150 ${
             isTransitioning ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
@@ -55,7 +61,7 @@ const DailyCelebritySpotlight = () => {
             </Button>
           </div>
         </div>
-      </Link>
+      </button>
     </Card>
   );
 };

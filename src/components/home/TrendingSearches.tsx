@@ -246,9 +246,10 @@ const TrendingSearches = () => {
   const handleNavigate = useCallback((person: TrendingItem) => {
     const netWorth = parseCurrencyString(person.netWorth || '$0');
     const annualEarnings = parseHourlyToAnnual(person.hourlyEarnings || '$0/hr');
+    const slug = nameToSlug(person.name);
 
     const celebrity: Celebrity = {
-      id: nameToSlug(person.name),
+      id: slug,
       name: person.name,
       profession: person.category || 'Celebrity',
       category: categoryToType(person.category),
@@ -257,7 +258,8 @@ const TrendingSearches = () => {
       source: 'Trending data',
     };
 
-    navigate(`/profile/${nameToSlug(person.name)}`, { state: { celebrity } });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    navigate(`/profile/${slug}`, { state: { celebrity } });
   }, [navigate]);
 
   return (
