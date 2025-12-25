@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Copy, MessageCircle, Loader2 } from 'lucide-react';
+import { Share2, Image, Copy, MessageCircle, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -119,8 +119,8 @@ const ShareMenuDropdown = ({
             <span className="ml-2">TikTok</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onSaveImage} className="cursor-pointer">
-            <Download className="h-4 w-4" />
-            <span className="ml-2">Save Image</span>
+            <Image className="h-4 w-4" />
+            <span className="ml-2">Save to Photos</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onCopyLink} className="cursor-pointer">
             <Copy className="h-4 w-4" />
