@@ -64,7 +64,7 @@ const BetaManagement = () => {
   const [recipientEmail, setRecipientEmail] = useState('');
   const [recipientName, setRecipientName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [newInvite, setNewInvite] = useState<{ link: string; message: string } | null>(null);
+  const [newInvite, setNewInvite] = useState<{ link: string; message: string; email?: string; name?: string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -107,6 +107,8 @@ const BetaManagement = () => {
       setNewInvite({
         link: data.inviteLink,
         message: data.inviteMessage,
+        email: recipientEmail || undefined,
+        name: recipientName || undefined,
       });
 
       setRecipientEmail('');
@@ -290,23 +292,23 @@ const BetaManagement = () => {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                {recipientEmail && (
+                {newInvite.email && (
                   <Button 
                     asChild
                     className="flex-1"
                   >
                     <a 
-                      href={`mailto:${recipientEmail}?subject=${encodeURIComponent("You're Invited to Beta Test Wealth Perspective! 🎉")}&body=${encodeURIComponent(newInvite.message)}`}
+                      href={`mailto:${newInvite.email}?subject=${encodeURIComponent("You're Invited to Beta Test Wealth Perspective! 🎉")}&body=${encodeURIComponent(newInvite.message)}`}
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      Send Email to {recipientName || recipientEmail}
+                      Send Email to {newInvite.name || newInvite.email}
                     </a>
                   </Button>
                 )}
                 <Button 
-                  variant={recipientEmail ? "outline" : "default"}
+                  variant={newInvite.email ? "outline" : "default"}
                   onClick={() => copyToClipboard(newInvite.message, 'Full message')}
-                  className={recipientEmail ? "" : "flex-1"}
+                  className={newInvite.email ? "" : "flex-1"}
                 >
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Full Message
