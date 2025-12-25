@@ -204,9 +204,49 @@ function getProfessionEmoji(profession: string): string {
   return '⭐'; // Default star for general celebrities
 }
 
+// Map legal names to stage names for better Wikipedia matching
+const STAGE_NAME_MAPPINGS: Record<string, string[]> = {
+  'robyn rihanna fenty': ['Rihanna'],
+  'aubrey drake graham': ['Drake'],
+  'shawn corey carter': ['Jay-Z', 'Jay Z'],
+  'onika tanya maraj': ['Nicki Minaj'],
+  'stefani joanne angelina germanotta': ['Lady Gaga'],
+  'belcalis marlenis almánzar': ['Cardi B'],
+  'dwayne michael carter': ['Lil Wayne'],
+  'marshall bruce mathers': ['Eminem'],
+  'calvin cordozar broadus': ['Snoop Dogg'],
+  'peter gene hernandez': ['Bruno Mars'],
+  'alecia beth moore': ['Pink', 'P!nk'],
+  'brian hugh warner': ['Marilyn Manson'],
+  'reginald kenneth dwight': ['Elton John'],
+  'gordon matthew thomas sumner': ['Sting'],
+  'declan patrick macmanus': ['Elvis Costello'],
+  'eric marlon bishop': ['Jamie Foxx'],
+  'demetria devonne lovato': ['Demi Lovato'],
+  'elizabeth woolridge grant': ['Lana Del Rey'],
+  'abel makkonen tesfaye': ['The Weeknd'],
+  'radric delantic davis': ['Gucci Mane'],
+  'nayvadius demun wilburn': ['Future'],
+  'amala ratna zandile dlamini': ['Doja Cat'],
+  'melissa viviane jefferson': ['Lizzo'],
+  'montero lamar hill': ['Lil Nas X'],
+  'tahliah debrett barnett': ['FKA Twigs'],
+  'robyn fenty': ['Rihanna'],
+};
+
+// Get stage names for a celebrity
+function getStageNames(name: string): string[] {
+  const lower = name.toLowerCase().trim();
+  return STAGE_NAME_MAPPINGS[lower] || [];
+}
+
 // Generate smart search variants for better Wikipedia matching
 function generateSearchVariants(name: string, profession?: string): string[] {
   const variants: string[] = [name];
+  
+  // Add stage names at the FRONT (most likely to work)
+  const stageNames = getStageNames(name);
+  variants.unshift(...stageNames);
   
   // Remove periods
   const noPeriods = name.replace(/\./g, '');
