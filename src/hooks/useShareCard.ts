@@ -36,6 +36,62 @@ const canShareFiles = async (file: File): Promise<boolean> => {
   }
 };
 
+// Robust clipboard copy that works on mobile Safari
+const copyToClipboardRobust = async (text: string): Promise<boolean> => {
+  // Method 1: Modern Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fall through to legacy method
+    }
+  }
+
+  // Method 2: Legacy execCommand with proper focus handling for mobile Safari
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    
+    // Make it invisible but still selectable
+    textArea.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 2em;
+      height: 2em;
+      padding: 0;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      background: transparent;
+      font-size: 16px;
+    `;
+    
+    document.body.appendChild(textArea);
+    
+    // iOS-specific handling
+    if (isIOS()) {
+      const range = document.createRange();
+      range.selectNodeContents(textArea);
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      textArea.setSelectionRange(0, text.length);
+    } else {
+      textArea.focus();
+      textArea.select();
+    }
+    
+    const success = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return success;
+  } catch {
+    return false;
+  }
+};
 export const useShareCard = ({
   cardRef,
   shareText,
@@ -235,27 +291,16 @@ export const useShareCard = ({
         }
       }
       
-      // Desktop/fallback: copy to clipboard
-      try {
-        await navigator.clipboard.writeText(shareText + '\n' + shareUrl);
+      // Desktop/fallback: copy to clipboard using robust method
+      const textToCopy = shareText + '\n' + shareUrl;
+      const copied = await copyToClipboardRobust(textToCopy);
+      
+      if (copied) {
         toast.success('Copied to clipboard!', {
           description: 'Paste it in your text message',
         });
-      } catch {
-        // Final fallback
-        const textArea = document.createElement('textarea');
-        textArea.value = shareText + '\n' + shareUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          toast.success('Copied to clipboard!');
-        } catch {
-          toast.error('Could not share. Please copy the link manually.');
-        }
-        document.body.removeChild(textArea);
+      } else {
+        toast.error('Could not copy. Try long-pressing to select and copy the link.');
       }
     } catch (err) {
       console.error('handleTextShare error:', err);
