@@ -127,28 +127,58 @@ const TrendingSearches = () => {
   // No longer using JS-based scroll - using CSS animation instead
 
   useEffect(() => {
-    // Rotate category based on current hour
-    const hourIndex = new Date().getHours() % categories.length;
-    const currentCategory = categories[hourIndex];
-    setSpotlightCategory(currentCategory);
-
-    // Get 5 featured items from spotlight category (shuffled by hour)
-    const allSpotlight = categorySpotlights[currentCategory];
-    const hourSeed = new Date().getHours() + new Date().getDate();
-    const shuffledSpotlight = [...allSpotlight].sort((a, b) => {
-      const hashA = a.name.charCodeAt(0) * hourSeed;
-      const hashB = b.name.charCodeAt(0) * hourSeed;
-      return (hashA % 100) - (hashB % 100);
+    // Create a diverse mix from ALL categories (not just one)
+    const hourSeed = new Date().getHours() + new Date().getDate() + new Date().getMinutes();
+    
+    // Collect celebrities from all categories with their category info
+    // Weight modern categories higher (less Historical)
+    const categoryWeights: Record<string, number> = {
+      Athletes: 3,
+      Musicians: 3,
+      'Tech Billionaires': 2,
+      Hollywood: 3,
+      Influencers: 3,
+      Historical: 1, // Lower weight - still included but less frequently
+    };
+    
+    const allCelebrities: (CelebrityData & { category: string })[] = [];
+    categories.forEach((cat) => {
+      const weight = categoryWeights[cat] || 1;
+      const celebs = categorySpotlights[cat];
+      // Add celebrities based on weight
+      for (let i = 0; i < weight; i++) {
+        celebs.forEach((celeb) => {
+          allCelebrities.push({ ...celeb, category: cat });
+        });
+      }
     });
-    const featuredItems = shuffledSpotlight.slice(0, 10).map((item) => ({
-      name: item.name,
-      searches: 'Featured',
-      hot: item.hot || false,
-      category: currentCategory,
-      netWorth: item.netWorth,
-      hourlyEarnings: item.hourlyEarnings,
-    }));
-    setSpotlightItems(featuredItems);
+    
+    // Shuffle all celebrities
+    const shuffled = [...allCelebrities].sort((a, b) => {
+      const hashA = (a.name.charCodeAt(0) + a.name.charCodeAt(1)) * hourSeed;
+      const hashB = (b.name.charCodeAt(0) + b.name.charCodeAt(1)) * hourSeed;
+      return (hashA % 1000) - (hashB % 1000);
+    });
+    
+    // Remove duplicates (keep first occurrence) and pick 10
+    const seen = new Set<string>();
+    const uniqueItems: TrendingItem[] = [];
+    for (const item of shuffled) {
+      if (!seen.has(item.name) && uniqueItems.length < 10) {
+        seen.add(item.name);
+        uniqueItems.push({
+          name: item.name,
+          searches: 'Featured',
+          hot: item.hot || false,
+          category: item.category,
+          netWorth: item.netWorth,
+          hourlyEarnings: item.hourlyEarnings,
+        });
+      }
+    }
+    
+    setSpotlightCategory('Mixed'); // Show "Mixed" instead of single category
+    setSpotlightItems(uniqueItems);
     setLoading(false);
 
     // Optionally fetch top 1 real trend (but we won't prioritize it)
