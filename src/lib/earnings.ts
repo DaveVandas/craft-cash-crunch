@@ -162,11 +162,33 @@ export const calculateTimeToEarn = (amount: number, annualEarnings: number): str
   return `${(seconds / 31536000).toFixed(1)} years`;
 };
 
-// Get the single most dramatic comparison for Flex Mode
+// Get the single most dramatic comparison for Flex Mode (5-year empire)
 export const getMostDramaticComparison = (annualEarnings: number): EnhancedComparison | null => {
-  const comparisons = generateMogulComparisons(annualEarnings);
-  if (comparisons.length === 0) return null;
+  const fiveYearEarnings = annualEarnings * 5;
+  const breakdown = calculateEarningsBreakdown(fiveYearEarnings);
   
-  // Pick the yearly one for max drama, or the highest quantity available
-  return comparisons.find(c => c.period === 'year') || comparisons[comparisons.length - 1];
+  // Use the year-tier items but with 5 years of earnings for max drama
+  const eliteItems = mogulItems.year;
+  
+  let bestItem = null;
+  let bestScore = 0;
+  
+  for (const item of eliteItems) {
+    const quantity = Math.floor(fiveYearEarnings / item.price);
+    if (quantity >= 1) {
+      // Prefer impressive but believable quantities
+      const score = Math.min(quantity, 20) * (item.price / 1000000);
+      if (score > bestScore) {
+        bestScore = score;
+        bestItem = {
+          ...item,
+          quantity,
+          timeframe: 'In 5 years',
+          period: 'year' as const,
+        };
+      }
+    }
+  }
+  
+  return bestItem;
 };
