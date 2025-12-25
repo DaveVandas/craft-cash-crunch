@@ -7,6 +7,7 @@ import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
 import DailyWealthFact from '@/components/home/DailyWealthFact';
 import WealthWisdomPromo from '@/components/home/WealthWisdomPromo';
+import RichHabits from '@/components/home/RichHabits';
 import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
@@ -54,6 +55,11 @@ const Index = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <QuickActions />
           </div>
+        </section>
+
+        {/* Rich Habits Quote */}
+        <section className="container mb-8">
+          <RichHabits />
         </section>
 
         {/* Wealth Wisdom Promo */}
