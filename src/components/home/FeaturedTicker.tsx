@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
@@ -139,55 +139,85 @@ const FeaturedSlide = ({ person }: { person: FeaturedPerson }) => {
 
 const FeaturedTicker = () => {
   const [isNavigating, setIsNavigating] = useState(false);
+  const navTimeoutRef = useRef<number | null>(null);
+  const initialIndexRef = useRef(Math.floor(Math.random() * featuredPeople.length));
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
+  const emblaOptions = useMemo(
+    () => ({
       loop: true,
       skipSnaps: false,
       slidesToScroll: 1,
-      startIndex: Math.floor(Math.random() * featuredPeople.length),
-      // Higher = slower animation (less "sporadic" feel)
-      duration: 140,
+      startIndex: initialIndexRef.current,
+      // Higher = slower animation (but keep it snappy)
+      duration: 60,
       dragFree: false,
-    },
+    }),
+    []
+  );
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    emblaOptions,
     [Autoplay({ delay: 30000, stopOnInteraction: true, stopOnMouseEnter: true })]
   );
+
+  const clearNavLock = useCallback(() => {
+    if (navTimeoutRef.current) {
+      window.clearTimeout(navTimeoutRef.current);
+      navTimeoutRef.current = null;
+    }
+    setIsNavigating(false);
+  }, []);
 
   useEffect(() => {
     if (!emblaApi) return;
 
-    const onSettle = () => setIsNavigating(false);
-    emblaApi.on('settle', onSettle);
-    emblaApi.on('reInit', onSettle);
+    emblaApi.on('settle', clearNavLock);
+    emblaApi.on('reInit', clearNavLock);
 
     return () => {
-      emblaApi.off('settle', onSettle);
-      emblaApi.off('reInit', onSettle);
+      emblaApi.off('settle', clearNavLock);
+      emblaApi.off('reInit', clearNavLock);
     };
-  }, [emblaApi]);
+  }, [emblaApi, clearNavLock]);
+
+  useEffect(() => {
+    return () => {
+      if (navTimeoutRef.current) window.clearTimeout(navTimeoutRef.current);
+    };
+  }, []);
 
   const resetAutoplay = useCallback(() => {
     // Autoplay doesn't always treat external nav buttons as "interaction".
-    // Reset/stop here to prevent an extra auto-advance right after a manual click.
+    // Reset the timer so it won't auto-advance right after a manual click.
     const plugins = (emblaApi?.plugins?.() ?? {}) as Record<string, any>;
     const autoplay = plugins.autoplay;
     autoplay?.reset?.();
-    autoplay?.stop?.();
   }, [emblaApi]);
+
+  const lockWithFailsafe = useCallback(() => {
+    setIsNavigating(true);
+    if (navTimeoutRef.current) window.clearTimeout(navTimeoutRef.current);
+
+    // Never allow the UI to be stuck disabled if an event doesn't fire.
+    navTimeoutRef.current = window.setTimeout(() => {
+      navTimeoutRef.current = null;
+      setIsNavigating(false);
+    }, 900);
+  }, []);
 
   const scrollPrev = useCallback(() => {
     if (!emblaApi || isNavigating) return;
     resetAutoplay();
-    setIsNavigating(true);
+    lockWithFailsafe();
     emblaApi.scrollPrev();
-  }, [emblaApi, isNavigating, resetAutoplay]);
+  }, [emblaApi, isNavigating, lockWithFailsafe, resetAutoplay]);
 
   const scrollNext = useCallback(() => {
     if (!emblaApi || isNavigating) return;
     resetAutoplay();
-    setIsNavigating(true);
+    lockWithFailsafe();
     emblaApi.scrollNext();
-  }, [emblaApi, isNavigating, resetAutoplay]);
+  }, [emblaApi, isNavigating, lockWithFailsafe, resetAutoplay]);
 
   return (
     <div className="relative">
