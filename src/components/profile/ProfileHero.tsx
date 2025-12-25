@@ -81,7 +81,7 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
               {celebrity.profession}
             </p>
 
-            <div className="flex flex-wrap gap-6 mb-4">
+            <div className="flex flex-wrap gap-6 mb-2">
               <div>
                 <p className="text-sm text-muted-foreground">Net Worth</p>
                 <p className="text-2xl font-bold gradient-gold-text">
@@ -95,6 +95,12 @@ const ProfileHero = ({ celebrity }: ProfileHeroProps) => {
                 </p>
               </div>
             </div>
+            
+            {celebrity.source && (
+              <p className="text-xs text-muted-foreground/60 mb-4">
+                Source: {celebrity.source}
+              </p>
+            )}
 
             {celebrity.biggestDeal && (
               <div className="mb-6 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-amber-500/10 border border-primary/20">
