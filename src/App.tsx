@@ -27,6 +27,9 @@ import SideHustle from "./pages/SideHustle";
 import WealthWisdom from "./pages/WealthWisdom";
 import Trades from "./pages/Trades";
 import DebtDestroyer from "./pages/DebtDestroyer";
+import LandingVariantA from "./pages/landing/LandingVariantA";
+import LandingVariantB from "./pages/landing/LandingVariantB";
+import LandingVariantC from "./pages/landing/LandingVariantC";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +65,9 @@ const App = () => (
                   <Route path="/wealth-wisdom" element={<WealthWisdom />} />
                   <Route path="/trades" element={<Trades />} />
                   <Route path="/debt-destroyer" element={<DebtDestroyer />} />
+                  <Route path="/landing/a" element={<LandingVariantA />} />
+                  <Route path="/landing/b" element={<LandingVariantB />} />
+                  <Route path="/landing/c" element={<LandingVariantC />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
