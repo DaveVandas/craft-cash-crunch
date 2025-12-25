@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -9,7 +10,6 @@ import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency } from '@/lib/earnings';
 import { validateCelebrityName, sanitizeSearchQuery } from '@/lib/validation';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getAvatarEmoji } from '@/lib/avatar';
 
@@ -93,8 +93,9 @@ const Search = () => {
           </div>
 
           {searching && (
-            <div className="space-y-4">
-              <Skeleton className="h-32 w-full" />
+            <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Searching...</span>
             </div>
           )}
           {!searching && validationError && displayQuery && (
@@ -114,7 +115,7 @@ const Search = () => {
           )}
 
           {!searching && !validationError && result && (
-            <Link to={`/profile/${result.id}`}>
+            <Link to={`/profile/${result.id}`} state={{ celebrity: result }}>
               <Card className="border-primary/30 bg-card/50 hover:bg-card transition-colors cursor-pointer animate-fade-in">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">

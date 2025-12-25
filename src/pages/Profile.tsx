@@ -57,8 +57,10 @@ const Profile = () => {
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
 
-  // Get preview data from navigation state (from "You Might Also Like" clicks)
-  const preview = (location.state as { preview?: PreviewData })?.preview;
+  // Get preview or prefetched celebrity data from navigation state
+  const navState = (location.state ?? null) as { preview?: PreviewData; celebrity?: Celebrity } | null;
+  const preview = navState?.preview;
+  const prefetchedCelebrity = navState?.celebrity;
 
   // Create a preview celebrity for instant display while loading
   const previewCelebrity: Celebrity | null = preview ? {
@@ -77,30 +79,40 @@ const Profile = () => {
   const isUserBlocked = user && accessInfo && !accessInfo.hasAccess;
   const shouldBlock = isAnonBlocked || isUserBlocked;
 
-  // Reset celebrity when route changes to show preview immediately
+  // Reset celebrity when route changes.
+  // If we already have prefetched data (e.g. from /search), show it instantly.
   useEffect(() => {
-    setCelebrity(null);
     setValidationError(false);
-  }, [id]);
+
+    if (prefetchedCelebrity && prefetchedCelebrity.id === (id || '')) {
+      setCelebrity(prefetchedCelebrity);
+      return;
+    }
+
+    setCelebrity(null);
+  }, [id, prefetchedCelebrity]);
 
   useEffect(() => {
     // Don't fetch if blocked
     if (shouldBlock || authLoading) return;
-    
-    if (id) {
-      // Validate the URL parameter before making API call
-      const validatedName = slugToName(id);
 
-      if (!validatedName) {
-        setValidationError(true);
-        setCelebrity(null);
-        return;
-      }
+    // If we navigated here with already-fetched data (e.g. from /search), don't refetch.
+    if (prefetchedCelebrity && prefetchedCelebrity.id === (id || '')) return;
 
-      setValidationError(false);
-      fetchCelebrity(validatedName).then(setCelebrity);
+    if (!id) return;
+
+    // Validate the URL parameter before making API call
+    const validatedName = slugToName(id);
+
+    if (!validatedName) {
+      setValidationError(true);
+      setCelebrity(null);
+      return;
     }
-  }, [id, fetchCelebrity, shouldBlock, authLoading]);
+
+    setValidationError(false);
+    fetchCelebrity(validatedName).then(setCelebrity);
+  }, [id, fetchCelebrity, shouldBlock, authLoading, prefetchedCelebrity]);
 
   // Show paywall FIRST if blocked
   if (shouldBlock && !authLoading) {
