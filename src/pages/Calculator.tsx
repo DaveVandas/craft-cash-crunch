@@ -40,6 +40,7 @@ type SelectedCelebrity = {
   emoji?: string;
   profession?: string;
   imageUrl?: string;
+  source?: string;
 };
 
 const Calculator = () => {
@@ -69,6 +70,7 @@ const Calculator = () => {
         emoji: undefined,
         profession: celeb.profession,
         imageUrl: celeb.imageUrl,
+        source: celeb.source,
       });
     }
   }, [location.state]);
@@ -106,6 +108,7 @@ const Calculator = () => {
           earnings: result.annualEarnings,
           profession: result.profession,
           imageUrl: result.imageUrl,
+          source: result.source,
         });
         setSearchQuery('');
         setShowResults(false);
@@ -252,6 +255,7 @@ const Calculator = () => {
                   celebrityName={selectedCeleb.name}
                   celebrityAnnualEarnings={selectedCeleb.earnings}
                   celebrityImageUrl={selectedCeleb.imageUrl}
+                  celebritySource={selectedCeleb.source}
                 />
                 
                 <RealityCheckShareCard
