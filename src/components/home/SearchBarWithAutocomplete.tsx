@@ -24,13 +24,16 @@ const POPULAR_BY_CATEGORY: Record<string, string[]> = {
   'politicians': ['Donald Trump', 'Joe Biden', 'Barack Obama', 'Vladimir Putin', 'Emmanuel Macron', 'Rishi Sunak', 'Justin Trudeau', 'Angela Merkel', 'Nancy Pelosi', 'Bernie Sanders'],
   'influencers': ['MrBeast', 'Kylie Jenner', 'Logan Paul', 'PewDiePie', 'Charli D\'Amelio', 'Kim Kardashian', 'Jake Paul', 'KSI', 'Ninja', 'Pokimane'],
   'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Mansa Musa', 'Henry Ford', 'Cleopatra', 'Genghis Khan', 'J.P. Morgan', 'Cornelius Vanderbilt', 'King Solomon', 'Augustus Caesar'],
+  'royalty': ['King Charles III', 'Prince William', 'Queen Elizabeth II', 'Prince Harry', 'King Salman', 'Mohammed bin Salman', 'Sultan of Brunei', 'Prince Albert II', 'Princess Diana', 'Sheikh Mohammed'],
+  'business-titans': ['Warren Buffett', 'Jamie Dimon', 'Ray Dalio', 'Bernard Arnault', 'Mukesh Ambani', 'Michael Bloomberg', 'Stephen Schwarzman', 'Carl Icahn', 'George Soros', 'Ken Griffin'],
 };
 
-// General popular celebrities
+// General popular celebrities (includes variety from all categories)
 const POPULAR_CELEBRITIES = [
   'Elon Musk', 'Taylor Swift', 'LeBron James', 'Beyoncé', 'Jeff Bezos',
   'Cristiano Ronaldo', 'Kim Kardashian', 'Drake', 'Oprah Winfrey', 'Jay-Z',
-  'Rihanna', 'Michael Jordan', 'Lionel Messi', 'The Rock', 'Kanye West'
+  'Rihanna', 'Michael Jordan', 'Lionel Messi', 'The Rock', 'Kanye West',
+  'Prince William', 'Prince Harry', 'King Charles III', 'Warren Buffett', 'MrBeast'
 ];
 
 const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlete, or billionaire...", categoryId }: SearchBarWithAutocompleteProps) => {
