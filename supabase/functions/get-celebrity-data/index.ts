@@ -711,9 +711,21 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!accessData?.has_lifetime_access && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
+    // Check for active beta access
+    const hasBetaAccess = accessData?.beta_expires_at 
+      ? new Date(accessData.beta_expires_at) > new Date() 
+      : false;
+
+    // Allow access if user has lifetime access OR active beta access
+    const hasFullAccess = accessData?.has_lifetime_access || hasBetaAccess;
+
+    if (!hasFullAccess && (accessData?.search_count || 0) >= FREE_SEARCH_LIMIT) {
       console.log(`User ${user.id} has exceeded free search limit`);
       return errorResponse('Free search limit reached. Please upgrade for unlimited access.', 'LIMIT_REACHED', corsHeaders);
+    }
+    
+    if (hasBetaAccess) {
+      console.log(`User ${user.id} has active beta access until ${accessData.beta_expires_at}`);
     }
   }
 
