@@ -3,12 +3,11 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TrendingUp, DollarSign, Rocket, Flame, Zap, Crown, ArrowDown } from 'lucide-react';
 import { formatCurrency } from '@/lib/earnings';
+import AllHustlesModal, { type SideHustle as SideHustleType } from '@/components/side-hustle/AllHustlesModal';
 
 interface CalculationResult {
   profit: number;
@@ -20,32 +19,59 @@ interface CalculationResult {
   salesPerMonth: number;
 }
 
-// Extended pool of side hustles for rotation
-const ALL_SIDE_HUSTLES = [
-  { name: 'Reselling Sneakers', emoji: '👟', avgBuyPrice: 180, avgSellPrice: 280, salesPerMonth: 8, difficulty: 'Medium', description: 'Buy limited releases, flip for profit.', tips: 'Follow @snkr_twitr, use bots for drops' },
-  { name: 'Print on Demand', emoji: '👕', avgBuyPrice: 12, avgSellPrice: 28, salesPerMonth: 30, difficulty: 'Easy', description: 'Design once, sell forever.', tips: 'Printful + Etsy = passive income' },
-  { name: 'Dropshipping', emoji: '📦', avgBuyPrice: 8, avgSellPrice: 25, salesPerMonth: 50, difficulty: 'Medium', description: 'Sell without touching product.', tips: 'Find winners on TikTok' },
-  { name: 'Thrift Flipping', emoji: '🏷️', avgBuyPrice: 5, avgSellPrice: 35, salesPerMonth: 20, difficulty: 'Easy', description: "Goodwill to gold.", tips: 'Vintage & designer on Poshmark' },
-  { name: 'Freelance Design', emoji: '🎨', avgBuyPrice: 0, avgSellPrice: 150, salesPerMonth: 6, difficulty: 'Medium', description: 'Turn creativity into cash.', tips: 'Start Fiverr, build portfolio' },
-  { name: 'Amazon FBA', emoji: '📈', avgBuyPrice: 15, avgSellPrice: 40, salesPerMonth: 100, difficulty: 'Hard', description: 'Let Amazon do the lifting.', tips: 'Use Jungle Scout for research' },
-  { name: 'Social Media Mgmt', emoji: '📱', avgBuyPrice: 0, avgSellPrice: 500, salesPerMonth: 3, difficulty: 'Medium', description: 'Get paid to post.', tips: 'Package content + scheduling' },
-  { name: 'Digital Products', emoji: '💻', avgBuyPrice: 0, avgSellPrice: 29, salesPerMonth: 40, difficulty: 'Medium', description: 'Build once, sell infinitely.', tips: 'Notion templates are hot' },
-  { name: 'Online Tutoring', emoji: '📚', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 20, difficulty: 'Easy', description: 'Share knowledge, get paid.', tips: 'Wyzant, Varsity Tutors' },
-  { name: 'Handmade Crafts', emoji: '🧶', avgBuyPrice: 10, avgSellPrice: 45, salesPerMonth: 15, difficulty: 'Easy', description: 'Turn hobbies into income.', tips: 'Etsy is your best friend' },
-  { name: 'Car Detailing', emoji: '🚗', avgBuyPrice: 20, avgSellPrice: 150, salesPerMonth: 12, difficulty: 'Medium', description: 'Mobile detailing = flexibility.', tips: 'Start with friends & family' },
-  { name: 'Pet Sitting', emoji: '🐕', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 15, difficulty: 'Easy', description: 'Get paid to hang with pets.', tips: 'Rover app for bookings' },
-  { name: 'YouTube Channel', emoji: '🎬', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Hard', description: 'Build audience, monetize.', tips: 'Consistency > perfection' },
-  { name: 'Pressure Washing', emoji: '💦', avgBuyPrice: 30, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Medium', description: 'Satisfying work, great margins.', tips: 'Before/after pics sell' },
-  { name: 'Flipping Furniture', emoji: '🪑', avgBuyPrice: 25, avgSellPrice: 120, salesPerMonth: 6, difficulty: 'Medium', description: 'Facebook finds to profit.', tips: 'Paint & hardware = magic' },
-  { name: 'Photography', emoji: '📸', avgBuyPrice: 0, avgSellPrice: 300, salesPerMonth: 4, difficulty: 'Medium', description: 'Capture moments, charge premium.', tips: 'Start with events & portraits' },
-  { name: 'Lawn Care', emoji: '🌿', avgBuyPrice: 10, avgSellPrice: 75, salesPerMonth: 16, difficulty: 'Easy', description: 'Simple service, recurring income.', tips: 'Upsell seasonal services' },
-  { name: 'Consulting', emoji: '💼', avgBuyPrice: 0, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Hard', description: 'Monetize your expertise.', tips: 'Package your knowledge' },
-  { name: 'Voiceover Work', emoji: '🎙️', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Medium', description: 'Your voice = your product.', tips: 'Fiverr & Voices.com' },
-  { name: 'Affiliate Marketing', emoji: '🔗', avgBuyPrice: 0, avgSellPrice: 30, salesPerMonth: 50, difficulty: 'Medium', description: 'Recommend products, earn commissions.', tips: 'Build an email list' },
-  { name: 'Stock Photography', emoji: '🖼️', avgBuyPrice: 0, avgSellPrice: 5, salesPerMonth: 200, difficulty: 'Easy', description: 'Upload once, earn forever.', tips: 'Shutterstock + Adobe Stock' },
-  { name: 'Cleaning Service', emoji: '🧹', avgBuyPrice: 15, avgSellPrice: 120, salesPerMonth: 12, difficulty: 'Easy', description: 'Always in demand.', tips: 'Residential or Airbnb focus' },
-  { name: 'Bookkeeping', emoji: '📊', avgBuyPrice: 0, avgSellPrice: 400, salesPerMonth: 5, difficulty: 'Medium', description: 'Numbers = money.', tips: 'QuickBooks certification helps' },
-  { name: 'Food Delivery', emoji: '🍕', avgBuyPrice: 5, avgSellPrice: 25, salesPerMonth: 60, difficulty: 'Easy', description: 'Flexible hours, instant pay.', tips: 'Multi-app for max earnings' },
+// Extended pool of side hustles with categories
+const ALL_SIDE_HUSTLES: SideHustleType[] = [
+  // Digital & Online
+  { name: 'Digital Products', emoji: '💻', avgBuyPrice: 0, avgSellPrice: 29, salesPerMonth: 40, difficulty: 'Medium', description: 'Build once, sell infinitely.', tips: 'Notion templates are hot', category: 'digital' },
+  { name: 'AI Prompt Engineering', emoji: '🤖', avgBuyPrice: 0, avgSellPrice: 15, salesPerMonth: 50, difficulty: 'Medium', description: 'Sell ChatGPT prompts that work.', tips: 'PromptBase marketplace', category: 'digital' },
+  { name: 'UGC Content Creator', emoji: '📲', avgBuyPrice: 0, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Medium', description: 'Create TikTok-style ads for brands.', tips: 'No following needed, just content', category: 'digital' },
+  { name: 'Virtual Assistant', emoji: '🖥️', avgBuyPrice: 0, avgSellPrice: 30, salesPerMonth: 80, difficulty: 'Easy', description: 'Remote admin support for busy pros.', tips: 'Belay, Time Etc for clients', category: 'digital' },
+  { name: 'Online Courses', emoji: '🎓', avgBuyPrice: 0, avgSellPrice: 97, salesPerMonth: 15, difficulty: 'Hard', description: 'Teach what you know at scale.', tips: 'Teachable or Kajabi', category: 'digital' },
+  { name: 'Newsletter/Substack', emoji: '📧', avgBuyPrice: 0, avgSellPrice: 10, salesPerMonth: 100, difficulty: 'Medium', description: 'Paid newsletter subscriptions.', tips: 'Niche expertise + consistency', category: 'digital' },
+  { name: 'Website Flipping', emoji: '🌐', avgBuyPrice: 500, avgSellPrice: 2000, salesPerMonth: 1, difficulty: 'Hard', description: 'Buy, improve, sell websites.', tips: 'Flippa for marketplace', category: 'digital' },
+  { name: 'Dropshipping', emoji: '📦', avgBuyPrice: 8, avgSellPrice: 25, salesPerMonth: 50, difficulty: 'Medium', description: 'Sell without touching product.', tips: 'Find winners on TikTok', category: 'digital' },
+  { name: 'Online Tutoring', emoji: '📚', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 20, difficulty: 'Easy', description: 'Share knowledge, get paid.', tips: 'Wyzant, Varsity Tutors', category: 'digital' },
+  { name: 'Social Media Mgmt', emoji: '📱', avgBuyPrice: 0, avgSellPrice: 500, salesPerMonth: 3, difficulty: 'Medium', description: 'Get paid to post.', tips: 'Package content + scheduling', category: 'digital' },
+  { name: 'Bookkeeping', emoji: '📊', avgBuyPrice: 0, avgSellPrice: 400, salesPerMonth: 5, difficulty: 'Medium', description: 'Numbers = money.', tips: 'QuickBooks certification helps', category: 'digital' },
+  { name: 'Freelance Design', emoji: '🎨', avgBuyPrice: 0, avgSellPrice: 150, salesPerMonth: 6, difficulty: 'Medium', description: 'Turn creativity into cash.', tips: 'Start Fiverr, build portfolio', category: 'digital' },
+  
+  // Product Flipping
+  { name: 'Reselling Sneakers', emoji: '👟', avgBuyPrice: 180, avgSellPrice: 280, salesPerMonth: 8, difficulty: 'Medium', description: 'Buy limited releases, flip for profit.', tips: 'Follow @snkr_twitr, use bots for drops', category: 'flipping' },
+  { name: 'Thrift Flipping', emoji: '🏷️', avgBuyPrice: 5, avgSellPrice: 35, salesPerMonth: 20, difficulty: 'Easy', description: "Goodwill to gold.", tips: 'Vintage & designer on Poshmark', category: 'flipping' },
+  { name: 'Amazon FBA', emoji: '📈', avgBuyPrice: 15, avgSellPrice: 40, salesPerMonth: 100, difficulty: 'Hard', description: 'Let Amazon do the lifting.', tips: 'Use Jungle Scout for research', category: 'flipping' },
+  { name: 'Flipping Furniture', emoji: '🪑', avgBuyPrice: 25, avgSellPrice: 120, salesPerMonth: 6, difficulty: 'Medium', description: 'Facebook finds to profit.', tips: 'Paint & hardware = magic', category: 'flipping' },
+  { name: 'Tech Flipping', emoji: '📱', avgBuyPrice: 150, avgSellPrice: 300, salesPerMonth: 6, difficulty: 'Medium', description: 'Phones, laptops, tablets.', tips: 'Facebook Marketplace gold', category: 'flipping' },
+  { name: 'Watch Flipping', emoji: '⌚', avgBuyPrice: 500, avgSellPrice: 900, salesPerMonth: 3, difficulty: 'Hard', description: 'Luxury timepieces, big margins.', tips: 'Learn authentication first', category: 'flipping' },
+  { name: 'Sports Card Trading', emoji: '🃏', avgBuyPrice: 20, avgSellPrice: 80, salesPerMonth: 15, difficulty: 'Medium', description: 'Collectibles market is booming.', tips: 'eBay + PSA grading', category: 'flipping' },
+  { name: 'Concert Tickets', emoji: '🎫', avgBuyPrice: 100, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Medium', description: 'Event arbitrage opportunity.', tips: 'StubHub, SeatGeek', category: 'flipping' },
+  { name: 'Vintage Antiques', emoji: '🏺', avgBuyPrice: 30, avgSellPrice: 150, salesPerMonth: 5, difficulty: 'Medium', description: 'Estate sales to profit.', tips: 'Learn niche markets', category: 'flipping' },
+  
+  // Local Services
+  { name: 'Car Detailing', emoji: '🚗', avgBuyPrice: 20, avgSellPrice: 150, salesPerMonth: 12, difficulty: 'Medium', description: 'Mobile detailing = flexibility.', tips: 'Start with friends & family', category: 'services' },
+  { name: 'Pressure Washing', emoji: '💦', avgBuyPrice: 30, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Medium', description: 'Satisfying work, great margins.', tips: 'Before/after pics sell', category: 'services' },
+  { name: 'Lawn Care', emoji: '🌿', avgBuyPrice: 10, avgSellPrice: 75, salesPerMonth: 16, difficulty: 'Easy', description: 'Simple service, recurring income.', tips: 'Upsell seasonal services', category: 'services' },
+  { name: 'Cleaning Service', emoji: '🧹', avgBuyPrice: 15, avgSellPrice: 120, salesPerMonth: 12, difficulty: 'Easy', description: 'Always in demand.', tips: 'Residential or Airbnb focus', category: 'services' },
+  { name: 'Pet Sitting', emoji: '🐕', avgBuyPrice: 0, avgSellPrice: 50, salesPerMonth: 15, difficulty: 'Easy', description: 'Get paid to hang with pets.', tips: 'Rover app for bookings', category: 'services' },
+  { name: 'Mobile Notary', emoji: '📝', avgBuyPrice: 0, avgSellPrice: 150, salesPerMonth: 10, difficulty: 'Easy', description: 'High per-signing fees.', tips: 'Notary2Pro for training', category: 'services' },
+  { name: 'Junk Removal', emoji: '🚚', avgBuyPrice: 50, avgSellPrice: 250, salesPerMonth: 8, difficulty: 'Medium', description: 'Clear clutter, stack cash.', tips: 'Truck + muscles = money', category: 'services' },
+  { name: 'Personal Training', emoji: '🏋️', avgBuyPrice: 0, avgSellPrice: 80, salesPerMonth: 20, difficulty: 'Medium', description: 'Fitness coaching pays well.', tips: 'Get certified, start local', category: 'services' },
+  { name: 'Pool Cleaning', emoji: '🏊', avgBuyPrice: 20, avgSellPrice: 100, salesPerMonth: 16, difficulty: 'Easy', description: 'Recurring maintenance income.', tips: 'Summer = peak season', category: 'services' },
+  { name: 'Home Staging', emoji: '🏠', avgBuyPrice: 50, avgSellPrice: 400, salesPerMonth: 4, difficulty: 'Medium', description: 'Prep homes for real estate sales.', tips: 'Partner with realtors', category: 'services' },
+  { name: 'Event DJ', emoji: '🎧', avgBuyPrice: 0, avgSellPrice: 500, salesPerMonth: 4, difficulty: 'Medium', description: 'Weddings & parties pay premium.', tips: 'Weekend warrior income', category: 'services' },
+  { name: 'Food Delivery', emoji: '🍕', avgBuyPrice: 5, avgSellPrice: 25, salesPerMonth: 60, difficulty: 'Easy', description: 'Flexible hours, instant pay.', tips: 'Multi-app for max earnings', category: 'services' },
+  
+  // Creative & Content
+  { name: 'Photography', emoji: '📸', avgBuyPrice: 0, avgSellPrice: 300, salesPerMonth: 4, difficulty: 'Medium', description: 'Capture moments, charge premium.', tips: 'Start with events & portraits', category: 'creative' },
+  { name: 'YouTube Channel', emoji: '🎬', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Hard', description: 'Build audience, monetize.', tips: 'Consistency > perfection', category: 'creative' },
+  { name: 'Voiceover Work', emoji: '🎙️', avgBuyPrice: 0, avgSellPrice: 100, salesPerMonth: 10, difficulty: 'Medium', description: 'Your voice = your product.', tips: 'Fiverr & Voices.com', category: 'creative' },
+  { name: 'Handmade Crafts', emoji: '🧶', avgBuyPrice: 10, avgSellPrice: 45, salesPerMonth: 15, difficulty: 'Easy', description: 'Turn hobbies into income.', tips: 'Etsy is your best friend', category: 'creative' },
+  { name: 'Print on Demand', emoji: '👕', avgBuyPrice: 12, avgSellPrice: 28, salesPerMonth: 30, difficulty: 'Easy', description: 'Design once, sell forever.', tips: 'Printful + Etsy = passive income', category: 'creative' },
+  { name: 'Consulting', emoji: '💼', avgBuyPrice: 0, avgSellPrice: 200, salesPerMonth: 8, difficulty: 'Hard', description: 'Monetize your expertise.', tips: 'Package your knowledge', category: 'creative' },
+  { name: 'NFT Art', emoji: '🎭', avgBuyPrice: 50, avgSellPrice: 200, salesPerMonth: 3, difficulty: 'Hard', description: 'Digital art with blockchain.', tips: 'Build community first', category: 'creative' },
+  
+  // Passive Income
+  { name: 'Affiliate Marketing', emoji: '🔗', avgBuyPrice: 0, avgSellPrice: 30, salesPerMonth: 50, difficulty: 'Medium', description: 'Recommend products, earn commissions.', tips: 'Build an email list', category: 'passive' },
+  { name: 'Stock Photography', emoji: '🖼️', avgBuyPrice: 0, avgSellPrice: 5, salesPerMonth: 200, difficulty: 'Easy', description: 'Upload once, earn forever.', tips: 'Shutterstock + Adobe Stock', category: 'passive' },
 ];
 
 const INSPIRATIONAL_QUOTES = [
@@ -89,7 +115,7 @@ const SideHustle = () => {
   const [salesPerPeriod, setSalesPerPeriod] = useState<string>('');
   const [period, setPeriod] = useState<string>('month');
   const [result, setResult] = useState<CalculationResult | null>(null);
-  const [selectedHustle, setSelectedHustle] = useState<typeof ALL_SIDE_HUSTLES[0] | null>(null);
+  const [selectedHustle, setSelectedHustle] = useState<SideHustleType | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   
   // Get rotated content on mount
@@ -137,7 +163,7 @@ const SideHustle = () => {
     calculateResult(buy, sell, sales, period);
   };
 
-  const applyHustle = (hustle: typeof ALL_SIDE_HUSTLES[0]) => {
+  const applyHustle = (hustle: SideHustleType) => {
     setSelectedHustle(hustle);
     setBuyPrice(hustle.avgBuyPrice.toString());
     setSellPrice(hustle.avgSellPrice.toString());
@@ -181,13 +207,18 @@ const SideHustle = () => {
           {/* Hot Hustles Grid */}
           <Card className="border-primary/20">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Flame className="h-6 w-6 text-amber-500" />
-                Pick Your Hustle
-              </CardTitle>
-              <CardDescription className="text-base">
-                Tap any option below to see how the numbers break down
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Flame className="h-6 w-6 text-amber-500" />
+                    Today's Hot Picks
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    Tap any option below to see how the numbers break down
+                  </CardDescription>
+                </div>
+                <AllHustlesModal hustles={ALL_SIDE_HUSTLES} onSelectHustle={applyHustle} />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
