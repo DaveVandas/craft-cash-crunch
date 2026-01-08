@@ -14,6 +14,7 @@ export interface SideHustle {
   description: string;
   tips: string;
   category: string;
+  guide: string;
 }
 
 interface Category {
