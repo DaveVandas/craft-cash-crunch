@@ -23,6 +23,11 @@ interface CalculationResult {
 const ALL_SIDE_HUSTLES: SideHustleType[] = [
   // Digital & Online
   { 
+    name: 'Wealth Perspective Affiliate', emoji: '💎', avgBuyPrice: 0, avgSellPrice: 1, salesPerMonth: 500, difficulty: 'Easy', 
+    description: 'Share our app, get paid per signup!', tips: 'One viral TikTok = 💰', category: 'digital',
+    guide: 'This is the ultimate low-effort, high-reward side hustle—share Wealth Perspective with your audience and earn $1-2.50 per signup. The math is insane: one TikTok that gets 100K views could drive 10,000 signups = $10,000+ overnight. No inventory, no customer service, no skills required—just share and get paid. Step 1: Apply at earningsexplorer.shop/become-affiliate (takes 2 minutes, usually approved within 24 hours). Step 2: Get your unique referral link and branded QR code share card. Step 3: Create content showing off the app—film your reaction to celebrity earnings, do a comparison video, share your Reality Check results. TikTok, Instagram Reels, and YouTube Shorts are goldmines for this. The app sells itself because it\'s genuinely fun and mind-blowing. Pro tip: Post during peak hours (7-9pm), use trending sounds, and hook viewers in the first second. VIP affiliates earn $2-2.50 per signup. This could literally pay your rent from one viral post!'
+  },
+  { 
     name: 'Digital Products', emoji: '💻', avgBuyPrice: 0, avgSellPrice: 29, salesPerMonth: 40, difficulty: 'Medium', 
     description: 'Build once, sell infinitely.', tips: 'Notion templates are hot', category: 'digital',
     guide: 'Digital products are the ultimate scalable side hustle—create once, sell forever with zero inventory. The key is solving a specific problem for a specific audience. Notion templates, Canva designs, spreadsheets, and eBooks are hot right now. Start by identifying what you\'re good at that others struggle with. Week 1: Research top-selling digital products on Gumroad and Etsy to understand what sells. Week 2: Create your first product—keep it simple, solve one problem well. Week 3: Set up your storefront on Gumroad (easiest) or Etsy. Week 4: Create 3-5 social media posts showing your product in action. The magic happens when you stack multiple products over time.'
