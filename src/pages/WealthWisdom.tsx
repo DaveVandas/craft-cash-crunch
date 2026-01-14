@@ -21,7 +21,7 @@ import {
   Target
 } from 'lucide-react';
 
-// Weekly featured story - rotates based on week number
+// Featured story - rotates every 3 days for more frequent updates
 const getWeeklyStory = () => {
   const stories = [
     {
@@ -179,12 +179,136 @@ Sanders didn't succeed despite his age. He succeeded because of a lifetime of fa
         "Age is just a number if your fire is still burning"
       ],
       tags: ["Late Bloomer", "Persistence", "Franchise"]
+    },
+    {
+      title: "From $7.50/Hour to Billionaire: Sara Blakely's Spanx Story",
+      subtitle: "How a fax machine saleswoman invented a billion-dollar industry",
+      image: "👗",
+      intro: "Sara Blakely was selling fax machines door-to-door, earning $7.50 an hour. One night, cutting the feet off her pantyhose changed everything.",
+      story: `Sara Blakely's journey to becoming the youngest self-made female billionaire started with a simple frustration: her pants didn't look right with regular pantyhose.
+
+**The $5,000 Gamble**
+
+In 1998, Sara had saved $5,000 from selling fax machines. She invested every penny into creating footless pantyhose — a product that didn't exist.
+
+She couldn't afford a lawyer, so she wrote her own patent by reading textbooks. Manufacturers laughed at her. She got rejected by every hosiery mill she approached.
+
+Finally, one factory owner agreed — not because of the pitch, but because his daughters said it was a great idea.
+
+**Breaking Into Retail**
+
+Sara drove to Neiman Marcus, talked her way into a buyer meeting, and literally put on the product in the bathroom to demonstrate the difference. She got her first order.
+
+She packed products herself. She worked nights and weekends. She didn't take a salary for years.
+
+**The Oprah Effect**
+
+When Oprah named Spanx one of her "Favorite Things" in 2000, sales exploded. But Sara had already been grinding for two years before that moment.
+
+**Today**
+
+Sara sold a majority stake of Spanx in 2021, valuing the company at $1.2 billion. She gave every employee two first-class plane tickets and $10,000 cash to celebrate.
+
+From $5,000 to $1.2 billion. From fax machines to fashion empire.`,
+      quote: "It's important to be willing to make mistakes. The worst thing that can happen is you become memorable.",
+      lessons: [
+        "Start with the money you have, not the money you want",
+        "Persistence beats perfection every time",
+        "Learn skills yourself when you can't afford to hire them",
+        "Success often comes after years of invisible grinding"
+      ],
+      tags: ["Self-Made", "Fashion", "Persistence"]
+    },
+    {
+      title: "The Immigrant Who Built a $70 Billion Empire: Do Won Chang",
+      subtitle: "From janitor to Forever 21 founder",
+      image: "🛍️",
+      intro: "Do Won Chang arrived in America with almost nothing. He worked three jobs simultaneously. Twenty years later, he owned one of the world's largest fashion retailers.",
+      story: `In 1981, Do Won Chang immigrated to Los Angeles from South Korea with his wife and daughters. He didn't speak English. He had no connections. He had almost no money.
+
+**The Grind**
+
+To survive, he worked three jobs at once: janitor, gas station attendant, and coffee shop worker. He worked from 6 AM to midnight, seven days a week.
+
+But he was watching. Learning. He noticed that the people driving the nicest cars weren't doctors or lawyers — they were in the clothing business.
+
+**Fashion 21**
+
+In 1984, with savings from years of grinding, Do Won and his wife Jin Sook opened a small clothing store in Highland Park, LA. They called it Fashion 21.
+
+First year sales: $700,000. The store was just 900 square feet.
+
+The secret? Affordable fashion that looked like expensive runway styles. They could spot trends and get products on shelves in weeks, not months.
+
+**The Empire Grows**
+
+Fashion 21 became Forever 21. One store became hundreds. The company grew to over 800 stores in 57 countries at its peak.
+
+At its height, Forever 21 generated $4.4 billion in annual revenue. The Chang family's net worth reached $6 billion.
+
+**The Lesson**
+
+Do Won Chang often says: "I am very thankful that I came to this country with almost nothing, because having almost nothing makes you hungry."`,
+      quote: "America is still the land of opportunity. Work hard, stay focused, be patient.",
+      lessons: [
+        "Immigrant hunger can be a superpower",
+        "Work multiple jobs to learn multiple industries",
+        "Watch what successful people do, not just what they say",
+        "Speed and adaptation beat slow perfection"
+      ],
+      tags: ["Immigrant Story", "Retail", "Hard Work"]
+    },
+    {
+      title: "Rejected from 30 Jobs: Jack Ma's Journey to $40 Billion",
+      subtitle: "How China's most famous failure built Alibaba",
+      image: "📱",
+      intro: "Jack Ma failed his college entrance exam twice. He was rejected from 30 jobs including KFC. He started an internet company without knowing anything about technology.",
+      story: `Before becoming one of China's richest men, Jack Ma collected failures like trophies.
+
+**The Rejection Collector**
+
+- Failed his college entrance exam twice
+- Rejected from Harvard 10 times
+- Applied to 30 jobs after college, rejected from all of them
+- KFC came to his town, 24 people applied, 23 got hired — he was the one rejection
+- Applied to be a police officer — rejected
+
+**Finding the Internet**
+
+In 1995, at age 31, Jack Ma visited the United States and saw the internet for the first time. He typed "beer" into a search engine. Results came from America, Germany, Japan — but nothing from China.
+
+He saw opportunity where others saw nothing.
+
+**The Garage Years**
+
+Back in China, Jack gathered 17 friends into his apartment. He raised $60,000 — pooling everyone's life savings. They built Alibaba.
+
+For years, they didn't pay themselves. They ate instant noodles. They slept on the floor.
+
+**The Empire**
+
+Alibaba became the world's largest e-commerce company. At its peak, the company was worth over $800 billion. Jack Ma's personal net worth reached $40 billion.
+
+The man rejected by KFC now owns companies that employ over 250,000 people.
+
+**His Famous Words**
+
+"If you don't give up, you still have a chance. Giving up is the greatest failure."`,
+      quote: "Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine.",
+      lessons: [
+        "Rejection is just redirection",
+        "You don't need to understand technology to build tech companies",
+        "Start with people who believe in you, not credentials",
+        "Your biggest asset is your ability to not give up"
+      ],
+      tags: ["Tech", "Perseverance", "Alibaba"]
     }
   ];
   
-  // Rotate weekly based on the current week of the year
-  const weekOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
-  return stories[weekOfYear % stories.length];
+  // Rotate every 3 days for more frequent updates
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (24 * 60 * 60 * 1000));
+  const storyIndex = Math.floor(dayOfYear / 3) % stories.length;
+  return stories[storyIndex];
 };
 
 const quickWisdom = [
