@@ -266,14 +266,20 @@ const INSPIRATIONAL_QUOTES = [
 ];
 
 // Get rotated hustles based on day (changes daily)
+// Affiliate hustle is always pinned first, other 7 rotate
 const getRotatedHustles = () => {
+  const affiliateHustle = ALL_SIDE_HUSTLES.find(h => h.name === 'Wealth Perspective Affiliate');
+  const otherHustles = ALL_SIDE_HUSTLES.filter(h => h.name !== 'Wealth Perspective Affiliate');
+  
   const dayOfYear = Math.floor(Date.now() / 86400000);
-  const shuffled = [...ALL_SIDE_HUSTLES].sort((a, b) => {
+  const shuffled = [...otherHustles].sort((a, b) => {
     const hashA = (a.name.charCodeAt(0) + dayOfYear) % 100;
     const hashB = (b.name.charCodeAt(0) + dayOfYear) % 100;
     return hashA - hashB;
   });
-  return shuffled.slice(0, 8);
+  
+  // Pin affiliate first, then 7 rotating hustles
+  return affiliateHustle ? [affiliateHustle, ...shuffled.slice(0, 7)] : shuffled.slice(0, 8);
 };
 
 // Get random quote (changes on each page load/visit)
