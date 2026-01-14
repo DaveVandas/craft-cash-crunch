@@ -6,6 +6,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 const ALLOWED_ORIGINS = [
   'https://earningsexplorer.shop',
   'https://www.earningsexplorer.shop',
+  'https://craft-cash-crunch.lovable.app',
+  'https://id-preview--86ba5315-0e8e-45d4-9ce2-019ca156c207.lovable.app',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:8080',
