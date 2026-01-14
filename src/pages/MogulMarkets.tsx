@@ -216,7 +216,7 @@ const MogulMarkets = () => {
             {!user && (
               <div className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30">
                 <p className="text-xs text-amber-400">
-                  🎩 Guest mode • <a href="/auth" className="underline font-semibold">Sign in</a>
+                  Guest mode • <a href="/auth" className="underline font-semibold">Sign in</a>
                 </p>
               </div>
             )}

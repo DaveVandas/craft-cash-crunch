@@ -24,13 +24,13 @@ export function MogulMascot({
   const getMoodEmoji = () => {
     switch (mood) {
       case 'happy':
-        return '🦊';
+        return '😊';
       case 'excited':
-        return '🦁';
+        return '🤑';
       case 'worried':
-        return '🐻';
+        return '😰';
       default:
-        return '🦉';
+        return '🧐';
     }
   };
 
