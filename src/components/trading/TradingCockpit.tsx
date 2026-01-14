@@ -20,7 +20,6 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { GoldBars } from './GoldBars';
-import { MogulMascot } from './MogulMascot';
 import { StockSearch } from './StockSearch';
 
 interface Position {
@@ -81,13 +80,6 @@ export function TradingCockpit({
   onRefreshPrices,
 }: TradingCockpitProps) {
   const isPositive = totalGainLoss >= 0;
-  const mascotMood = totalGainLoss > 1000 
-    ? 'excited' 
-    : totalGainLoss > 0 
-      ? 'happy' 
-      : totalGainLoss < -1000 
-        ? 'worried' 
-        : 'neutral';
 
   // Quick access tickers
   const quickTickers = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'META', 'GOOGL', 'AMZN', 'SPY'];
@@ -104,7 +96,6 @@ export function TradingCockpit({
                 <Crown className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-sm text-muted-foreground">NET WORTH</span>
               </div>
-              <MogulMascot mood={mascotMood} size="sm" />
             </div>
             
             <p className="text-3xl md:text-4xl font-bold gradient-gold-text mb-2">
