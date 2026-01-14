@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,9 @@ import {
   Sparkles,
   RefreshCw,
   Loader2,
-  DollarSign
+  DollarSign,
+  Plus,
+  Coins
 } from 'lucide-react';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { PortfolioSummary } from '@/components/trading/PortfolioSummary';
@@ -25,6 +28,7 @@ import { TradeModal } from '@/components/trading/TradeModal';
 import { MogulMascot } from '@/components/trading/MogulMascot';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface StockData {
   ticker: string;
@@ -42,6 +46,7 @@ interface StockData {
 
 const MogulMarkets = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     portfolio,
     isLoading,
@@ -57,7 +62,64 @@ const MogulMarkets = () => {
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isBuyingCash, setIsBuyingCash] = useState(false);
+
+  // Handle successful cash purchase return
+  useEffect(() => {
+    const purchased = searchParams.get('purchased');
+    const portfolioId = searchParams.get('portfolio');
+    
+    if (purchased === 'true' && portfolioId) {
+      // Verify and credit the purchase
+      const verifyPurchase = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-mogul-cash', {
+            body: { portfolioId },
+          });
+          
+          if (error) throw error;
+          
+          if (data.success) {
+            toast.success('💰 $20,000 added to your account!', {
+              description: `New balance: $${data.newBalance.toLocaleString()}`,
+            });
+            fetchPortfolio();
+          }
+        } catch (err) {
+          console.error('Error verifying purchase:', err);
+        }
+        
+        // Clear URL params
+        setSearchParams({});
+      };
+      
+      verifyPurchase();
+    }
+  }, [searchParams, setSearchParams, fetchPortfolio]);
+
+  const handleBuyCash = async () => {
+    if (!portfolio) return;
+    
+    setIsBuyingCash(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('buy-mogul-cash', {
+        body: { portfolioId: portfolio.id },
+      });
+      
+      if (error) throw error;
+      
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err) {
+      console.error('Error initiating cash purchase:', err);
+      toast.error('Failed to start purchase', {
+        description: 'Please try again.',
+      });
+    } finally {
+      setIsBuyingCash(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -191,6 +253,35 @@ const MogulMarkets = () => {
               totalGainLossPercent={totalGainLossPercent}
             />
           </div>
+
+          {/* Buy More Cash Upsell */}
+          <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-primary/5 to-amber-500/10 mb-8">
+            <CardContent className="py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-amber-500/20">
+                    <Coins className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Need more trading power?</p>
+                    <p className="text-sm text-muted-foreground">Get $20,000 virtual cash for just $4.99</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleBuyCash}
+                  disabled={isBuyingCash || !portfolio}
+                  className="gap-2 bg-gradient-to-r from-amber-500 to-primary hover:from-amber-600 hover:to-primary/90"
+                >
+                  {isBuyingCash ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                  Buy Mogul Cash
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Main Trading Interface */}
           <Tabs defaultValue="trade" className="space-y-6">
