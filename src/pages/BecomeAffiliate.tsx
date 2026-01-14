@@ -100,13 +100,13 @@ export default function BecomeAffiliate() {
   const benefits = [
     {
       icon: DollarSign,
-      title: 'Earn $1 Per Signup',
-      description: 'Get paid for every new user who signs up through your unique link.',
+      title: 'Tiered Commission = MORE $$$',
+      description: 'Earn $1 per signup for your first 1,000 referrals. After that? $2 PER SIGNUP FOREVER. 🚀',
     },
     {
       icon: Share2,
-      title: 'Easy Sharing',
-      description: 'Share your personalized link on social media, blogs, or with friends.',
+      title: 'One Viral Post = Life Changing',
+      description: '20,000 downloads from one TikTok = $1,000 (first 1K) + $38,000 (next 19K) = $39,000! 💰',
     },
     {
       icon: Users,
@@ -116,7 +116,7 @@ export default function BecomeAffiliate() {
     {
       icon: TrendingUp,
       title: 'Track Your Progress',
-      description: 'Monitor your referrals and earnings in real-time from your dashboard.',
+      description: 'Monitor your referrals, see your tier progress, and watch your earnings grow in real-time.',
     },
     {
       icon: Gift,
@@ -133,8 +133,8 @@ export default function BecomeAffiliate() {
   const steps = [
     { step: 1, title: 'Apply', description: 'Fill out the quick form below' },
     { step: 2, title: 'Get Approved', description: 'We\'ll review and approve your application' },
-    { step: 3, title: 'Share', description: 'Share your unique link with your audience' },
-    { step: 4, title: 'Earn', description: 'Get $1 for every new signup!' },
+    { step: 3, title: 'Share', description: 'Post one TikTok showing the app' },
+    { step: 4, title: 'Earn', description: '$1 → first 1K, then $2 forever!' },
   ];
 
   return (
@@ -149,13 +149,32 @@ export default function BecomeAffiliate() {
             Affiliate Program
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Turn Your Influence Into{' '}
-            <span className="text-primary">Mogul Cash</span> 💰
+            One TikTok Could Pay You{' '}
+            <span className="text-primary">$39,000</span> 🤯
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Earn money by sharing Wealth Perspective with your friends, followers, and community. 
-            It's simple: share your link, they sign up, you get paid!
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+            Share Wealth Perspective, get paid for every signup. It's that simple.
           </p>
+          
+          {/* Tier Breakdown */}
+          <div className="max-w-xl mx-auto bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 rounded-xl p-6 border border-primary/20">
+            <h3 className="font-bold text-lg mb-3">💎 Tiered Commission Structure</h3>
+            <div className="grid grid-cols-2 gap-4 text-left">
+              <div className="bg-card/50 rounded-lg p-4 border border-border/50">
+                <div className="text-2xl font-bold text-primary">$1</div>
+                <div className="text-sm text-muted-foreground">per signup</div>
+                <div className="text-xs mt-1">First 1,000 referrals</div>
+              </div>
+              <div className="bg-card/50 rounded-lg p-4 border border-primary/30">
+                <div className="text-2xl font-bold text-amber-400">$2</div>
+                <div className="text-sm text-muted-foreground">per signup</div>
+                <div className="text-xs mt-1">After 1,000 — FOREVER</div>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              <strong className="text-foreground">Example:</strong> 20K downloads = $1,000 (first 1K) + $38,000 (next 19K) = <span className="text-primary font-bold">$39,000</span>
+            </p>
+          </div>
         </div>
 
         {/* How It Works */}
@@ -314,7 +333,7 @@ export default function BecomeAffiliate() {
                       {isSubmitting ? 'Submitting...' : 'Submit Application'}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center mt-3">
-                      By applying, you agree to our affiliate terms. Standard commission rate is $1 per signup.
+                      By applying, you agree to our affiliate terms. Earn $1/signup for first 1,000 referrals, then $2/signup forever!
                     </p>
                   </div>
                 </form>
