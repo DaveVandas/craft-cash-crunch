@@ -745,6 +745,7 @@ export type Database = {
         Args: { p_older_than_minutes?: number }
         Returns: number
       }
+      get_request_session_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
