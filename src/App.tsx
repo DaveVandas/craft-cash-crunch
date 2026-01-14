@@ -26,6 +26,7 @@ import Referral from "./pages/Referral";
 import SideHustle from "./pages/SideHustle";
 import WealthWisdom from "./pages/WealthWisdom";
 import Trades from "./pages/Trades";
+import MogulMarkets from "./pages/MogulMarkets";
 import DebtDestroyer from "./pages/DebtDestroyer";
 import LandingVariantA from "./pages/landing/LandingVariantA";
 import LandingVariantB from "./pages/landing/LandingVariantB";
@@ -65,6 +66,7 @@ const App = () => (
                   <Route path="/side-hustle" element={<SideHustle />} />
                   <Route path="/wealth-wisdom" element={<WealthWisdom />} />
                   <Route path="/trades" element={<Trades />} />
+                  <Route path="/mogul-markets" element={<MogulMarkets />} />
                   <Route path="/debt-destroyer" element={<DebtDestroyer />} />
                   <Route path="/landing/a" element={<LandingVariantA />} />
                   <Route path="/landing/b" element={<LandingVariantB />} />
