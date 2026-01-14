@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send } from 'lucide-react';
+import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
+import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 
 interface Affiliate {
   id: string;
@@ -67,6 +68,7 @@ export function AffiliateManagement() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
+  const [shareCardDialogOpen, setShareCardDialogOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<Affiliate | null>(null);
 
   // Form state for creating VIP affiliate
@@ -477,12 +479,24 @@ export function AffiliateManagement() {
                           size="sm"
                           variant="ghost"
                           onClick={() => copyAffiliateLink(affiliate.affiliate_code)}
+                          title="Copy link"
                         >
                           {copiedCode === affiliate.affiliate_code ? (
                             <Check className="h-4 w-4 text-green-400" />
                           ) : (
                             <Copy className="h-4 w-4" />
                           )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedAffiliate(affiliate);
+                            setShareCardDialogOpen(true);
+                          }}
+                          title="Share card with QR"
+                        >
+                          <QrCode className="h-4 w-4" />
                         </Button>
                         {affiliate.status === 'pending' && (
                           <Button
@@ -659,6 +673,26 @@ export function AffiliateManagement() {
               Mark as Paid
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Card Dialog */}
+      <Dialog open={shareCardDialogOpen} onOpenChange={setShareCardDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-primary" />
+              Affiliate Share Card
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAffiliate && (
+            <AffiliateShareCard
+              affiliateCode={selectedAffiliate.affiliate_code}
+              displayName={selectedAffiliate.display_name}
+              commissionRate={selectedAffiliate.commission_rate}
+              isVip={selectedAffiliate.is_vip}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

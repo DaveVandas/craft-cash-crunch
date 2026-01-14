@@ -34,6 +34,7 @@ import LandingVariantB from "./pages/landing/LandingVariantB";
 import LandingVariantC from "./pages/landing/LandingVariantC";
 import BetaInvite from "./pages/BetaInvite";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
+import AffiliateDashboard from "./pages/AffiliateDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ const App = () => (
                   <Route path="/landing/c" element={<LandingVariantC />} />
                   <Route path="/beta" element={<BetaInvite />} />
                   <Route path="/become-affiliate" element={<BecomeAffiliate />} />
+                  <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
