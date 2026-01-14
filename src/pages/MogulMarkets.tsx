@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +9,8 @@ import {
   Loader2,
   Plus,
   Coins,
-  Zap
+  Zap,
+  GraduationCap
 } from 'lucide-react';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { TradeModal } from '@/components/trading/TradeModal';
@@ -254,6 +255,10 @@ const MogulMarkets = () => {
                 <Zap className="h-3 w-3" />
                 <span className="font-medium">Real-time AI Data</span>
               </div>
+              <Link to="/mogul-academy" className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors">
+                <GraduationCap className="h-3 w-3" />
+                <span className="font-medium">Learn Trading</span>
+              </Link>
             </div>
           </CardContent>
         </Card>
