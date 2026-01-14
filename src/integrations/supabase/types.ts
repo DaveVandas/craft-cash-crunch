@@ -14,6 +14,157 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_payouts: {
+        Row: {
+          affiliate_id: string
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          payout_method: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payout_method: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payout_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_referrals: {
+        Row: {
+          affiliate_id: string
+          commission_amount: number
+          converted_at: string | null
+          created_at: string
+          id: string
+          paid_at: string | null
+          referred_email: string | null
+          referred_user_id: string | null
+          status: string
+        }
+        Insert: {
+          affiliate_id: string
+          commission_amount: number
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_email?: string | null
+          referred_user_id?: string | null
+          status?: string
+        }
+        Update: {
+          affiliate_id?: string
+          commission_amount?: number
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_email?: string | null
+          referred_user_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          affiliate_code: string
+          approved_at: string | null
+          approved_by: string | null
+          commission_rate: number
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          is_vip: boolean
+          payout_details: string | null
+          payout_method: string | null
+          pending_payout: number
+          status: string
+          total_earnings: number
+          total_referrals: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          affiliate_code: string
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: number
+          created_at?: string
+          display_name: string
+          email: string
+          id?: string
+          is_vip?: boolean
+          payout_details?: string | null
+          payout_method?: string | null
+          pending_payout?: number
+          status?: string
+          total_earnings?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          affiliate_code?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: number
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+          is_vip?: boolean
+          payout_details?: string | null
+          payout_method?: string | null
+          pending_payout?: number
+          status?: string
+          total_earnings?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       beta_feedback: {
         Row: {
           additional_comments: string | null
