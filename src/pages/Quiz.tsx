@@ -6,10 +6,12 @@ import PaywallGate from '@/components/paywall/PaywallGate';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Trophy, RotateCcw, CheckCircle, XCircle, Flame, Zap, Crown, Sparkles, Play } from 'lucide-react';
+import { Brain, Trophy, RotateCcw, CheckCircle, XCircle, Flame, Zap, Crown, Sparkles, Play, Loader2 } from 'lucide-react';
 import { formatLargeCurrency } from '@/lib/earnings';
 import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 interface QuizQuestion {
   celebrity: string;
   emoji: string;
@@ -139,7 +141,7 @@ const RESULT_TITLES = [
 ];
 
 const Quiz = () => {
-  const [gameState, setGameState] = useState<'intro' | 'playing' | 'result'>('intro');
+  const [gameState, setGameState] = useState<'intro' | 'loading' | 'playing' | 'result'>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -148,6 +150,7 @@ const Quiz = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
   const [showStreakMessage, setShowStreakMessage] = useState(false);
+  const [usedFallback, setUsedFallback] = useState(false);
   const resultsCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -186,9 +189,34 @@ const Quiz = () => {
     title: 'Wealth Quiz Results',
   });
 
-  const startQuiz = () => {
-    const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
-    setShuffledQuestions(shuffled);
+  const startQuiz = async () => {
+    setGameState('loading');
+    setUsedFallback(false);
+    
+    try {
+      // Try to fetch AI-validated questions from Perplexity
+      const { data, error } = await supabase.functions.invoke('generate-quiz-questions', {
+        body: { count: 5 },
+      });
+      
+      if (!error && data?.questions?.length >= 3) {
+        console.log('Using AI-generated questions:', data.questions.length);
+        setShuffledQuestions(data.questions);
+      } else {
+        console.log('Falling back to static questions:', error);
+        // Fall back to static questions
+        const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
+        setShuffledQuestions(shuffled);
+        setUsedFallback(true);
+      }
+    } catch (err) {
+      console.error('Error fetching quiz questions:', err);
+      // Fall back to static questions
+      const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
+      setShuffledQuestions(shuffled);
+      setUsedFallback(true);
+    }
+    
     setCurrentQuestion(0);
     setScore(0);
     setStreak(0);
@@ -306,6 +334,21 @@ const Quiz = () => {
                 <Play className="mr-2 h-5 w-5" />
                 Start Quiz
               </Button>
+            </div>
+          )}
+
+          {/* LOADING STATE */}
+          {gameState === 'loading' && (
+            <div className="text-center animate-fade-in py-16">
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto mb-6">
+                <Loader2 className="h-12 w-12 text-primary animate-spin" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2">
+                Generating Fresh Questions...
+              </h2>
+              <p className="text-muted-foreground">
+                Fetching real-time earnings data from AI
+              </p>
             </div>
           )}
 
