@@ -184,11 +184,11 @@ const Header = () => {
                     >
                       <Crown className="h-4 w-4 mr-2" />
                       <span className="hidden sm:inline">Unlock Unlimited</span>
-                      <span className="sm:hidden">$4.99</span>
+                      <span className="sm:hidden">$6.99</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>$4.99 one-time • All sales final</p>
+                    <p>$6.99 one-time • All sales final</p>
                   </TooltipContent>
                 </Tooltip>
               )}

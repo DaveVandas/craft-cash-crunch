@@ -117,9 +117,9 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
             )}
 
             <div className="mt-4 space-y-1">
-              <span className="block text-sm text-muted-foreground line-through">$4.99</span>
-              <span className="block text-3xl font-bold gradient-gold-text">$3.99</span>
-              <span className="block text-sm text-muted-foreground">Save 20% - One-time payment</span>
+              <span className="block text-sm text-muted-foreground line-through">$6.99</span>
+              <span className="block text-3xl font-bold gradient-gold-text">$5.99</span>
+              <span className="block text-sm text-muted-foreground">Save 14% - One-time payment</span>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -131,7 +131,7 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
             disabled={isExpired}
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            {isExpired ? 'Offer Expired' : 'Claim $3.99 Deal'}
+            {isExpired ? 'Offer Expired' : 'Claim $5.99 Deal'}
           </Button>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             <Clock className="mr-2 h-4 w-4" />

@@ -72,7 +72,7 @@ export const useCelebritySearch = () => {
 
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
           toast("You've sampled the goods — now join the winners circle 🏆", {
-            description: '$4.99 once. Unlimited access. No subscriptions. Real mogul energy.',
+            description: '$6.99 once. Unlimited access. No subscriptions. Real mogul energy.',
             action: {
               label: 'Unlock Lifetime Access',
               onClick: async () => {
@@ -86,7 +86,7 @@ export const useCelebritySearch = () => {
           return null;
         } else if (errorCode === 'LIMIT_REACHED') {
           toast.error(data.error, {
-            description: 'Unlock unlimited access for just $4.99',
+            description: 'Unlock unlimited access for just $6.99',
             action: {
               label: 'Upgrade',
               onClick: async () => {
