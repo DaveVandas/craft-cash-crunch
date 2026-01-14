@@ -26,6 +26,7 @@ import { PositionsList } from '@/components/trading/PositionsList';
 import { OrderHistory } from '@/components/trading/OrderHistory';
 import { TradeModal } from '@/components/trading/TradeModal';
 import { MogulMascot } from '@/components/trading/MogulMascot';
+import { MarketTicker } from '@/components/trading/MarketTicker';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -209,6 +210,9 @@ const MogulMarkets = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      
+      {/* Live Market Ticker */}
+      <MarketTicker />
       
       <main className="flex-1 container py-10 md:py-12">
         {/* Hero Section */}
