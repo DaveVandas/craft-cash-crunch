@@ -14,9 +14,10 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2
 } from 'lucide-react';
 import BetaManagement from '@/components/admin/BetaManagement';
+import { AffiliateManagement } from '@/components/admin/AffiliateManagement';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
@@ -644,6 +645,10 @@ const Admin = () => {
               <Megaphone className="h-4 w-4" />
               Landing Pages
             </TabsTrigger>
+            <TabsTrigger value="affiliates" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              Affiliates
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -982,6 +987,11 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Affiliates Tab */}
+          <TabsContent value="affiliates">
+            <AffiliateManagement />
           </TabsContent>
         </Tabs>
       </main>
