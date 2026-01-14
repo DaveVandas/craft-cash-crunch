@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles, MessageSquare, TrendingUp } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -19,6 +19,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -28,6 +35,7 @@ const Header = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [isBetaUser, setIsBetaUser] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkRoles = async () => {
@@ -52,6 +60,14 @@ const Header = () => {
 
   const isPremium = accessInfo?.hasLifetimeAccess === true || (accessInfo?.searchesRemaining ?? 0) < 0;
 
+  const navLinks = [
+    { to: '/search', icon: Search, label: 'Search' },
+    { to: '/mogul-markets', icon: TrendingUp, label: 'Mogul Markets', highlight: true },
+    { to: '/compare', icon: GitCompareArrows, label: 'Compare' },
+    { to: '/calculator', icon: Calculator, label: 'Reality Check' },
+    { to: '/wealth-wisdom', icon: BookOpen, label: 'Wisdom' },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
@@ -62,6 +78,7 @@ const Header = () => {
           </span>
         </Link>
 
+        {/* Desktop Navigation - simplified to just Search and Mogul Markets */}
         <nav className="hidden md:flex items-center gap-6">
           <Link 
             to="/search" 
@@ -69,30 +86,6 @@ const Header = () => {
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
-          </Link>
-          <Link 
-            to="/compare" 
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
-          >
-            <GitCompareArrows className="h-4 w-4" />
-            <span>Compare</span>
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
-          </Link>
-          <Link 
-            to="/calculator" 
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
-          >
-            <Calculator className="h-4 w-4" />
-            <span>Reality Check</span>
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
-          </Link>
-          <Link 
-            to="/wealth-wisdom" 
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
-          >
-            <BookOpen className="h-4 w-4" />
-            <span>Wisdom</span>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
           <Link 
@@ -107,6 +100,41 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Hamburger Menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <span className="text-xl">💎</span>
+                  <span className="font-serif gradient-gold-text">Menu</span>
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-2 mt-6">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      link.highlight 
+                        ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    <link.icon className="h-5 w-5" />
+                    <span className="font-medium">{link.label}</span>
+                    {link.highlight && <Sparkles className="h-4 w-4 text-amber-500 ml-auto" />}
+                  </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+
           {/* Sound Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -130,7 +158,7 @@ const Header = () => {
             className="h-9 px-3"
           >
             <Share2 className="h-4 w-4 mr-1.5" />
-            <span className="text-sm">Share</span>
+            <span className="text-sm hidden sm:inline">Share</span>
           </Button>
 
           {user ? (
