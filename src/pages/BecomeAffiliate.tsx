@@ -153,7 +153,7 @@ export default function BecomeAffiliate() {
             <span className="text-primary">Mogul Cash</span> 💰
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Earn money by sharing CraftCashCrunch with your friends, followers, and community. 
+            Earn money by sharing Wealth Perspective with your friends, followers, and community. 
             It's simple: share your link, they sign up, you get paid!
           </p>
         </div>
