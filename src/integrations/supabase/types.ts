@@ -312,6 +312,200 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_achievements: {
+        Row: {
+          achievement_id: string
+          achievement_name: string
+          id: string
+          portfolio_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          achievement_id: string
+          achievement_name: string
+          id?: string
+          portfolio_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          achievement_id?: string
+          achievement_name?: string
+          id?: string
+          portfolio_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_achievements_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "trading_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_cash_purchases: {
+        Row: {
+          amount_purchased: number
+          created_at: string
+          id: string
+          portfolio_id: string
+          price_paid: number
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount_purchased: number
+          created_at?: string
+          id?: string
+          portfolio_id: string
+          price_paid: number
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount_purchased?: number
+          created_at?: string
+          id?: string
+          portfolio_id?: string
+          price_paid?: number
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_cash_purchases_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "trading_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_orders: {
+        Row: {
+          company_name: string
+          created_at: string
+          executed_at: string | null
+          id: string
+          order_status: string
+          order_type: string
+          portfolio_id: string
+          price_per_share: number
+          shares: number
+          ticker: string
+          total_amount: number
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          order_status?: string
+          order_type: string
+          portfolio_id: string
+          price_per_share: number
+          shares: number
+          ticker: string
+          total_amount: number
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          order_status?: string
+          order_type?: string
+          portfolio_id?: string
+          price_per_share?: number
+          shares?: number
+          ticker?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_orders_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "trading_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_portfolios: {
+        Row: {
+          cash_balance: number
+          created_at: string
+          id: string
+          session_id: string | null
+          total_invested: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cash_balance?: number
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          total_invested?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cash_balance?: number
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          total_invested?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      trading_positions: {
+        Row: {
+          avg_cost_per_share: number
+          company_name: string
+          created_at: string
+          current_price: number | null
+          id: string
+          last_price_update: string | null
+          portfolio_id: string
+          shares: number
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          avg_cost_per_share: number
+          company_name: string
+          created_at?: string
+          current_price?: number | null
+          id?: string
+          last_price_update?: string | null
+          portfolio_id: string
+          shares: number
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          avg_cost_per_share?: number
+          company_name?: string
+          created_at?: string
+          current_price?: number | null
+          id?: string
+          last_price_update?: string | null
+          portfolio_id?: string
+          shares?: number
+          ticker?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_positions_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "trading_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_access: {
         Row: {
           beta_expires_at: string | null
