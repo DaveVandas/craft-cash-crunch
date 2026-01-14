@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
@@ -14,7 +15,9 @@ import {
   TrendingUp, 
   Clock,
   Crown,
-  Sparkles
+  Sparkles,
+  Rocket,
+  Target
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -142,6 +145,16 @@ export default function AffiliateDashboard() {
 
   const pendingReferrals = referrals.filter(r => r.status === 'pending').length;
   const convertedReferrals = referrals.filter(r => r.status === 'converted' || r.status === 'paid').length;
+  
+  // Tier progress calculation
+  const TIER_THRESHOLD = 1000;
+  const tierProgress = Math.min((affiliate.total_referrals / TIER_THRESHOLD) * 100, 100);
+  const referralsToNextTier = Math.max(TIER_THRESHOLD - affiliate.total_referrals, 0);
+  const hasReachedTier2 = affiliate.total_referrals >= TIER_THRESHOLD;
+  const currentTierRate = hasReachedTier2 ? 2 : 1;
+  const potentialEarningsAtTier2 = affiliate.total_referrals >= TIER_THRESHOLD 
+    ? 0 
+    : (TIER_THRESHOLD - affiliate.total_referrals) * 1; // What they'd miss at $1 tier
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,6 +183,67 @@ export default function AffiliateDashboard() {
           )}
         </div>
 
+        {/* Tier Progress Card */}
+        <Card className={`mb-8 border-2 ${hasReachedTier2 ? 'bg-gradient-to-r from-amber-500/20 via-primary/20 to-amber-500/20 border-amber-500/50' : 'bg-gradient-to-r from-primary/10 to-amber-500/10 border-primary/30'}`}>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {hasReachedTier2 ? (
+                  <div className="p-3 rounded-full bg-amber-500/20">
+                    <Crown className="h-8 w-8 text-amber-400" />
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-full bg-primary/20">
+                    <Rocket className="h-8 w-8 text-primary" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-lg font-bold">
+                    {hasReachedTier2 ? '🎉 TIER 2 UNLOCKED!' : 'Tier Progress'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hasReachedTier2 
+                      ? 'You\'re earning $2 per signup forever!' 
+                      : `${referralsToNextTier.toLocaleString()} referrals to unlock $2/signup`}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">
+                  <span className={hasReachedTier2 ? 'text-amber-400' : 'text-primary'}>${currentTierRate}</span>
+                  <span className="text-lg text-muted-foreground">/signup</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Current Rate</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="flex items-center gap-1">
+                  <Target className="w-4 h-4" />
+                  {affiliate.total_referrals.toLocaleString()} / {TIER_THRESHOLD.toLocaleString()} referrals
+                </span>
+                <span className="font-mono">{tierProgress.toFixed(1)}%</span>
+              </div>
+              <Progress value={tierProgress} className="h-3" />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>$1/signup</span>
+                <span className={hasReachedTier2 ? 'text-amber-400 font-bold' : ''}>$2/signup FOREVER 🔥</span>
+              </div>
+            </div>
+            
+            {!hasReachedTier2 && (
+              <div className="mt-4 p-3 bg-card/50 rounded-lg border border-border/50">
+                <p className="text-sm text-center">
+                  <span className="text-muted-foreground">After unlocking Tier 2, every signup = </span>
+                  <span className="text-amber-400 font-bold">DOUBLE the earnings</span>
+                  <span className="text-muted-foreground"> — grind to 1,000 and never look back! 💪</span>
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30">
@@ -179,7 +253,7 @@ export default function AffiliateDashboard() {
                 <div>
                   <p className="text-xs text-muted-foreground">Commission Rate</p>
                   <p className="text-2xl font-bold text-primary">
-                    ${affiliate.commission_rate.toFixed(2)}
+                    ${currentTierRate.toFixed(2)}
                   </p>
                 </div>
               </div>
