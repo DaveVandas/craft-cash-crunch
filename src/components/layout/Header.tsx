@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -32,6 +32,7 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAffiliate, setIsAffiliate] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [isBetaUser, setIsBetaUser] = useState(false);
@@ -42,6 +43,7 @@ const Header = () => {
       if (!user) {
         setIsAdmin(false);
         setIsBetaUser(false);
+        setIsAffiliate(false);
         return;
       }
       const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
@@ -49,6 +51,15 @@ const Header = () => {
       
       // Check beta access from accessInfo
       setIsBetaUser(!!(accessInfo as any)?.hasBetaAccess);
+
+      // Check if user is an approved affiliate
+      const { data: affiliateData } = await supabase
+        .from('affiliates')
+        .select('status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      setIsAffiliate(affiliateData?.status === 'approved');
     };
     checkRoles();
   }, [user, accessInfo]);
@@ -216,6 +227,12 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="h-4 w-4 mr-2" />
                       Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
+                  {isAffiliate && (
+                    <DropdownMenuItem onClick={() => navigate('/affiliate-dashboard')}>
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Affiliate Dashboard
                     </DropdownMenuItem>
                   )}
                   {isBetaUser && (
