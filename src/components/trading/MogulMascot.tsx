@@ -24,13 +24,13 @@ export function MogulMascot({
   const getMoodEmoji = () => {
     switch (mood) {
       case 'happy':
-        return '🎩😊';
+        return '🦊';
       case 'excited':
-        return '🎩🤑';
+        return '🦁';
       case 'worried':
-        return '🎩😰';
+        return '🐻';
       default:
-        return '🎩🧐';
+        return '🦉';
     }
   };
 
@@ -61,13 +61,13 @@ export function MogulMascot({
         {/* Decorative elements based on mood */}
         {mood === 'excited' && (
           <>
-            <span className="absolute -top-2 -right-2 text-lg animate-ping">✨</span>
-            <span className="absolute -bottom-1 -left-2 text-lg animate-ping" style={{ animationDelay: '0.5s' }}>💰</span>
+            <span className="absolute -top-2 -right-2 text-lg animate-ping">🔥</span>
+            <span className="absolute -bottom-1 -left-2 text-lg animate-ping" style={{ animationDelay: '0.5s' }}>📈</span>
           </>
         )}
         
         {mood === 'happy' && (
-          <span className="absolute -top-1 -right-1 text-lg animate-pulse">⭐</span>
+          <span className="absolute -top-1 -right-1 text-lg animate-pulse">✓</span>
         )}
       </div>
       

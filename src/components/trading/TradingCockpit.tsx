@@ -157,8 +157,9 @@ export function TradingCockpit({
         <Card className="border-border/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                {isPositive ? '📈 Profit Stack' : '📉 Loss Meter'}
+              <span className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                {isPositive ? <TrendingUp className="h-3 w-3 text-emerald-400" /> : <TrendingDown className="h-3 w-3 text-red-400" />}
+                {isPositive ? 'Gold Stack' : 'Red Zone'}
               </span>
               <span className={cn(
                 "text-xs font-medium",

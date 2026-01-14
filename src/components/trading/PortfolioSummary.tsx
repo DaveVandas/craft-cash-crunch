@@ -33,7 +33,7 @@ export function PortfolioSummary({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-xl">
-            <span className="text-3xl">🎩</span>
+            <DollarSign className="h-6 w-6 text-primary" />
             Mogul Markets Dashboard
           </CardTitle>
           <MogulMascot mood={mascotMood} size="sm" />
@@ -90,9 +90,10 @@ export function PortfolioSummary({
 
         {/* Gold Bars Visualization */}
         <div className="flex flex-col items-center p-4 rounded-lg bg-card/30">
-          <p className="text-sm text-muted-foreground mb-3">
-            {isPositive ? '📈 Profit Stacks' : '📉 Loss Meter'}
-          </p>
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+            {isPositive ? <TrendingUp className="h-3 w-3 text-emerald-400" /> : <TrendingDown className="h-3 w-3 text-red-400" />}
+            <span>{isPositive ? 'Gold Stack' : 'Red Zone'}</span>
+          </div>
           <GoldBars amount={totalGainLoss} barValue={500} maxBars={25} />
         </div>
 

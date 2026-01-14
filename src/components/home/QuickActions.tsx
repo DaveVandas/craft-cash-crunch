@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull } from 'lucide-react';
+import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const actions = [
@@ -16,6 +16,13 @@ const actions = [
     description: 'Compare any two people head-to-head',
     href: '/compare',
     color: 'text-blue-400'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Mogul Markets',
+    description: 'Paper trade stocks like a mogul',
+    href: '/mogul-markets',
+    color: 'text-primary'
   },
   {
     icon: HardHat,
