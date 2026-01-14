@@ -40,12 +40,12 @@ const About = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p>
-                We use AI to gather and analyze publicly available information about celebrities, 
-                athletes, entrepreneurs, and other public figures to estimate their annual earnings.
+                We aggregate data from leading wealth publications including Forbes, Bloomberg, and official 
+                financial filings to estimate the annual earnings of celebrities, athletes, and entrepreneurs.
               </p>
               <p>
                 Our calculations factor in various income sources including salaries, endorsements, 
-                business ventures, and investment returns where publicly known.
+                business ventures, stock appreciation, and investment returns as reported by these publications.
               </p>
             </CardContent>
           </Card>
@@ -59,19 +59,18 @@ const About = () => {
                 <AccordionItem value="accuracy">
                   <AccordionTrigger>How accurate is the data?</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Our earnings estimates are based on publicly available information and AI analysis. 
-                    While we strive for accuracy, actual wealth and earnings can be difficult to calculate 
-                    due to complex financial structures, private investments, and undisclosed assets. 
-                    Our figures should be considered estimates for entertainment purposes.
+                    Our earnings estimates are sourced from Forbes wealth rankings, Bloomberg Billionaires Index, 
+                    and other authoritative financial publications. While these are the most trusted sources available, 
+                    actual wealth can differ due to private holdings, complex financial structures, and undisclosed assets.
                   </AccordionContent>
                 </AccordionItem>
                 
                 <AccordionItem value="sources">
                   <AccordionTrigger>Where does the data come from?</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We aggregate information from various public sources including news reports, 
-                    financial filings, Forbes lists, and other publicly available data. Our AI 
-                    processes this information to generate earnings estimates.
+                    We aggregate data from Forbes (highest-paid lists, real-time billionaires), Bloomberg Billionaires Index, 
+                    SEC filings, official contract announcements, and verified financial reporting. Our AI processes 
+                    these authoritative sources to provide consistent earnings estimates.
                   </AccordionContent>
                 </AccordionItem>
                 

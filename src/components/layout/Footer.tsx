@@ -119,8 +119,8 @@ const Footer = () => {
             </Link>
           </div>
           <p className="text-xs text-muted-foreground/70 text-center max-w-2xl">
-            Disclaimer: Earnings and net worth figures are estimates based on publicly available information and may not reflect actual values. 
-            Wealth calculations can vary significantly due to complex financial structures, investments, and undisclosed assets.
+            Disclaimer: Earnings and net worth figures are sourced from Forbes, Bloomberg, and public financial reports. 
+            All figures are estimates and may differ from actual values due to private holdings and undisclosed assets.
           </p>
           <p className="text-xs text-muted-foreground/50 mt-2">
             © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Vandas Inc.
