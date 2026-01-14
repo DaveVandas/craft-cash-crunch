@@ -455,125 +455,248 @@ const SideHustle = () => {
               {/* Adjustable Inputs + Results Combined */}
               <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-amber-500/5">
                 <CardContent className="p-5 md:p-6">
-                  <p className="text-sm font-semibold text-foreground mb-4">Adjust the numbers to fit your situation:</p>
-                  
-                  {/* Inline Adjustable Inputs */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div>
-                      <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
-                      <div className="relative mt-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={buyPrice}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9.]/g, '');
-                            handleInputChange('buy', value);
-                          }}
-                          className="pl-7 h-11 text-base font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
-                      <div className="relative mt-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={sellPrice}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9.]/g, '');
-                            handleInputChange('sell', value);
-                          }}
-                          className="pl-7 h-11 text-base font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
-                      <Input
-                        type="text"
-                        inputMode="numeric"
-                        value={salesPerPeriod}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, '');
-                          handleInputChange('sales', value);
-                        }}
-                        className="h-11 text-base font-medium mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {result && (
+                  {/* Special Affiliate Calculator */}
+                  {selectedHustle.name === 'Wealth Perspective Affiliate' ? (
                     <>
-                      {/* Results Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
-                          <p className="text-xs text-foreground/60 font-medium mb-1">Profit/Item</p>
-                          <p className="text-xl md:text-2xl font-bold text-green-500">{formatCurrency(result.profit)}</p>
+                      <p className="text-sm font-semibold text-foreground mb-4">💰 See what you could earn with our tiered system:</p>
+                      
+                      {/* Single input for downloads */}
+                      <div className="mb-6">
+                        <Label className="text-xs text-foreground/70 font-medium">App Downloads / Signups</Label>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          value={salesPerPeriod}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            handleInputChange('sales', value);
+                          }}
+                          placeholder="e.g. 5000, 10000, 20000"
+                          className="h-12 text-lg font-medium mt-2"
+                        />
+                      </div>
+
+                      {/* Tiered Earnings Calculation */}
+                      {(() => {
+                        const downloads = parseInt(salesPerPeriod) || 0;
+                        const tier1Downloads = Math.min(downloads, 1000);
+                        const tier2Downloads = Math.max(0, downloads - 1000);
+                        const tier1Earnings = tier1Downloads * 1;
+                        const tier2Earnings = tier2Downloads * 2;
+                        const totalEarnings = tier1Earnings + tier2Earnings;
+
+                        return (
+                          <>
+                            {/* Tier Breakdown Visual */}
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                              <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                                <p className="text-xs text-foreground/60 font-medium mb-1">Tier 1 (First 1,000)</p>
+                                <p className="text-sm text-foreground/70 mb-2">{tier1Downloads.toLocaleString()} × $1</p>
+                                <p className="text-xl md:text-2xl font-bold text-green-500">{formatCurrency(tier1Earnings)}</p>
+                              </div>
+                              <div className="text-center p-4 rounded-xl bg-card border border-amber-500/30">
+                                <p className="text-xs text-foreground/60 font-medium mb-1">Tier 2 (After 1,000) ⭐</p>
+                                <p className="text-sm text-foreground/70 mb-2">{tier2Downloads.toLocaleString()} × $2</p>
+                                <p className="text-xl md:text-2xl font-bold text-amber-500">{formatCurrency(tier2Earnings)}</p>
+                              </div>
+                            </div>
+
+                            {/* Total Earnings Hero */}
+                            <div className="p-5 rounded-xl bg-gradient-to-r from-primary/20 via-amber-500/20 to-primary/20 border border-primary/30 text-center mb-6">
+                              <p className="text-sm text-foreground/70 font-medium mb-1">YOUR TOTAL EARNINGS</p>
+                              <p className="text-4xl md:text-5xl font-bold gradient-gold-text">{formatCurrency(totalEarnings)}</p>
+                              <p className="text-sm text-foreground/60 mt-2">
+                                from {downloads.toLocaleString()} downloads
+                              </p>
+                            </div>
+
+                            {/* Quick Examples */}
+                            <div className="p-4 rounded-xl bg-background/50 border border-border/50 mb-4">
+                              <p className="text-sm text-foreground/80 mb-3 text-center font-semibold">📊 Quick Examples:</p>
+                              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                                <div className="p-2 rounded-lg bg-secondary/30">
+                                  <p className="font-bold text-foreground">5K</p>
+                                  <p className="text-xs text-foreground/60">downloads</p>
+                                  <p className="text-green-500 font-semibold">{formatCurrency(1000 + (4000 * 2))}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-secondary/30">
+                                  <p className="font-bold text-foreground">10K</p>
+                                  <p className="text-xs text-foreground/60">downloads</p>
+                                  <p className="text-amber-500 font-semibold">{formatCurrency(1000 + (9000 * 2))}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-secondary/30">
+                                  <p className="font-bold text-foreground">20K</p>
+                                  <p className="text-xs text-foreground/60">downloads</p>
+                                  <p className="text-primary font-semibold">{formatCurrency(1000 + (19000 * 2))}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Tier Explanation */}
+                            <div className="p-4 rounded-xl bg-muted/50 border border-border/50 text-sm">
+                              <p className="font-semibold text-foreground mb-2">* How Our Tiered Commission Works:</p>
+                              <ul className="space-y-1 text-foreground/70">
+                                <li>• <span className="text-green-500 font-semibold">$1 per signup</span> for your first 1,000 referrals</li>
+                                <li>• <span className="text-amber-500 font-semibold">$2 per signup</span> for every referral after that — FOREVER</li>
+                                <li>• No cap, no limits. The more you grow, the more you earn!</li>
+                              </ul>
+                              <p className="mt-3 text-xs text-foreground/50 italic">
+                                Example: 20,000 downloads = $1,000 (first 1K × $1) + $38,000 (next 19K × $2) = <span className="text-primary font-semibold">$39,000</span>
+                              </p>
+                            </div>
+
+                            {/* Motivational Message */}
+                            <div className="mt-5 p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                              {totalEarnings >= 50000 ? (
+                                <p className="text-base md:text-lg text-primary font-semibold">
+                                  🚀 {formatCurrency(totalEarnings)} — That's life-changing money from ONE viral moment!
+                                </p>
+                              ) : totalEarnings >= 20000 ? (
+                                <p className="text-base md:text-lg text-primary font-semibold">
+                                  🔥 {formatCurrency(totalEarnings)} — You're in serious money territory!
+                                </p>
+                              ) : totalEarnings >= 5000 ? (
+                                <p className="text-base md:text-lg text-primary font-semibold">
+                                  💪 {formatCurrency(totalEarnings)} — That's a solid payout! Keep grinding!
+                                </p>
+                              ) : totalEarnings >= 1000 ? (
+                                <p className="text-base md:text-lg text-primary font-semibold">
+                                  ✨ {formatCurrency(totalEarnings)} — Great start! You're building momentum!
+                                </p>
+                              ) : (
+                                <p className="text-base md:text-lg text-primary font-semibold">
+                                  🌱 Enter a number above to see your potential earnings!
+                                </p>
+                              )}
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    <>
+                      {/* Default Calculator for Other Hustles */}
+                      <p className="text-sm font-semibold text-foreground mb-4">Adjust the numbers to fit your situation:</p>
+                      
+                      {/* Inline Adjustable Inputs */}
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div>
+                          <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
+                          <div className="relative mt-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              value={buyPrice}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9.]/g, '');
+                                handleInputChange('buy', value);
+                              }}
+                              className="pl-7 h-11 text-base font-medium"
+                            />
+                          </div>
                         </div>
-                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
-                          <p className="text-xs text-foreground/60 font-medium mb-1">Monthly</p>
-                          <p className="text-xl md:text-2xl font-bold gradient-gold-text">{formatCurrency(result.monthlyProfit)}</p>
+                        <div>
+                          <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
+                          <div className="relative mt-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              value={sellPrice}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9.]/g, '');
+                                handleInputChange('sell', value);
+                              }}
+                              className="pl-7 h-11 text-base font-medium"
+                            />
+                          </div>
                         </div>
-                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
-                          <p className="text-xs text-foreground/60 font-medium mb-1">Yearly</p>
-                          <p className="text-xl md:text-2xl font-bold text-primary">{formatCurrency(result.yearlyProfit)}</p>
-                        </div>
-                        <div className="text-center p-4 rounded-xl bg-card border border-border/50">
-                          <p className="text-xs text-foreground/60 font-medium mb-1">ROI</p>
-                          <p className="text-xl md:text-2xl font-bold text-amber-500">{result.roi.toFixed(0)}%</p>
+                        <div>
+                          <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            value={salesPerPeriod}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, '');
+                              handleInputChange('sales', value);
+                            }}
+                            className="h-11 text-base font-medium mt-1"
+                          />
                         </div>
                       </div>
 
-                      {/* Volume Breakdown */}
-                      <div className="p-4 rounded-xl bg-background/50 border border-border/50">
-                        <p className="text-sm text-foreground/80 mb-3 text-center font-semibold">📦 What it takes to hit these numbers:</p>
-                        <div className="grid grid-cols-3 gap-3 text-center">
-                          <div className="p-3 rounded-lg bg-secondary/30">
-                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerDay}</p>
-                            <p className="text-xs text-foreground/60 font-medium">sales/day</p>
+                      {result && (
+                        <>
+                          {/* Results Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                            <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                              <p className="text-xs text-foreground/60 font-medium mb-1">Profit/Item</p>
+                              <p className="text-xl md:text-2xl font-bold text-green-500">{formatCurrency(result.profit)}</p>
+                            </div>
+                            <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                              <p className="text-xs text-foreground/60 font-medium mb-1">Monthly</p>
+                              <p className="text-xl md:text-2xl font-bold gradient-gold-text">{formatCurrency(result.monthlyProfit)}</p>
+                            </div>
+                            <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                              <p className="text-xs text-foreground/60 font-medium mb-1">Yearly</p>
+                              <p className="text-xl md:text-2xl font-bold text-primary">{formatCurrency(result.yearlyProfit)}</p>
+                            </div>
+                            <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                              <p className="text-xs text-foreground/60 font-medium mb-1">ROI</p>
+                              <p className="text-xl md:text-2xl font-bold text-amber-500">{result.roi.toFixed(0)}%</p>
+                            </div>
                           </div>
-                          <div className="p-3 rounded-lg bg-secondary/30">
-                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerWeek}</p>
-                            <p className="text-xs text-foreground/60 font-medium">sales/week</p>
-                          </div>
-                          <div className="p-3 rounded-lg bg-secondary/30">
-                            <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerMonth}</p>
-                            <p className="text-xs text-foreground/60 font-medium">sales/month</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-foreground/60 text-center mt-3">
-                          That's {formatCurrency(result.profit)} profit per sale × {result.salesPerMonth} sales
-                        </p>
-                      </div>
 
-                      {/* Motivational Messages based on results */}
-                      <div className="mt-5 p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
-                        {result.yearlyProfit >= 100000 ? (
-                          <p className="text-base md:text-lg text-primary font-semibold">
-                            🚀 {formatCurrency(result.yearlyProfit)}/year — You could quit your day job!
-                          </p>
-                        ) : result.yearlyProfit >= 50000 ? (
-                          <p className="text-base md:text-lg text-primary font-semibold">
-                            🔥 {formatCurrency(result.yearlyProfit)}/year — That's serious side income!
-                          </p>
-                        ) : result.yearlyProfit >= 20000 ? (
-                          <p className="text-base md:text-lg text-primary font-semibold">
-                            💪 {formatCurrency(result.yearlyProfit)}/year — A solid extra income stream!
-                          </p>
-                        ) : result.yearlyProfit >= 5000 ? (
-                          <p className="text-base md:text-lg text-primary font-semibold">
-                            ✨ {formatCurrency(result.yearlyProfit)}/year — Great start! Scale it up!
-                          </p>
-                        ) : (
-                          <p className="text-base md:text-lg text-primary font-semibold">
-                            🌱 Every empire starts small. Keep building!
-                          </p>
-                        )}
-                      </div>
+                          {/* Volume Breakdown */}
+                          <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                            <p className="text-sm text-foreground/80 mb-3 text-center font-semibold">📦 What it takes to hit these numbers:</p>
+                            <div className="grid grid-cols-3 gap-3 text-center">
+                              <div className="p-3 rounded-lg bg-secondary/30">
+                                <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerDay}</p>
+                                <p className="text-xs text-foreground/60 font-medium">sales/day</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-secondary/30">
+                                <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerWeek}</p>
+                                <p className="text-xs text-foreground/60 font-medium">sales/week</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-secondary/30">
+                                <p className="text-xl md:text-2xl font-bold text-foreground">{result.salesPerMonth}</p>
+                                <p className="text-xs text-foreground/60 font-medium">sales/month</p>
+                              </div>
+                            </div>
+                            <p className="text-sm text-foreground/60 text-center mt-3">
+                              That's {formatCurrency(result.profit)} profit per sale × {result.salesPerMonth} sales
+                            </p>
+                          </div>
+
+                          {/* Motivational Messages based on results */}
+                          <div className="mt-5 p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                            {result.yearlyProfit >= 100000 ? (
+                              <p className="text-base md:text-lg text-primary font-semibold">
+                                🚀 {formatCurrency(result.yearlyProfit)}/year — You could quit your day job!
+                              </p>
+                            ) : result.yearlyProfit >= 50000 ? (
+                              <p className="text-base md:text-lg text-primary font-semibold">
+                                🔥 {formatCurrency(result.yearlyProfit)}/year — That's serious side income!
+                              </p>
+                            ) : result.yearlyProfit >= 20000 ? (
+                              <p className="text-base md:text-lg text-primary font-semibold">
+                                💪 {formatCurrency(result.yearlyProfit)}/year — A solid extra income stream!
+                              </p>
+                            ) : result.yearlyProfit >= 5000 ? (
+                              <p className="text-base md:text-lg text-primary font-semibold">
+                                ✨ {formatCurrency(result.yearlyProfit)}/year — Great start! Scale it up!
+                              </p>
+                            ) : (
+                              <p className="text-base md:text-lg text-primary font-semibold">
+                                🌱 Every empire starts small. Keep building!
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </CardContent>
