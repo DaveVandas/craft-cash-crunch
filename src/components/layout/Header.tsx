@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles, MessageSquare } from 'lucide-react';
+import { Search, Calculator, GitCompareArrows, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, BookOpen, Sparkles, MessageSquare, TrendingUp } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -89,10 +89,18 @@ const Header = () => {
           </Link>
           <Link 
             to="/wealth-wisdom" 
-            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors relative group"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
           >
             <BookOpen className="h-4 w-4" />
             <span>Wisdom</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
+          </Link>
+          <Link 
+            to="/mogul-markets" 
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors relative group"
+          >
+            <TrendingUp className="h-4 w-4" />
+            <span>Mogul Markets</span>
             <Sparkles className="h-3 w-3 text-amber-500" />
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
           </Link>
