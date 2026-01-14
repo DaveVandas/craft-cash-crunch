@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createSupabaseWithSession, getOrCreateGuestSession } from '@/lib/supabaseWithSession';
 
 interface Position {
   id: string;
@@ -32,29 +33,28 @@ interface Portfolio {
   orders: Order[];
 }
 
-const GUEST_SESSION_KEY = 'mogul_markets_session';
-
-function getOrCreateGuestSession(): string {
-  let sessionId = localStorage.getItem(GUEST_SESSION_KEY);
-  if (!sessionId) {
-    sessionId = `guest_${crypto.randomUUID()}`;
-    localStorage.setItem(GUEST_SESSION_KEY, sessionId);
-  }
-  return sessionId;
-}
-
 export function useTradingPortfolio() {
   const { user } = useAuth();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Get the appropriate Supabase client - with session header for guests
+  const db = useMemo(() => {
+    if (user) {
+      return supabase; // Authenticated user uses regular client
+    }
+    // Guest user needs session header for RLS validation
+    const sessionId = getOrCreateGuestSession();
+    return createSupabaseWithSession(sessionId);
+  }, [user]);
+
   const fetchPortfolio = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      let portfolioQuery = supabase
+      let portfolioQuery = db
         .from('trading_portfolios')
         .select('*');
       
@@ -77,7 +77,7 @@ export function useTradingPortfolio() {
           ? { user_id: user.id }
           : { session_id: getOrCreateGuestSession() };
         
-        const { data: created, error: createError } = await supabase
+        const { data: created, error: createError } = await db
           .from('trading_portfolios')
           .insert(newPortfolio)
           .select()
@@ -98,7 +98,7 @@ export function useTradingPortfolio() {
       }
       
       // Fetch positions
-      const { data: positions, error: positionsError } = await supabase
+      const { data: positions, error: positionsError } = await db
         .from('trading_positions')
         .select('*')
         .eq('portfolio_id', portfolioData.id);
@@ -108,7 +108,7 @@ export function useTradingPortfolio() {
       }
       
       // Fetch recent orders
-      const { data: orders, error: ordersError } = await supabase
+      const { data: orders, error: ordersError } = await db
         .from('trading_orders')
         .select('*')
         .eq('portfolio_id', portfolioData.id)
@@ -150,7 +150,7 @@ export function useTradingPortfolio() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, db]);
 
   const executeBuy = useCallback(async (
     ticker: string,
@@ -174,7 +174,7 @@ export function useTradingPortfolio() {
       const newCashBalance = portfolio.cash_balance - totalCost;
       const newTotalInvested = portfolio.total_invested + totalCost;
       
-      await supabase
+      await db
         .from('trading_portfolios')
         .update({ 
           cash_balance: newCashBalance,
@@ -193,7 +193,7 @@ export function useTradingPortfolio() {
           (shares * pricePerShare)
         ) / newShares;
         
-        await supabase
+        await db
           .from('trading_positions')
           .update({
             shares: newShares,
@@ -204,7 +204,7 @@ export function useTradingPortfolio() {
           .eq('id', existingPosition.id);
       } else {
         // Create new position
-        await supabase
+        await db
           .from('trading_positions')
           .insert({
             portfolio_id: portfolio.id,
@@ -218,7 +218,7 @@ export function useTradingPortfolio() {
       }
       
       // Record order
-      await supabase
+      await db
         .from('trading_orders')
         .insert({
           portfolio_id: portfolio.id,
@@ -244,7 +244,7 @@ export function useTradingPortfolio() {
       });
       return false;
     }
-  }, [portfolio, fetchPortfolio]);
+  }, [portfolio, fetchPortfolio, db]);
 
   const executeSell = useCallback(async (
     ticker: string,
@@ -270,7 +270,7 @@ export function useTradingPortfolio() {
       const newCashBalance = portfolio.cash_balance + totalProceeds;
       const newTotalInvested = portfolio.total_invested - costBasis;
       
-      await supabase
+      await db
         .from('trading_portfolios')
         .update({ 
           cash_balance: newCashBalance,
@@ -282,19 +282,19 @@ export function useTradingPortfolio() {
       const remainingShares = position.shares - shares;
       
       if (remainingShares <= 0) {
-        await supabase
+        await db
           .from('trading_positions')
           .delete()
           .eq('id', position.id);
       } else {
-        await supabase
+        await db
           .from('trading_positions')
           .update({ shares: remainingShares })
           .eq('id', position.id);
       }
       
       // Record order
-      await supabase
+      await db
         .from('trading_orders')
         .insert({
           portfolio_id: portfolio.id,
@@ -323,7 +323,7 @@ export function useTradingPortfolio() {
       });
       return false;
     }
-  }, [portfolio, fetchPortfolio]);
+  }, [portfolio, fetchPortfolio, db]);
 
   const updatePositionPrices = useCallback(async (prices: Record<string, number>) => {
     if (!portfolio) return;
@@ -331,7 +331,7 @@ export function useTradingPortfolio() {
     try {
       for (const position of portfolio.positions) {
         if (prices[position.ticker]) {
-          await supabase
+          await db
             .from('trading_positions')
             .update({
               current_price: prices[position.ticker],
@@ -345,7 +345,7 @@ export function useTradingPortfolio() {
     } catch (err) {
       console.error('Error updating prices:', err);
     }
-  }, [portfolio, fetchPortfolio]);
+  }, [portfolio, fetchPortfolio, db]);
 
   useEffect(() => {
     fetchPortfolio();
