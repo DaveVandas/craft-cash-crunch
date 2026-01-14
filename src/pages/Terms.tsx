@@ -30,19 +30,19 @@ const Terms = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">2. Description of Service</h2>
                 <p className="text-muted-foreground">
-                  Wealth Perspective provides estimated earnings and wealth comparisons for entertainment 
-                  purposes. The information presented is based on publicly available data and AI analysis, 
-                  and should not be considered financial advice or factual representation.
+                  Wealth Perspective provides earnings and wealth comparisons sourced from Forbes, Bloomberg, 
+                  and other leading financial publications. The information is intended for entertainment and 
+                  educational purposes and should not be considered financial advice.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">3. Disclaimer of Accuracy</h2>
                 <p className="text-muted-foreground">
-                  All earnings, net worth, and wealth figures displayed are estimates only. We do not 
-                  guarantee the accuracy, completeness, or reliability of any information provided. 
-                  Actual wealth and earnings may differ significantly from displayed estimates due to 
-                  complex financial structures, private holdings, and undisclosed information.
+                  All earnings and net worth figures are estimates based on published wealth rankings and 
+                  financial reports from sources including Forbes, Bloomberg, and SEC filings. We do not 
+                  guarantee the accuracy of any figures. Actual wealth may differ significantly due to 
+                  private holdings, complex financial structures, and undisclosed assets.
                 </p>
               </section>
 
