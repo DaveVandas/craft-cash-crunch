@@ -49,7 +49,7 @@ const Terms = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">4. Payments & Refund Policy</h2>
                 <p className="text-muted-foreground mb-3">
-                  Wealth Perspective offers a one-time lifetime access purchase for $4.99. Before purchasing, 
+                  Wealth Perspective offers a one-time lifetime access purchase for $6.99. Before purchasing, 
                   all users receive <strong className="text-foreground">3 free searches</strong> to explore the service and determine if it 
                   meets their needs.
                 </p>

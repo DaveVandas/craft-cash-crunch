@@ -48,7 +48,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           </h2>
           
           <p className="text-muted-foreground mb-6">
-            You've explored the wealth gap — now unlock unlimited access to all features for just <span className="text-primary font-bold">$4.99</span> (one time, forever).
+            You've explored the wealth gap — now unlock unlimited access to all features for just <span className="text-primary font-bold">$6.99</span> (one time, forever).
           </p>
 
           <div className="space-y-3 text-left mb-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
@@ -71,7 +71,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           </div>
 
           <p className="text-sm text-muted-foreground mb-4 italic">
-            "You can afford $5 once to hang in this winners circle, right?!" 💪
+            "You can afford $7 once to hang in this winners circle, right?!" 💪
           </p>
 
           {user ? (
@@ -80,7 +80,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
               className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
             >
               <Crown className="mr-2 h-5 w-5" />
-              Get Lifetime Access - $4.99
+              Get Lifetime Access - $6.99
             </Button>
           ) : (
             <div className="space-y-3">

@@ -25,7 +25,7 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
-const LIFETIME_ACCESS_PRICE_ID = "price_1Se6KdQ4T0jF0A1fLe3n9fMI";
+const LIFETIME_ACCESS_PRICE_ID = "price_1SpczOQ4T0jF0A1fAHWJ6kS8";
 
 serve(async (req) => {
   const origin = req.headers.get('origin');

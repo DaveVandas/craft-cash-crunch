@@ -127,7 +127,7 @@ const Admin = () => {
   const paidUsers = users.filter((u) => u.has_lifetime_access).length;
   const freeUsers = totalUsers - paidUsers;
   const totalSearches = users.reduce((sum, u) => sum + u.search_count, 0);
-  const estimatedRevenue = paidUsers * 4.99;
+  const estimatedRevenue = paidUsers * 6.99;
 
   // Recent activity (users who signed in within last 7 days)
   const recentlyActive = users.filter((u) => {
@@ -171,7 +171,7 @@ const Admin = () => {
         date: displayDate,
         signups: dayUsers.length,
         paid: paidCount,
-        revenue: paidCount * 4.99,
+        revenue: paidCount * 6.99,
       });
     }
     return data;
@@ -319,7 +319,7 @@ const Admin = () => {
             <CardContent>
               <p className="text-3xl font-bold text-primary">${estimatedRevenue.toFixed(2)}</p>
               <p className="text-sm text-muted-foreground">
-                {paidUsers} × $4.99
+                {paidUsers} × $6.99
               </p>
             </CardContent>
           </Card>

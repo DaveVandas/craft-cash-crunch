@@ -356,7 +356,7 @@ const Auth = () => {
                     <span className="text-muted-foreground"> included with every account</span>
                   </p>
                   <p className="text-xs text-center text-muted-foreground mt-1">
-                    Unlock unlimited access for just $4.99 — one time, forever
+                    Unlock unlimited access for just $6.99 — one time, forever
                   </p>
                 </div>
               </>
