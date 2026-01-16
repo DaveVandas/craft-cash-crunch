@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -9,32 +9,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Seeded random for consistent shuffling within a time period
-function seededRandom(seed: number): () => number {
-  return function() {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-}
-
-function shuffleWithSeed<T>(array: T[], seed: number): T[] {
-  const result = [...array];
-  const random = seededRandom(seed);
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
 const Category = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const category = id ? getCategoryById(id) : undefined;
   const [displayedSuggestions, setDisplayedSuggestions] = useState<string[]>([]);
+  const [isReady, setIsReady] = useState(false);
 
-  // Scroll to top on mount to prevent flash/jump issues on back navigation
+  // Scroll to top and mark ready on mount to prevent flash/jump issues
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // Small delay to ensure DOM is ready before rendering content
+    const timer = setTimeout(() => setIsReady(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   // Shuffle suggestions randomly on every visit
@@ -45,6 +32,21 @@ const Category = () => {
       setDisplayedSuggestions(shuffled.slice(0, 5));
     }
   }, [category]);
+
+  // Navigate to profile with preview data to prevent loading flash
+  const handleSuggestionClick = (name: string) => {
+    const slug = name.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/profile/${slug}`, {
+      state: {
+        preview: {
+          name,
+          netWorth: 'Loading...',
+          hourlyEarnings: '$0/hr',
+          emoji: '💰',
+        },
+      },
+    });
+  };
 
   if (!category) {
     return (
@@ -60,6 +62,17 @@ const Category = () => {
             </Button>
           </Link>
         </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Wait until ready to prevent flash on navigation
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1" />
         <Footer />
       </div>
     );
@@ -111,14 +124,15 @@ const Category = () => {
           <h2 className="font-serif text-xl font-bold mb-4">Try searching for</h2>
           <div className="flex flex-wrap gap-2">
             {displayedSuggestions.map((suggestion) => (
-              <Link 
+              <Button 
                 key={suggestion} 
-                to={`/profile/${suggestion.toLowerCase().replace(/\s+/g, '-')}`}
+                variant="outline" 
+                size="sm" 
+                className="hover:border-primary/50"
+                onClick={() => handleSuggestionClick(suggestion)}
               >
-                <Button variant="outline" size="sm" className="hover:border-primary/50">
-                  {suggestion}
-                </Button>
-              </Link>
+                {suggestion}
+              </Button>
             ))}
           </div>
         </section>
