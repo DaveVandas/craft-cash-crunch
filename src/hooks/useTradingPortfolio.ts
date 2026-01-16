@@ -12,6 +12,7 @@ interface Position {
   avg_cost_per_share: number;
   current_price: number | null;
   last_price_update: string | null;
+  is_short?: boolean; // True if this is a short position
 }
 
 interface Order {
@@ -137,6 +138,7 @@ export function useTradingPortfolio() {
           avg_cost_per_share: Number(p.avg_cost_per_share),
           current_price: p.current_price ? Number(p.current_price) : null,
           last_price_update: p.last_price_update,
+          is_short: Number(p.shares) < 0, // Negative shares = short position
         })),
         orders: (orders || []).map(o => ({
           id: o.id,
@@ -188,8 +190,8 @@ export function useTradingPortfolio() {
         })
         .eq('id', portfolio.id);
       
-      // Check if position exists
-      const existingPosition = portfolio.positions.find(p => p.ticker === ticker);
+      // Check if position exists (only long positions, shares > 0)
+      const existingPosition = portfolio.positions.find(p => p.ticker === ticker && p.shares > 0);
       
       if (existingPosition) {
         // Update existing position
@@ -259,7 +261,8 @@ export function useTradingPortfolio() {
   ) => {
     if (!portfolio) return false;
     
-    const position = portfolio.positions.find(p => p.ticker === ticker);
+    // Find long position (shares > 0)
+    const position = portfolio.positions.find(p => p.ticker === ticker && p.shares > 0);
     
     if (!position || position.shares < shares) {
       toast.error('Insufficient shares', {
@@ -331,6 +334,191 @@ export function useTradingPortfolio() {
     }
   }, [portfolio, fetchPortfolio, db]);
 
+  // Execute a short sale - borrow shares and sell them
+  const executeShort = useCallback(async (
+    ticker: string,
+    companyName: string,
+    shares: number,
+    pricePerShare: number
+  ) => {
+    if (!portfolio) return false;
+    
+    const totalProceeds = shares * pricePerShare;
+    
+    // Short selling requires margin - we'll require 50% margin requirement
+    const marginRequired = totalProceeds * 0.5;
+    
+    if (marginRequired > portfolio.cash_balance) {
+      toast.error('Insufficient margin', {
+        description: `You need $${marginRequired.toFixed(2)} margin (50%) but only have $${portfolio.cash_balance.toFixed(2)}`,
+      });
+      return false;
+    }
+    
+    try {
+      // Add proceeds to cash, hold margin
+      // Net effect: cash increases by proceeds but margin is reserved
+      const newCashBalance = portfolio.cash_balance + totalProceeds;
+      
+      await db
+        .from('trading_portfolios')
+        .update({ 
+          cash_balance: newCashBalance,
+        })
+        .eq('id', portfolio.id);
+      
+      // Check if short position already exists (shares < 0)
+      const existingShort = portfolio.positions.find(p => p.ticker === ticker && p.shares < 0);
+      
+      if (existingShort) {
+        // Add to existing short position
+        const newShares = existingShort.shares - shares; // More negative
+        const existingValue = Math.abs(existingShort.shares) * existingShort.avg_cost_per_share;
+        const newValue = shares * pricePerShare;
+        const newAvgCost = (existingValue + newValue) / Math.abs(newShares);
+        
+        await db
+          .from('trading_positions')
+          .update({
+            shares: newShares,
+            avg_cost_per_share: newAvgCost,
+            current_price: pricePerShare,
+            last_price_update: new Date().toISOString(),
+          })
+          .eq('id', existingShort.id);
+      } else {
+        // Create new short position (negative shares)
+        await db
+          .from('trading_positions')
+          .insert({
+            portfolio_id: portfolio.id,
+            ticker,
+            company_name: companyName,
+            shares: -shares, // Negative for short
+            avg_cost_per_share: pricePerShare,
+            current_price: pricePerShare,
+            last_price_update: new Date().toISOString(),
+          });
+      }
+      
+      // Record order
+      await db
+        .from('trading_orders')
+        .insert({
+          portfolio_id: portfolio.id,
+          ticker,
+          company_name: companyName,
+          order_type: 'short',
+          shares,
+          price_per_share: pricePerShare,
+          total_amount: totalProceeds,
+        });
+      
+      toast.success(`Shorted ${shares} shares of ${ticker}`, {
+        description: `Received: $${totalProceeds.toFixed(2)} 🐻`,
+      });
+      
+      await fetchPortfolio();
+      return true;
+      
+    } catch (err) {
+      console.error('Error executing short:', err);
+      toast.error('Short trade failed', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+      return false;
+    }
+  }, [portfolio, fetchPortfolio, db]);
+
+  // Cover a short position - buy back shares to close
+  const executeCover = useCallback(async (
+    ticker: string,
+    shares: number,
+    pricePerShare: number
+  ) => {
+    if (!portfolio) return false;
+    
+    // Find short position (shares < 0)
+    const shortPosition = portfolio.positions.find(p => p.ticker === ticker && p.shares < 0);
+    const shortedShares = shortPosition ? Math.abs(shortPosition.shares) : 0;
+    
+    if (!shortPosition || shortedShares < shares) {
+      toast.error('Insufficient short position', {
+        description: `You only have ${shortedShares} shares shorted of ${ticker}`,
+      });
+      return false;
+    }
+    
+    const totalCost = shares * pricePerShare;
+    
+    if (totalCost > portfolio.cash_balance) {
+      toast.error('Insufficient funds to cover', {
+        description: `You need $${totalCost.toFixed(2)} but only have $${portfolio.cash_balance.toFixed(2)}`,
+      });
+      return false;
+    }
+    
+    try {
+      // Pay to buy back shares
+      const newCashBalance = portfolio.cash_balance - totalCost;
+      
+      await db
+        .from('trading_portfolios')
+        .update({ 
+          cash_balance: newCashBalance,
+        })
+        .eq('id', portfolio.id);
+      
+      // Calculate profit/loss on short
+      const shortCostBasis = shares * shortPosition.avg_cost_per_share;
+      const profitLoss = shortCostBasis - totalCost; // Profit if bought back lower
+      
+      // Update or delete short position
+      const remainingShorted = shortedShares - shares;
+      
+      if (remainingShorted <= 0) {
+        await db
+          .from('trading_positions')
+          .delete()
+          .eq('id', shortPosition.id);
+      } else {
+        await db
+          .from('trading_positions')
+          .update({ shares: -remainingShorted }) // Keep negative
+          .eq('id', shortPosition.id);
+      }
+      
+      // Record order
+      await db
+        .from('trading_orders')
+        .insert({
+          portfolio_id: portfolio.id,
+          ticker,
+          company_name: shortPosition.company_name,
+          order_type: 'cover',
+          shares,
+          price_per_share: pricePerShare,
+          total_amount: totalCost,
+        });
+      
+      const profitEmoji = profitLoss >= 0 ? '📈' : '📉';
+      
+      toast.success(`Covered ${shares} shares of ${ticker}`, {
+        description: `${profitEmoji} P/L: ${profitLoss >= 0 ? '+' : ''}$${profitLoss.toFixed(2)}`,
+      });
+      
+      await fetchPortfolio();
+      return true;
+      
+    } catch (err) {
+      console.error('Error executing cover:', err);
+      toast.error('Cover trade failed', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+      return false;
+    }
+  }, [portfolio, fetchPortfolio, db]);
+
   const updatePositionPrices = useCallback(async (prices: Record<string, number>) => {
     if (!portfolio) return;
     
@@ -360,12 +548,20 @@ export function useTradingPortfolio() {
   // Calculate portfolio stats
   const portfolioValue = portfolio?.positions.reduce((total, pos) => {
     const price = pos.current_price || pos.avg_cost_per_share;
+    // For short positions (negative shares), the value is negative
     return total + (pos.shares * price);
   }, 0) || 0;
   
   const totalValue = (portfolio?.cash_balance || 0) + portfolioValue;
   const totalGainLoss = totalValue - 10000; // Starting balance
   const totalGainLossPercent = ((totalValue - 10000) / 10000) * 100;
+
+  // Helper to get long and short positions separately
+  const longPositions = portfolio?.positions.filter(p => p.shares > 0) || [];
+  const shortPositions = portfolio?.positions.filter(p => p.shares < 0).map(p => ({
+    ...p,
+    shares: Math.abs(p.shares), // Convert to positive for display
+  })) || [];
 
   return {
     portfolio,
@@ -375,9 +571,13 @@ export function useTradingPortfolio() {
     totalValue,
     totalGainLoss,
     totalGainLossPercent,
+    longPositions,
+    shortPositions,
     fetchPortfolio,
     executeBuy,
     executeSell,
+    executeShort,
+    executeCover,
     updatePositionPrices,
   };
 }

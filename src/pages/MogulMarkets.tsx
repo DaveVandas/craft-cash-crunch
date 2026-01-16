@@ -45,9 +45,13 @@ const MogulMarkets = () => {
     totalValue,
     totalGainLoss,
     totalGainLossPercent,
+    longPositions,
+    shortPositions,
     fetchPortfolio,
     executeBuy,
     executeSell,
+    executeShort,
+    executeCover,
   } = useTradingPortfolio();
 
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
@@ -172,7 +176,11 @@ const MogulMarkets = () => {
   };
 
   const currentShares = selectedStock 
-    ? portfolio?.positions.find(p => p.ticker === selectedStock.ticker)?.shares || 0
+    ? longPositions.find(p => p.ticker === selectedStock.ticker)?.shares || 0
+    : 0;
+
+  const currentShortedShares = selectedStock
+    ? shortPositions.find(p => p.ticker === selectedStock.ticker)?.shares || 0
     : 0;
 
   if (isLoading) {
@@ -289,6 +297,7 @@ const MogulMarkets = () => {
         onClose={() => setIsTradeModalOpen(false)}
         cashBalance={portfolio?.cash_balance || 0}
         currentShares={currentShares}
+        currentShortedShares={currentShortedShares}
         onBuy={async (shares, price) => {
           if (!selectedStock) return false;
           return executeBuy(selectedStock.ticker, selectedStock.name, shares, price);
@@ -296,6 +305,14 @@ const MogulMarkets = () => {
         onSell={async (shares, price) => {
           if (!selectedStock) return false;
           return executeSell(selectedStock.ticker, shares, price);
+        }}
+        onShort={async (shares, price) => {
+          if (!selectedStock) return false;
+          return executeShort(selectedStock.ticker, selectedStock.name, shares, price);
+        }}
+        onCover={async (shares, price) => {
+          if (!selectedStock) return false;
+          return executeCover(selectedStock.ticker, shares, price);
         }}
       />
     </div>
