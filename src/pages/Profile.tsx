@@ -56,6 +56,15 @@ const Profile = () => {
   const { user, accessInfo, loading: authLoading } = useAuth();
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  // Scroll to top and mark ready on mount to prevent flash/jump issues
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Small delay to ensure DOM is ready before rendering content
+    const timer = setTimeout(() => setIsReady(true), 10);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get preview or prefetched celebrity data from navigation state
   const navState = (location.state ?? null) as { preview?: PreviewData; celebrity?: Celebrity } | null;
@@ -134,14 +143,15 @@ const Profile = () => {
   const isLoadingWithPreview = loading && !!(previewCelebrity || prefetchedCelebrity);
   const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity && !prefetchedCelebrity;
 
-  if (isLoadingWithoutPreview) {
+  // Wait until ready to prevent flash on navigation
+  if (!isReady || isLoadingWithoutPreview) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container py-8">
-          <Skeleton className="h-40 w-full mb-8" />
-          <Skeleton className="h-64 w-full mb-8" />
-          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-40 w-full mb-8 animate-pulse" />
+          <Skeleton className="h-64 w-full mb-8 animate-pulse" />
+          <Skeleton className="h-96 w-full animate-pulse" />
         </main>
         <Footer />
       </div>
