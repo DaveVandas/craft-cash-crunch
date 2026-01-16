@@ -32,6 +32,11 @@ const Category = () => {
   const category = id ? getCategoryById(id) : undefined;
   const [displayedSuggestions, setDisplayedSuggestions] = useState<string[]>([]);
 
+  // Scroll to top on mount to prevent flash/jump issues on back navigation
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   // Shuffle suggestions randomly on every visit
   useEffect(() => {
     if (category) {
