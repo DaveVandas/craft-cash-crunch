@@ -22,25 +22,46 @@ serve(async (req) => {
   try {
     const { portfolioId, sessionId } = await req.json();
     
+    // SECURITY: Both portfolioId and sessionId are required
     if (!portfolioId) {
       throw new Error("Portfolio ID is required");
+    }
+    
+    if (!sessionId) {
+      throw new Error("Session ID is required");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Verify the session if provided
-    if (sessionId) {
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // SECURITY: Always verify the Stripe session - never skip this step
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status !== "paid") {
+      throw new Error("Payment not completed");
+    }
+    
+    // Validate metadata matches the portfolio
+    if (session.metadata?.portfolioId !== portfolioId) {
+      throw new Error("Portfolio mismatch");
+    }
+
+    // SECURITY: Idempotency check - prevent replay attacks
+    // Check if this payment_intent has already been used
+    const paymentIntentId = typeof session.payment_intent === 'string' 
+      ? session.payment_intent 
+      : session.payment_intent?.id;
+    
+    if (paymentIntentId) {
+      const { data: existingPurchase } = await supabaseAdmin
+        .from("trading_cash_purchases")
+        .select("id")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .maybeSingle();
       
-      if (session.payment_status !== "paid") {
-        throw new Error("Payment not completed");
-      }
-      
-      // Check metadata matches
-      if (session.metadata?.portfolioId !== portfolioId) {
-        throw new Error("Portfolio mismatch");
+      if (existingPurchase) {
+        throw new Error("Payment already processed");
       }
     }
 
@@ -67,15 +88,17 @@ serve(async (req) => {
       throw new Error("Failed to update balance");
     }
 
-    // Record the purchase
+    // Record the purchase with payment_intent for idempotency
     await supabaseAdmin
       .from("trading_cash_purchases")
       .insert({
         portfolio_id: portfolioId,
         amount_purchased: CASH_AMOUNT,
         price_paid: 4.99,
-        stripe_payment_intent_id: sessionId || null,
+        stripe_payment_intent_id: paymentIntentId || sessionId,
       });
+
+    console.log(`Mogul Cash purchase verified: portfolio=${portfolioId}, amount=${CASH_AMOUNT}, payment_intent=${paymentIntentId}`);
 
     return new Response(JSON.stringify({ 
       success: true, 
