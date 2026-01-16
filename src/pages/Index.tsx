@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
@@ -14,6 +15,14 @@ import SocialProofNotifications from '@/components/engagement/SocialProofNotific
 import { categories } from '@/lib/categories';
 
 const Index = () => {
+  // Ensure scroll is at top when navigating back to this page
+  useEffect(() => {
+    // Use a small timeout to ensure this runs after any browser scroll restoration
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />

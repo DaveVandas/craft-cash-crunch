@@ -162,8 +162,8 @@ const FeaturedTicker = () => {
   const { currentIndex, goToIndex } = useFeaturedCelebrity();
 
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const navTimeoutRef = useRef<number | null>(null);
-  const initialIndexRef = useRef(currentIndex);
 
   // Navigate to profile with prefetched data for instant loading
   const handleNavigate = useCallback((person: FeaturedPerson) => {
@@ -171,20 +171,33 @@ const FeaturedTicker = () => {
     navigate(`/profile/${person.id}`, { state: { celebrity } });
   }, [navigate]);
 
+  // Use currentIndex directly for startIndex - this ensures correct
+  // initialization when navigating back to the page
   const emblaOptions = useMemo(
     () => ({
       loop: true,
       skipSnaps: false,
       slidesToScroll: 1,
-      startIndex: initialIndexRef.current,
+      startIndex: currentIndex,
       // Keep it smooth but not "floaty"
       duration: 60,
       dragFree: false,
     }),
+    // Intentionally only run once on mount to prevent carousel resets during auto-rotation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const [emblaRef, emblaApi] = useEmblaCarousel(emblaOptions);
+
+  // Mark carousel as ready after initial render to prevent flash
+  useEffect(() => {
+    if (emblaApi) {
+      // Small delay to ensure carousel is fully initialized
+      const timer = setTimeout(() => setIsReady(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [emblaApi]);
 
   const clearNavLock = useCallback(() => {
     if (navTimeoutRef.current) {
@@ -262,6 +275,15 @@ const FeaturedTicker = () => {
     lockWithFailsafe();
     emblaApi.scrollNext();
   }, [emblaApi, isNavigating, lockWithFailsafe]);
+
+  // Don't render carousel until it's ready to prevent flashing on back navigation
+  if (!isReady && !emblaApi) {
+    return (
+      <div className="relative">
+        <div className="mx-2 h-48 md:h-44 bg-card rounded-xl animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

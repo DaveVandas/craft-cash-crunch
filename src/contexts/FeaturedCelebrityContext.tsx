@@ -68,10 +68,34 @@ export const FeaturedCelebrityProvider = ({ children }: { children: ReactNode })
     window.setTimeout(() => setIsTransitioning(false), 150);
   }, []);
 
-  // Auto-rotate every 30 seconds
+  // Auto-rotate every 30 seconds, but only when the page is visible
   useEffect(() => {
-    const interval = setInterval(goToNext, 30000);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      } else {
+        if (!interval) {
+          interval = setInterval(goToNext, 30000);
+        }
+      }
+    };
+
+    // Start interval only if page is visible
+    if (!document.hidden) {
+      interval = setInterval(goToNext, 30000);
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [goToNext]);
 
   return (
