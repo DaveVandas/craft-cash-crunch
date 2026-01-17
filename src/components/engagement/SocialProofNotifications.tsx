@@ -99,8 +99,8 @@ const SocialProofNotifications = () => {
       }, randomDelay);
     };
 
-    // Show first notification after becoming active
-    fetchAndShowNotification();
+    // Don't show notification immediately - wait for the first scheduled interval
+    // This prevents toasts from appearing when navigating back to home page
     scheduleNext();
 
     return () => {

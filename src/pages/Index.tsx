@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
@@ -15,14 +15,21 @@ import SocialProofNotifications from '@/components/engagement/SocialProofNotific
 import { categories } from '@/lib/categories';
 
 const Index = () => {
-  // Ensure scroll is at top when navigating back to this page
+  const [isReady, setIsReady] = useState(false);
+
+  // Ensure scroll is at top and mark ready to prevent flash on back navigation
   useEffect(() => {
-    // Use a small timeout to ensure this runs after any browser scroll restoration
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Small delay to ensure DOM is stable before rendering
+    const timer = setTimeout(() => setIsReady(true), 10);
     return () => clearTimeout(timer);
   }, []);
+
+  // Prevent black screen flash on back navigation
+  if (!isReady) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
