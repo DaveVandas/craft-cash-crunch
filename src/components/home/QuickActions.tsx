@@ -58,7 +58,7 @@ const QuickActions = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3" data-tour="quick-actions">
       {actions.map((action) => (
         <Link key={action.href} to={action.href} className="group block">
-          <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/80 hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] h-full">
+          <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 border-l-4 border-l-primary/40 bg-card/30 hover:bg-card/80 hover:border-primary/40 hover:border-l-primary transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] h-full">
             {/* Emoji */}
             <div className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
               {action.emoji}
