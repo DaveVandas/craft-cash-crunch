@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Crown, TrendingUp, Zap, DollarSign, ArrowRight, Star } from 'lucide-react';
 import LandingShareButtons from '@/components/landing/LandingShareButtons';
+import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
 
 const LandingVariantA = () => {
+  // Track affiliate referral from ?ref=CODE query param
+  useAffiliateAttribution();
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}

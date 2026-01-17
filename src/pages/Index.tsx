@@ -14,8 +14,11 @@ import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import SideHustlePreview from '@/components/home/SideHustlePreview';
 import MogulMarketsPreview from '@/components/home/MogulMarketsPreview';
 import HeroSpotlight from '@/components/home/HeroSpotlight';
+import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
 
 const Index = () => {
+  // Track affiliate referral from ?ref=CODE query param
+  useAffiliateAttribution();
   // Scroll to top immediately on any navigation to this page (including back)
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });

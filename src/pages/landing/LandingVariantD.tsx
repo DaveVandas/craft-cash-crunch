@@ -15,8 +15,11 @@ import {
   Zap
 } from 'lucide-react';
 import LandingShareButtons from '@/components/landing/LandingShareButtons';
+import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
 
 const LandingVariantD = () => {
+  // Track affiliate referral from ?ref=CODE query param
+  useAffiliateAttribution();
   // Calculate example earnings
   const tier1Signups = 1000;
   const tier2Signups = 19000;
