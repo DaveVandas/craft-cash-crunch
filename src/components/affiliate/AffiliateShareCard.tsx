@@ -74,8 +74,8 @@ export function AffiliateShareCard({
       if (blob && navigator.share) {
         const file = new File([blob], `mogul-affiliate-${affiliateCode}.png`, { type: 'image/png' });
         await navigator.share({
-          title: 'Join Wealth Perspective',
-          text: `🎩 Use my code ${affiliateCode} to explore how the ultra-wealthy earn! See what you can make compared to billionaires.`,
+          title: 'Join the Mogul Movement',
+          text: `👑 Join the mogul lifestyle with my code ${affiliateCode}! See how the ultra-wealthy build their empires and start your journey to greatness.`,
           files: [file],
         });
         toast.success('Shared successfully!');
@@ -138,12 +138,12 @@ export function AffiliateShareCard({
               {isVip && <Crown className="w-5 h-5 text-primary" />}
             </div>
             <h2 className="text-2xl font-bold text-foreground">
-              Mogul Invite
+              Join the Mogul Life
             </h2>
             <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span>Exclusive Access</span>
-              <Sparkles className="w-4 h-4 text-primary" />
+              <Crown className="w-4 h-4 text-primary" />
+              <span>Exclusive Mogul Access</span>
+              <Crown className="w-4 h-4 text-primary" />
             </div>
           </div>
 
@@ -175,7 +175,10 @@ export function AffiliateShareCard({
           {/* Affiliate Info */}
           <div className="space-y-3">
             <div className="space-y-1">
-              <p className="text-muted-foreground text-sm">Invited by</p>
+              <p className="text-muted-foreground text-sm flex items-center justify-center gap-1">
+                <Crown className="w-3 h-3 text-primary" />
+                Invited by Mogul
+              </p>
               <p className="text-xl font-bold text-foreground">{displayName}</p>
             </div>
             
@@ -192,14 +195,14 @@ export function AffiliateShareCard({
 
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <TrendingUp className="w-4 h-4 text-green-500" />
-              <span>See how billionaires really earn</span>
+              <span>Live the mogul lifestyle</span>
             </div>
           </div>
 
           {/* Footer */}
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Scan to explore celebrity earnings
+              Scan to join the mogul movement 👑
             </p>
             <p className="text-xs text-primary font-medium">
               earningsexplorer.shop

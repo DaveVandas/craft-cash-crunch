@@ -182,21 +182,25 @@ export default function AffiliateDashboard() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+            <Crown className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold">
+              <span className="text-primary">{affiliate.display_name}</span>'s Empire
+            </h1>
             {affiliate.is_vip && (
-              <Badge className="bg-primary/20 text-primary border-primary/30 gap-1">
+              <Badge className="bg-gradient-to-r from-amber-500/30 to-primary/30 text-amber-400 border-amber-500/50 gap-1">
                 <Crown className="w-3 h-3" />
-                VIP
+                VIP Mogul
               </Badge>
             )}
           </div>
-          <p className="text-muted-foreground">
-            Welcome back, {affiliate.display_name}! Track your referrals and earnings here.
+          <p className="text-lg text-muted-foreground">
+            Welcome back, <span className="text-primary font-semibold">Mogul {affiliate.display_name}</span>! 
+            Your empire awaits — keep building that wealth! 👑
           </p>
           {affiliate.status === 'pending' && (
             <Badge className="mt-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
               <Clock className="w-3 h-3 mr-1" />
-              Application Pending Review
+              Application Pending Review — Your journey to mogul status begins soon!
             </Badge>
           )}
         </div>
@@ -217,12 +221,12 @@ export default function AffiliateDashboard() {
                 )}
                 <div>
                   <h3 className="text-lg font-bold">
-                    {hasReachedTier2 ? '🎉 TIER 2 UNLOCKED!' : 'Tier Progress'}
+                    {hasReachedTier2 ? '👑 MOGUL ELITE STATUS!' : 'Path to Mogul Elite'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {hasReachedTier2 
-                      ? 'You\'re earning $2 per signup forever!' 
-                      : `${referralsToNextTier.toLocaleString()} referrals to unlock $2/signup`}
+                      ? 'You\'ve reached the top! Earning $2 per signup forever like a true mogul!' 
+                      : `${referralsToNextTier.toLocaleString()} referrals until you unlock elite mogul status!`}
                   </p>
                 </div>
               </div>
@@ -253,9 +257,9 @@ export default function AffiliateDashboard() {
             {!hasReachedTier2 && (
               <div className="mt-4 p-3 bg-card/50 rounded-lg border border-border/50">
                 <p className="text-sm text-center">
-                  <span className="text-muted-foreground">After unlocking Tier 2, every signup = </span>
-                  <span className="text-amber-400 font-bold">DOUBLE the earnings</span>
-                  <span className="text-muted-foreground"> — grind to 1,000 and never look back! 💪</span>
+                  <span className="text-muted-foreground">True moguls don't stop at Tier 1. </span>
+                  <span className="text-amber-400 font-bold">Hit 1,000 and DOUBLE your empire!</span>
+                  <span className="text-muted-foreground"> Every referral is a step toward greatness 👑</span>
                 </p>
               </div>
             )}
@@ -381,17 +385,21 @@ export default function AffiliateDashboard() {
           <TabsContent value="referrals">
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
-                <CardTitle>Your Referrals</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="w-5 h-5 text-primary" />
+                  Your Mogul Network
+                </CardTitle>
                 <div className="flex gap-4 text-sm text-muted-foreground">
-                  <span>{convertedReferrals} converted</span>
-                  <span>{pendingReferrals} pending</span>
+                  <span>{convertedReferrals} moguls recruited</span>
+                  <span>{pendingReferrals} pending verification</span>
                 </div>
               </CardHeader>
               <CardContent>
                 {referrals.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No referrals yet. Share your card to start earning!</p>
+                    <Crown className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">Your empire starts with one share!</p>
+                    <p className="text-sm mt-1">Every mogul was once a beginner. Start building your network today! 👑</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
