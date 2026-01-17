@@ -26,12 +26,12 @@ const WealthWisdomPromo = () => {
           </div>
         </div>
         
-        <Link to="/wealth-wisdom" className="shrink-0">
-          <Button size="sm" className="group w-full sm:w-auto">
+        <Button asChild size="sm" className="group w-full sm:w-auto shrink-0">
+          <Link to="/wealth-wisdom">
             Read Story
             <ArrowRight className="h-4 w-4 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </div>
   );

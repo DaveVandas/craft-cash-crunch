@@ -292,12 +292,12 @@ const Header = () => {
               </DropdownMenu>
             </>
           ) : (
-            <Link to="/auth">
-              <Button variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+            <Button asChild variant="outline" className="border-primary/50 hover:border-primary hover:bg-primary/10">
+              <Link to="/auth">
                 <LogIn className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Sign In</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
         
