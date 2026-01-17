@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, Flame, Sparkles } from 'lucide-react';
+import { TrendingUp, Flame, Sparkles, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { nameToSlug } from '@/lib/validation';
@@ -314,6 +314,15 @@ const TrendingSearches = () => {
                 ))}
               </div>
             )}
+            
+            {/* See More Link */}
+            <Link 
+              to="/search" 
+              className="flex items-center justify-center gap-1 mt-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              See more celebrities
+              <ChevronRight className="h-4 w-4" />
+            </Link>
           </CardContent>
         </Card>
       </div>
