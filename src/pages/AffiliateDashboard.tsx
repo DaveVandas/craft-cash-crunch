@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
+import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { 
   DollarSign, 
   Users, 
@@ -309,6 +310,10 @@ export default function AffiliateDashboard() {
               <Sparkles className="w-4 h-4" />
               Share Card
             </TabsTrigger>
+            <TabsTrigger value="links" className="gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Marketing Links
+            </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2">
               <Users className="w-4 h-4" />
               Referrals ({referrals.length})
@@ -335,6 +340,10 @@ export default function AffiliateDashboard() {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="links">
+            <MarketingLinksCard affiliateCode={affiliate.affiliate_code} />
           </TabsContent>
 
           <TabsContent value="referrals">
