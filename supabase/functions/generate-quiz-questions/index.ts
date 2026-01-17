@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -107,6 +108,53 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check - require valid user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+    console.log(`Quiz questions requested by user: ${userId}`);
+
+    // Rate limiting - max 10 quiz requests per minute per user
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    const rateLimitKey = `quiz_${userId}_${clientIp}`;
+    
+    const { data: isRateLimited } = await supabaseClient.rpc('check_rate_limit', {
+      p_ip_address: rateLimitKey,
+      p_max_requests: 10,
+      p_window_seconds: 60
+    });
+    
+    if (isRateLimited) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
     
     if (!PERPLEXITY_API_KEY) {
@@ -119,8 +167,11 @@ serve(async (req) => {
 
     const { count = 5 } = await req.json().catch(() => ({}));
     
+    // Limit count to prevent abuse (max 10 questions per request)
+    const safeCount = Math.min(Math.max(1, Number(count) || 5), 10);
+    
     // Shuffle and select celebrities
-    const shuffledCelebs = [...CELEBRITY_POOL].sort(() => Math.random() - 0.5).slice(0, count);
+    const shuffledCelebs = [...CELEBRITY_POOL].sort(() => Math.random() - 0.5).slice(0, safeCount);
     
     // Fetch earnings data from Perplexity for each celebrity
     const questions: QuizQuestion[] = [];
