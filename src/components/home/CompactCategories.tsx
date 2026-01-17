@@ -27,7 +27,7 @@ const CompactCategories = () => {
           </Link>
         ))}
       </div>
-      <ScrollBar orientation="horizontal" />
+      <ScrollBar orientation="horizontal" className="bg-primary/20 [&>div]:bg-primary/60" />
     </ScrollArea>
   );
 };
