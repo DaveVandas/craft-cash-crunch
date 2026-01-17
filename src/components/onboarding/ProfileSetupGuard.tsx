@@ -2,19 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import ProfileSetupModal from '@/components/onboarding/ProfileSetupModal';
-import WelcomeTour from '@/components/onboarding/WelcomeTour';
 
 interface ProfileSetupGuardProps {
   children: React.ReactNode;
 }
 
-const TOUR_COMPLETED_KEY = 'wealth_perspective_tour_completed';
-
 const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
   const [showSetup, setShowSetup] = useState(false);
-  const [showTour, setShowTour] = useState(false);
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
 
   useEffect(() => {
@@ -31,27 +27,12 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   const handleSetupComplete = () => {
     setShowSetup(false);
     setHasCompletedSetup(true);
-    
-    // Check if user has seen the tour before
-    const tourCompleted = localStorage.getItem(TOUR_COMPLETED_KEY);
-    if (!tourCompleted) {
-      // Small delay to let the setup modal close smoothly
-      setTimeout(() => {
-        setShowTour(true);
-      }, 300);
-    }
-  };
-
-  const handleTourComplete = () => {
-    setShowTour(false);
-    localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
   };
 
   return (
     <>
       {children}
       <ProfileSetupModal open={showSetup} onComplete={handleSetupComplete} />
-      <WelcomeTour open={showTour} onComplete={handleTourComplete} />
     </>
   );
 };

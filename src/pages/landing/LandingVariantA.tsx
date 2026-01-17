@@ -1,15 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Crown, TrendingUp, Zap, DollarSign, ArrowRight, Star } from 'lucide-react';
-import LandingShareHeader from '@/components/landing/LandingShareHeader';
 
 const LandingVariantA = () => {
   return (
     <div className="min-h-screen bg-background">
-      <LandingShareHeader variant="a" />
-      
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-14">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-background" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
