@@ -119,6 +119,58 @@ const MogulMarkets = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Auto-refresh prices on page load and every 60 seconds
+  useEffect(() => {
+    if (!portfolio || portfolio.positions.length === 0) return;
+    
+    // Refresh prices on initial load
+    const initialRefresh = async () => {
+      setIsRefreshing(true);
+      try {
+        const tickers = portfolio.positions.map(p => p.ticker);
+        const { data, error } = await supabase.functions.invoke('get-stock-data', {
+          body: { action: 'batch', tickers },
+        });
+        
+        if (!error && data.stocks) {
+          // Update prices in database
+          const priceMap: Record<string, number> = {};
+          for (const stock of data.stocks) {
+            priceMap[stock.ticker] = stock.price;
+          }
+          
+          // Update each position's current_price
+          for (const position of portfolio.positions) {
+            if (priceMap[position.ticker]) {
+              await supabase
+                .from('trading_positions')
+                .update({
+                  current_price: priceMap[position.ticker],
+                  last_price_update: new Date().toISOString(),
+                })
+                .eq('id', position.id);
+            }
+          }
+          
+          await fetchPortfolio();
+        }
+      } catch (err) {
+        console.error('Error refreshing prices:', err);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+    
+    initialRefresh();
+    
+    // Set up interval for periodic refresh (every 60 seconds)
+    const intervalId = setInterval(() => {
+      handleRefreshPrices();
+    }, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, [portfolio?.id, portfolio?.positions.length]);
+
   const handleSelectStock = (stock: StockData) => {
     setSelectedStock(stock);
     setIsTradeModalOpen(true);
@@ -167,10 +219,26 @@ const MogulMarkets = () => {
       });
       
       if (!error && data.stocks) {
+        // Update prices in database
+        for (const stock of data.stocks) {
+          const position = portfolio.positions.find(p => p.ticker === stock.ticker);
+          if (position) {
+            await supabase
+              .from('trading_positions')
+              .update({
+                current_price: stock.price,
+                last_price_update: new Date().toISOString(),
+              })
+              .eq('id', position.id);
+          }
+        }
+        
         await fetchPortfolio();
+        toast.success('Prices updated!', { duration: 2000 });
       }
     } catch (err) {
       console.error('Error refreshing prices:', err);
+      toast.error('Failed to refresh prices');
     } finally {
       setIsRefreshing(false);
     }
