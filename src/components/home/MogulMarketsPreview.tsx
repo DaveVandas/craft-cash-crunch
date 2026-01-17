@@ -36,9 +36,12 @@ const MogulMarketsPreview = () => {
               NEW
             </Badge>
           </CardTitle>
-          <div className="flex items-center gap-1 text-xs text-primary">
-            <Zap className="h-3 w-3" />
-            <span>Live</span>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-muted-foreground">Live Market Data</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">Paper trade stocks risk-free</p>
