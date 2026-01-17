@@ -164,6 +164,19 @@ const Quiz = () => {
     }
   }, []);
 
+  // Safety reset: when we advance to a new question, clear any prior selection
+  // and blur focus so the previously-clicked button doesn't appear "selected".
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+
+    if (typeof document !== 'undefined') {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
+  }, [currentQuestion, gameState]);
+
   const getResultTitle = () => {
     const percentage = shuffledQuestions.length > 0 ? (score / shuffledQuestions.length) * 100 : 0;
     return RESULT_TITLES.find(r => percentage >= r.min && percentage <= r.max) || RESULT_TITLES[0];
@@ -275,7 +288,13 @@ const Quiz = () => {
         // Reset selection state BEFORE changing question
         setSelectedAnswer(null);
         setIsCorrect(null);
-        setCurrentQuestion(currentQuestion + 1);
+
+        // Prevent focus styling from making the next question look pre-selected
+        if (typeof document !== 'undefined') {
+          (document.activeElement as HTMLElement | null)?.blur?.();
+        }
+
+        setCurrentQuestion((q) => q + 1);
       } else {
         // Play victory sound when quiz completes
         playSound('quizComplete');
