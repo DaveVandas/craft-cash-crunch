@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import BetaManagement from '@/components/admin/BetaManagement';
 import { AffiliateManagement } from '@/components/admin/AffiliateManagement';
+import { RevenueDashboard } from '@/components/admin/RevenueDashboard';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
@@ -623,8 +624,12 @@ const Admin = () => {
         </Card>
 
         {/* Tabs for Users and Trends */}
-        <Tabs defaultValue="users" className="space-y-4">
-          <TabsList>
+        <Tabs defaultValue="revenue" className="space-y-4">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="revenue" className="gap-2">
+              <DollarSign className="h-4 w-4" />
+              Revenue
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               Users
@@ -650,6 +655,10 @@ const Admin = () => {
               Affiliates
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="revenue">
+            <RevenueDashboard users={users} />
+          </TabsContent>
 
           <TabsContent value="users">
             <Card className="border-primary/20">
