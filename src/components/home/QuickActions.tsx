@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull, TrendingUp, ChevronRight } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Calculator, GitCompareArrows, Brain, HardHat, Skull, ChevronRight } from 'lucide-react';
 
 const actions = [
   {
@@ -18,26 +17,11 @@ const actions = [
     emoji: '⚔️'
   },
   {
-    icon: TrendingUp,
-    title: 'Mogul Markets',
-    description: 'Paper trade stocks with virtual cash',
-    href: '/mogul-markets',
-    emoji: '📈',
-    badge: 'NEW'
-  },
-  {
     icon: Brain,
     title: 'Wealth Quiz',
     description: 'Guess who earns more and test your knowledge',
     href: '/quiz',
     emoji: '🧠'
-  },
-  {
-    icon: Rocket,
-    title: 'Side Hustle',
-    description: 'Calculate your extra income potential',
-    href: '/side-hustle',
-    emoji: '🚀'
   },
   {
     icon: HardHat,
@@ -66,18 +50,10 @@ const QuickActions = () => {
               {action.emoji}
             </div>
             
-            {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                  {action.title}
-                </h3>
-                {action.badge && (
-                  <Badge className="bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0 h-4 font-bold animate-pulse">
-                    {action.badge}
-                  </Badge>
-                )}
-              </div>
+              <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                {action.title}
+              </h3>
               <p className="text-xs text-muted-foreground truncate">
                 {action.description}
               </p>
