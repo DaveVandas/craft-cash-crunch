@@ -86,7 +86,7 @@ export function TradingCockpit({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-      {/* Left Panel - Portfolio Overview */}
+      {/* Left Panel - Portfolio Overview + Quick Trade */}
       <div className="lg:col-span-4 space-y-4">
         {/* Main Portfolio Card */}
         <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-card to-amber-500/5">
@@ -144,29 +144,7 @@ export function TradingCockpit({
           </Card>
         </div>
 
-        {/* Gold Bars */}
-        <Card className="border-border/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                {isPositive ? <TrendingUp className="h-3 w-3 text-emerald-400" /> : <TrendingDown className="h-3 w-3 text-red-400" />}
-                {isPositive ? 'Gold Stack' : 'Red Zone'}
-              </span>
-              <span className={cn(
-                "text-xs font-medium",
-                isPositive ? "text-emerald-400" : "text-red-400"
-              )}>
-                {isPositive ? '+' : ''}${Math.abs(totalGainLoss).toFixed(0)}
-              </span>
-            </div>
-            <GoldBars amount={totalGainLoss} barValue={250} maxBars={20} />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Center Panel - Trading Console */}
-      <div className="lg:col-span-5 space-y-4">
-        {/* Search & Quick Trade */}
+        {/* Quick Trade - Moved here under Net Worth */}
         <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -194,6 +172,28 @@ export function TradingCockpit({
           </CardContent>
         </Card>
 
+        {/* Gold Bars */}
+        <Card className="border-border/30">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                {isPositive ? <TrendingUp className="h-3 w-3 text-emerald-400" /> : <TrendingDown className="h-3 w-3 text-red-400" />}
+                {isPositive ? 'Gold Stack' : 'Red Zone'}
+              </span>
+              <span className={cn(
+                "text-xs font-medium",
+                isPositive ? "text-emerald-400" : "text-red-400"
+              )}>
+                {isPositive ? '+' : ''}${Math.abs(totalGainLoss).toFixed(0)}
+              </span>
+            </div>
+            <GoldBars amount={totalGainLoss} barValue={250} maxBars={20} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Center Panel - Holdings (now wider) */}
+      <div className="lg:col-span-5 space-y-4">
         {/* Positions */}
         <Card className="border-border/30">
           <CardHeader className="pb-2 pt-4">
@@ -220,13 +220,13 @@ export function TradingCockpit({
           </CardHeader>
           <CardContent>
             {positions.length === 0 ? (
-              <div className="text-center py-6">
-                <Activity className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+              <div className="text-center py-8">
+                <Activity className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
                 <p className="text-sm text-muted-foreground">No positions yet</p>
-                <p className="text-xs text-muted-foreground/60">Make your first trade above!</p>
+                <p className="text-xs text-muted-foreground/60">Search for a stock and make your first trade!</p>
               </div>
             ) : (
-              <ScrollArea className="h-[240px]">
+              <ScrollArea className="h-[380px]">
                 <div className="space-y-2 pr-2">
                   {positions.map((position) => {
                     const currentPrice = position.current_price || position.avg_cost_per_share;
