@@ -84,14 +84,15 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
             </Button>
           ) : (
             <div className="space-y-3">
-              <Link to="/auth" className="block">
-                <Button 
-                  className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
-                >
+              <Button 
+                asChild
+                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+              >
+                <Link to="/auth">
                   <Crown className="mr-2 h-5 w-5" />
                   Sign Up & Get Lifetime Access
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <p className="text-xs text-muted-foreground">
                 Already have an account? <Link to="/auth" className="text-primary hover:underline">Sign in</Link>
               </p>

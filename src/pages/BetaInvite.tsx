@@ -151,9 +151,9 @@ const BetaInvite = () => {
             <CardDescription>{invalidReason}</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Link to="/">
-              <Button variant="outline">Go to Home</Button>
-            </Link>
+            <Button asChild variant="outline">
+              <Link to="/">Go to Home</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
