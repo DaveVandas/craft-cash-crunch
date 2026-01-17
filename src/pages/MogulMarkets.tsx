@@ -329,7 +329,7 @@ const MogulMarkets = () => {
               </div>
               <div className="flex items-center gap-1.5 text-primary">
                 <Zap className="h-3 w-3" />
-                <span className="font-medium">Real-time AI Data</span>
+                <span className="font-medium">Live Market Data</span>
               </div>
               <Link to="/mogul-academy" className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors">
                 <GraduationCap className="h-3 w-3" />
