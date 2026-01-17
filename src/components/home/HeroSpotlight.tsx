@@ -5,14 +5,14 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Celebrity } from '@/lib/types';
 import { useEarningsTicker } from '@/hooks/useEarningsTicker';
-import { formatLargeCurrency } from '@/lib/earnings';
+import { formatLargeCurrency, formatCompactCurrency } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const HeroSpotlight = () => {
   const navigate = useNavigate();
   const { featured, isTransitioning, goToIndex, currentIndex, totalCount } = useFeaturedCelebrity();
-  const { currentEarnings } = useEarningsTicker({ annualEarnings: featured.annualEarnings });
+  const { currentEarnings, breakdown } = useEarningsTicker({ annualEarnings: featured.annualEarnings });
 
   const prefetchedCelebrity: Celebrity = {
     id: featured.id,
@@ -104,6 +104,24 @@ const HeroSpotlight = () => {
           </div>
           <div className="font-mono text-2xl md:text-3xl font-bold gradient-gold-text">
             {formatLargeCurrency(currentEarnings)}
+          </div>
+          
+          {/* Compact earnings breakdown */}
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
+            <div className="text-center flex-1">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">/sec</div>
+              <div className="text-xs font-mono font-semibold text-foreground">{formatCompactCurrency(breakdown.perSecond)}</div>
+            </div>
+            <div className="w-px h-6 bg-border/30" />
+            <div className="text-center flex-1">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">/min</div>
+              <div className="text-xs font-mono font-semibold text-foreground">{formatCompactCurrency(breakdown.perMinute)}</div>
+            </div>
+            <div className="w-px h-6 bg-border/30" />
+            <div className="text-center flex-1">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">/hr</div>
+              <div className="text-xs font-mono font-semibold text-foreground">{formatCompactCurrency(breakdown.perHour)}</div>
+            </div>
           </div>
         </div>
 
