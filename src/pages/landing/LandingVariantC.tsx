@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Rocket, Eye, Lightbulb, Users, ArrowRight, Play } from 'lucide-react';
+import LandingShareButtons from '@/components/landing/LandingShareButtons';
 
 const LandingVariantC = () => {
   return (
@@ -15,6 +16,13 @@ const LandingVariantC = () => {
         </div>
         
         <div className="container relative z-10 text-center px-4 py-20">
+          {/* Share Button - Top Right */}
+          <div className="absolute top-6 right-6 z-20">
+            <LandingShareButtons 
+              shareText="⏱️ Your monthly salary in 42 seconds? That's how fast Rihanna earns it. Mind = blown."
+            />
+          </div>
+
           {/* Eyebrow */}
           <p className="text-primary font-medium mb-4 tracking-wide">
             50,000+ PEOPLE ALREADY GET IT
