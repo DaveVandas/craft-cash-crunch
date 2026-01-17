@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode } from 'react';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 interface SoundContextType {
-  play: (sound?: 'coin' | 'cashRegister' | 'ching') => void;
+  play: (sound?: 'coin' | 'cashRegister' | 'ching' | 'correct' | 'incorrect' | 'streak' | 'quizComplete') => void;
   enabled: boolean;
   toggle: () => void;
 }
