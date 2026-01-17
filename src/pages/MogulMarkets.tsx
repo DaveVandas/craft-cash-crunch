@@ -219,27 +219,44 @@ const MogulMarkets = () => {
         body: { action: 'batch', tickers },
       });
       
-      if (!error && data.stocks) {
-        // Update prices in database
-        for (const stock of data.stocks) {
-          const position = portfolio.positions.find(p => p.ticker === stock.ticker);
-          if (position) {
-            await supabase
-              .from('trading_positions')
-              .update({
-                current_price: stock.price,
-                last_price_update: new Date().toISOString(),
-              })
-              .eq('id', position.id);
-          }
-        }
-        
-        await fetchPortfolio();
-        toast.success('Prices updated!', { duration: 2000 });
+      if (error) {
+        console.error('Error refreshing prices:', error);
+        toast.error('Unable to refresh prices', {
+          description: 'Data service temporarily unavailable. Try again shortly.',
+        });
+        return;
       }
+      
+      if (!data.stocks || data.stocks.length === 0) {
+        // No data returned - could be off-hours or rate limited
+        toast.info('Prices unchanged', {
+          description: 'Market data may be delayed outside trading hours.',
+          duration: 3000,
+        });
+        return;
+      }
+      
+      // Update prices in database
+      for (const stock of data.stocks) {
+        const position = portfolio.positions.find(p => p.ticker === stock.ticker);
+        if (position) {
+          await supabase
+            .from('trading_positions')
+            .update({
+              current_price: stock.price,
+              last_price_update: new Date().toISOString(),
+            })
+            .eq('id', position.id);
+        }
+      }
+      
+      await fetchPortfolio();
+      toast.success('Prices updated!', { duration: 2000 });
     } catch (err) {
       console.error('Error refreshing prices:', err);
-      toast.error('Failed to refresh prices');
+      toast.error('Unable to refresh prices', {
+        description: 'Please check your connection and try again.',
+      });
     } finally {
       setIsRefreshing(false);
     }
