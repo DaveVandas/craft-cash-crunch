@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import ProfileHero from '@/components/profile/ProfileHero';
+import ProfileBreadcrumb from '@/components/profile/ProfileBreadcrumb';
 import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import ShareCard from '@/components/share/ShareCard';
@@ -207,6 +208,12 @@ const Profile = () => {
       <main className="flex-1">
         <PaywallGate>
           <>
+            <div className="container pt-4">
+              <ProfileBreadcrumb 
+                celebrityName={displayCelebrity.name} 
+                category={displayCelebrity.category} 
+              />
+            </div>
             <ProfileHero celebrity={displayCelebrity} isLoading={!!isLoadingWithPreview} />
             <div className="container py-8 space-y-8">
               <EarningsTicker annualEarnings={displayCelebrity.annualEarnings} name={displayCelebrity.name} />
