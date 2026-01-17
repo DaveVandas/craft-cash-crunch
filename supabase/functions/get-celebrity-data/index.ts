@@ -162,6 +162,29 @@ function validateName(name: unknown): string | null {
   return trimmed;
 }
 
+// Sanitize input for safe use in AI prompts - defense-in-depth after validation
+function sanitizeForPrompt(input: string): string {
+  // Remove any potential prompt injection patterns
+  let sanitized = input
+    // Remove control characters
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    // Escape quotes that could break prompt structure
+    .replace(/"/g, "'")
+    // Remove common prompt injection patterns
+    .replace(/ignore\s*(all\s*)?(previous\s*)?(instructions?)?/gi, '')
+    .replace(/disregard\s*(all\s*)?(previous\s*)?(instructions?)?/gi, '')
+    .replace(/system\s*:?/gi, '')
+    .replace(/assistant\s*:?/gi, '')
+    .replace(/user\s*:?/gi, '')
+    .replace(/\[INST\]/gi, '')
+    .replace(/<\/?[a-z][^>]*>/gi, '') // Remove HTML-like tags
+    // Limit consecutive special characters
+    .replace(/([^\p{L}\p{M}0-9\s])\1{2,}/gu, '$1$1');
+  
+  // Final trim and length enforcement
+  return sanitized.trim().substring(0, 100);
+}
+
 function validateCategory(category: unknown): string | null {
   if (typeof category !== 'string') return null;
   
@@ -758,9 +781,12 @@ serve(async (req) => {
       return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE', corsHeaders);
     }
 
+    // Sanitize name for safe prompt injection prevention
+    const safeName = name ? sanitizeForPrompt(name) : null;
+    
     // Build sanitized prompt with specific instructions for consistent, verifiable data
-    const prompt = name 
-      ? `Provide earnings data for "${name}". Return ONLY a JSON object with these fields:
+    const prompt = safeName 
+      ? `Provide earnings data for "${safeName}". Return ONLY a JSON object with these fields:
 - name: full name
 - profession: their primary profession
 - category: one of (athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical)
