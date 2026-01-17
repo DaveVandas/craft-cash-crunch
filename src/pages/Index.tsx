@@ -57,8 +57,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Featured Section - Stacked */}
-        <section className="container mb-8">
+        {/* Featured Section */}
+        <section className="container mb-6">
           <div className="space-y-1">
             <DailyCelebritySpotlight />
             <FeaturedTicker />
@@ -66,19 +66,19 @@ const Index = () => {
         </section>
 
         {/* Trending Now */}
-        <section className="container mb-8">
+        <section className="container mb-6">
           <TrendingSearches />
         </section>
 
-        {/* Browse Categories - Compact Pills */}
+        {/* Browse Categories - Horizontal Scroll */}
         <section className="container mb-8">
-          <h2 className="font-serif text-xl font-bold mb-4 text-center">Browse by Category</h2>
+          <h2 className="font-serif text-lg font-bold mb-3">Browse by Category</h2>
           <CompactCategories />
         </section>
 
-        {/* Quick Actions */}
+        {/* Mogul Tools - Stacked List */}
         <section className="container mb-8">
-          <h2 className="font-serif text-2xl font-bold mb-5">Mogul Tools</h2>
+          <h2 className="font-serif text-lg font-bold mb-3">Mogul Tools</h2>
           <QuickActions />
         </section>
 
