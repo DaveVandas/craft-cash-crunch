@@ -155,10 +155,10 @@ Thank you for being part of our journey. We can't wait to hear what you think!
         });
       }
 
+      // Return minimal data - only first name, no email or other sensitive info
       return new Response(JSON.stringify({ 
         valid: true, 
-        invite,
-        recipientName: invite.recipient_name,
+        recipientName: invite.recipient_name?.split(' ')[0] || '',
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
