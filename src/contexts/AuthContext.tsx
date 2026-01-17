@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  paymentLoading: boolean;
   accessInfo: AccessInfo | null;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [accessInfo, setAccessInfo] = useState<AccessInfo | null>(null);
 
   const refreshAccess = async () => {
@@ -147,6 +149,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const initiatePayment = async () => {
+    if (paymentLoading) return; // Prevent double-clicks
+    
+    setPaymentLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-payment');
       
@@ -178,6 +183,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error('Something went wrong', {
         description: 'Please try again later.',
       });
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -187,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         session,
         loading,
+        paymentLoading,
         accessInfo,
         signUp,
         signIn,

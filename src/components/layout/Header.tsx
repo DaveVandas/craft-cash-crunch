@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode, RefreshCw } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode, RefreshCw, Loader2 } from 'lucide-react';
 import { usePWAUpdate } from '@/hooks/usePWAUpdate';
 import { toast } from 'sonner';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
@@ -31,7 +31,7 @@ import {
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, accessInfo, signOut, initiatePayment } = useAuth();
+  const { user, accessInfo, signOut, initiatePayment, paymentLoading } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const { checkForUpdates, isChecking, needRefresh, applyUpdate } = usePWAUpdate();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -207,11 +207,16 @@ const Header = () => {
                   <TooltipTrigger asChild>
                     <Button 
                       onClick={initiatePayment}
+                      disabled={paymentLoading}
                       className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                     >
-                      <Crown className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Unlock Unlimited</span>
-                      <span className="sm:hidden">$6.99</span>
+                      {paymentLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Crown className="h-4 w-4 mr-2" />
+                      )}
+                      <span className="hidden sm:inline">{paymentLoading ? 'Processing...' : 'Unlock Unlimited'}</span>
+                      <span className="sm:hidden">{paymentLoading ? '...' : '$6.99'}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -269,9 +274,13 @@ const Header = () => {
                     </DropdownMenuItem>
                   )}
                   {accessInfo && !isPremium && (
-                    <DropdownMenuItem onClick={initiatePayment}>
-                      <Crown className="h-4 w-4 mr-2" />
-                      Upgrade to Unlimited
+                    <DropdownMenuItem onClick={initiatePayment} disabled={paymentLoading}>
+                      {paymentLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Crown className="h-4 w-4 mr-2" />
+                      )}
+                      {paymentLoading ? 'Processing...' : 'Upgrade to Unlimited'}
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSub>

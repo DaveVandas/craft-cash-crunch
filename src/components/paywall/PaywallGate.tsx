@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Crown, Lock, Sparkles } from 'lucide-react';
+import { Crown, Lock, Sparkles, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
@@ -19,7 +19,7 @@ interface PaywallGateProps {
 }
 
 const PaywallGate = ({ children }: PaywallGateProps) => {
-  const { user, accessInfo, initiatePayment, loading } = useAuth();
+  const { user, accessInfo, initiatePayment, loading, paymentLoading } = useAuth();
   
   // Check if user should be blocked
   const anonSearchCount = getAnonSearchCount();
@@ -77,10 +77,15 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           {user ? (
             <Button 
               onClick={initiatePayment}
+              disabled={paymentLoading}
               className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
             >
-              <Crown className="mr-2 h-5 w-5" />
-              Get Lifetime Access - $6.99
+              {paymentLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Crown className="mr-2 h-5 w-5" />
+              )}
+              {paymentLoading ? 'Processing...' : 'Get Lifetime Access - $6.99'}
             </Button>
           ) : (
             <div className="space-y-3">
