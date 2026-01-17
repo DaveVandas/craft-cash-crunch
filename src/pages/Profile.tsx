@@ -95,18 +95,31 @@ const Profile = () => {
 
     if (prefetchedCelebrity && prefetchedCelebrity.id === (id || '')) {
       setCelebrity(prefetchedCelebrity);
+      // If prefetched data is missing imageUrl, fetch full data in background
+      // This happens when navigating from Trending which has earnings but no images
+      if (!prefetchedCelebrity.imageUrl && id) {
+        const validatedName = slugToName(id);
+        if (validatedName) {
+          fetchCelebrity(validatedName).then((fullData) => {
+            if (fullData) setCelebrity(fullData);
+          });
+        }
+      }
       return;
     }
 
     setCelebrity(null);
-  }, [id, prefetchedCelebrity]);
+  }, [id, prefetchedCelebrity, fetchCelebrity]);
 
   useEffect(() => {
     // Don't fetch if blocked
     if (shouldBlock || authLoading) return;
 
-    // If we navigated here with already-fetched data (e.g. from /search), don't refetch.
-    if (prefetchedCelebrity && prefetchedCelebrity.id === (id || '')) return;
+    // If we navigated here with already-fetched data that has an image, don't refetch.
+    if (prefetchedCelebrity && prefetchedCelebrity.id === (id || '') && prefetchedCelebrity.imageUrl) return;
+
+    // Also skip if we already have celebrity data with an image (from background fetch above)
+    if (celebrity && celebrity.imageUrl) return;
 
     if (!id) return;
 
@@ -121,7 +134,7 @@ const Profile = () => {
 
     setValidationError(false);
     fetchCelebrity(validatedName).then(setCelebrity);
-  }, [id, fetchCelebrity, shouldBlock, authLoading, prefetchedCelebrity]);
+  }, [id, fetchCelebrity, shouldBlock, authLoading, prefetchedCelebrity, celebrity]);
 
   // Show paywall FIRST if blocked
   if (shouldBlock && !authLoading) {
