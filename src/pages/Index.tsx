@@ -40,15 +40,15 @@ const Index = () => {
 
       <main className="flex-1 animate-fade-in">
         {/* Hero Section */}
-        <section className="relative py-16 md:py-24">
+        <section className="relative py-8 md:py-12">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
-            <div className="text-center mb-10 animate-fade-in">
-              <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4">
+            <div className="text-center mb-6 animate-fade-in">
+              <h1 className="font-serif text-4xl md:text-6xl font-bold mb-3">
                 See Wealth in <span className="gradient-gold-text">Perspective</span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Master the game of money. Explore wealth, build side income, and trade like a mogul.
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                Master the game of money. Explore wealth, build side income, and trade like a <span className="gradient-gold-text font-semibold">mogul</span>.
               </p>
             </div>
 
@@ -60,7 +60,7 @@ const Index = () => {
         </section>
 
         {/* Featured Section */}
-        <section className="container mb-6">
+        <section className="container mb-6 -mt-2">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-2xl">👑</span>
             <div>
