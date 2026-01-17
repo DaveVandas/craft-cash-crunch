@@ -20,7 +20,8 @@ import {
   Zap,
   CheckCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Crown
 } from 'lucide-react';
 
 export default function BecomeAffiliate() {
@@ -149,21 +150,26 @@ export default function BecomeAffiliate() {
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Affiliate Program
+          <Badge className="mb-4 bg-gradient-to-r from-amber-500/30 to-primary/30 text-amber-400 border-amber-500/50">
+            <Crown className="w-3 h-3 mr-1" />
+            Join the Mogul Movement
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            One TikTok Could Pay You{' '}
-            <span className="text-primary">$39,000</span> 🤯
+            Ready to Build Your{' '}
+            <span className="text-primary">Mogul Empire?</span> 👑
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-            Share Wealth Perspective, get paid for every signup. It's that simple.
+            One TikTok could pay you <span className="text-primary font-bold">$39,000</span>. 
+            Join our elite mogul network and start earning like the wealthy do.
           </p>
           
           {/* Tier Breakdown */}
           <div className="max-w-xl mx-auto bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 rounded-xl p-6 border border-primary/20">
-            <h3 className="font-bold text-lg mb-3">💎 Tiered Commission Structure</h3>
+            <h3 className="font-bold text-lg mb-3 flex items-center justify-center gap-2">
+              <Crown className="w-5 h-5 text-primary" />
+              Mogul Commission Tiers
+              <Crown className="w-5 h-5 text-primary" />
+            </h3>
             <div className="grid grid-cols-2 gap-4 text-left">
               <div className="bg-card/50 rounded-lg p-4 border border-border/50">
                 <div className="text-2xl font-bold text-primary">$1</div>
@@ -184,7 +190,10 @@ export default function BecomeAffiliate() {
 
         {/* How It Works */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
+          <h2 className="text-2xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+            <Crown className="w-6 h-6 text-primary" />
+            Your Path to Mogul Status
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {steps.map((item, index) => (
               <div key={item.step} className="relative">
@@ -205,7 +214,7 @@ export default function BecomeAffiliate() {
 
         {/* Benefits */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-center mb-8">Why Become an Affiliate?</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">Why Moguls Choose Us 👑</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {benefits.map((benefit) => (
               <Card key={benefit.title} className="bg-card/50 border-border/50">
@@ -222,23 +231,32 @@ export default function BecomeAffiliate() {
         {/* Application Form or Success */}
         <div className="max-w-2xl mx-auto">
           {submitted ? (
-            <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30">
+            <Card className="bg-gradient-to-br from-amber-500/20 via-primary/20 to-green-500/10 border-amber-500/30">
               <CardContent className="p-8 text-center">
-                <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Application Submitted! 🎉</h2>
+                <div className="relative inline-block mb-4">
+                  <Crown className="w-16 h-16 text-amber-400" />
+                  <CheckCircle className="w-8 h-8 text-green-400 absolute -bottom-1 -right-1" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Welcome to the Mogul Family! 👑</h2>
                 <p className="text-muted-foreground mb-4">
-                  We've received your affiliate application. Our team will review it and 
-                  you'll receive an email once approved. This usually takes less than 24 hours.
+                  Congratulations on taking the first step toward building your empire! 
+                  Our team will review your application and you'll receive your mogul credentials 
+                  within 24 hours. Get ready to start earning like the elite!
                 </p>
-                <Button onClick={() => navigate('/')}>
-                  Back to Home
+                <Button onClick={() => navigate('/')} className="gap-2">
+                  <Crown className="w-4 h-4" />
+                  Return to Your Kingdom
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-gradient-to-br from-card/80 to-primary/5 border-primary/20">
               <CardHeader>
-                <CardTitle className="text-center">Apply to Become an Affiliate</CardTitle>
+                <CardTitle className="text-center flex items-center justify-center gap-2">
+                  <Crown className="w-5 h-5 text-primary" />
+                  Claim Your Mogul Status
+                  <Crown className="w-5 h-5 text-primary" />
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -331,14 +349,15 @@ export default function BecomeAffiliate() {
                   <div className="pt-4">
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full gap-2" 
                       size="lg"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                      <Crown className="w-4 h-4" />
+                      {isSubmitting ? 'Joining the Elite...' : 'Join the Mogul Movement'}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center mt-3">
-                      By applying, you agree to our affiliate terms. Earn $1/signup for first 1,000 referrals, then $2/signup forever!
+                      By applying, you agree to join our elite mogul network. Earn $1/signup for first 1,000 referrals, then $2/signup forever! 👑
                     </p>
                   </div>
                 </form>
