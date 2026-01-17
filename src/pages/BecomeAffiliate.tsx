@@ -31,7 +31,7 @@ export default function BecomeAffiliate() {
 
   // Scroll to top on mount
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
   }, []);
   
   const [formData, setFormData] = useState({

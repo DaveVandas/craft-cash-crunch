@@ -19,7 +19,7 @@ const Category = () => {
 
   // Scroll to top and mark ready on mount to prevent flash/jump issues
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
     // Small delay to ensure DOM is ready before rendering content
     const timer = setTimeout(() => setIsReady(true), 10);
     return () => clearTimeout(timer);

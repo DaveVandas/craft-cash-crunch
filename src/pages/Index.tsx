@@ -19,7 +19,7 @@ const Index = () => {
 
   // Ensure scroll is at top and mark ready to prevent flash on back navigation
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
     // Small delay to ensure DOM is stable before rendering
     const timer = setTimeout(() => setIsReady(true), 10);
     return () => clearTimeout(timer);
