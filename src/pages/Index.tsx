@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
@@ -16,17 +17,22 @@ import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import { categories } from '@/lib/categories';
 
 const Index = () => {
+  const location = useLocation();
   const [isReady, setIsReady] = useState(false);
 
-  // Ensure scroll is at top and mark ready to prevent flash on back navigation
+  // Reset ready state and scroll on every visit (including back navigation)
+  // Using location.key ensures the effect re-runs on back/forward navigation
   useEffect(() => {
+    setIsReady(false);
     window.scrollTo({ top: 0, behavior: 'instant' });
-    // Small delay to ensure DOM is stable before rendering
-    const timer = setTimeout(() => setIsReady(true), 10);
-    return () => clearTimeout(timer);
-  }, []);
+    // requestAnimationFrame ensures the browser has painted before we show content
+    const raf = requestAnimationFrame(() => {
+      setIsReady(true);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [location.key]);
 
-  // Prevent black screen flash on back navigation
+  // Prevent black screen flash - show placeholder until ready
   if (!isReady) {
     return <div className="min-h-screen bg-background" />;
   }
