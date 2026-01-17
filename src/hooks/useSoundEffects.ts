@@ -4,6 +4,10 @@ const SOUNDS = {
   coin: 'https://assets.mixkit.co/active_storage/sfx/2001/2001-preview.mp3',
   cashRegister: 'https://assets.mixkit.co/active_storage/sfx/2058/2058-preview.mp3',
   ching: 'https://assets.mixkit.co/active_storage/sfx/888/888-preview.mp3',
+  correct: 'https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3', // Success/correct answer
+  incorrect: 'https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3', // Wrong/buzzer
+  streak: 'https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3', // Achievement/level up
+  quizComplete: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3', // Victory fanfare
 };
 
 type SoundType = keyof typeof SOUNDS;
@@ -20,6 +24,10 @@ export const useSoundEffects = () => {
     coin: null,
     cashRegister: null,
     ching: null,
+    correct: null,
+    incorrect: null,
+    streak: null,
+    quizComplete: null,
   });
 
   useEffect(() => {

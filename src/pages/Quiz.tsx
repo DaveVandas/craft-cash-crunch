@@ -13,6 +13,7 @@ import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSound } from '@/contexts/SoundContext';
 interface QuizQuestion {
   celebrity: string;
   emoji: string;
@@ -142,6 +143,7 @@ const RESULT_TITLES = [
 ];
 
 const Quiz = () => {
+  const { play: playSound } = useSound();
   const [gameState, setGameState] = useState<'intro' | 'loading' | 'playing' | 'result'>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -242,6 +244,13 @@ const Quiz = () => {
       setStreak(newStreak);
       setScore(score + 1);
       
+      // Play correct sound, or streak sound for streaks >= 2
+      if (newStreak >= 2) {
+        playSound('streak');
+      } else {
+        playSound('correct');
+      }
+      
       // Points with streak multiplier
       const basePoints = 100;
       const multiplier = Math.min(newStreak, 5);
@@ -254,6 +263,7 @@ const Quiz = () => {
       }
     } else {
       setStreak(0);
+      playSound('incorrect');
     }
 
     // Longer delay for wrong answers to read the fun fact
@@ -266,6 +276,8 @@ const Quiz = () => {
         setIsCorrect(null);
         setCurrentQuestion(currentQuestion + 1);
       } else {
+        // Play victory sound when quiz completes
+        playSound('quizComplete');
         setGameState('result');
       }
     }, delay);
