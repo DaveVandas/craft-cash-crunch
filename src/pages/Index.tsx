@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useLayoutEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
@@ -17,25 +16,20 @@ import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import { categories } from '@/lib/categories';
 
 const Index = () => {
-  const location = useLocation();
-  const [isReady, setIsReady] = useState(false);
-
-  // Reset ready state and scroll on every visit (including back navigation)
-  // Using location.key ensures the effect re-runs on back/forward navigation
-  useEffect(() => {
-    setIsReady(false);
+  // Scroll to top immediately on any navigation to this page (including back)
+  // Using useLayoutEffect to run before paint
+  useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    // requestAnimationFrame ensures the browser has painted before we show content
-    const raf = requestAnimationFrame(() => {
-      setIsReady(true);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [location.key]);
+  }, []);
 
-  // Prevent black screen flash - show placeholder until ready
-  if (!isReady) {
-    return <div className="min-h-screen bg-background" />;
-  }
+  // Also handle popstate (back/forward button) which may not trigger remount
+  useEffect(() => {
+    const handlePopState = () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
