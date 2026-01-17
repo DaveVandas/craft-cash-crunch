@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Flame, Clock, Target, Brain, ArrowRight, CheckCircle2 } from 'lucide-react';
+import LandingShareHeader from '@/components/landing/LandingShareHeader';
 
 const LandingVariantB = () => {
   return (
     <div className="min-h-screen bg-background">
+      <LandingShareHeader variant="b" />
+      
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-14">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
         
         <div className="container relative z-10 py-20">
