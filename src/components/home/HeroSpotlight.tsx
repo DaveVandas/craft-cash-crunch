@@ -102,8 +102,9 @@ const HeroSpotlight = () => {
             <TrendingUp className="h-3 w-3 text-primary" />
             <span>Earned since you arrived</span>
           </div>
-          <div className="font-mono text-2xl md:text-3xl font-bold gradient-gold-text">
+          <div className="relative overflow-hidden font-mono text-2xl md:text-3xl font-bold gradient-gold-text">
             {formatLargeCurrency(currentEarnings)}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
           </div>
           
           {/* Compact earnings breakdown */}
