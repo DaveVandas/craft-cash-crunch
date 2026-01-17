@@ -10,11 +10,11 @@ import DailyWealthFact from '@/components/home/DailyWealthFact';
 import WealthWisdomPromo from '@/components/home/WealthWisdomPromo';
 import RichHabits from '@/components/home/RichHabits';
 import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
-import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
 import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import SideHustlePreview from '@/components/home/SideHustlePreview';
 import MogulMarketsPreview from '@/components/home/MogulMarketsPreview';
+import HeroSpotlight from '@/components/home/HeroSpotlight';
 
 const Index = () => {
   // Scroll to top immediately on any navigation to this page (including back)
@@ -39,41 +39,49 @@ const Index = () => {
       <SocialProofNotifications />
 
       <main className="flex-1 animate-fade-in">
-        {/* Hero Section */}
-        <section className="relative py-8 md:py-12">
+        {/* Hero Section - Split Layout */}
+        <section className="relative py-6 md:py-10">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
-            <div className="text-center mb-6 animate-fade-in">
-              <h1 className="font-serif text-4xl md:text-6xl font-bold mb-3">
-                See Wealth in <span className="gradient-gold-text">Perspective</span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Master the game of money. Explore wealth, build side income, and trade like a <span className="gradient-gold-text font-semibold">mogul</span>.
-              </p>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+              {/* Left side - Title, subtitle, search */}
+              <div className="animate-fade-in">
+                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 text-left">
+                  See Wealth in <span className="gradient-gold-text">Perspective</span>
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground mb-5 text-left max-w-lg">
+                  Master the game of money. Explore wealth, build side income, and trade like a <span className="gradient-gold-text font-semibold">mogul</span>.
+                </p>
+                
+                <div className="space-y-2">
+                  <SearchBarWithAutocomplete />
+                  <DailyWealthFact />
+                </div>
+              </div>
 
-            <SearchBarWithAutocomplete />
-            <div className="mt-2">
-              <DailyWealthFact />
+              {/* Right side - Featured Mogul Spotlight */}
+              <div className="animate-fade-in lg:animate-slide-in-right" data-tour="celebrity-spotlight">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">👑</span>
+                  <h2 className="font-serif text-base font-bold">
+                    Today's <span className="gradient-gold-text">Mogul</span>
+                  </h2>
+                </div>
+                <HeroSpotlight />
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Featured Section */}
-        <section className="container mb-6 -mt-2">
+        {/* More Featured Moguls - Carousel */}
+        <section className="container mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">👑</span>
-            <div>
-              <h2 className="font-serif text-lg font-bold flex items-center gap-2">
-                Today's <span className="gradient-gold-text">Moguls</span>
-              </h2>
-              <p className="text-sm text-muted-foreground">Watch their wealth grow in real-time</p>
-            </div>
+            <span className="text-lg">🔥</span>
+            <h2 className="font-serif text-base font-bold">
+              More <span className="gradient-gold-text">Moguls</span>
+            </h2>
           </div>
-          <div className="space-y-1">
-            <DailyCelebritySpotlight />
-            <FeaturedTicker />
-          </div>
+          <FeaturedTicker />
         </section>
 
         {/* Trending Now */}
