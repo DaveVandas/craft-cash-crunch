@@ -13,6 +13,8 @@ import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
 import OnboardingTour from '@/components/onboarding/OnboardingTour';
+import SideHustlePreview from '@/components/home/SideHustlePreview';
+import MogulMarketsPreview from '@/components/home/MogulMarketsPreview';
 
 const Index = () => {
   // Scroll to top immediately on any navigation to this page (including back)
@@ -76,9 +78,17 @@ const Index = () => {
           <CompactCategories />
         </section>
 
-        {/* Mogul Tools - Stacked List */}
+        {/* Featured Tools - Side Hustle & Mogul Markets */}
         <section className="container mb-8">
-          <h2 className="font-serif text-lg font-bold mb-3">Mogul Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MogulMarketsPreview />
+            <SideHustlePreview />
+          </div>
+        </section>
+
+        {/* Other Mogul Tools */}
+        <section className="container mb-8">
+          <h2 className="font-serif text-lg font-bold mb-3">More Mogul Tools</h2>
           <QuickActions />
         </section>
 
