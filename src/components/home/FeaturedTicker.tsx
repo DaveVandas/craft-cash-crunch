@@ -192,12 +192,10 @@ const FeaturedTicker = () => {
 
   // Mark carousel as ready after initial render to prevent flash
   useEffect(() => {
-    if (emblaApi) {
-      // Small delay to ensure carousel is fully initialized
-      const timer = setTimeout(() => setIsReady(true), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [emblaApi]);
+    // Set ready immediately on mount with a minimal delay for DOM stability
+    const timer = setTimeout(() => setIsReady(true), 10);
+    return () => clearTimeout(timer);
+  }, []);
 
   const clearNavLock = useCallback(() => {
     if (navTimeoutRef.current) {
@@ -277,7 +275,7 @@ const FeaturedTicker = () => {
   }, [emblaApi, isNavigating, lockWithFailsafe]);
 
   // Don't render carousel until it's ready to prevent flashing on back navigation
-  if (!isReady && !emblaApi) {
+  if (!isReady) {
     return (
       <div className="relative">
         <div className="mx-2 h-48 md:h-44 bg-card rounded-xl animate-pulse" />
