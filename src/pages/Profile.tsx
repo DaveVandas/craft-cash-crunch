@@ -4,7 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import ProfileHero from '@/components/profile/ProfileHero';
-import ProfileBreadcrumb from '@/components/profile/ProfileBreadcrumb';
+import Breadcrumb, { getCategoryBreadcrumb } from '@/components/navigation/Breadcrumb';
 import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import ShareCard from '@/components/share/ShareCard';
@@ -209,9 +209,9 @@ const Profile = () => {
         <PaywallGate>
           <>
             <div className="container pt-4">
-              <ProfileBreadcrumb 
-                celebrityName={displayCelebrity.name} 
-                category={displayCelebrity.category} 
+              <Breadcrumb 
+                items={displayCelebrity.category ? [getCategoryBreadcrumb(displayCelebrity.category)].filter(Boolean) as { label: string; href?: string; icon?: string }[] : []}
+                currentPage={displayCelebrity.name} 
               />
             </div>
             <ProfileHero celebrity={displayCelebrity} isLoading={!!isLoadingWithPreview} />

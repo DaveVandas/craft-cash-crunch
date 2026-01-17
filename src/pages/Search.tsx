@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SearchBar from '@/components/home/SearchBar';
 import { useCelebritySearch } from '@/hooks/useCelebritySearch';
 import { Celebrity } from '@/lib/types';
@@ -85,6 +86,7 @@ const Search = () => {
       <main className="flex-1 container py-8 md:py-12">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
+          <Breadcrumb currentPage="Search" />
           <h1 className="font-serif text-3xl font-bold mb-6 text-center">
             Search <span className="gradient-gold-text">Anyone</span>
           </h1>

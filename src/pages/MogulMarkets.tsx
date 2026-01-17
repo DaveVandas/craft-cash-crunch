@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -206,6 +207,8 @@ const MogulMarkets = () => {
       <MarketTicker />
       
       <main className="flex-1 container py-6 md:py-8">
+        <Breadcrumb currentPage="Mogul Markets" />
+        
         {/* Compact Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">

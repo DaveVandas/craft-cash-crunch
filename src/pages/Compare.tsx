@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 import CompareResult from '@/components/compare/CompareResult';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity, Category } from '@/lib/types';
@@ -78,6 +79,7 @@ const Compare = () => {
       <main className="flex-1 container py-8 md:py-12">
         <PaywallGate>
         <div className="max-w-4xl mx-auto">
+          <Breadcrumb currentPage="Compare" />
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
               Wealth <span className="gradient-gold-text">Showdown</span> ⚖️
