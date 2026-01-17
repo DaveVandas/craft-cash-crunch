@@ -31,7 +31,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
     navigate(`/profile/${slug}`, { 
       state: { preview: previewData }
     });
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
   
   // Get diverse comparisons for visual appeal

@@ -25,7 +25,7 @@ const Compare = () => {
 
   // Handle navigation from profile or favorites with pre-loaded data
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
 
     if (location.state?.person1) {
       setPerson1(location.state.person1);

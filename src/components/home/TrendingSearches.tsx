@@ -258,7 +258,7 @@ const TrendingSearches = () => {
       source: 'Trending data',
     };
 
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
     navigate(`/profile/${slug}`, { state: { celebrity } });
   }, [navigate]);
 

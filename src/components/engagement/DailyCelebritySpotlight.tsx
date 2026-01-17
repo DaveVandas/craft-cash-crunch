@@ -22,7 +22,7 @@ const DailyCelebritySpotlight = () => {
   };
 
   const handleClick = () => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
     navigate(`/profile/${featured.id}`, { state: { celebrity: prefetchedCelebrity } });
   };
 

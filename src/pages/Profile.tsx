@@ -62,7 +62,7 @@ const Profile = () => {
   // Scroll to top and mark ready on mount/route change to prevent flash/jump issues
   useEffect(() => {
     setIsReady(false);
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
     // Small delay to ensure DOM is ready before rendering content
     const timer = setTimeout(() => setIsReady(true), 10);
     return () => clearTimeout(timer);
