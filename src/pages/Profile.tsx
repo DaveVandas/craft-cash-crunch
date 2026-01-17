@@ -200,7 +200,7 @@ const Profile = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       {isBillionaire && <MoneyRain intensity="light" />}
-      <main className="flex-1">
+      <main className="flex-1 animate-fade-in">
         <PaywallGate>
           <>
             <div className="container pt-4">

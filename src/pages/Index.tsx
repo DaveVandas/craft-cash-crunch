@@ -38,7 +38,7 @@ const Index = () => {
       <ExitIntentPopup />
       <SocialProofNotifications />
 
-      <main className="flex-1">
+      <main className="flex-1 animate-fade-in">
         {/* Hero Section */}
         <section className="relative py-16 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
