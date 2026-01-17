@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -15,15 +15,11 @@ const Category = () => {
   const navigate = useNavigate();
   const category = id ? getCategoryById(id) : undefined;
   const [displayedSuggestions, setDisplayedSuggestions] = useState<string[]>([]);
-  const [isReady, setIsReady] = useState(false);
 
-  // Scroll to top and mark ready on mount to prevent flash/jump issues
-  useEffect(() => {
+  // Scroll to top immediately on any navigation (including back button)
+  useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    // Small delay to ensure DOM is ready before rendering content
-    const timer = setTimeout(() => setIsReady(true), 10);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [id]);
 
   // Shuffle suggestions randomly on every visit
   useEffect(() => {
@@ -63,17 +59,6 @@ const Category = () => {
             </Button>
           </Link>
         </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Wait until ready to prevent flash on navigation
-  if (!isReady) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1" />
         <Footer />
       </div>
     );

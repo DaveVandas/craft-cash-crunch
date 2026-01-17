@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -57,15 +57,10 @@ const Profile = () => {
   const { user, accessInfo, loading: authLoading } = useAuth();
   const [celebrity, setCelebrity] = useState<Celebrity | null>(null);
   const [validationError, setValidationError] = useState(false);
-  const [isReady, setIsReady] = useState(false);
 
-  // Scroll to top and mark ready on mount/route change to prevent flash/jump issues
-  useEffect(() => {
-    setIsReady(false);
+  // Scroll to top immediately on any navigation (including back button)
+  useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    // Small delay to ensure DOM is ready before rendering content
-    const timer = setTimeout(() => setIsReady(true), 10);
-    return () => clearTimeout(timer);
   }, [id]);
 
   // Get preview or prefetched celebrity data from navigation state
@@ -158,8 +153,8 @@ const Profile = () => {
   const isLoadingWithPreview = loading && !!(previewCelebrity || prefetchedCelebrity);
   const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity && !prefetchedCelebrity;
 
-  // Wait until ready to prevent flash on navigation
-  if (!isReady || isLoadingWithoutPreview) {
+  // Show loading skeleton while fetching (without preview data)
+  if (isLoadingWithoutPreview) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
