@@ -16,14 +16,13 @@ import {
   AlertCircle
 } from 'lucide-react';
 import LandingShareButtons from '@/components/landing/LandingShareButtons';
+import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
 
 interface AffiliateInfo {
   id: string;
   display_name: string;
   affiliate_code: string;
 }
-
-const AFFILIATE_CODE_KEY = 'wp_affiliate_referral_code';
 
 const AffiliateReferral = () => {
   const { code } = useParams<{ code: string }>();
@@ -54,8 +53,9 @@ const AffiliateReferral = () => {
           setError(true);
         } else {
           setAffiliate(data);
-          // Store the affiliate code for attribution after signup
+          // Store the affiliate code and source variant for attribution after signup
           localStorage.setItem(AFFILIATE_CODE_KEY, data.affiliate_code);
+          localStorage.setItem(AFFILIATE_VARIANT_KEY, 'ref');
         }
       } catch {
         setError(true);
@@ -336,6 +336,3 @@ const AffiliateReferral = () => {
 };
 
 export default AffiliateReferral;
-
-// Export the storage key for use in Auth page
-export { AFFILIATE_CODE_KEY };

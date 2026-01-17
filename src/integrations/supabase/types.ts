@@ -666,6 +666,7 @@ export type Database = {
           id: string
           referred_by_code: string | null
           search_count: number
+          source_variant: string | null
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
           updated_at: string
@@ -679,6 +680,7 @@ export type Database = {
           id?: string
           referred_by_code?: string | null
           search_count?: number
+          source_variant?: string | null
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           updated_at?: string
@@ -692,6 +694,7 @@ export type Database = {
           id?: string
           referred_by_code?: string | null
           search_count?: number
+          source_variant?: string | null
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           updated_at?: string

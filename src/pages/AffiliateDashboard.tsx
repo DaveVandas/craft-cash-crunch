@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
+import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
 import { 
   DollarSign, 
   Users, 
@@ -50,6 +51,7 @@ export default function AffiliateDashboard() {
   const navigate = useNavigate();
   const [affiliate, setAffiliate] = useState<AffiliateData | null>(null);
   const [referrals, setReferrals] = useState<ReferralData[]>([]);
+  const [referralsByVariant, setReferralsByVariant] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -91,6 +93,21 @@ export default function AffiliateDashboard() {
 
       if (!referralsError && referralsData) {
         setReferrals(referralsData);
+      }
+
+      // Fetch landing page analytics from user_access table
+      const { data: variantData, error: variantError } = await supabase
+        .from('user_access')
+        .select('source_variant')
+        .eq('referred_by_code', affiliateData.affiliate_code);
+
+      if (!variantError && variantData) {
+        const variantCounts: Record<string, number> = {};
+        variantData.forEach((row) => {
+          const variant = row.source_variant || 'direct';
+          variantCounts[variant] = (variantCounts[variant] || 0) + 1;
+        });
+        setReferralsByVariant(variantCounts);
       }
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
@@ -305,18 +322,26 @@ export default function AffiliateDashboard() {
         </div>
 
         <Tabs defaultValue="share" className="space-y-6">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="share" className="gap-2">
               <Sparkles className="w-4 h-4" />
-              Share Card
+              <span className="hidden sm:inline">Share Card</span>
+              <span className="sm:hidden">Card</span>
             </TabsTrigger>
             <TabsTrigger value="links" className="gap-2">
               <TrendingUp className="w-4 h-4" />
-              Marketing Links
+              <span className="hidden sm:inline">Marketing Links</span>
+              <span className="sm:hidden">Links</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <Target className="w-4 h-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2">
               <Users className="w-4 h-4" />
-              Referrals ({referrals.length})
+              <span className="hidden sm:inline">Referrals</span>
+              <span className="sm:hidden">{referrals.length}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -344,6 +369,13 @@ export default function AffiliateDashboard() {
 
           <TabsContent value="links">
             <MarketingLinksCard affiliateCode={affiliate.affiliate_code} />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <LandingPageAnalytics 
+              affiliateCode={affiliate.affiliate_code} 
+              referralsByVariant={referralsByVariant}
+            />
           </TabsContent>
 
           <TabsContent value="referrals">

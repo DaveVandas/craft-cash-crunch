@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift, Users } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
-import { AFFILIATE_CODE_KEY } from './AffiliateReferral';
+import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -151,10 +151,16 @@ const Auth = () => {
       // If we have an affiliate code, attribute this signup to them
       if (affiliateCode && data?.user) {
         try {
-          // Update the user's user_access with the referral code
+          // Get the source variant from localStorage
+          const sourceVariant = localStorage.getItem(AFFILIATE_VARIANT_KEY) || 'direct';
+          
+          // Update the user's user_access with the referral code and source variant
           await supabase
             .from('user_access')
-            .update({ referred_by_code: affiliateCode.toUpperCase() })
+            .update({ 
+              referred_by_code: affiliateCode.toUpperCase(),
+              source_variant: sourceVariant
+            })
             .eq('user_id', data.user.id);
 
           // Find the affiliate and create a referral record
@@ -179,8 +185,9 @@ const Auth = () => {
             await supabase.rpc('increment_affiliate_referrals', { 
               affiliate_uuid: affiliateData.id 
             }).then(() => {
-              // Clear the stored affiliate code
+              // Clear the stored affiliate code and variant
               localStorage.removeItem(AFFILIATE_CODE_KEY);
+              localStorage.removeItem(AFFILIATE_VARIANT_KEY);
             });
           }
         } catch (err) {
