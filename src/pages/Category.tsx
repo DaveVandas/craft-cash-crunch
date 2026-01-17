@@ -67,7 +67,7 @@ const Category = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 animate-fade-in">
         <PaywallGate>
         {/* Hero Section */}
         <section className="relative py-12 md:py-16">
