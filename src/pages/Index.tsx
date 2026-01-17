@@ -97,7 +97,12 @@ const Index = () => {
 
         {/* Other Mogul Tools */}
         <section className="container mb-8">
-          <h2 className="font-serif text-lg font-bold mb-3">More Mogul Tools</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">🛠️</span>
+            <h2 className="font-serif text-lg font-bold">
+              More <span className="gradient-gold-text">Mogul</span> Tools
+            </h2>
+          </div>
           <QuickActions />
         </section>
 
