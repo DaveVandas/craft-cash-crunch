@@ -1,82 +1,101 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull, TrendingUp } from 'lucide-react';
+import { Calculator, GitCompareArrows, Brain, Rocket, HardHat, Skull, TrendingUp, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const actions = [
   {
     icon: Calculator,
     title: 'Reality Check',
-    description: 'Compare your salary to the rich & famous',
+    tagline: 'How do you stack up?',
+    description: 'Enter your salary and see how long it takes celebrities to earn what you make in a year.',
     href: '/calculator',
-    color: 'text-emerald-400'
   },
   {
     icon: GitCompareArrows,
     title: 'Side by Side',
-    description: 'Compare any two people head-to-head',
+    tagline: 'The ultimate showdown',
+    description: 'Pick any two celebrities and compare their earnings, net worth, and lifestyle stats head-to-head.',
     href: '/compare',
-    color: 'text-blue-400'
   },
   {
     icon: TrendingUp,
     title: 'Mogul Markets',
-    description: 'Paper trade stocks like a mogul',
+    tagline: 'Trade like the elite',
+    description: 'Practice stock trading with virtual cash. Build your portfolio and track your performance.',
     href: '/mogul-markets',
-    color: 'text-primary'
   },
   {
     icon: HardHat,
     title: 'Who Needs College?',
-    description: 'Trades vs degree wealth comparison',
+    tagline: 'Degree vs skilled trades',
+    description: 'Compare lifetime earnings between college graduates and skilled tradespeople.',
     href: '/trades',
-    color: 'text-orange-400'
   },
   {
     icon: Rocket,
     title: 'Side Hustle',
-    description: 'Calculate your hustle potential',
+    tagline: 'Unlock extra income',
+    description: 'Calculate how much you could earn from popular side hustles based on your available time.',
     href: '/side-hustle',
-    color: 'text-amber-400'
   },
   {
     icon: Brain,
     title: 'Wealth Quiz',
-    description: 'Test your knowledge of celebrity earnings',
+    tagline: 'Test your knowledge',
+    description: 'Can you guess who earns more? Challenge yourself with our celebrity earnings trivia.',
     href: '/quiz',
-    color: 'text-purple-400'
   },
   {
     icon: Skull,
     title: 'Debt Destroyer',
-    description: 'Crush debt & see interest savings',
+    tagline: 'Crush your debt',
+    description: 'Compare avalanche vs snowball payoff strategies and see how much interest you can save.',
     href: '/debt-destroyer',
-    color: 'text-red-400'
   }
 ];
 
 const QuickActions = () => {
   return (
-    <div className="contents" data-tour="quick-actions">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-tour="quick-actions">
       {actions.map((action) => (
-        <Link key={action.href} to={action.href}>
-          <Card className="relative overflow-hidden border-border/50 bg-card/50 hover:bg-card transition-all duration-300 cursor-pointer group hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]">
-            {/* Gold shimmer border on hover */}
-            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-              <div className="absolute inset-0 rounded-lg border-2 border-primary/60" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+        <Link key={action.href} to={action.href} className="group">
+          <Card className="relative h-full overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 hover:border-primary/60 transition-all duration-300 cursor-pointer hover:shadow-[0_0_30px_hsl(var(--primary)/0.25)] hover:-translate-y-1">
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/20 to-transparent" />
+            
+            {/* Gold shimmer on hover */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_ease-in-out]" />
             </div>
             
-            <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3 relative z-10">
-              <div className={`p-2 sm:p-2.5 rounded-full bg-secondary group-hover:scale-110 transition-transform flex-shrink-0 ${action.color}`}>
-                <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+            <CardContent className="p-5 flex flex-col h-full relative z-10">
+              {/* Icon with mogul ring */}
+              <div className="mb-4 relative w-fit">
+                <div className="absolute inset-0 rounded-xl bg-primary/20 blur-md group-hover:bg-primary/30 transition-colors" />
+                <div className="relative p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 group-hover:border-primary/50 transition-colors">
+                  <action.icon className="h-6 w-6 text-primary" />
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-xs sm:text-sm group-hover:text-primary transition-colors leading-tight">
+              
+              {/* Content */}
+              <div className="flex-1">
+                <h3 className="font-bold text-base mb-1 group-hover:text-primary transition-colors">
                   {action.title}
                 </h3>
-                <p className="text-[10px] sm:text-xs text-foreground/70 font-medium leading-tight line-clamp-2 sm:truncate">
+                <p className="text-xs text-primary/80 font-semibold mb-2 uppercase tracking-wide">
+                  {action.tagline}
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {action.description}
                 </p>
+              </div>
+              
+              {/* Footer action hint */}
+              <div className="mt-4 pt-3 border-t border-primary/10 flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                  Try it now
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </div>
             </CardContent>
           </Card>
