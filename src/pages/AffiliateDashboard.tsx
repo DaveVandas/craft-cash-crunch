@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
+import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
 import { 
   DollarSign, 
   Users, 
@@ -19,7 +20,8 @@ import {
   Crown,
   Sparkles,
   Rocket,
-  Target
+  Target,
+  MessageSquare
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -326,25 +328,26 @@ export default function AffiliateDashboard() {
         </div>
 
         <Tabs defaultValue="share" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="share" className="gap-2">
               <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">Share Card</span>
-              <span className="sm:hidden">Card</span>
+              <span className="hidden sm:inline">Card</span>
+            </TabsTrigger>
+            <TabsTrigger value="captions" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Captions</span>
             </TabsTrigger>
             <TabsTrigger value="links" className="gap-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Marketing Links</span>
-              <span className="sm:hidden">Links</span>
+              <span className="hidden sm:inline">Links</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <Target className="w-4 h-4" />
-              <span className="hidden sm:inline">Analytics</span>
-              <span className="sm:hidden">Stats</span>
+              <span className="hidden sm:inline">Stats</span>
             </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2">
               <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Referrals</span>
+              <span className="hidden sm:inline">{referrals.length}</span>
               <span className="sm:hidden">{referrals.length}</span>
             </TabsTrigger>
           </TabsList>
@@ -369,6 +372,13 @@ export default function AffiliateDashboard() {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="captions">
+            <SocialCaptionsCard 
+              affiliateCode={affiliate.affiliate_code}
+              displayName={affiliate.display_name}
+            />
           </TabsContent>
 
           <TabsContent value="links">
