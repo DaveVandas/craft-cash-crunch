@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Brain, Trophy, RotateCcw, CheckCircle, XCircle, Flame, Zap, Crown, Sparkles, Play, Loader2 } from 'lucide-react';
+import quizLoadingMogul from '@/assets/quiz-loading-mogul.png';
 import { formatLargeCurrency } from '@/lib/earnings';
 import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
@@ -153,8 +154,11 @@ const Quiz = () => {
   const [usedFallback, setUsedFallback] = useState(false);
   const resultsCardRef = useRef<HTMLDivElement>(null);
 
+  // Only scroll on initial mount, not on quiz start
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (gameState === 'intro') {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   const getResultTitle = () => {
@@ -257,9 +261,10 @@ const Quiz = () => {
     
     setTimeout(() => {
       if (currentQuestion < shuffledQuestions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
+        // Reset selection state BEFORE changing question
         setSelectedAnswer(null);
         setIsCorrect(null);
+        setCurrentQuestion(currentQuestion + 1);
       } else {
         setGameState('result');
       }
@@ -340,14 +345,21 @@ const Quiz = () => {
           {/* LOADING STATE */}
           {gameState === 'loading' && (
             <div className="text-center animate-fade-in py-16">
-              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto mb-6">
-                <Loader2 className="h-12 w-12 text-primary animate-spin" />
+              <div className="relative mx-auto mb-6 w-40 h-40">
+                <img 
+                  src={quizLoadingMogul} 
+                  alt="Quiz Mogul thinking" 
+                  className="w-full h-full object-contain animate-pulse"
+                />
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                  <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                </div>
               </div>
               <h2 className="font-serif text-2xl font-bold mb-2">
-                Generating Fresh Questions...
+                Preparing Your Challenge...
               </h2>
               <p className="text-muted-foreground">
-                Fetching real-time earnings data from AI
+                The Mogul is picking the toughest questions 🤔
               </p>
             </div>
           )}
