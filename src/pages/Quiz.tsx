@@ -468,7 +468,10 @@ const Quiz = () => {
                           buttonClass += ' opacity-40';
                         }
                       } else {
-                        buttonClass += ' hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02]';
+                        // Prevent "sticky hover" on touch devices (notably iOS Safari) from making the next question
+                        // look like a prior option is still selected. We neutralize the base outline hover styles,
+                        // then re-enable hover effects only on devices that actually support hover.
+                        buttonClass += ' hover:bg-transparent hover:text-foreground [@media(hover:hover)]:hover:border-primary/50 [@media(hover:hover)]:hover:bg-primary/5 [@media(hover:hover)]:hover:scale-[1.02]';
                       }
 
                       return (
