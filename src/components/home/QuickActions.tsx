@@ -73,7 +73,7 @@ const QuickActions = () => {
                   {action.title}
                 </h3>
                 {action.badge && (
-                  <Badge className="bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0 h-4 font-bold">
+                  <Badge className="bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0 h-4 font-bold animate-pulse">
                     {action.badge}
                   </Badge>
                 )}
