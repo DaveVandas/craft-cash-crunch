@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import FeaturedTicker from '@/components/home/FeaturedTicker';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
@@ -71,17 +70,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* More Featured Moguls - Carousel */}
-        <section className="container mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">🔥</span>
-            <h2 className="font-serif text-base font-bold">
-              More <span className="gradient-gold-text">Moguls</span>
-            </h2>
-          </div>
-          <FeaturedTicker />
         </section>
 
         {/* Trending Now */}
