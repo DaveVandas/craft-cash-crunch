@@ -3,9 +3,9 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedTicker from '@/components/home/FeaturedTicker';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
-import CategoryCard from '@/components/home/CategoryCard';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
+import CompactCategories from '@/components/home/CompactCategories';
 import DailyWealthFact from '@/components/home/DailyWealthFact';
 import WealthWisdomPromo from '@/components/home/WealthWisdomPromo';
 import RichHabits from '@/components/home/RichHabits';
@@ -13,11 +13,9 @@ import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
 import OnboardingTour from '@/components/onboarding/OnboardingTour';
-import { categories } from '@/lib/categories';
 
 const Index = () => {
   // Scroll to top immediately on any navigation to this page (including back)
-  // Using useLayoutEffect to run before paint
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -60,16 +58,27 @@ const Index = () => {
         </section>
 
         {/* Featured Section - Stacked */}
-        <section className="container mb-12">
+        <section className="container mb-8">
           <div className="space-y-1">
             <DailyCelebritySpotlight />
             <FeaturedTicker />
           </div>
         </section>
 
+        {/* Trending Now */}
+        <section className="container mb-8">
+          <TrendingSearches />
+        </section>
+
+        {/* Browse Categories - Compact Pills */}
+        <section className="container mb-8">
+          <h2 className="font-serif text-xl font-bold mb-4 text-center">Browse by Category</h2>
+          <CompactCategories />
+        </section>
+
         {/* Quick Actions */}
         <section className="container mb-8">
-          <h2 className="font-serif text-2xl font-bold mb-5">Quick Actions</h2>
+          <h2 className="font-serif text-2xl font-bold mb-5">Mogul Tools</h2>
           <QuickActions />
         </section>
 
@@ -79,23 +88,8 @@ const Index = () => {
         </section>
 
         {/* Wealth Wisdom Promo */}
-        <section className="container mb-12">
-          <WealthWisdomPromo />
-        </section>
-
-        {/* Trending */}
-        <section className="container mb-12">
-          <TrendingSearches />
-        </section>
-
-        {/* Categories */}
         <section className="container pb-16">
-          <h2 className="font-serif text-2xl font-bold mb-5">Browse by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category, index) => (
-              <CategoryCard key={category.id} category={category} index={index} />
-            ))}
-          </div>
+          <WealthWisdomPromo />
         </section>
       </main>
 
