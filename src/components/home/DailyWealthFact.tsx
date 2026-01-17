@@ -96,7 +96,7 @@ const DailyWealthFact = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 px-4 py-2.5 group hover:border-primary/40 transition-all duration-300">
+    <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 px-4 py-2 group hover:border-primary/40 transition-all duration-300">
       <div className="flex items-center gap-3">
         <Lightbulb className="h-4 w-4 text-primary flex-shrink-0" />
         <p 
