@@ -27,7 +27,7 @@ const DailyCelebritySpotlight = () => {
   };
 
   return (
-    <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-card to-primary/5">
+    <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-card to-primary/5" data-tour="celebrity-spotlight">
       <button onClick={handleClick} className="block w-full px-4 py-2.5 text-left">
         <div
           className={`flex items-center gap-3 transition-all duration-150 ${

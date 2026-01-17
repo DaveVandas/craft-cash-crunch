@@ -293,3 +293,62 @@
 .animate-ticker {
   animation: ticker 25s linear infinite;
 }
+
+/* Driver.js Tour Styling */
+.driver-popover {
+  background-color: hsl(220 18% 12%) !important;
+  border: 1px solid hsl(45 100% 50% / 0.3) !important;
+  border-radius: 0.75rem !important;
+  color: hsl(45 30% 96%) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 30px hsl(45 100% 50% / 0.1) !important;
+}
+
+.driver-popover-title {
+  color: hsl(45 30% 96%) !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+}
+
+.driver-popover-description {
+  color: hsl(220 10% 70%) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+
+.driver-popover-progress-text {
+  color: hsl(45 100% 50%) !important;
+  font-size: 0.75rem !important;
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn {
+  background: hsl(45 100% 50%) !important;
+  color: hsl(220 20% 7%) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s !important;
+}
+
+.driver-popover-prev-btn:hover,
+.driver-popover-next-btn:hover {
+  background: hsl(45 100% 55%) !important;
+  transform: scale(1.02) !important;
+}
+
+.driver-popover-close-btn {
+  color: hsl(220 10% 60%) !important;
+}
+
+.driver-popover-close-btn:hover {
+  color: hsl(45 30% 96%) !important;
+}
+
+.driver-popover-arrow-side-left.driver-popover-arrow,
+.driver-popover-arrow-side-right.driver-popover-arrow,
+.driver-popover-arrow-side-top.driver-popover-arrow,
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-color: hsl(220 18% 12%) !important;
+}

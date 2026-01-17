@@ -56,7 +56,7 @@ const actions = [
 
 const QuickActions = () => {
   return (
-    <>
+    <div className="contents" data-tour="quick-actions">
       {actions.map((action) => (
         <Link key={action.href} to={action.href}>
           <Card className="relative overflow-hidden border-border/50 bg-card/50 hover:bg-card transition-all duration-300 cursor-pointer group hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]">
@@ -82,7 +82,7 @@ const QuickActions = () => {
           </Card>
         </Link>
       ))}
-    </>
+    </div>
   );
 };
 
