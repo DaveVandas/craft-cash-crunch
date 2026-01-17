@@ -290,7 +290,7 @@ const TrendingSearches = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                {displayItems.map((person, index) => (
+                {displayItems.slice(0, 5).map((person, index) => (
                   <button
                     key={`${person.name}-${index}`}
                     onClick={() => handleNavigate(person)}
