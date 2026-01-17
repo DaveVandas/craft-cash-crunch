@@ -753,6 +753,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_affiliate_referrals: {
+        Args: { affiliate_uuid: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
