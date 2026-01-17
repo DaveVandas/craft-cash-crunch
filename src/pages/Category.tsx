@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import { getCategoryById, categories } from '@/lib/categories';
 import { Button } from '@/components/ui/button';
@@ -87,10 +88,7 @@ const Category = () => {
         <section className="relative py-12 md:py-16">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="container relative">
-            <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Categories
-            </Link>
+            <Breadcrumb currentPage={category.name} />
             
             <div className="flex items-center gap-4 mb-6">
               <div 

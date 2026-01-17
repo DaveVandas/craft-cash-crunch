@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -296,6 +297,7 @@ const Quiz = () => {
       <main className="flex-1 container py-8">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
+          <Breadcrumb currentPage="Wealth Quiz" />
           
           {/* INTRO SCREEN */}
           {gameState === 'intro' && (
