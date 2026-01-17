@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { FeaturedCelebrityProvider } from "@/contexts/FeaturedCelebrityContext";
 import ProfileSetupGuard from "@/components/onboarding/ProfileSetupGuard";
+import UpdateNotification from "@/components/pwa/UpdateNotification";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
@@ -48,6 +49,7 @@ const App = () => (
             <ProfileSetupGuard>
               <Toaster />
               <Sonner />
+              <UpdateNotification />
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />

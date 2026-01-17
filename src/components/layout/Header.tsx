@@ -1,5 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode, RefreshCw } from 'lucide-react';
+import { usePWAUpdate } from '@/hooks/usePWAUpdate';
+import { toast } from 'sonner';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -31,12 +33,22 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, accessInfo, signOut, initiatePayment } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
+  const { checkForUpdates, isChecking, needRefresh, applyUpdate } = usePWAUpdate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [isBetaUser, setIsBetaUser] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleCheckForUpdates = async () => {
+    const hasUpdate = await checkForUpdates();
+    if (hasUpdate || needRefresh) {
+      applyUpdate();
+    } else {
+      toast.success("You're on the latest version!");
+    }
+  };
 
   useEffect(() => {
     const checkRoles = async () => {
@@ -142,6 +154,21 @@ const Header = () => {
                     {link.highlight && <Sparkles className="h-4 w-4 text-amber-500 ml-auto" />}
                   </Link>
                 ))}
+                
+                {/* Check for Updates button */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleCheckForUpdates();
+                  }}
+                  disabled={isChecking}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left mt-4 border-t border-border pt-4"
+                >
+                  <RefreshCw className={`h-5 w-5 ${isChecking ? 'animate-spin' : ''}`} />
+                  <span className="font-medium">
+                    {isChecking ? 'Checking...' : 'Check for Updates'}
+                  </span>
+                </button>
               </nav>
             </SheetContent>
           </Sheet>
