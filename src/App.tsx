@@ -33,6 +33,7 @@ import DebtDestroyer from "./pages/DebtDestroyer";
 import LandingVariantA from "./pages/landing/LandingVariantA";
 import LandingVariantB from "./pages/landing/LandingVariantB";
 import LandingVariantC from "./pages/landing/LandingVariantC";
+import LandingVariantD from "./pages/landing/LandingVariantD";
 import BetaInvite from "./pages/BetaInvite";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
@@ -77,6 +78,7 @@ const App = () => (
                   <Route path="/landing/a" element={<LandingVariantA />} />
                   <Route path="/landing/b" element={<LandingVariantB />} />
                   <Route path="/landing/c" element={<LandingVariantC />} />
+                  <Route path="/landing/d" element={<LandingVariantD />} />
                   <Route path="/beta" element={<BetaInvite />} />
                   <Route path="/become-affiliate" element={<BecomeAffiliate />} />
                   <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />

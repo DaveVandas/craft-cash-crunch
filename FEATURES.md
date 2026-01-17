@@ -124,11 +124,24 @@
 
 ## 🎨 UI/UX Features
 
+### Onboarding
+- **Profile Setup Modal:** New users must set display name on first login
+- **Guided Tour:** Step-by-step tooltips showing key features (Search, Quick Actions, Celebrity Spotlight, Wealth Wisdom)
+- Uses driver.js for interactive walkthrough
+- Completes once per user (stored in localStorage)
+
 ### Navigation
 - **Breadcrumbs** on all pages (Home > Category > Page)
 - Mobile hamburger menu with PWA update check
 - Favorites dropdown in header
 - Search with autocomplete
+
+### Landing Pages
+- **Variant A:** "Think Like The 1%" - wealth gap focus
+- **Variant B:** "Wake Up Call" - income comparison focus  
+- **Variant C:** "42 Seconds" - shock value focus
+- **Variant D (NEW):** Affiliate hybrid - app value + earning opportunity
+- All variants have share buttons (X, Facebook, native share, copy link)
 
 ### Engagement Elements
 - Money rain animation for billionaires

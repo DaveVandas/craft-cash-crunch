@@ -12,6 +12,7 @@ import RichHabits from '@/components/home/RichHabits';
 import ExitIntentPopup from '@/components/effects/ExitIntentPopup';
 import DailyCelebritySpotlight from '@/components/engagement/DailyCelebritySpotlight';
 import SocialProofNotifications from '@/components/engagement/SocialProofNotifications';
+import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import { categories } from '@/lib/categories';
 
 const Index = () => {
@@ -33,6 +34,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      <OnboardingTour />
       <ExitIntentPopup />
       <SocialProofNotifications />
 
