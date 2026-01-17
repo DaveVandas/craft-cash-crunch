@@ -61,9 +61,14 @@ const Index = () => {
 
         {/* Featured Section */}
         <section className="container mb-6">
-          <div className="mb-3">
-            <h2 className="font-serif text-lg font-bold">Today's Moguls</h2>
-            <p className="text-sm text-muted-foreground">Watch their wealth grow in real-time</p>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">👑</span>
+            <div>
+              <h2 className="font-serif text-lg font-bold flex items-center gap-2">
+                Today's <span className="gradient-gold-text">Moguls</span>
+              </h2>
+              <p className="text-sm text-muted-foreground">Watch their wealth grow in real-time</p>
+            </div>
           </div>
           <div className="space-y-1">
             <DailyCelebritySpotlight />
