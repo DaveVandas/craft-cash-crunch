@@ -325,12 +325,7 @@ const MogulMarkets = () => {
           <CardContent className="py-2 px-4">
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-muted-foreground">Markets Open</span>
-                </div>
-                <span className="text-muted-foreground hidden sm:inline">|</span>
-                <span className="text-muted-foreground hidden sm:inline">Paper Trading Mode</span>
+                <span className="text-muted-foreground">Paper Trading Mode</span>
               </div>
               <div className="flex items-center gap-1.5 text-primary">
                 <Zap className="h-3 w-3" />
