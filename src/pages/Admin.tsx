@@ -893,7 +893,7 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Variant A */}
                   <div className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-colors">
                     <div className="flex items-center justify-between mb-4">
@@ -983,6 +983,36 @@ const Admin = () => {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Variant D */}
+                  <div className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant="outline" className="border-chart-4/30 text-[hsl(var(--chart-4))]">Variant D</Badge>
+                      <span className="text-xs text-muted-foreground">Affiliate</span>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">"Earn $39,000"</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Affiliate-focused hybrid page. Combines earning potential with app value props. Best for affiliate recruitment.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" className="flex-1">
+                        <a href="/landing/d" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Preview
+                        </a>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/landing/d`);
+                          toast.success('Link copied to clipboard!');
+                        }}
+                      >
+                        Copy URL
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-8 p-4 bg-muted/30 rounded-lg">
@@ -991,6 +1021,7 @@ const Admin = () => {
                     <li>• <strong>Variant A:</strong> Best for Facebook/Instagram ads targeting aspiring entrepreneurs</li>
                     <li>• <strong>Variant B:</strong> Works well for email marketing and retargeting campaigns</li>
                     <li>• <strong>Variant C:</strong> Great for SEO content, blog posts, and organic social</li>
+                    <li>• <strong>Variant D:</strong> Perfect for recruiting affiliates and showcasing earning potential</li>
                     <li>• Test each variant with different audiences to see which converts best</li>
                   </ul>
                 </div>
