@@ -17,6 +17,7 @@ import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { TradeModal } from '@/components/trading/TradeModal';
 import { MogulMascot } from '@/components/trading/MogulMascot';
 import { MarketTicker } from '@/components/trading/MarketTicker';
+import { MarketStatus } from '@/components/trading/MarketStatus';
 import { TradingCockpit } from '@/components/trading/TradingCockpit';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -279,17 +280,18 @@ const MogulMarkets = () => {
         
         {/* Compact Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <Crown className="h-6 w-6 text-primary" />
               <h1 className="font-serif text-2xl md:text-3xl font-bold">
                 Mogul <span className="gradient-gold-text">Markets</span>
               </h1>
+              <MogulMascot 
+                mood={totalGainLoss > 0 ? 'happy' : totalGainLoss < 0 ? 'worried' : 'neutral'} 
+                size="sm" 
+              />
             </div>
-            <MogulMascot 
-              mood={totalGainLoss > 0 ? 'happy' : totalGainLoss < 0 ? 'worried' : 'neutral'} 
-              size="sm" 
-            />
+            <MarketStatus />
           </div>
           
           <div className="flex items-center gap-3">
