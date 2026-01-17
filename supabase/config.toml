@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.generate-quiz-questions]
 verify_jwt = false
+
+[functions.get-stock-data]
+verify_jwt = false
