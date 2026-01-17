@@ -81,19 +81,18 @@ const SideHustlePreview = () => {
             <Link 
               key={hustle.name}
               to="/side-hustle"
-              className="p-3 rounded-lg border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+              className="p-3 rounded-lg border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-primary/5 transition-all group overflow-hidden"
             >
               <div className="flex items-start gap-2">
-                <span className="text-2xl">{hustle.emoji}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                <span className="text-xl flex-shrink-0">{hustle.emoji}</span>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className="text-xs font-medium truncate group-hover:text-primary transition-colors">
                     {hustle.name}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">{hustle.description}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                     <Badge 
                       variant="outline" 
-                      className={`text-[10px] px-1.5 py-0 ${
+                      className={`text-[10px] px-1 py-0 flex-shrink-0 ${
                         hustle.difficulty === 'Easy' ? 'border-green-500/30 text-green-500' :
                         hustle.difficulty === 'Medium' ? 'border-amber-500/30 text-amber-500' : 
                         'border-red-500/30 text-red-500'
@@ -101,7 +100,7 @@ const SideHustlePreview = () => {
                     >
                       {hustle.difficulty}
                     </Badge>
-                    <span className="text-xs font-semibold text-emerald-500">
+                    <span className="text-[10px] font-semibold text-emerald-500 truncate">
                       {formatProfit(hustle)}/mo
                     </span>
                   </div>
