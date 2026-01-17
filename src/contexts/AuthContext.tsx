@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AccessInfo {
   hasAccess: boolean;
@@ -146,10 +147,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const initiatePayment = async () => {
-    const { data, error } = await supabase.functions.invoke('create-payment');
-    if (error) throw error;
-    if (data.url) {
-      window.open(data.url, '_blank');
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment');
+      
+      if (error) {
+        console.error('Payment initiation error:', error);
+        toast.error('Unable to start payment. Please try again.', {
+          description: 'If this persists, please contact support.',
+        });
+        return;
+      }
+      
+      if (data?.error) {
+        console.error('Payment service error:', data.error);
+        toast.error('Payment service unavailable', {
+          description: data.error || 'Please try again later.',
+        });
+        return;
+      }
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast.error('Unable to open payment page', {
+          description: 'Please try again or contact support.',
+        });
+      }
+    } catch (err) {
+      console.error('Unexpected payment error:', err);
+      toast.error('Something went wrong', {
+        description: 'Please try again later.',
+      });
     }
   };
 
