@@ -37,6 +37,7 @@ import LandingVariantD from "./pages/landing/LandingVariantD";
 import BetaInvite from "./pages/BetaInvite";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
+import AffiliateReferral from "./pages/AffiliateReferral";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const App = () => (
                   <Route path="/beta" element={<BetaInvite />} />
                   <Route path="/become-affiliate" element={<BecomeAffiliate />} />
                   <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
+                  <Route path="/ref/:code" element={<AffiliateReferral />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

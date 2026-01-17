@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift } from 'lucide-react';
+import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift, Users } from 'lucide-react';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import { AFFILIATE_CODE_KEY } from './AffiliateReferral';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -19,7 +21,10 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const showReferralInfo = searchParams.get('showReferral') === 'true';
+  const refCodeFromUrl = searchParams.get('ref');
   const { user, signIn, signUp, resetPassword, loading: authLoading } = useAuth();
+  const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
+  const [affiliateName, setAffiliateName] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -37,10 +42,30 @@ const Auth = () => {
       setRememberMe(true);
     }
 
+    // Check for affiliate referral code (from URL or localStorage)
+    const storedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_KEY);
+    const codeToUse = refCodeFromUrl || storedAffiliateCode;
+    
+    if (codeToUse) {
+      setAffiliateCode(codeToUse);
+      // Fetch affiliate name for display
+      supabase
+        .from('affiliates')
+        .select('display_name')
+        .eq('affiliate_code', codeToUse.toUpperCase())
+        .eq('status', 'approved')
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setAffiliateName(data.display_name);
+          }
+        });
+    }
+
     if (user) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, navigate, refCodeFromUrl]);
 
   const validateInputs = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -113,16 +138,57 @@ const Auth = () => {
     if (!validateInputs()) return;
 
     setLoading(true);
-    const { error } = await signUp(email, password);
-    setLoading(false);
-
+    const { error, data } = await signUp(email, password);
+    
     if (error) {
+      setLoading(false);
       if (error.message.includes('already registered')) {
         toast.error('This email is already registered. Please sign in instead.');
       } else {
         toast.error(error.message);
       }
     } else {
+      // If we have an affiliate code, attribute this signup to them
+      if (affiliateCode && data?.user) {
+        try {
+          // Update the user's user_access with the referral code
+          await supabase
+            .from('user_access')
+            .update({ referred_by_code: affiliateCode.toUpperCase() })
+            .eq('user_id', data.user.id);
+
+          // Find the affiliate and create a referral record
+          const { data: affiliateData } = await supabase
+            .from('affiliates')
+            .select('id, commission_rate')
+            .eq('affiliate_code', affiliateCode.toUpperCase())
+            .eq('status', 'approved')
+            .single();
+
+          if (affiliateData) {
+            // Create affiliate_referral record
+            await supabase.from('affiliate_referrals').insert({
+              affiliate_id: affiliateData.id,
+              referred_user_id: data.user.id,
+              referred_email: email,
+              commission_amount: affiliateData.commission_rate,
+              status: 'pending',
+            });
+
+            // Update affiliate's total_referrals count
+            await supabase.rpc('increment_affiliate_referrals', { 
+              affiliate_uuid: affiliateData.id 
+            }).then(() => {
+              // Clear the stored affiliate code
+              localStorage.removeItem(AFFILIATE_CODE_KEY);
+            });
+          }
+        } catch (err) {
+          console.error('Error attributing referral:', err);
+        }
+      }
+
+      setLoading(false);
       toast.success('Account created successfully!');
       navigate('/');
     }
