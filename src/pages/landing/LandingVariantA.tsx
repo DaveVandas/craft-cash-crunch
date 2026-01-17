@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Crown, TrendingUp, Zap, DollarSign, ArrowRight, Star } from 'lucide-react';
+import LandingShareButtons from '@/components/landing/LandingShareButtons';
 
 const LandingVariantA = () => {
   return (
@@ -13,6 +14,11 @@ const LandingVariantA = () => {
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
         
         <div className="container relative z-10 text-center px-4 py-20">
+          {/* Share Button - Top Right */}
+          <div className="absolute top-6 right-6 z-20">
+            <LandingShareButtons />
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
             <Crown className="h-4 w-4 text-primary" />

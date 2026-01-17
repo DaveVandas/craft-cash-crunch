@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Flame, Clock, Target, Brain, ArrowRight, CheckCircle2 } from 'lucide-react';
+import LandingShareButtons from '@/components/landing/LandingShareButtons';
 
 const LandingVariantB = () => {
   return (
@@ -10,6 +11,13 @@ const LandingVariantB = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
         
         <div className="container relative z-10 py-20">
+          {/* Share Button - Top Right */}
+          <div className="absolute top-6 right-6 z-20">
+            <LandingShareButtons 
+              shareText="🔥 You're not broke, you're just uninformed. This app shows you what the 1% know!"
+            />
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               {/* Badge */}
