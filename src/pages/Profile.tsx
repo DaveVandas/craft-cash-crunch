@@ -58,13 +58,14 @@ const Profile = () => {
   const [validationError, setValidationError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // Scroll to top and mark ready on mount to prevent flash/jump issues
+  // Scroll to top and mark ready on mount/route change to prevent flash/jump issues
   useEffect(() => {
+    setIsReady(false);
     window.scrollTo({ top: 0, behavior: 'instant' });
     // Small delay to ensure DOM is ready before rendering content
     const timer = setTimeout(() => setIsReady(true), 10);
     return () => clearTimeout(timer);
-  }, []);
+  }, [id]);
 
   // Get preview or prefetched celebrity data from navigation state
   const navState = (location.state ?? null) as { preview?: PreviewData; celebrity?: Celebrity } | null;
