@@ -172,7 +172,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data?.url) {
-        window.open(data.url, '_blank');
+        // Use window.location.href for better reliability (avoids popup blockers)
+        window.location.href = data.url;
       } else {
         toast.error('Unable to open payment page', {
           description: 'Please try again or contact support.',
