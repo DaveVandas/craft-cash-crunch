@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -60,6 +60,11 @@ const Calculator = () => {
   const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
   
   const { searchCelebrity } = useCelebritySearch();
+
+  // Scroll to top on mount
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Handle navigation from profile with pre-selected celebrity
   useEffect(() => {
@@ -146,7 +151,7 @@ const Calculator = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container py-8 md:py-12">
+      <main className="flex-1 container py-8 md:py-12 animate-fade-in">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
           <Breadcrumb currentPage="Reality Check" />
