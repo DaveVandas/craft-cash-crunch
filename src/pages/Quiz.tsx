@@ -457,8 +457,8 @@ const Quiz = () => {
                   </p>
 
                   <div className="grid grid-cols-2 gap-3">
-                    {question.options.map((option, index) => {
-                      let buttonClass = 'h-auto py-4 text-base font-medium transition-all duration-300';
+                    {question.options.map((option) => {
+                      let buttonClass = 'h-auto py-4 text-base font-medium transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
                       if (selectedAnswer) {
                         if (option === question.correctTime) {
                           buttonClass += ' bg-green-500/20 border-green-500 text-green-400 scale-105';
@@ -473,7 +473,7 @@ const Quiz = () => {
 
                       return (
                         <Button
-                          key={option}
+                          key={`${currentQuestion}-${option}`}
                           variant="outline"
                           className={buttonClass}
                           onClick={() => handleAnswer(option)}
