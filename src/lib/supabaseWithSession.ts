@@ -10,18 +10,63 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const GUEST_SESSION_KEY = 'mogul_markets_session';
+const GUEST_SESSION_EXPIRY_KEY = 'mogul_markets_session_expiry';
+const SESSION_EXPIRY_DAYS = 7;
+
+/**
+ * Check if the session is expired
+ */
+function isSessionExpired(): boolean {
+  if (typeof window === 'undefined') return true;
+  const expiryStr = localStorage.getItem(GUEST_SESSION_EXPIRY_KEY);
+  if (!expiryStr) return true;
+  return Date.now() > parseInt(expiryStr, 10);
+}
+
+/**
+ * Set session expiry to 7 days from now
+ */
+function setSessionExpiry(): void {
+  const expiryTime = Date.now() + (SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+  localStorage.setItem(GUEST_SESSION_EXPIRY_KEY, expiryTime.toString());
+}
+
+/**
+ * Clear expired session data
+ */
+function clearSession(): void {
+  localStorage.removeItem(GUEST_SESSION_KEY);
+  localStorage.removeItem(GUEST_SESSION_EXPIRY_KEY);
+}
 
 export function getGuestSessionId(): string | null {
   if (typeof window === 'undefined') return null;
+  
+  // Check if session is expired
+  if (isSessionExpired()) {
+    clearSession();
+    return null;
+  }
+  
   return localStorage.getItem(GUEST_SESSION_KEY);
 }
 
 export function getOrCreateGuestSession(): string {
-  let sessionId = localStorage.getItem(GUEST_SESSION_KEY);
-  if (!sessionId) {
-    sessionId = `guest_${crypto.randomUUID()}`;
-    localStorage.setItem(GUEST_SESSION_KEY, sessionId);
+  // Check for existing valid session
+  const existingSession = localStorage.getItem(GUEST_SESSION_KEY);
+  
+  if (existingSession && !isSessionExpired()) {
+    // Rotate expiry on active use (sliding expiration)
+    setSessionExpiry();
+    return existingSession;
   }
+  
+  // Clear any expired session and create new one
+  clearSession();
+  const sessionId = `guest_${crypto.randomUUID()}`;
+  localStorage.setItem(GUEST_SESSION_KEY, sessionId);
+  setSessionExpiry();
+  
   return sessionId;
 }
 
