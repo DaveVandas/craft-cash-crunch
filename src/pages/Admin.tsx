@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -261,7 +262,7 @@ const Admin = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 container py-8">
+        <main className="flex-1 container py-8 pb-20 md:pb-0">
           <Skeleton className="h-10 w-48 mb-8" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <Skeleton className="h-32" />
@@ -272,6 +273,7 @@ const Admin = () => {
           <Skeleton className="h-96" />
         </main>
         <Footer />
+        <MobileNav />
       </div>
     );
   }
@@ -280,7 +282,7 @@ const Admin = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 container py-16 text-center">
+        <main className="flex-1 container py-16 pb-20 md:pb-0 text-center">
           <div className="max-w-md mx-auto">
             <Shield className="h-16 w-16 text-destructive mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
@@ -294,6 +296,7 @@ const Admin = () => {
           </div>
         </main>
         <Footer />
+        <MobileNav />
       </div>
     );
   }
@@ -302,7 +305,7 @@ const Admin = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1 container py-8">
+      <main className="flex-1 container py-8 pb-20 md:pb-0">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-serif text-3xl font-bold flex items-center gap-3">
@@ -1087,6 +1090,7 @@ const Admin = () => {
       </main>
 
       <Footer />
+      <MobileNav />
     </div>
   );
 };

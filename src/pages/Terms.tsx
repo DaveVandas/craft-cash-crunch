@@ -1,12 +1,13 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Terms = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container py-8 md:py-12">
+      <main className="flex-1 container py-8 md:py-12 pb-20 md:pb-0">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
@@ -111,6 +112,7 @@ const Terms = () => {
         </div>
       </main>
       <Footer />
+      <MobileNav />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import MobileNav from '@/components/layout/MobileNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -499,7 +499,7 @@ const MogulAcademy = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         {/* Hero Section */}
         <section className="relative py-12 md:py-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-emerald-500/10 to-transparent" />
@@ -702,6 +702,7 @@ const MogulAcademy = () => {
       </main>
       
       <Footer />
+      <MobileNav />
     </div>
   );
 };

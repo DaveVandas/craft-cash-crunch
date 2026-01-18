@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react';
@@ -66,7 +67,7 @@ const PaymentSuccess = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1 flex items-center justify-center py-12 px-4">
+      <main className="flex-1 flex items-center justify-center py-12 px-4 pb-20 md:pb-0">
         <Card className="w-full max-w-md border-primary/20">
           <CardHeader className="text-center">
             {verifying ? (
@@ -157,6 +158,7 @@ const PaymentSuccess = () => {
       </main>
 
       <Footer />
+      <MobileNav />
     </div>
   );
 };
