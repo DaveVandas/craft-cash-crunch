@@ -90,7 +90,35 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Admin ${userData.user.id} fetching all users`);
+    // SECURITY: Rate limiting for admin endpoints (20 requests per minute)
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('cf-connecting-ip') || 
+                     'unknown';
+    const adminRateLimitKey = `admin_${userData.user.id}_${clientIp}`;
+    
+    const { data: isRateLimited } = await supabaseClient.rpc('check_rate_limit', {
+      p_ip_address: adminRateLimitKey,
+      p_max_requests: 20,
+      p_window_seconds: 60
+    });
+    
+    if (isRateLimited) {
+      console.warn(`Rate limit exceeded for admin ${userData.user.id}`);
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // SECURITY: Audit logging for admin data access
+    const auditLog = {
+      admin_user_id: userData.user.id,
+      action: 'admin_get_users',
+      ip_address: clientIp,
+      user_agent: req.headers.get('user-agent') || 'unknown',
+      timestamp: new Date().toISOString(),
+    };
+    console.log(`AUDIT: Admin data access - ${JSON.stringify(auditLog)}`);
 
     // Fetch all users from auth (requires service role)
     const authUsers: any[] = [];
