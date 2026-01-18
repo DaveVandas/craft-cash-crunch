@@ -94,13 +94,36 @@ export function AffiliateShareCard({
   };
 
   const handleCopyLink = async () => {
+    setIsGenerating(true);
     try {
-      await navigator.clipboard.writeText(referralUrl);
-      setCopied(true);
-      toast.success('Link copied!');
-      setTimeout(() => setCopied(false), 2000);
+      const blob = await generateCardImage();
+      if (blob && navigator.clipboard && 'write' in navigator.clipboard) {
+        // Try to copy image to clipboard
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          setCopied(true);
+          toast.success('Card copied to clipboard! 📋');
+          setTimeout(() => setCopied(false), 2000);
+        } catch (imgError) {
+          // Fallback: copy link if image clipboard fails
+          await navigator.clipboard.writeText(referralUrl);
+          setCopied(true);
+          toast.success('Link copied! (Image copy not supported on this device)');
+          setTimeout(() => setCopied(false), 2000);
+        }
+      } else {
+        // Fallback for older browsers
+        await navigator.clipboard.writeText(referralUrl);
+        setCopied(true);
+        toast.success('Link copied!');
+        setTimeout(() => setCopied(false), 2000);
+      }
     } catch (error) {
-      toast.error('Failed to copy link');
+      toast.error('Failed to copy');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -247,8 +270,10 @@ export function AffiliateShareCard({
         </Button>
         <Button
           onClick={handleCopyLink}
+          disabled={isGenerating}
           variant="outline"
           className="gap-2"
+          title="Copy card to clipboard"
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </Button>
