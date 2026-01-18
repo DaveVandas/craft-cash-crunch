@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -374,7 +375,7 @@ const WealthWisdom = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <main className="flex-1">
+      <main className="flex-1 pb-24 md:pb-0">
         <div className="container pt-4">
           <Breadcrumb currentPage="Wealth Wisdom" />
         </div>
@@ -574,6 +575,7 @@ const WealthWisdom = () => {
       </main>
       
       <Footer />
+      <MobileNav />
     </div>
   );
 };

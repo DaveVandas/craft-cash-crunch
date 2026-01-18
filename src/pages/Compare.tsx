@@ -77,7 +77,7 @@ const Compare = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container py-8 md:py-12 animate-fade-in">
+      <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12 animate-fade-in">
         <PaywallGate>
         <div className="max-w-4xl mx-auto">
           <Breadcrumb currentPage="Compare" />

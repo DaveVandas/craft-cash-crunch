@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -291,7 +292,7 @@ const Trades = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <main className="flex-1 container py-10 md:py-12">
+      <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">
         <PaywallGate>
           {/* Hero Section */}
           <div className="text-center mb-10">
@@ -748,6 +749,7 @@ const Trades = () => {
       </main>
       
       <Footer />
+      <MobileNav />
     </div>
   );
 };
