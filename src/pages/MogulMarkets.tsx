@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -292,7 +293,7 @@ const MogulMarkets = () => {
       {/* Live Market Ticker */}
       <MarketTicker />
       
-      <main className="flex-1 container py-6 md:py-8">
+      <main className="flex-1 container py-6 md:py-8 pb-24 md:pb-8">
         <Breadcrumb currentPage="Mogul Markets" />
         
         {/* Compact Header */}
@@ -400,6 +401,7 @@ const MogulMarkets = () => {
           return executeCover(selectedStock.ticker, shares, price);
         }}
       />
+      <MobileNav />
     </div>
   );
 };

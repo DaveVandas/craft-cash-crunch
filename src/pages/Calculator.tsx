@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SalaryInput from '@/components/calculator/SalaryInput';
@@ -460,6 +461,7 @@ const Calculator = () => {
         </PaywallGate>
       </main>
       <Footer />
+      <MobileNav />
     </div>
   );
 };

@@ -1,7 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, Menu, Calculator, GitCompareArrows, BookOpen, QrCode, RefreshCw, Loader2 } from 'lucide-react';
-import { usePWAUpdate } from '@/hooks/usePWAUpdate';
-import { toast } from 'sonner';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2 } from 'lucide-react';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -9,9 +7,11 @@ import { NotificationsDropdown } from '@/components/notifications/NotificationsD
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,34 +22,17 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 
 const Header = () => {
   const navigate = useNavigate();
   const { user, accessInfo, signOut, initiatePayment, paymentLoading } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
-  const { checkForUpdates, isChecking, needRefresh, applyUpdate } = usePWAUpdate();
+  const { profile } = useUserProfile();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [isBetaUser, setIsBetaUser] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleCheckForUpdates = async () => {
-    const hasUpdate = await checkForUpdates();
-    if (hasUpdate || needRefresh) {
-      applyUpdate();
-    } else {
-      toast.success("You're on the latest version!");
-    }
-  };
 
   useEffect(() => {
     const checkRoles = async () => {
@@ -84,13 +67,16 @@ const Header = () => {
 
   const isPremium = accessInfo?.hasLifetimeAccess === true || (accessInfo?.searchesRemaining ?? 0) < 0;
 
-  const navLinks = [
-    { to: '/search', icon: Search, label: 'Search' },
-    { to: '/mogul-markets', icon: TrendingUp, label: 'Mogul Markets', highlight: true },
-    { to: '/compare', icon: GitCompareArrows, label: 'Compare' },
-    { to: '/calculator', icon: Calculator, label: 'Reality Check' },
-    { to: '/wealth-wisdom', icon: BookOpen, label: 'Wisdom' },
-  ];
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (profile?.display_name) {
+      return profile.display_name.slice(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return '👤';
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -124,60 +110,10 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Mobile Hamburger Menu */}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <span className="text-xl">💎</span>
-                  <span className="font-serif gradient-gold-text">Menu</span>
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      link.highlight 
-                        ? 'bg-primary/10 text-primary hover:bg-primary/20' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                    }`}
-                  >
-                    <link.icon className="h-5 w-5" />
-                    <span className="font-medium">{link.label}</span>
-                    {link.highlight && <Sparkles className="h-4 w-4 text-amber-500 ml-auto" />}
-                  </Link>
-                ))}
-                
-                {/* Check for Updates button */}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleCheckForUpdates();
-                  }}
-                  disabled={isChecking}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left mt-4 border-t border-border pt-4"
-                >
-                  <RefreshCw className={`h-5 w-5 ${isChecking ? 'animate-spin' : ''}`} />
-                  <span className="font-medium">
-                    {isChecking ? 'Checking...' : 'Check for Updates'}
-                  </span>
-                </button>
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          {/* Sound Toggle */}
+          {/* Sound Toggle - Desktop only */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={toggleSound} className="h-9 w-9">
+              <Button variant="ghost" size="icon" onClick={toggleSound} className="h-9 w-9 hidden md:flex">
                 {soundEnabled ? (
                   <Volume2 className="h-4 w-4" />
                 ) : (
@@ -190,36 +126,35 @@ const Header = () => {
             </TooltipContent>
           </Tooltip>
 
-          {/* Share App Button */}
+          {/* Share App Button - Desktop only */}
           <Button 
             variant="ghost" 
             onClick={() => setInviteModalOpen(true)} 
-            className="h-9 px-3"
+            className="h-9 px-3 hidden md:flex"
           >
             <Share2 className="h-4 w-4 mr-1.5" />
-            <span className="text-sm hidden sm:inline">Share</span>
+            <span className="text-sm">Share</span>
           </Button>
 
           {user ? (
             <>
               {/* Notifications */}
               <NotificationsDropdown />
-              {/* Only show upgrade button if accessInfo loaded AND user is NOT premium */}
+              {/* Only show upgrade button if accessInfo loaded AND user is NOT premium - Desktop only */}
               {accessInfo && !isPremium && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
                       onClick={initiatePayment}
                       disabled={paymentLoading}
-                      className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                      className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 hidden sm:flex"
                     >
                       {paymentLoading ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       ) : (
                         <Crown className="h-4 w-4 mr-2" />
                       )}
-                      <span className="hidden sm:inline">{paymentLoading ? 'Processing...' : 'Unlock Unlimited'}</span>
-                      <span className="sm:hidden">{paymentLoading ? '...' : '$6.99'}</span>
+                      <span>{paymentLoading ? 'Processing...' : 'Unlock Unlimited'}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -230,23 +165,30 @@ const Header = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {isPremium ? (
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="border-primary bg-gradient-to-br from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30"
-                    >
-                      <Gem className="h-4 w-4 text-primary" />
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="icon" className="border-primary/50">
-                      <User className="h-4 w-4" />
-                    </Button>
-                  )}
+                  {/* Mobile: Show avatar, Desktop: Show icon button */}
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className={`${isPremium ? 'border-primary bg-gradient-to-br from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30' : 'border-primary/50'}`}
+                  >
+                    {/* Mobile avatar */}
+                    <Avatar className="h-7 w-7 md:hidden">
+                      <AvatarImage src={profile?.avatar_url || undefined} alt="Profile" />
+                      <AvatarFallback className="text-xs bg-primary/20 text-primary">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* Desktop icon */}
+                    {isPremium ? (
+                      <Gem className="h-4 w-4 text-primary hidden md:block" />
+                    ) : (
+                      <User className="h-4 w-4 hidden md:block" />
+                    )}
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium truncate">{user.email}</p>
+                    <p className="text-sm font-medium truncate">{profile?.display_name || user.email}</p>
                     {isPremium ? (
                       <p className="text-xs text-primary flex items-center gap-1">
                         <Gem className="h-3 w-3" /> Lifetime VIP Access

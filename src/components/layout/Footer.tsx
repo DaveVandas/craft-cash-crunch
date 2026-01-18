@@ -49,7 +49,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-border/40 bg-card/30 py-8 mt-auto">
+    <footer className="border-t border-border/40 bg-card/30 py-8 mt-auto hidden md:block">
       <div className="container">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">

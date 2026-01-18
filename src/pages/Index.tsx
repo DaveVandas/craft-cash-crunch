@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
@@ -40,7 +41,7 @@ const Index = () => {
       <ExitIntentPopup />
       <SocialProofNotifications />
 
-      <main className="flex-1 animate-fade-in">
+      <main className="flex-1 animate-fade-in pb-20 md:pb-0">
         {/* Hero Section - Split Layout */}
         <section className="relative py-6 md:py-10">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
@@ -117,6 +118,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <MobileNav />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SearchBar from '@/components/home/SearchBar';
@@ -83,7 +84,7 @@ const Search = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container py-8 md:py-12">
+      <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
           <Breadcrumb currentPage="Search" />
@@ -152,6 +153,7 @@ const Search = () => {
         </PaywallGate>
       </main>
       <Footer />
+      <MobileNav />
     </div>
   );
 };
