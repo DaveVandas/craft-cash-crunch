@@ -80,7 +80,7 @@ const MobileNav = () => {
               <span className="text-[10px] font-medium pointer-events-none">More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-auto max-h-[70vh] rounded-t-2xl">
+          <SheetContent side="bottom" className="h-auto max-h-[70vh] rounded-t-2xl pb-20">
             <SheetHeader className="pb-4">
               <SheetTitle className="flex items-center gap-2 justify-center">
                 <span className="text-xl">🛠️</span>
