@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send, QrCode } from 'lucide-react';
+import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send, QrCode, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Affiliate {
   id: string;
@@ -86,6 +87,10 @@ export function AffiliateManagement() {
     transaction_id: '',
     notes: '',
   });
+
+  // Form state for editing commission
+  const [editingCommission, setEditingCommission] = useState<string | null>(null);
+  const [newCommissionRate, setNewCommissionRate] = useState<string>('1.00');
 
   useEffect(() => {
     fetchData();
@@ -243,6 +248,33 @@ export function AffiliateManagement() {
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
     toast.success('Link copied to clipboard!');
+  };
+
+  const handleUpdateCommission = async (affiliateId: string) => {
+    try {
+      const rate = parseFloat(newCommissionRate);
+      if (isNaN(rate) || rate <= 0) {
+        toast.error('Please enter a valid commission rate');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('affiliates')
+        .update({
+          commission_rate: rate,
+          is_vip: rate > 1,
+        })
+        .eq('id', affiliateId);
+
+      if (error) throw error;
+
+      toast.success(`Commission updated to $${rate.toFixed(2)}! Affiliate will be notified.`);
+      setEditingCommission(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating commission:', error);
+      toast.error('Failed to update commission');
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -465,8 +497,71 @@ export function AffiliateManagement() {
                         <Badge className="ml-2 bg-yellow-500/20 text-yellow-400">VIP</Badge>
                       )}
                     </TableCell>
-                    <TableCell className="font-mono text-green-400">
-                      ${affiliate.commission_rate.toFixed(2)}
+                    <TableCell>
+                      <Popover 
+                        open={editingCommission === affiliate.id} 
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setEditingCommission(affiliate.id);
+                            setNewCommissionRate(affiliate.commission_rate.toFixed(2));
+                          } else {
+                            setEditingCommission(null);
+                          }
+                        }}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="font-mono text-green-400 hover:text-green-300 gap-1 px-2"
+                          >
+                            ${affiliate.commission_rate.toFixed(2)}
+                            <Edit2 className="h-3 w-3 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-3" align="start">
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs">Commission Rate</Label>
+                              <Select
+                                value={newCommissionRate}
+                                onValueChange={setNewCommissionRate}
+                              >
+                                <SelectTrigger className="h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {COMMISSION_OPTIONS.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => setEditingCommission(null)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => handleUpdateCommission(affiliate.id)}
+                              >
+                                Save
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Affiliate will be notified of this change.
+                            </p>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </TableCell>
                     <TableCell>{affiliate.total_referrals}</TableCell>
                     <TableCell className="font-mono">
