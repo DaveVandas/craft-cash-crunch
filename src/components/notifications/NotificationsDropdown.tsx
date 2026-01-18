@@ -73,7 +73,7 @@ export function NotificationsDropdown() {
           )}
         </div>
         <DropdownMenuSeparator />
-        <ScrollArea className="max-h-80">
+        <ScrollArea className="h-[280px] max-h-[60vh]">
           {loading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Loading...
