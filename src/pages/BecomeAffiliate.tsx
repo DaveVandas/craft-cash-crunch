@@ -150,8 +150,8 @@ export default function BecomeAffiliate() {
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-gradient-to-r from-amber-500/30 to-primary/30 text-amber-400 border-amber-500/50">
-            <Crown className="w-3 h-3 mr-1" />
+          <Badge className="mb-4 bg-gradient-to-r from-primary/20 to-primary/10 text-foreground border-primary/50">
+            <Crown className="w-3 h-3 mr-1 text-primary" />
             Join the Mogul Movement
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">

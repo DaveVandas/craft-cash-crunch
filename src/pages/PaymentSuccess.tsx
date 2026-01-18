@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,9 +15,14 @@ const PaymentSuccess = () => {
   const { refreshAccess, user } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
+  const hasVerifiedRef = useRef(false); // Prevent multiple verifications
 
   useEffect(() => {
     const verifyPayment = async () => {
+      // Prevent running multiple times
+      if (hasVerifiedRef.current) return;
+      hasVerifiedRef.current = true;
+      
       const sessionId = searchParams.get('session_id');
       
       if (!sessionId) {

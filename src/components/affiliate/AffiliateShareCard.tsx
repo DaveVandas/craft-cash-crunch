@@ -106,12 +106,12 @@ export function AffiliateShareCard({
 
   return (
     <div className="space-y-4">
-      {/* The Shareable Card */}
+      {/* The Shareable Card - USES EXPLICIT COLORS FOR IMAGE GENERATION */}
       <div 
         ref={cardRef}
         className="relative w-full max-w-sm mx-auto aspect-[9/16] rounded-2xl overflow-hidden"
         style={{
-          background: 'linear-gradient(145deg, hsl(45, 100%, 8%) 0%, hsl(0, 0%, 5%) 50%, hsl(45, 100%, 10%) 100%)',
+          background: 'linear-gradient(145deg, #1a1814 0%, #0d0d0d 50%, #1c1915 100%)',
         }}
       >
         {/* Gold border frame */}
@@ -119,36 +119,36 @@ export function AffiliateShareCard({
           className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{
             border: '4px solid transparent',
-            background: 'linear-gradient(145deg, hsl(45, 100%, 50%), hsl(35, 100%, 40%), hsl(45, 100%, 55%)) border-box',
+            background: 'linear-gradient(145deg, #FFD700, #B8860B, #FFE066) border-box',
             WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
             WebkitMaskComposite: 'xor',
             maskComposite: 'exclude',
           }}
         />
 
-        {/* Content */}
+        {/* Content - using explicit colors for image generation */}
         <div className="relative h-full flex flex-col items-center justify-between p-6 text-center">
           {/* Header */}
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">
-              {isVip && <Crown className="w-5 h-5 text-primary" />}
-              <span className="text-primary font-bold text-sm tracking-widest uppercase">
+              {isVip && <Crown className="w-5 h-5" style={{ color: '#FFD700' }} />}
+              <span style={{ color: '#FFD700' }} className="font-bold text-sm tracking-widest uppercase">
                 Wealth Perspective
               </span>
-              {isVip && <Crown className="w-5 h-5 text-primary" />}
+              {isVip && <Crown className="w-5 h-5" style={{ color: '#FFD700' }} />}
             </div>
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-2xl font-bold" style={{ color: '#F5F3EE' }}>
               Join the Mogul Life
             </h2>
-            <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm">
-              <Crown className="w-4 h-4 text-primary" />
+            <div className="flex items-center justify-center gap-1 text-sm" style={{ color: '#9CA3AF' }}>
+              <Crown className="w-4 h-4" style={{ color: '#FFD700' }} />
               <span>Exclusive Mogul Access</span>
-              <Crown className="w-4 h-4 text-primary" />
+              <Crown className="w-4 h-4" style={{ color: '#FFD700' }} />
             </div>
           </div>
 
           {/* QR Code */}
-          <div className="relative p-4 rounded-xl bg-white shadow-xl">
+          <div className="relative p-4 rounded-xl shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
             <QRCodeSVG
               value={referralUrl}
               size={160}
@@ -166,45 +166,45 @@ export function AffiliateShareCard({
               }}
             />
             {/* Corner accents */}
-            <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl" />
-            <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr" />
-            <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl" />
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br" />
+            <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 rounded-tl" style={{ borderColor: '#FFD700' }} />
+            <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 rounded-tr" style={{ borderColor: '#FFD700' }} />
+            <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 rounded-bl" style={{ borderColor: '#FFD700' }} />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 rounded-br" style={{ borderColor: '#FFD700' }} />
           </div>
 
           {/* Affiliate Info */}
           <div className="space-y-3">
             <div className="space-y-1">
-              <p className="text-muted-foreground text-sm flex items-center justify-center gap-1">
-                <Crown className="w-3 h-3 text-primary" />
+              <p className="text-sm flex items-center justify-center gap-1" style={{ color: '#9CA3AF' }}>
+                <Crown className="w-3 h-3" style={{ color: '#FFD700' }} />
                 Invited by Mogul
               </p>
-              <p className="text-xl font-bold text-foreground">{displayName}</p>
+              <p className="text-xl font-bold" style={{ color: '#F5F3EE' }}>{displayName}</p>
             </div>
             
             <div 
               className="px-4 py-2 rounded-lg inline-block"
               style={{
-                background: 'linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(35, 100%, 40%) 100%)',
+                background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
               }}
             >
-              <span className="text-lg font-mono font-bold text-background tracking-wider">
+              <span className="text-lg font-mono font-bold tracking-wider" style={{ color: '#1a1814' }}>
                 {affiliateCode}
               </span>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <TrendingUp className="w-4 h-4 text-green-500" />
+            <div className="flex items-center justify-center gap-2 text-sm" style={{ color: '#9CA3AF' }}>
+              <TrendingUp className="w-4 h-4" style={{ color: '#22C55E' }} />
               <span>Live the mogul lifestyle</span>
             </div>
           </div>
 
           {/* Footer */}
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs" style={{ color: '#9CA3AF' }}>
               Scan to join the mogul movement 👑
             </p>
-            <p className="text-xs text-primary font-medium">
+            <p className="text-xs font-medium" style={{ color: '#FFD700' }}>
               earningsexplorer.shop
             </p>
           </div>
@@ -214,13 +214,13 @@ export function AffiliateShareCard({
         <div 
           className="absolute top-0 right-0 w-24 h-24 opacity-20"
           style={{
-            background: 'radial-gradient(circle at top right, hsl(45, 100%, 50%) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at top right, #FFD700 0%, transparent 70%)',
           }}
         />
         <div 
           className="absolute bottom-0 left-0 w-24 h-24 opacity-20"
           style={{
-            background: 'radial-gradient(circle at bottom left, hsl(45, 100%, 50%) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at bottom left, #FFD700 0%, transparent 70%)',
           }}
         />
       </div>
