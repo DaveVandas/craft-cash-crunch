@@ -48,20 +48,20 @@ const MobileNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/80 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-2">
         {mainNavItems.map((item) => (
           <Link
             key={item.to}
             to={item.to}
-            className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors ${
+            className={`flex flex-col items-center justify-center flex-1 h-full min-h-[56px] py-2 transition-colors touch-manipulation ${
               isActive(item.to)
                 ? 'text-primary'
-                : 'text-muted-foreground hover:text-foreground'
+                : 'text-muted-foreground active:text-foreground'
             } ${item.highlight && !isActive(item.to) ? 'text-amber-500' : ''}`}
           >
-            <item.icon className={`h-5 w-5 mb-1 ${isActive(item.to) ? 'scale-110' : ''} transition-transform`} />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <item.icon className={`h-5 w-5 mb-1 ${isActive(item.to) ? 'scale-110' : ''} transition-transform pointer-events-none`} />
+            <span className="text-[10px] font-medium pointer-events-none">{item.label}</span>
           </Link>
         ))}
 
@@ -69,14 +69,15 @@ const MobileNav = () => {
         <Sheet open={moreMenuOpen} onOpenChange={setMoreMenuOpen}>
           <SheetTrigger asChild>
             <button
-              className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors ${
+              type="button"
+              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[56px] py-2 transition-colors touch-manipulation ${
                 moreMenuOpen
                   ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground active:text-foreground'
               }`}
             >
-              <MoreHorizontal className="h-5 w-5 mb-1" />
-              <span className="text-[10px] font-medium">More</span>
+              <MoreHorizontal className="h-5 w-5 mb-1 pointer-events-none" />
+              <span className="text-[10px] font-medium pointer-events-none">More</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-auto max-h-[70vh] rounded-t-2xl">
