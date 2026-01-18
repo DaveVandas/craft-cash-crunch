@@ -519,41 +519,47 @@ const Quiz = () => {
             <div className="animate-fade-in space-y-4">
               {/* Results Card - Capturable for sharing */}
               <div ref={resultsCardRef}>
-                <Card className="border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
-                  <CardContent className="p-8 text-center">
+                <Card className="border-2 border-primary/40 bg-[#0a0a0f] overflow-hidden shadow-2xl">
+                  <CardContent className="p-6 md:p-8 text-center">
+                    {/* Header Badge */}
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <Brain className="h-5 w-5 text-primary" />
+                      <span className="text-primary font-semibold text-sm tracking-wide uppercase">Wealth Quiz Results</span>
+                    </div>
+
                     {/* Result Badge */}
-                    <div className="relative mb-6">
-                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto">
-                        <span className="text-5xl">{getResultTitle().emoji}</span>
+                    <div className="relative mb-5">
+                      <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-gradient-to-br from-primary via-amber-500 to-primary flex items-center justify-center mx-auto shadow-lg shadow-primary/30">
+                        <span className="text-4xl md:text-5xl">{getResultTitle().emoji}</span>
                       </div>
                       {score === shuffledQuestions.length && (
-                        <div className="absolute -top-2 -right-2 left-0 right-0 mx-auto w-fit">
-                          <Crown className="h-8 w-8 text-amber-400 animate-pulse" />
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+                          <Crown className="h-7 w-7 text-amber-400 animate-pulse drop-shadow-lg" />
                         </div>
                       )}
                     </div>
 
-                    <p className="text-sm text-primary font-medium mb-2">You are a...</p>
-                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-2 gradient-gold-text">
+                    <p className="text-xs text-primary font-semibold mb-1 uppercase tracking-wider">You are a...</p>
+                    <h2 className="font-serif text-2xl md:text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-400 to-primary leading-tight px-2">
                       {getResultTitle().title}
                     </h2>
-                    <p className="text-foreground/70 mb-6">{getResultTitle().desc}</p>
+                    <p className="text-sm text-gray-300 mb-5 px-4 leading-relaxed">{getResultTitle().desc}</p>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                        <p className="text-3xl font-bold text-primary">{score}/{shuffledQuestions.length}</p>
-                        <p className="text-xs text-muted-foreground">Correct Answers</p>
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      <div className="p-3 md:p-4 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30">
+                        <p className="text-2xl md:text-3xl font-bold text-primary">{score}/{shuffledQuestions.length}</p>
+                        <p className="text-[10px] md:text-xs text-gray-400 font-medium uppercase tracking-wide">Correct</p>
                       </div>
-                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                        <p className="text-3xl font-bold text-amber-500">{totalPoints}</p>
-                        <p className="text-xs text-muted-foreground">Total Points</p>
+                      <div className="p-3 md:p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/30">
+                        <p className="text-2xl md:text-3xl font-bold text-amber-400">{totalPoints}</p>
+                        <p className="text-[10px] md:text-xs text-gray-400 font-medium uppercase tracking-wide">Points</p>
                       </div>
                     </div>
 
                     {/* Branding Footer */}
-                    <div className="text-center pt-4 border-t border-border/50">
-                      <p className="text-muted-foreground text-xs">earningsexplorer.shop</p>
+                    <div className="text-center pt-3 border-t border-gray-700">
+                      <p className="text-gray-500 text-xs font-medium">💎 earningsexplorer.shop</p>
                     </div>
                   </CardContent>
                 </Card>
