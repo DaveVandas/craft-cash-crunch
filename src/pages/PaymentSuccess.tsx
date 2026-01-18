@@ -12,12 +12,15 @@ import { toast } from 'sonner';
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { refreshAccess, user } = useAuth();
+  const { refreshAccess, user, loading: authLoading } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const hasVerifiedRef = useRef(false); // Prevent multiple verifications
 
   useEffect(() => {
+    // Wait for auth to finish loading before verifying
+    if (authLoading) return;
+    
     const verifyPayment = async () => {
       // Prevent running multiple times
       if (hasVerifiedRef.current) return;
@@ -26,6 +29,12 @@ const PaymentSuccess = () => {
       const sessionId = searchParams.get('session_id');
       
       if (!sessionId) {
+        setVerifying(false);
+        return;
+      }
+
+      // If no user after auth loaded, show appropriate state
+      if (!user) {
         setVerifying(false);
         return;
       }
@@ -50,12 +59,8 @@ const PaymentSuccess = () => {
       }
     };
 
-    if (user) {
-      verifyPayment();
-    } else {
-      setVerifying(false);
-    }
-  }, [searchParams, user, refreshAccess]);
+    verifyPayment();
+  }, [searchParams, authLoading, user]); // Removed refreshAccess from deps to prevent re-runs
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -126,7 +131,18 @@ const PaymentSuccess = () => {
               </div>
             )}
 
-            {!verifying && !verified && (
+            {!verifying && !verified && !user && (
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Please sign in to verify your payment.
+                </p>
+                <Button onClick={() => navigate('/auth')} className="w-full">
+                  Sign In
+                </Button>
+              </div>
+            )}
+
+            {!verifying && !verified && user && (
               <div className="text-center space-y-4">
                 <p className="text-sm text-muted-foreground">
                   If your payment was successful, it may take a moment to process.
