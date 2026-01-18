@@ -193,18 +193,18 @@ export function AffiliateShareCard({
               </span>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-sm" style={{ color: '#9CA3AF' }}>
-              <TrendingUp className="w-4 h-4" style={{ color: '#22C55E' }} />
-              <span>Live the mogul lifestyle</span>
+            <div className="flex items-center justify-center gap-2 text-sm" style={{ color: '#FFD700' }}>
+              <TrendingUp className="w-4 h-4" style={{ color: '#FFD700' }} />
+              <span className="font-semibold">Live the mogul lifestyle</span>
             </div>
           </div>
 
           {/* Footer */}
           <div className="space-y-2">
-            <p className="text-xs" style={{ color: '#9CA3AF' }}>
+            <p className="text-sm font-semibold" style={{ color: '#F5F3EE' }}>
               Scan to join the mogul movement 👑
             </p>
-            <p className="text-xs font-medium" style={{ color: '#FFD700' }}>
+            <p className="text-sm font-bold tracking-wide" style={{ color: '#FFD700' }}>
               earningsexplorer.shop
             </p>
           </div>
