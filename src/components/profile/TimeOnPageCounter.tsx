@@ -34,7 +34,7 @@ const TimeOnPageCounter = ({ annualEarnings, name }: TimeOnPageCounterProps) => 
   if (dismissed) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 animate-fade-in">
+    <div className="fixed bottom-20 md:bottom-4 right-4 z-40 animate-fade-in">
       <div className="bg-card/95 backdrop-blur-sm border border-primary/30 rounded-lg p-3 shadow-gold-lg relative">
         <button
           onClick={() => setDismissed(true)}
