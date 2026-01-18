@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
@@ -56,15 +57,7 @@ export default function AffiliateDashboard() {
   const [referralsByVariant, setReferralsByVariant] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    fetchAffiliateData();
-  }, [user, navigate]);
-
-  const fetchAffiliateData = async () => {
+  const fetchAffiliateData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -116,7 +109,92 @@ export default function AffiliateDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    fetchAffiliateData();
+  }, [user, navigate, fetchAffiliateData]);
+
+  // Real-time subscription for affiliate updates
+  useEffect(() => {
+    if (!affiliate?.id) return;
+
+    console.log('[Realtime] Setting up affiliate dashboard subscriptions');
+
+    const channel = supabase
+      .channel('affiliate-dashboard')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'affiliates',
+          filter: `id=eq.${affiliate.id}`,
+        },
+        (payload) => {
+          console.log('[Realtime] Affiliate update:', payload);
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            setAffiliate(payload.new as AffiliateData);
+            // Show toast for earnings updates
+            const oldEarnings = (payload.old as AffiliateData)?.total_earnings || 0;
+            const newEarnings = (payload.new as AffiliateData).total_earnings || 0;
+            if (newEarnings > oldEarnings) {
+              const earned = newEarnings - oldEarnings;
+              toast.success(`💰 Cha-Ching! You just earned $${earned.toFixed(2)}!`);
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'affiliate_referrals',
+          filter: `affiliate_id=eq.${affiliate.id}`,
+        },
+        (payload) => {
+          console.log('[Realtime] New referral:', payload);
+          if (payload.new) {
+            setReferrals((prev) => [payload.new as ReferralData, ...prev]);
+            toast.success('🎉 New signup! Someone just used your link!');
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'affiliate_referrals',
+          filter: `affiliate_id=eq.${affiliate.id}`,
+        },
+        (payload) => {
+          console.log('[Realtime] Referral updated:', payload);
+          if (payload.new) {
+            setReferrals((prev) =>
+              prev.map((r) =>
+                r.id === (payload.new as ReferralData).id
+                  ? (payload.new as ReferralData)
+                  : r
+              )
+            );
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Realtime] Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[Realtime] Cleaning up affiliate dashboard subscriptions');
+      supabase.removeChannel(channel);
+    };
+  }, [affiliate?.id]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
