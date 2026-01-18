@@ -59,6 +59,13 @@ export type Database = {
             referencedRelation: "affiliates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       affiliate_referrals: {
@@ -101,6 +108,13 @@ export type Database = {
             columns: ["affiliate_id"]
             isOneToOne: false
             referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates_public"
             referencedColumns: ["id"]
           },
         ]
@@ -207,6 +221,13 @@ export type Database = {
             referencedRelation: "beta_invites"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "beta_feedback_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       beta_invites: {
@@ -279,6 +300,13 @@ export type Database = {
             columns: ["beta_invite_id"]
             isOneToOne: false
             referencedRelation: "beta_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beta_sessions_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites_public"
             referencedColumns: ["id"]
           },
         ]
@@ -708,6 +736,13 @@ export type Database = {
             referencedRelation: "beta_invites"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_access_beta_invite_id_fkey"
+            columns: ["beta_invite_id"]
+            isOneToOne: false
+            referencedRelation: "beta_invites_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_notifications: {
@@ -769,7 +804,96 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      affiliates_public: {
+        Row: {
+          affiliate_code: string | null
+          approved_at: string | null
+          approved_by: string | null
+          commission_rate: number | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          is_vip: boolean | null
+          payout_method: string | null
+          pending_payout: number | null
+          status: string | null
+          total_earnings: number | null
+          total_referrals: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          affiliate_code?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_vip?: boolean | null
+          payout_method?: string | null
+          pending_payout?: number | null
+          status?: string | null
+          total_earnings?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          affiliate_code?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_vip?: boolean | null
+          payout_method?: string | null
+          pending_payout?: number | null
+          status?: string | null
+          total_earnings?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      beta_invites_public: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string | null
+          invite_code: string | null
+          recipient_name: string | null
+          status: string | null
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invite_code?: string | null
+          recipient_name?: string | null
+          status?: string | null
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string | null
+          invite_code?: string | null
+          recipient_name?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_rate_limit: {
