@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,7 +148,7 @@ export default function BecomeAffiliate() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 py-8 pb-20 md:pb-0 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-gradient-to-r from-primary/20 to-primary/10 text-foreground border-primary/50">
@@ -399,6 +400,7 @@ export default function BecomeAffiliate() {
       </main>
 
       <Footer />
+      <MobileNav />
     </div>
   );
 }
