@@ -171,7 +171,7 @@ const Header = () => {
                     className={`${isPremium ? 'border-primary bg-gradient-to-br from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30' : 'border-primary/50'}`}
                   >
                     {isPremium ? (
-                      <Gem className="h-4 w-4 text-primary" />
+                      <Crown className="h-4 w-4 text-primary" />
                     ) : (
                       <User className="h-4 w-4" />
                     )}
