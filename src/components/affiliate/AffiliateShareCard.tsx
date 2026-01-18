@@ -97,31 +97,61 @@ export function AffiliateShareCard({
     setIsGenerating(true);
     try {
       const blob = await generateCardImage();
-      if (blob && navigator.clipboard && 'write' in navigator.clipboard) {
-        // Try to copy image to clipboard
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          setCopied(true);
-          toast.success('Card copied to clipboard! 📋');
-          setTimeout(() => setCopied(false), 2000);
-        } catch (imgError) {
-          // Fallback: copy link if image clipboard fails
-          await navigator.clipboard.writeText(referralUrl);
-          setCopied(true);
-          toast.success('Link copied! (Image copy not supported on this device)');
-          setTimeout(() => setCopied(false), 2000);
+      
+      if (blob) {
+        // Check if ClipboardItem API is available and supports image/png
+        const canCopyImage = typeof ClipboardItem !== 'undefined' && 
+          navigator.clipboard && 
+          'write' in navigator.clipboard;
+        
+        if (canCopyImage) {
+          try {
+            // Some browsers need the blob wrapped in a Promise
+            const clipboardItem = new ClipboardItem({
+              'image/png': Promise.resolve(blob)
+            });
+            await navigator.clipboard.write([clipboardItem]);
+            setCopied(true);
+            toast.success('Card image copied! 📋 Paste it anywhere!');
+            setTimeout(() => setCopied(false), 2000);
+            return;
+          } catch (imgError) {
+            console.log('Image clipboard failed, trying alternative...', imgError);
+          }
         }
+        
+        // Fallback: Download the image instead since clipboard doesn't support images
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `mogul-affiliate-${affiliateCode}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        setCopied(true);
+        toast.success('Card downloaded! 📥 (Your device doesn\'t support image copy)', {
+          description: 'Share the downloaded image directly!'
+        });
+        setTimeout(() => setCopied(false), 2000);
       } else {
-        // Fallback for older browsers
+        // Ultimate fallback: copy link
         await navigator.clipboard.writeText(referralUrl);
         setCopied(true);
         toast.success('Link copied!');
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (error) {
-      toast.error('Failed to copy');
+      console.error('Copy failed:', error);
+      // Even if everything fails, try to copy the link
+      try {
+        await navigator.clipboard.writeText(referralUrl);
+        setCopied(true);
+        toast.success('Link copied!');
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error('Failed to copy - please screenshot the card');
+      }
     } finally {
       setIsGenerating(false);
     }
