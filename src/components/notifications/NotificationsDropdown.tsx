@@ -17,9 +17,11 @@ const getNotificationIcon = (type: string) => {
     case 'affiliate_approved':
       return <Crown className="h-4 w-4 text-primary" />;
     case 'referral_converted':
-      return <Users className="h-4 w-4 text-green-500" />;
+      return <Users className="h-4 w-4 text-primary" />;
     case 'payout_sent':
-      return <DollarSign className="h-4 w-4 text-green-500" />;
+      return <DollarSign className="h-4 w-4 text-primary" />;
+    case 'admin_sale':
+      return <DollarSign className="h-4 w-4 text-primary" />;
     default:
       return <Gift className="h-4 w-4 text-primary" />;
   }

@@ -10,8 +10,19 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8080',
 ];
 
+function isAllowedOrigin(origin: string): boolean {
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  try {
+    const { hostname } = new URL(origin);
+    // Allow Lovable preview + published domains
+    return hostname.endsWith('lovable.app');
+  } catch {
+    return false;
+  }
+}
+
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+  const allowedOrigin = origin && isAllowedOrigin(origin)
     ? origin
     : ALLOWED_ORIGINS[0];
 
@@ -81,12 +92,23 @@ serve(async (req) => {
 
     console.log(`Admin ${userData.user.id} fetching all users`);
 
-    // Fetch all users from auth.users (requires service role)
-    const { data: authUsers, error: authError } = await supabaseClient.auth.admin.listUsers();
-    
-    if (authError) {
-      console.error("Error fetching auth users:", authError);
-      throw authError;
+    // Fetch all users from auth (requires service role)
+    const authUsers: any[] = [];
+    let page = 1;
+    const perPage = 1000;
+
+    while (true) {
+      const { data, error: authError } = await supabaseClient.auth.admin.listUsers({ page, perPage });
+
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+        throw authError;
+      }
+
+      authUsers.push(...data.users);
+
+      if (data.users.length < perPage) break;
+      page += 1;
     }
 
     // Fetch all user_access records
@@ -110,7 +132,7 @@ serve(async (req) => {
     }
 
     // Combine the data
-    const users = authUsers.users.map((authUser) => {
+    const users = authUsers.map((authUser) => {
       const access = accessData?.find((a) => a.user_id === authUser.id);
       const roles = rolesData?.filter((r) => r.user_id === authUser.id).map((r) => r.role) || [];
       

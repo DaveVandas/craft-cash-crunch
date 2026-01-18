@@ -171,6 +171,73 @@ serve(async (req) => {
       
       logStep("SUCCESS: user_access updated", { updateData });
 
+      // Notify admins of a new sale (bell notification)
+      try {
+        const saleAmount = 6.99;
+        const referredByCode = (currentAccess as any)?.referred_by_code ?? null;
+
+        const { data: adminRoles, error: adminRolesError } = await supabaseClient
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        if (adminRolesError) {
+          logStep("WARN: Failed to fetch admin roles", { error: adminRolesError.message });
+        } else {
+          const adminIds = (adminRoles ?? []).map((r) => r.user_id).filter(Boolean);
+
+          if (adminIds.length > 0) {
+            const paymentIntentId = session.payment_intent as string;
+
+            // Prevent duplicate notifications if verify-payment is called multiple times
+            const { data: existingNotifs, error: existingNotifsError } = await supabaseClient
+              .from('user_notifications')
+              .select('user_id')
+              .in('user_id', adminIds)
+              .eq('type', 'admin_sale')
+              .contains('metadata', { stripe_payment_intent_id: paymentIntentId });
+
+            if (existingNotifsError) {
+              logStep("WARN: Failed to check existing admin notifications", { error: existingNotifsError.message });
+            }
+
+            const alreadyNotified = new Set((existingNotifs ?? []).map((n) => (n as any).user_id));
+
+            const notificationsToInsert = adminIds
+              .filter((adminId) => !alreadyNotified.has(adminId))
+              .map((adminId) => ({
+                user_id: adminId,
+                type: 'admin_sale',
+                title: 'New sale 💰',
+                message: `Lifetime access purchased ($${saleAmount.toFixed(2)})${referredByCode ? ` • ref: ${referredByCode}` : ''}`,
+                action_url: '/admin',
+                metadata: {
+                  stripe_payment_intent_id: paymentIntentId,
+                  purchaser_user_id: user.id,
+                  amount: saleAmount,
+                  referred_by_code: referredByCode,
+                },
+              }));
+
+            if (notificationsToInsert.length > 0) {
+              const { error: notifyError } = await supabaseClient
+                .from('user_notifications')
+                .insert(notificationsToInsert);
+
+              if (notifyError) {
+                logStep("WARN: Failed to insert admin sale notifications", { error: notifyError.message });
+              } else {
+                logStep("Admin sale notifications inserted", { count: notificationsToInsert.length });
+              }
+            } else {
+              logStep("Admin sale notifications skipped (already notified)");
+            }
+          }
+        }
+      } catch (notifyErr) {
+        logStep("WARN: Admin notification block failed", { error: notifyErr instanceof Error ? notifyErr.message : String(notifyErr) });
+      }
+
       // Verify the update worked
       const { data: verifyAccess } = await supabaseClient
         .from("user_access")
