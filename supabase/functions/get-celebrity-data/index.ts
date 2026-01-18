@@ -1,14 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-// CORS configuration - allow all origins for development
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-anonymous-search-count',
-};
+// CORS configuration - restrict to allowed origins
+const ALLOWED_ORIGINS = [
+  'https://craft-cash-crunch.lovable.app',
+  'https://id-preview--86ba5315-0e8e-45d4-9ce2-019ca156c207.lovable.app',
+  'https://earningsexplorer.shop',
+  'https://www.earningsexplorer.shop',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:8080',
+];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  return corsHeaders;
+  const allowedOrigin = origin && ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith('.lovable.app'))
+    ? origin
+    : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-anonymous-search-count',
+    'Access-Control-Allow-Credentials': 'true',
+  };
 }
 
 // Wikipedia requires a proper User-Agent - using MediaWiki bot format
