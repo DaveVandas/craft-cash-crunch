@@ -61,6 +61,10 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
   // Calculate net revenue per sale after Stripe fees
   const netRevenuePerSale = PRICE_PER_SALE - (PRICE_PER_SALE * STRIPE_FEE_PERCENT / 100) - STRIPE_FEE_FIXED;
 
+  // Helpers for robust date comparisons (timestamps may not be strict ISO strings)
+  const toIsoDay = (value: string) => new Date(value).toISOString().split('T')[0];
+  const toIsoMonth = (value: string) => new Date(value).toISOString().slice(0, 7);
+
   // Get paid users with their payment dates
   const paidUsers = useMemo(() => {
     return users.filter(u => u.has_lifetime_access);
@@ -85,9 +89,9 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       const dateStr = date.toISOString().split('T')[0];
       const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
-      const daySignups = users.filter(u => u.created_at.split('T')[0] === dateStr);
+      const daySignups = users.filter(u => toIsoDay(u.created_at) === dateStr);
       // Use paid_at for sales tracking, not created_at
-      const daySales = paidUsers.filter(u => u.paid_at && u.paid_at.split('T')[0] === dateStr);
+      const daySales = paidUsers.filter(u => u.paid_at && toIsoDay(u.paid_at) === dateStr);
       const dayRevenue = daySales.length * PRICE_PER_SALE;
       const dayNetRevenue = daySales.length * netRevenuePerSale;
       
@@ -146,9 +150,9 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       const monthStr = month.toISOString().slice(0, 7); // YYYY-MM
       const monthLabel = month.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
       
-      const monthSignups = users.filter(u => u.created_at.slice(0, 7) === monthStr);
+      const monthSignups = users.filter(u => toIsoMonth(u.created_at) === monthStr);
       // Use paid_at for sales tracking
-      const monthSales = paidUsers.filter(u => u.paid_at && u.paid_at.slice(0, 7) === monthStr);
+      const monthSales = paidUsers.filter(u => u.paid_at && toIsoMonth(u.paid_at) === monthStr);
       
       data.push({
         month: monthLabel,
@@ -164,8 +168,8 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
 
   // Today's stats - uses paid_at for sales tracking
   const todayStr = new Date().toISOString().split('T')[0];
-  const todaySignups = users.filter(u => u.created_at.split('T')[0] === todayStr);
-  const todaySales = paidUsers.filter(u => u.paid_at && u.paid_at.split('T')[0] === todayStr);
+  const todaySignups = users.filter(u => toIsoDay(u.created_at) === todayStr);
+  const todaySales = paidUsers.filter(u => u.paid_at && toIsoDay(u.paid_at) === todayStr);
   const todayRevenue = todaySales.length * PRICE_PER_SALE;
 
   // This week's stats - uses paid_at for sales tracking
@@ -327,6 +331,57 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Sales */}
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Recent Sales
+          </CardTitle>
+          <CardDescription>Latest lifetime access purchases (timestamp + referral code)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {paidUsers.filter(u => u.paid_at).length === 0 ? (
+            <div className="text-sm text-muted-foreground">No purchases yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Purchased</TableHead>
+                    <TableHead>Buyer</TableHead>
+                    <TableHead>Referral</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paidUsers
+                    .filter(u => u.paid_at)
+                    .sort((a, b) => new Date(b.paid_at as string).getTime() - new Date(a.paid_at as string).getTime())
+                    .slice(0, 10)
+                    .map((u) => (
+                      <TableRow key={u.id}>
+                        <TableCell className="whitespace-nowrap">
+                          {u.paid_at ? new Date(u.paid_at).toLocaleString() : '—'}
+                        </TableCell>
+                        <TableCell className="max-w-[220px] truncate">{u.email}</TableCell>
+                        <TableCell>
+                          {u.referred_by_code ? (
+                            <Badge variant="outline">{u.referred_by_code}</Badge>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Direct</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">${PRICE_PER_SALE.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Revenue Chart */}
       <Card className="border-primary/20">
