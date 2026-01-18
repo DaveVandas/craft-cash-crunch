@@ -109,9 +109,26 @@ export const useShareCard = ({
 
     try {
       const element = cardRef.current;
-      const rect = element.getBoundingClientRect();
+      
+      // Clone the element to avoid modifying the original
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Apply inline styles to ensure visibility during capture
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.width = `${element.offsetWidth}px`;
+      clone.style.zIndex = '-1';
+      clone.style.opacity = '1';
+      clone.style.visibility = 'visible';
+      
+      // Append to body temporarily
+      document.body.appendChild(clone);
+      
+      // Wait for any images to load
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(clone, {
         backgroundColor: '#0a0a0a',
         scale: 2,
         useCORS: true,
@@ -119,13 +136,18 @@ export const useShareCard = ({
         logging: false,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight,
-        width: rect.width,
-        height: rect.height,
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY,
+        width: clone.offsetWidth,
+        height: clone.offsetHeight,
+        onclone: (clonedDoc, clonedElement) => {
+          // Ensure all elements are visible in the clone
+          clonedElement.style.opacity = '1';
+          clonedElement.style.visibility = 'visible';
+          clonedElement.style.display = 'block';
+        },
       });
+      
+      // Clean up the clone
+      document.body.removeChild(clone);
 
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
