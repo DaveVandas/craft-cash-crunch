@@ -114,6 +114,12 @@ serve(async (req) => {
       const access = accessData?.find((a) => a.user_id === authUser.id);
       const roles = rolesData?.filter((r) => r.user_id === authUser.id).map((r) => r.role) || [];
       
+      // Determine paid_at: use updated_at when has_lifetime_access and stripe_payment_intent_id exist
+      let paid_at: string | null = null;
+      if (access?.has_lifetime_access && access?.stripe_payment_intent_id) {
+        paid_at = access.updated_at;
+      }
+      
       return {
         id: authUser.id,
         email: authUser.email,
@@ -122,6 +128,9 @@ serve(async (req) => {
         has_lifetime_access: access?.has_lifetime_access ?? false,
         search_count: access?.search_count ?? 0,
         stripe_customer_id: access?.stripe_customer_id,
+        stripe_payment_intent_id: access?.stripe_payment_intent_id,
+        paid_at,
+        referred_by_code: access?.referred_by_code,
         roles,
       };
     });

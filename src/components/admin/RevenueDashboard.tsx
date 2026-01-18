@@ -19,6 +19,8 @@ interface AdminUser {
   search_count: number;
   stripe_customer_id: string | null;
   stripe_payment_intent_id?: string | null;
+  paid_at?: string | null;
+  referred_by_code?: string | null;
   roles: string[];
 }
 
@@ -74,7 +76,7 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
   // Conversion rate
   const conversionRate = users.length > 0 ? (paidUsers.length / users.length) * 100 : 0;
 
-  // Daily revenue data for the last 30 days
+  // Daily revenue data for the last 30 days - uses paid_at for accurate revenue tracking
   const dailyRevenueData = useMemo(() => {
     const data: { date: string; displayDate: string; sales: number; revenue: number; netRevenue: number; signups: number }[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -84,7 +86,8 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       const daySignups = users.filter(u => u.created_at.split('T')[0] === dateStr);
-      const daySales = daySignups.filter(u => u.has_lifetime_access);
+      // Use paid_at for sales tracking, not created_at
+      const daySales = paidUsers.filter(u => u.paid_at && u.paid_at.split('T')[0] === dateStr);
       const dayRevenue = daySales.length * PRICE_PER_SALE;
       const dayNetRevenue = daySales.length * netRevenuePerSale;
       
@@ -98,9 +101,9 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       });
     }
     return data;
-  }, [users, netRevenuePerSale]);
+  }, [users, paidUsers, netRevenuePerSale]);
 
-  // Weekly revenue data
+  // Weekly revenue data - uses paid_at for accurate revenue tracking
   const weeklyRevenueData = useMemo(() => {
     const data: { week: string; sales: number; revenue: number; netRevenue: number; signups: number; conversion: number }[] = [];
     for (let i = 11; i >= 0; i--) {
@@ -115,7 +118,12 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
         const created = new Date(u.created_at);
         return created >= weekStart && created <= weekEnd;
       });
-      const weekSales = weekSignups.filter(u => u.has_lifetime_access);
+      // Use paid_at for sales tracking
+      const weekSales = paidUsers.filter(u => {
+        if (!u.paid_at) return false;
+        const paidDate = new Date(u.paid_at);
+        return paidDate >= weekStart && paidDate <= weekEnd;
+      });
       
       data.push({
         week: weekLabel,
@@ -127,9 +135,9 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       });
     }
     return data;
-  }, [users, netRevenuePerSale]);
+  }, [users, paidUsers, netRevenuePerSale]);
 
-  // Monthly revenue data
+  // Monthly revenue data - uses paid_at for accurate revenue tracking
   const monthlyRevenueData = useMemo(() => {
     const data: { month: string; sales: number; revenue: number; netRevenue: number; signups: number; conversion: number }[] = [];
     for (let i = 11; i >= 0; i--) {
@@ -139,7 +147,8 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       const monthLabel = month.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
       
       const monthSignups = users.filter(u => u.created_at.slice(0, 7) === monthStr);
-      const monthSales = monthSignups.filter(u => u.has_lifetime_access);
+      // Use paid_at for sales tracking
+      const monthSales = paidUsers.filter(u => u.paid_at && u.paid_at.slice(0, 7) === monthStr);
       
       data.push({
         month: monthLabel,
@@ -151,34 +160,38 @@ export const RevenueDashboard = ({ users, affiliates = [], payouts = [] }: Reven
       });
     }
     return data;
-  }, [users, netRevenuePerSale]);
+  }, [users, paidUsers, netRevenuePerSale]);
 
-  // Today's stats
+  // Today's stats - uses paid_at for sales tracking
   const todayStr = new Date().toISOString().split('T')[0];
   const todaySignups = users.filter(u => u.created_at.split('T')[0] === todayStr);
-  const todaySales = todaySignups.filter(u => u.has_lifetime_access);
+  const todaySales = paidUsers.filter(u => u.paid_at && u.paid_at.split('T')[0] === todayStr);
   const todayRevenue = todaySales.length * PRICE_PER_SALE;
 
-  // This week's stats
+  // This week's stats - uses paid_at for sales tracking
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const thisWeekSignups = users.filter(u => new Date(u.created_at) > weekAgo);
-  const thisWeekSales = thisWeekSignups.filter(u => u.has_lifetime_access);
+  const thisWeekSales = paidUsers.filter(u => u.paid_at && new Date(u.paid_at) > weekAgo);
   const thisWeekRevenue = thisWeekSales.length * PRICE_PER_SALE;
 
-  // This month's stats
+  // This month's stats - uses paid_at for sales tracking
   const monthAgo = new Date();
   monthAgo.setMonth(monthAgo.getMonth() - 1);
   const thisMonthSignups = users.filter(u => new Date(u.created_at) > monthAgo);
-  const thisMonthSales = thisMonthSignups.filter(u => u.has_lifetime_access);
+  const thisMonthSales = paidUsers.filter(u => u.paid_at && new Date(u.paid_at) > monthAgo);
   const thisMonthRevenue = thisMonthSales.length * PRICE_PER_SALE;
 
-  // Compare to previous period
+  // Compare to previous period - uses paid_at
   const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   const prevWeekSignups = users.filter(u => {
     const created = new Date(u.created_at);
     return created > twoWeeksAgo && created <= weekAgo;
   });
-  const prevWeekSales = prevWeekSignups.filter(u => u.has_lifetime_access);
+  const prevWeekSales = paidUsers.filter(u => {
+    if (!u.paid_at) return false;
+    const paidDate = new Date(u.paid_at);
+    return paidDate > twoWeeksAgo && paidDate <= weekAgo;
+  });
   const weekOverWeekGrowth = prevWeekSales.length > 0 
     ? ((thisWeekSales.length - prevWeekSales.length) / prevWeekSales.length) * 100 
     : thisWeekSales.length > 0 ? 100 : 0;
