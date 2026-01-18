@@ -2,16 +2,36 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// CORS configuration - restrict to allowed origins
+const ALLOWED_ORIGINS = [
+  'https://craft-cash-crunch.lovable.app',
+  'https://earningsexplorer.shop',
+  'https://www.earningsexplorer.shop',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:8080',
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app'))
+    ? origin
+    : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
 
 // Mogul Cash Pack: $20,000 virtual dollars for $4.99
 const MOGUL_CASH_PRICE_ID = "price_1SpKmZQ4T0jF0A1fnB2nBHyy";
 const CASH_AMOUNT = 20000;
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -62,8 +82,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/mogul-markets?purchased=true&portfolio=${portfolioId}`,
-      cancel_url: `${req.headers.get("origin")}/mogul-markets`,
+      success_url: `${origin || req.headers.get("origin")}/mogul-markets?purchased=true&portfolio=${portfolioId}`,
+      cancel_url: `${origin || req.headers.get("origin")}/mogul-markets`,
       metadata: {
         portfolioId,
         cashAmount: String(CASH_AMOUNT),
