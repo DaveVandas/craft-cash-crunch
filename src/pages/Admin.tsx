@@ -47,21 +47,36 @@ const Admin = () => {
   const [trends, setTrends] = useState<SearchTrend[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
+    setErrorDetails(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('admin-get-users');
 
       if (fnError) throw fnError;
-      if (data.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
 
-      setUsers(data.users);
+      setUsers(data?.users ?? []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch users';
+      const details = (() => {
+        try {
+          if (err && typeof err === 'object') {
+            return JSON.stringify(err, Object.getOwnPropertyNames(err), 2);
+          }
+          return String(err);
+        } catch {
+          return String(err);
+        }
+      })();
+
       setError(message);
+      setErrorDetails(details);
+
       if (message.includes('Forbidden')) {
         toast.error('You do not have admin access');
       } else {
@@ -306,10 +321,45 @@ const Admin = () => {
               Refresh
             </Button>
           </div>
-        </div>
+         </div>
 
-        {/* Revenue & Key Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+         {error && !error.includes('Forbidden') && (
+           <Card className="border-destructive/30 bg-destructive/5 mb-6">
+             <CardHeader className="pb-3">
+               <CardTitle className="flex items-center gap-2 text-base">
+                 <AlertTriangle className="h-4 w-4 text-destructive" />
+                 Admin data failed to load
+               </CardTitle>
+               <CardDescription>
+                 Your dashboard shows 0s because the backend request failed.
+               </CardDescription>
+             </CardHeader>
+             <CardContent className="space-y-3">
+               <div className="flex flex-wrap items-center gap-2">
+                 <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
+                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                   Retry users
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={fetchTrends} disabled={loading}>
+                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                   Retry trends
+                 </Button>
+               </div>
+
+               <p className="text-sm text-foreground">{error}</p>
+
+               {errorDetails && (
+                 <details className="rounded-md border border-border bg-card p-3">
+                   <summary className="cursor-pointer text-sm text-muted-foreground">Technical details</summary>
+                   <pre className="mt-3 whitespace-pre-wrap break-words text-xs text-muted-foreground">{errorDetails}</pre>
+                 </details>
+               )}
+             </CardContent>
+           </Card>
+         )}
+
+         {/* Revenue & Key Stats */}
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">

@@ -21,19 +21,14 @@ function isAllowedOrigin(origin: string): boolean {
   }
 }
 
-function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && isAllowedOrigin(origin)
-    ? origin
-    : ALLOWED_ORIGINS[0];
-
+function getCorsHeaders(_origin: string | null): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Credentials': 'true',
-    'Vary': 'Origin',
   };
 }
+
 
 serve(async (req) => {
   const origin = req.headers.get('origin');
