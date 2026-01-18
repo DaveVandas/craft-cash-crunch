@@ -275,7 +275,15 @@ export function AffiliateShareCard({
           className="gap-2"
           title="Copy card to clipboard"
         >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {isGenerating ? (
+            <>
+              <span className="animate-pulse">Generating...</span>
+            </>
+          ) : copied ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <Copy className="w-4 h-4" />
+          )}
         </Button>
       </div>
 
