@@ -51,6 +51,24 @@ serve(async (req) => {
       throw new Error("Session ID is required");
     }
 
+    // SECURITY: Extract user authentication if present
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      // Use anon client to verify the JWT token
+      const supabaseAnon = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      );
+      const { data: { user } } = await supabaseAnon.auth.getUser(token);
+      authenticatedUserId = user?.id ?? null;
+    }
+    
+    // Get request session ID for guest users
+    const requestSessionId = req.headers.get('x-session-id');
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -85,12 +103,27 @@ serve(async (req) => {
       }
     }
 
-    // Get current portfolio balance
+    // Get current portfolio with ownership info
     const { data: portfolio, error: fetchError } = await supabaseAdmin
       .from("trading_portfolios")
-      .select("cash_balance")
+      .select("cash_balance, user_id, session_id")
       .eq("id", portfolioId)
       .single();
+    
+    if (fetchError || !portfolio) {
+      throw new Error("Portfolio not found");
+    }
+    
+    // SECURITY: Verify ownership - user must own the portfolio
+    // For authenticated users: verify user_id matches
+    // For guest users: verify session_id matches the request header
+    const isAuthenticatedOwner = authenticatedUserId && portfolio.user_id === authenticatedUserId;
+    const isGuestOwner = !portfolio.user_id && requestSessionId && portfolio.session_id === requestSessionId;
+    
+    if (!isAuthenticatedOwner && !isGuestOwner) {
+      console.error(`Ownership verification failed: portfolioId=${portfolioId}, authenticatedUserId=${authenticatedUserId}, requestSessionId=${requestSessionId}, portfolio.user_id=${portfolio.user_id}, portfolio.session_id=${portfolio.session_id}`);
+      throw new Error("Unauthorized: You do not own this portfolio");
+    }
     
     if (fetchError || !portfolio) {
       throw new Error("Portfolio not found");
