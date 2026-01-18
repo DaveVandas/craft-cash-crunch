@@ -165,24 +165,15 @@ const Header = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {/* Mobile: Show avatar, Desktop: Show icon button */}
                   <Button 
                     variant="outline" 
                     size="icon" 
                     className={`${isPremium ? 'border-primary bg-gradient-to-br from-primary/20 to-amber-500/20 hover:from-primary/30 hover:to-amber-500/30' : 'border-primary/50'}`}
                   >
-                    {/* Mobile avatar */}
-                    <Avatar className="h-7 w-7 md:hidden">
-                      <AvatarImage src={profile?.avatar_url || undefined} alt="Profile" />
-                      <AvatarFallback className="text-xs bg-primary/20 text-primary">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    {/* Desktop icon */}
                     {isPremium ? (
-                      <Gem className="h-4 w-4 text-primary hidden md:block" />
+                      <Gem className="h-4 w-4 text-primary" />
                     ) : (
-                      <User className="h-4 w-4 hidden md:block" />
+                      <User className="h-4 w-4" />
                     )}
                   </Button>
                 </DropdownMenuTrigger>
