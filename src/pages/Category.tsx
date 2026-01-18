@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
@@ -67,7 +68,7 @@ const Category = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 animate-fade-in">
+      <main className="flex-1 pb-24 md:pb-0 animate-fade-in">
         <PaywallGate>
         {/* Hero Section */}
         <section className="relative py-12 md:py-16">
@@ -122,6 +123,7 @@ const Category = () => {
         </PaywallGate>
       </main>
       <Footer />
+      <MobileNav />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import ProfileHero from '@/components/profile/ProfileHero';
 import Breadcrumb, { getCategoryBreadcrumb } from '@/components/navigation/Breadcrumb';
@@ -200,7 +201,7 @@ const Profile = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       {isBillionaire && <MoneyRain intensity="light" />}
-      <main className="flex-1 animate-fade-in">
+      <main className="flex-1 pb-24 md:pb-0 animate-fade-in">
         <PaywallGate>
           <>
             <div className="container pt-4">
@@ -220,6 +221,7 @@ const Profile = () => {
       </main>
       <TimeOnPageCounter annualEarnings={displayCelebrity.annualEarnings} name={displayCelebrity.name} />
       <Footer />
+      <MobileNav />
     </div>
   );
 };

@@ -314,7 +314,7 @@ const Quiz = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1 container py-8">
+      <main className="flex-1 container py-8 pb-24 md:pb-8">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
           <Breadcrumb currentPage="Wealth Quiz" />
