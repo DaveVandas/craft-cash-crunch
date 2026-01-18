@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
+import { NotificationsDropdown } from '@/components/notifications/NotificationsDropdown';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
@@ -201,6 +202,8 @@ const Header = () => {
 
           {user ? (
             <>
+              {/* Notifications */}
+              <NotificationsDropdown />
               {/* Only show upgrade button if accessInfo loaded AND user is NOT premium */}
               {accessInfo && !isPremium && (
                 <Tooltip>
