@@ -352,3 +352,8 @@
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-color: hsl(220 18% 12%) !important;
 }
+
+/* Safe area for mobile bottom navigation */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

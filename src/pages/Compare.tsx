@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import CompareResult from '@/components/compare/CompareResult';
@@ -217,6 +218,7 @@ const Compare = () => {
         </PaywallGate>
       </main>
       <Footer />
+      <MobileNav />
     </div>
   );
 };
