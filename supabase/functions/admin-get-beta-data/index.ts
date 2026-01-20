@@ -93,10 +93,11 @@ serve(async (req) => {
     if (sessionsError) throw sessionsError;
 
     // Get user emails for feedback and sessions
+    const claimedUserIds = invites.filter(i => i.claimed_by).map(i => i.claimed_by);
     const userIds = new Set([
       ...feedback.map(f => f.user_id),
       ...sessions.map(s => s.user_id),
-      ...invites.filter(i => i.claimed_by).map(i => i.claimed_by),
+      ...claimedUserIds,
     ]);
 
     const { data: authUsers } = await supabaseClient.auth.admin.listUsers();
@@ -110,10 +111,26 @@ serve(async (req) => {
       });
     }
 
-    // Enrich data with emails
+    // Fetch user_access data for claimed users to get lifetime access status
+    const userAccessMap: Record<string, boolean> = {};
+    if (claimedUserIds.length > 0) {
+      const { data: userAccessData } = await supabaseClient
+        .from('user_access')
+        .select('user_id, has_lifetime_access')
+        .in('user_id', claimedUserIds);
+      
+      if (userAccessData) {
+        userAccessData.forEach(ua => {
+          userAccessMap[ua.user_id] = ua.has_lifetime_access || false;
+        });
+      }
+    }
+
+    // Enrich data with emails and lifetime access status
     const enrichedInvites = invites.map(invite => ({
       ...invite,
       claimedByEmail: invite.claimed_by ? userEmailMap[invite.claimed_by] : null,
+      hasLifetimeAccess: invite.claimed_by ? (userAccessMap[invite.claimed_by] || false) : null,
     }));
 
     const enrichedFeedback = feedback.map(fb => ({

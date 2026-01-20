@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { 
   Users, Send, Copy, RefreshCw, Star, Clock, MessageSquare,
-  CheckCircle, XCircle, AlertCircle, Loader2, Trash2
+  CheckCircle, XCircle, AlertCircle, Loader2, Trash2, Crown
 } from 'lucide-react';
 
 interface BetaInvite {
@@ -23,7 +24,9 @@ interface BetaInvite {
   created_at: string;
   expires_at: string;
   claimed_at: string | null;
+  claimed_by: string | null;
   claimedByEmail: string | null;
+  hasLifetimeAccess: boolean | null;
 }
 
 interface BetaFeedback {
@@ -60,6 +63,7 @@ const BetaManagement = () => {
   const [feedback, setFeedback] = useState<BetaFeedback[]>([]);
   const [sessions, setSessions] = useState<BetaSession[]>([]);
   const [stats, setStats] = useState<BetaStats | null>(null);
+  const [togglingAccess, setTogglingAccess] = useState<string | null>(null);
 
   const [recipientEmail, setRecipientEmail] = useState('');
   const [recipientName, setRecipientName] = useState('');
@@ -142,6 +146,37 @@ const BetaManagement = () => {
     } catch (err: any) {
       console.error('Error deleting invite:', err);
       toast.error(err.message || 'Failed to delete invite');
+    }
+  };
+
+  const handleToggleLifetimeAccess = async (invite: BetaInvite) => {
+    if (!invite.claimed_by) return;
+    
+    setTogglingAccess(invite.id);
+    try {
+      const newValue = !invite.hasLifetimeAccess;
+      
+      const { error } = await supabase
+        .from('user_access')
+        .update({ has_lifetime_access: newValue })
+        .eq('user_id', invite.claimed_by);
+
+      if (error) throw error;
+
+      // Update local state optimistically
+      setInvites(prev => prev.map(inv => 
+        inv.id === invite.id ? { ...inv, hasLifetimeAccess: newValue } : inv
+      ));
+
+      toast.success(newValue 
+        ? `Granted permanent access to ${invite.claimedByEmail}` 
+        : `Revoked permanent access from ${invite.claimedByEmail}`
+      );
+    } catch (err: any) {
+      console.error('Error toggling lifetime access:', err);
+      toast.error(err.message || 'Failed to update access');
+    } finally {
+      setTogglingAccess(null);
     }
   };
 
@@ -377,13 +412,19 @@ const BetaManagement = () => {
                   <TableHead>Created</TableHead>
                   <TableHead>Expires</TableHead>
                   <TableHead>Claimed By</TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Crown className="h-3.5 w-3.5" />
+                      Permanent
+                    </div>
+                  </TableHead>
                   <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {invites.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       No invites yet
                     </TableCell>
                   </TableRow>
@@ -398,6 +439,23 @@ const BetaManagement = () => {
                       <TableCell className="text-sm">{formatDate(invite.created_at)}</TableCell>
                       <TableCell className="text-sm">{formatDate(invite.expires_at)}</TableCell>
                       <TableCell>{invite.claimedByEmail || '-'}</TableCell>
+                      <TableCell className="text-center">
+                        {invite.claimed_by ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Switch
+                              checked={invite.hasLifetimeAccess || false}
+                              onCheckedChange={() => handleToggleLifetimeAccess(invite)}
+                              disabled={togglingAccess === invite.id}
+                              className="data-[state=checked]:bg-primary"
+                            />
+                            {invite.hasLifetimeAccess && (
+                              <Crown className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
