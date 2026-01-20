@@ -807,54 +807,21 @@ export type Database = {
       affiliates_public: {
         Row: {
           affiliate_code: string | null
-          approved_at: string | null
-          approved_by: string | null
-          commission_rate: number | null
-          created_at: string | null
           display_name: string | null
           id: string | null
-          is_vip: boolean | null
-          payout_method: string | null
-          pending_payout: number | null
           status: string | null
-          total_earnings: number | null
-          total_referrals: number | null
-          updated_at: string | null
-          user_id: string | null
         }
         Insert: {
           affiliate_code?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          commission_rate?: number | null
-          created_at?: string | null
           display_name?: string | null
           id?: string | null
-          is_vip?: boolean | null
-          payout_method?: string | null
-          pending_payout?: number | null
           status?: string | null
-          total_earnings?: number | null
-          total_referrals?: number | null
-          updated_at?: string | null
-          user_id?: string | null
         }
         Update: {
           affiliate_code?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          commission_rate?: number | null
-          created_at?: string | null
           display_name?: string | null
           id?: string | null
-          is_vip?: boolean | null
-          payout_method?: string | null
-          pending_payout?: number | null
           status?: string | null
-          total_earnings?: number | null
-          total_referrals?: number | null
-          updated_at?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
