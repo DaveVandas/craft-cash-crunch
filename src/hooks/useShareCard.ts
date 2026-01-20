@@ -121,12 +121,21 @@ export const useShareCard = ({
       clone.style.zIndex = '-1';
       clone.style.opacity = '1';
       clone.style.visibility = 'visible';
+      // Add extra padding at bottom to prevent text clipping
+      clone.style.paddingBottom = '4px';
       
       // Append to body temporarily
       document.body.appendChild(clone);
       
-      // Wait for any images to load
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for any images/fonts to load and layout to settle
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      // Get the actual rendered height including any overflow
+      const computedStyle = window.getComputedStyle(clone);
+      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+      const scrollHeight = clone.scrollHeight;
+      const captureHeight = Math.max(clone.offsetHeight, scrollHeight) + 2; // Extra 2px safety margin
 
       const canvas = await html2canvas(clone, {
         backgroundColor: '#0a0a0a',
@@ -137,12 +146,15 @@ export const useShareCard = ({
         scrollX: 0,
         scrollY: 0,
         width: clone.offsetWidth,
-        height: clone.offsetHeight,
+        height: captureHeight,
+        windowWidth: clone.offsetWidth,
+        windowHeight: captureHeight,
         onclone: (clonedDoc, clonedElement) => {
           // Ensure all elements are visible in the clone
           clonedElement.style.opacity = '1';
           clonedElement.style.visibility = 'visible';
           clonedElement.style.display = 'block';
+          clonedElement.style.overflow = 'visible';
         },
       });
       
