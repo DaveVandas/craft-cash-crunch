@@ -43,10 +43,9 @@ const AffiliateReferral = () => {
 
       try {
         const { data, error: fetchError } = await supabase
-          .from('affiliates')
+          .from('affiliates_public')
           .select('id, display_name, affiliate_code')
           .eq('affiliate_code', code.toUpperCase())
-          .eq('status', 'approved')
           .single();
 
         if (fetchError || !data) {

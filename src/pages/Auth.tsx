@@ -50,10 +50,9 @@ const Auth = () => {
       setAffiliateCode(codeToUse);
       // Fetch affiliate name for display
       supabase
-        .from('affiliates')
+        .from('affiliates_public')
         .select('display_name')
         .eq('affiliate_code', codeToUse.toUpperCase())
-        .eq('status', 'approved')
         .single()
         .then(({ data }) => {
           if (data) {
