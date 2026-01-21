@@ -18,7 +18,8 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    // Include x-session-id so guest users can access stock search/batch without auth.
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-id',
     'Access-Control-Allow-Credentials': 'true',
   };
 }
