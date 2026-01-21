@@ -137,15 +137,17 @@ const MogulMarkets = () => {
           body: { action: 'batch', tickers },
         });
         
-        if (!error && data?.stocks && data.stocks.length > 0) {
+        // stocks is an object keyed by ticker, not an array
+        if (!error && data?.stocks && Object.keys(data.stocks).length > 0) {
           // Update prices in database
-          for (const stock of data.stocks) {
-            const position = portfolio.positions.find(p => p.ticker === stock.ticker);
-            if (position && stock.price) {
+          for (const [ticker, stock] of Object.entries(data.stocks)) {
+            const stockData = stock as { price?: number };
+            const position = portfolio.positions.find(p => p.ticker === ticker);
+            if (position && stockData.price) {
               await supabase
                 .from('trading_positions')
                 .update({
-                  current_price: stock.price,
+                  current_price: stockData.price,
                   last_price_update: new Date().toISOString(),
                 })
                 .eq('id', position.id);
@@ -230,7 +232,8 @@ const MogulMarkets = () => {
         return;
       }
       
-      if (!data.stocks || data.stocks.length === 0) {
+      // stocks is an object keyed by ticker, not an array
+      if (!data.stocks || Object.keys(data.stocks).length === 0) {
         // No data returned - could be off-hours or rate limited
         toast.info('Prices unchanged', {
           description: 'Market data may be delayed outside trading hours.',
@@ -240,13 +243,14 @@ const MogulMarkets = () => {
       }
       
       // Update prices in database
-      for (const stock of data.stocks) {
-        const position = portfolio.positions.find(p => p.ticker === stock.ticker);
-        if (position) {
+      for (const [ticker, stock] of Object.entries(data.stocks)) {
+        const stockData = stock as { price?: number };
+        const position = portfolio.positions.find(p => p.ticker === ticker);
+        if (position && stockData.price) {
           await supabase
             .from('trading_positions')
             .update({
-              current_price: stock.price,
+              current_price: stockData.price,
               last_price_update: new Date().toISOString(),
             })
             .eq('id', position.id);
