@@ -24,6 +24,15 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
+function jsonResponse(body: Record<string, unknown>, corsHeaders: Record<string, string>) {
+  return new Response(JSON.stringify(body), {
+    // IMPORTANT: Return 200 with an error payload (instead of 4xx/5xx) so the client
+    // can show a friendly message without triggering generic transport errors.
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
 // Popular stocks for suggestions
 const POPULAR_STOCKS = [
   { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
@@ -211,13 +220,16 @@ serve(async (req) => {
       console.log(`Guest session detected: ${sessionId}`);
     }
     
-    // Require either authenticated user or guest session
-    if (!userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized - please sign in or use guest mode' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+     // Require either authenticated user or guest session
+     if (!userId) {
+       return jsonResponse(
+         {
+           error: 'Unauthorized - please sign in or use guest mode',
+           errorCode: 'AUTH_REQUIRED',
+         },
+         corsHeaders,
+       );
+     }
     
     console.log(`Stock data requested by ${isGuest ? 'guest' : 'user'}: ${userId}, action: ${action}`);
 
@@ -233,29 +245,32 @@ serve(async (req) => {
       p_window_seconds: 60
     });
     
-    if (isRateLimited) {
-      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+     if (isRateLimited) {
+       return jsonResponse(
+         {
+           error: 'Rate limit exceeded. Please try again later.',
+           errorCode: 'RATE_LIMIT',
+         },
+         corsHeaders,
+       );
+     }
     
     if (action === 'search' && query) {
       // Search for a specific stock
       const stockData = await fetchStockDataFromPerplexity(query);
       
       if (!stockData) {
-        return new Response(JSON.stringify({ 
-          error: 'Could not fetch stock data', 
-          stock: null 
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return jsonResponse(
+          {
+            error: 'Could not fetch stock data',
+            errorCode: 'DATA_UNAVAILABLE',
+            stock: null,
+          },
+          corsHeaders,
+        );
       }
       
-      return new Response(JSON.stringify({ stock: stockData }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ stock: stockData }, corsHeaders);
     }
     
     if (action === 'batch' && tickers && Array.isArray(tickers)) {
@@ -272,23 +287,26 @@ serve(async (req) => {
         }
       }
       
-      return new Response(JSON.stringify({ stocks: results }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ stocks: results }, corsHeaders);
     }
     
-    return new Response(JSON.stringify({ error: 'Invalid action' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return jsonResponse(
+      {
+        error: 'Invalid action',
+        errorCode: 'BAD_REQUEST',
+      },
+      corsHeaders,
+    );
     
   } catch (error) {
     console.error('get-stock-data error:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return jsonResponse(
+      {
+        error: 'Data service temporarily unavailable. Please try again later.',
+        errorCode: 'SERVICE_UNAVAILABLE',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      corsHeaders,
+    );
   }
 });
