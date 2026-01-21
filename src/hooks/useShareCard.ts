@@ -110,56 +110,28 @@ export const useShareCard = ({
     try {
       const element = cardRef.current;
       
-      // Clone the element to avoid modifying the original
-      const clone = element.cloneNode(true) as HTMLElement;
-      
-      // Apply inline styles to ensure visibility during capture
-      clone.style.position = 'absolute';
-      clone.style.left = '-9999px';
-      clone.style.top = '0';
-      clone.style.width = `${element.offsetWidth}px`;
-      clone.style.zIndex = '-1';
-      clone.style.opacity = '1';
-      clone.style.visibility = 'visible';
-      // Add extra padding at bottom to prevent text clipping
-      clone.style.paddingBottom = '4px';
-      
-      // Append to body temporarily
-      document.body.appendChild(clone);
-      
-      // Wait for any images/fonts to load and layout to settle
-      await new Promise(resolve => setTimeout(resolve, 150));
-      
-      // Get the actual rendered height including any overflow
-      const computedStyle = window.getComputedStyle(clone);
-      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-      const scrollHeight = clone.scrollHeight;
-      const captureHeight = Math.max(clone.offsetHeight, scrollHeight) + 2; // Extra 2px safety margin
+      // Get dimensions from the original element
+      const rect = element.getBoundingClientRect();
+      const width = Math.ceil(rect.width);
+      const height = Math.ceil(rect.height) + 8; // Extra padding to prevent clipping
 
-      const canvas = await html2canvas(clone, {
+      // Use html2canvas directly on the element without cloning
+      // This prevents the offset issues caused by cloning layout differences
+      const canvas = await html2canvas(element, {
         backgroundColor: '#0a0a0a',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        width: clone.offsetWidth,
-        height: captureHeight,
-        windowWidth: clone.offsetWidth,
-        windowHeight: captureHeight,
-        onclone: (clonedDoc, clonedElement) => {
-          // Ensure all elements are visible in the clone
-          clonedElement.style.opacity = '1';
-          clonedElement.style.visibility = 'visible';
-          clonedElement.style.display = 'block';
-          clonedElement.style.overflow = 'visible';
-        },
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
+        x: rect.left + window.scrollX,
+        y: rect.top + window.scrollY,
+        width: width,
+        height: height,
+        windowWidth: document.documentElement.clientWidth,
+        windowHeight: document.documentElement.clientHeight,
       });
-      
-      // Clean up the clone
-      document.body.removeChild(clone);
 
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
@@ -174,11 +146,16 @@ export const useShareCard = ({
 
   // Pre-generate image when menu opens for instant "Save to Photos"
   const handleMenuOpen = useCallback(async () => {
-    // Don't re-generate if we already have one
+    // Don't re-generate if we already have one or if already generating
     if (preGeneratedImageRef.current || isPreGenerating) return;
     
     setIsPreGenerating(true);
     try {
+      // Add a small delay on mobile to prevent UI blocking
+      if (isMobile()) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
       const blob = await generateCardImage();
       if (blob) {
         const filename = `${imageName}.jpg`;
