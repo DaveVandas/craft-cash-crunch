@@ -24,6 +24,88 @@ const isMobile = (): boolean => {
     ((navigator as unknown as { userAgentData?: { mobile?: boolean } }).userAgentData?.mobile ?? false);
 };
 
+// Safari/iOS can return a "successful" canvas with foreignObjectRendering but render it as a blank/black image.
+const isSafari = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // Chrome on iOS uses Safari engine but includes CriOS; treat it as Safari engine too.
+  const isAppleWebKit = /AppleWebKit\//.test(ua);
+  const isChrome = /Chrome\//.test(ua) || /CriOS\//.test(ua);
+  const isFirefox = /Firefox\//.test(ua) || /FxiOS\//.test(ua);
+  const isSafariLike = isAppleWebKit && !isChrome && !isFirefox;
+  return isSafariLike || isIOS();
+};
+
+const getCaptureScale = (): number => (isMobile() ? 1.5 : 2);
+
+const prepareCloneForCapture = (root: HTMLElement) => {
+  // Force overflow visible on clone tree to avoid clipping
+  root.querySelectorAll('*').forEach((el) => {
+    const htmlEl = el as HTMLElement;
+    if (htmlEl?.style) htmlEl.style.overflow = 'visible';
+  });
+
+  // Hint CORS for images when possible
+  root.querySelectorAll('img').forEach((img) => {
+    if (!img.getAttribute('crossorigin')) img.setAttribute('crossorigin', 'anonymous');
+  });
+};
+
+const normalizeGradientTextForCanvas = (root: HTMLElement) => {
+  // html2canvas (esp. without foreignObjectRendering) often drops background-clip:text,
+  // resulting in fully transparent text (looks like a black card). For the clone only,
+  // convert gradient-text to solid text using computed color.
+  const nodes = Array.from(root.querySelectorAll<HTMLElement>('*'));
+  nodes.forEach((node) => {
+    const cs = window.getComputedStyle(node);
+    const webkitFill = (cs as unknown as { webkitTextFillColor?: string }).webkitTextFillColor;
+    const isTransparentFill =
+      webkitFill === 'transparent' ||
+      webkitFill === 'rgba(0, 0, 0, 0)' ||
+      cs.color === 'transparent' ||
+      cs.color === 'rgba(0, 0, 0, 0)';
+
+    if (!isTransparentFill) return;
+
+    // Use computed color so the screenshot matches theme as closely as possible.
+    const fallbackColor = cs.color && cs.color !== 'transparent' ? cs.color : 'rgb(245, 243, 238)';
+    (node.style as unknown as { webkitTextFillColor?: string }).webkitTextFillColor = fallbackColor;
+    node.style.color = fallbackColor;
+    node.style.backgroundImage = 'none';
+    (node.style as unknown as { webkitBackgroundClip?: string }).webkitBackgroundClip = 'border-box';
+    node.style.backgroundClip = 'border-box';
+  });
+};
+
+const isCanvasMostlyBackground = (canvas: HTMLCanvasElement): boolean => {
+  try {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return false;
+
+    const { width, height } = canvas;
+    const sampleCount = 80;
+    let darkish = 0;
+    let total = 0;
+
+    for (let i = 0; i < sampleCount; i++) {
+      const x = Math.floor((i / sampleCount) * (width - 1));
+      const y = Math.floor((((i * 13) % sampleCount) / sampleCount) * (height - 1));
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
+      const brightness = (r + g + b) / 3;
+      if (brightness < 20) darkish++;
+      total++;
+    }
+
+    // If almost all sampled pixels are near-black, the render likely failed.
+    return total > 0 && darkish / total > 0.95;
+  } catch {
+    return false;
+  }
+};
+
 // Check if native share with files is supported
 const canShareFiles = async (file: File): Promise<boolean> => {
   if (!navigator.share) return false;
@@ -115,27 +197,22 @@ export const useShareCard = ({
       const width = Math.ceil(elementRect.width);
 
       const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.width = `${width}px`;
+      clone.style.maxWidth = `${width}px`;
+      clone.style.boxSizing = 'border-box';
 
-      // Force overflow visible on clone tree to avoid bottom clipping
-      clone.querySelectorAll('*').forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        if (htmlEl?.style) htmlEl.style.overflow = 'visible';
-      });
-
-      // Hint CORS for images when possible
-      clone.querySelectorAll('img').forEach((img) => {
-        if (!img.getAttribute('crossorigin')) img.setAttribute('crossorigin', 'anonymous');
-      });
+      prepareCloneForCapture(clone);
 
       const captureRoot = document.createElement('div');
       captureRoot.style.cssText = `
         position: fixed;
-        left: -10000px;
+        left: 0;
         top: 0;
+        transform: translateX(-200vw);
         width: ${width}px;
         padding: 0 0 8px 0;
         overflow: visible;
-        z-index: -9999;
+        z-index: 2147483647;
         pointer-events: none;
       `;
       captureRoot.appendChild(clone);
@@ -170,16 +247,20 @@ export const useShareCard = ({
           ]);
         }
 
-        // Let layout settle for one paint cycle
+        // Normalize gradient/clip text so it doesn't disappear in canvas renders
+        normalizeGradientTextForCanvas(clone);
+
+        // Let layout settle for a couple paint cycles
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        await new Promise((resolve) => setTimeout(resolve, 150));
 
         const height = Math.ceil(captureRoot.scrollHeight);
 
         const baseOptions = {
           backgroundColor: '#0a0a0a',
-          scale: 2,
+          scale: getCaptureScale(),
           useCORS: true,
-          allowTaint: true,
+          allowTaint: false,
           logging: false,
           width,
           height,
@@ -189,15 +270,31 @@ export const useShareCard = ({
           windowHeight: height,
         } as const;
 
-        // foreignObjectRendering tends to preserve text metrics better; fallback if it fails.
+        // Prefer foreignObjectRendering except on Safari where it can silently render black.
+        const tryForeignObject = !isSafari();
+
         let canvas: HTMLCanvasElement;
-        try {
+
+        if (tryForeignObject) {
+          try {
+            canvas = await html2canvas(captureRoot, {
+              ...baseOptions,
+              foreignObjectRendering: true,
+            });
+          } catch {
+            canvas = await html2canvas(captureRoot, baseOptions);
+          }
+        } else {
+          canvas = await html2canvas(captureRoot, baseOptions);
+        }
+
+        // If we got a "successful" but black render, retry with safer settings.
+        if (isCanvasMostlyBackground(canvas)) {
           canvas = await html2canvas(captureRoot, {
             ...baseOptions,
-            foreignObjectRendering: true,
+            foreignObjectRendering: false,
+            scale: 1.25,
           });
-        } catch {
-          canvas = await html2canvas(captureRoot, baseOptions);
         }
 
         return new Promise((resolve) => {
