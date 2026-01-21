@@ -110,28 +110,53 @@ export const useShareCard = ({
     try {
       const element = cardRef.current;
       
-      // Get dimensions from the original element
-      const rect = element.getBoundingClientRect();
-      const width = Math.ceil(rect.width);
-      const height = Math.ceil(rect.height) + 8; // Extra padding to prevent clipping
-
-      // Use html2canvas directly on the element without cloning
-      // This prevents the offset issues caused by cloning layout differences
-      const canvas = await html2canvas(element, {
+      // Clone the element and place it off-screen for reliable capture
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Get computed styles from original
+      const originalStyles = window.getComputedStyle(element);
+      const width = element.offsetWidth;
+      const height = element.scrollHeight + 16; // Extra padding to prevent text clipping
+      
+      // Style the clone for off-screen rendering
+      clone.style.cssText = `
+        position: fixed !important;
+        left: -9999px !important;
+        top: 0 !important;
+        width: ${width}px !important;
+        height: ${height}px !important;
+        overflow: visible !important;
+        background: ${originalStyles.background || '#0a0a0a'} !important;
+        padding-bottom: 8px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+      `;
+      
+      // Ensure all text in clone is visible
+      clone.querySelectorAll('*').forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.style) {
+          htmlEl.style.overflow = 'visible';
+        }
+      });
+      
+      document.body.appendChild(clone);
+      
+      // Wait for fonts and styles to settle
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(clone, {
         backgroundColor: '#0a0a0a',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY,
         width: width,
         height: height,
-        windowWidth: document.documentElement.clientWidth,
-        windowHeight: document.documentElement.clientHeight,
       });
+      
+      // Clean up clone
+      document.body.removeChild(clone);
 
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
