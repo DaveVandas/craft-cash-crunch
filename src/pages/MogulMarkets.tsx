@@ -61,6 +61,7 @@ const MogulMarkets = () => {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isBuyingCash, setIsBuyingCash] = useState(false);
+  const [hasInitialRefresh, setHasInitialRefresh] = useState(false);
 
   // Handle successful cash purchase return
   useEffect(() => {
@@ -124,30 +125,27 @@ const MogulMarkets = () => {
   // Auto-refresh prices on page load and every 60 seconds
   useEffect(() => {
     if (!portfolio || portfolio.positions.length === 0) return;
+    if (hasInitialRefresh) return; // Only run once on initial load
     
     // Refresh prices on initial load
     const initialRefresh = async () => {
       setIsRefreshing(true);
+      setHasInitialRefresh(true);
       try {
         const tickers = portfolio.positions.map(p => p.ticker);
         const { data, error } = await supabase.functions.invoke('get-stock-data', {
           body: { action: 'batch', tickers },
         });
         
-        if (!error && data.stocks) {
+        if (!error && data?.stocks && data.stocks.length > 0) {
           // Update prices in database
-          const priceMap: Record<string, number> = {};
           for (const stock of data.stocks) {
-            priceMap[stock.ticker] = stock.price;
-          }
-          
-          // Update each position's current_price
-          for (const position of portfolio.positions) {
-            if (priceMap[position.ticker]) {
+            const position = portfolio.positions.find(p => p.ticker === stock.ticker);
+            if (position && stock.price) {
               await supabase
                 .from('trading_positions')
                 .update({
-                  current_price: priceMap[position.ticker],
+                  current_price: stock.price,
                   last_price_update: new Date().toISOString(),
                 })
                 .eq('id', position.id);
@@ -164,14 +162,18 @@ const MogulMarkets = () => {
     };
     
     initialRefresh();
+  }, [portfolio?.id, portfolio?.positions.length, hasInitialRefresh, fetchPortfolio]);
+
+  // Separate effect for periodic refresh every 60 seconds
+  useEffect(() => {
+    if (!portfolio || portfolio.positions.length === 0) return;
     
-    // Set up interval for periodic refresh (every 60 seconds)
     const intervalId = setInterval(() => {
       handleRefreshPrices();
     }, 60000);
     
     return () => clearInterval(intervalId);
-  }, [portfolio?.id, portfolio?.positions.length]);
+  }, [portfolio?.id]);
 
   const handleSelectStock = (stock: StockData) => {
     setSelectedStock(stock);
