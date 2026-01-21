@@ -109,60 +109,105 @@ export const useShareCard = ({
 
     try {
       const element = cardRef.current;
-      
-      // Clone the element and place it off-screen for reliable capture
+
+      // Off-screen capture wrapper (keeps inherited styles stable and avoids viewport clipping)
+      const elementRect = element.getBoundingClientRect();
+      const width = Math.ceil(elementRect.width);
+
       const clone = element.cloneNode(true) as HTMLElement;
-      
-      // Get computed styles from original
-      const originalStyles = window.getComputedStyle(element);
-      const width = element.offsetWidth;
-      const height = element.scrollHeight + 16; // Extra padding to prevent text clipping
-      
-      // Style the clone for off-screen rendering
-      clone.style.cssText = `
-        position: fixed !important;
-        left: -9999px !important;
-        top: 0 !important;
-        width: ${width}px !important;
-        height: ${height}px !important;
-        overflow: visible !important;
-        background: ${originalStyles.background || '#0a0a0a'} !important;
-        padding-bottom: 8px !important;
-        z-index: -9999 !important;
-        pointer-events: none !important;
-      `;
-      
-      // Ensure all text in clone is visible
+
+      // Force overflow visible on clone tree to avoid bottom clipping
       clone.querySelectorAll('*').forEach((el) => {
         const htmlEl = el as HTMLElement;
-        if (htmlEl.style) {
-          htmlEl.style.overflow = 'visible';
-        }
+        if (htmlEl?.style) htmlEl.style.overflow = 'visible';
       });
-      
-      document.body.appendChild(clone);
-      
-      // Wait for fonts and styles to settle
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const canvas = await html2canvas(clone, {
-        backgroundColor: '#0a0a0a',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: width,
-        height: height,
-      });
-      
-      // Clean up clone
-      document.body.removeChild(clone);
 
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, 'image/jpeg', 0.92);
+      // Hint CORS for images when possible
+      clone.querySelectorAll('img').forEach((img) => {
+        if (!img.getAttribute('crossorigin')) img.setAttribute('crossorigin', 'anonymous');
       });
+
+      const captureRoot = document.createElement('div');
+      captureRoot.style.cssText = `
+        position: fixed;
+        left: -10000px;
+        top: 0;
+        width: ${width}px;
+        padding: 0 0 8px 0;
+        overflow: visible;
+        z-index: -9999;
+        pointer-events: none;
+      `;
+      captureRoot.appendChild(clone);
+
+      document.body.appendChild(captureRoot);
+
+      try {
+        // Wait for fonts to fully load (prevents baseline/vertical metric shifts)
+        if (document.fonts?.ready) {
+          await Promise.race([
+            document.fonts.ready,
+            new Promise((resolve) => setTimeout(resolve, 500)),
+          ]);
+        }
+
+        // Wait for images in the clone so layout doesn't shift during capture
+        const imgs = Array.from(clone.querySelectorAll('img'));
+        if (imgs.length) {
+          await Promise.race([
+            Promise.all(
+              imgs.map(
+                (img) =>
+                  img.complete
+                    ? Promise.resolve()
+                    : new Promise<void>((resolve) => {
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve();
+                      })
+              )
+            ),
+            new Promise((resolve) => setTimeout(resolve, 500)),
+          ]);
+        }
+
+        // Let layout settle for one paint cycle
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        const height = Math.ceil(captureRoot.scrollHeight);
+
+        const baseOptions = {
+          backgroundColor: '#0a0a0a',
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          width,
+          height,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: width,
+          windowHeight: height,
+        } as const;
+
+        // foreignObjectRendering tends to preserve text metrics better; fallback if it fails.
+        let canvas: HTMLCanvasElement;
+        try {
+          canvas = await html2canvas(captureRoot, {
+            ...baseOptions,
+            foreignObjectRendering: true,
+          });
+        } catch {
+          canvas = await html2canvas(captureRoot, baseOptions);
+        }
+
+        return new Promise((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, 'image/jpeg', 0.92);
+        });
+      } finally {
+        document.body.removeChild(captureRoot);
+      }
     } catch (err) {
       console.error('Failed to generate image:', err);
       return null;
