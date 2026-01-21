@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Search, Loader2, TrendingUp, TrendingDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { getOrCreateGuestSession, createSupabaseWithSession } from '@/lib/supabaseWithSession';
 
 interface StockData {
   ticker: string;
@@ -30,6 +32,14 @@ export function StockSearch({ onSelectStock, className }: StockSearchProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<StockData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  // Use session-aware client for guests, standard client for authenticated users
+  const db = useMemo(() => {
+    if (user) return supabase;
+    const sessionId = getOrCreateGuestSession();
+    return createSupabaseWithSession(sessionId);
+  }, [user]);
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) return;
@@ -39,7 +49,7 @@ export function StockSearch({ onSelectStock, className }: StockSearchProps) {
     setSearchResult(null);
     
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('get-stock-data', {
+      const { data, error: fnError } = await db.functions.invoke('get-stock-data', {
         body: { action: 'search', query: query.trim() },
       });
       
@@ -61,7 +71,7 @@ export function StockSearch({ onSelectStock, className }: StockSearchProps) {
     } finally {
       setIsSearching(false);
     }
-  }, [query]);
+  }, [query, db]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
