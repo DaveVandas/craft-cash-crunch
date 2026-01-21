@@ -174,35 +174,53 @@ serve(async (req) => {
       });
     }
     
-    // For actions that call external APIs (search, batch), require authentication
+    // For actions that call external APIs (search, batch), require authentication OR guest session
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
+    const sessionId = req.headers.get('x-session-id');
+    
+    let userId: string | null = null;
+    let isGuest = false;
+    
+    // Create Supabase client with service role for guest operations
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
     
-    if (claimsError || !claimsData?.claims?.sub) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    // Try to authenticate via JWT first
+    if (authHeader?.startsWith('Bearer ')) {
+      const anonClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      
+      const token = authHeader.replace('Bearer ', '');
+      const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+      
+      if (!claimsError && claimsData?.claims?.sub) {
+        userId = claimsData.claims.sub;
+      }
+    }
+    
+    // If no authenticated user, check for guest session
+    if (!userId && sessionId && sessionId.startsWith('guest_')) {
+      isGuest = true;
+      userId = sessionId;
+      console.log(`Guest session detected: ${sessionId}`);
+    }
+    
+    // Require either authenticated user or guest session
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - please sign in or use guest mode' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    console.log(`Stock data requested by ${isGuest ? 'guest' : 'user'}: ${userId}, action: ${action}`);
 
-    const userId = claimsData.claims.sub;
-    console.log(`Stock data requested by user: ${userId}, action: ${action}`);
-
-    // Rate limiting - max 20 stock requests per minute per user
+    // Rate limiting - max 20 stock requests per minute per user/session
     const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
                      req.headers.get('x-real-ip') || 
                      'unknown';

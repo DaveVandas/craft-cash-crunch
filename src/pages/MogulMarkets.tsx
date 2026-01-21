@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -23,6 +23,7 @@ import { TradingCockpit } from '@/components/trading/TradingCockpit';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getOrCreateGuestSession, createSupabaseWithSession } from '@/lib/supabaseWithSession';
 
 interface StockData {
   ticker: string;
@@ -62,6 +63,15 @@ const MogulMarkets = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isBuyingCash, setIsBuyingCash] = useState(false);
   const [hasInitialRefresh, setHasInitialRefresh] = useState(false);
+
+  // Get the appropriate Supabase client for edge function calls
+  const db = useMemo(() => {
+    if (user) {
+      return supabase;
+    }
+    const sessionId = getOrCreateGuestSession();
+    return createSupabaseWithSession(sessionId);
+  }, [user]);
 
   // Handle successful cash purchase return
   useEffect(() => {
@@ -133,7 +143,7 @@ const MogulMarkets = () => {
       setHasInitialRefresh(true);
       try {
         const tickers = portfolio.positions.map(p => p.ticker);
-        const { data, error } = await supabase.functions.invoke('get-stock-data', {
+        const { data, error } = await db.functions.invoke('get-stock-data', {
           body: { action: 'batch', tickers },
         });
         
@@ -144,7 +154,7 @@ const MogulMarkets = () => {
             const stockData = stock as { price?: number };
             const position = portfolio.positions.find(p => p.ticker === ticker);
             if (position && stockData.price) {
-              await supabase
+              await db
                 .from('trading_positions')
                 .update({
                   current_price: stockData.price,
@@ -164,7 +174,7 @@ const MogulMarkets = () => {
     };
     
     initialRefresh();
-  }, [portfolio?.id, portfolio?.positions.length, hasInitialRefresh, fetchPortfolio]);
+  }, [portfolio?.id, portfolio?.positions.length, hasInitialRefresh, fetchPortfolio, db]);
 
   // Separate effect for periodic refresh every 60 seconds
   useEffect(() => {
@@ -185,7 +195,7 @@ const MogulMarkets = () => {
   const handleSelectTicker = async (ticker: string) => {
     setIsRefreshing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('get-stock-data', {
+      const { data, error } = await db.functions.invoke('get-stock-data', {
         body: { action: 'search', query: ticker },
       });
       
@@ -220,7 +230,7 @@ const MogulMarkets = () => {
     setIsRefreshing(true);
     try {
       const tickers = portfolio.positions.map(p => p.ticker);
-      const { data, error } = await supabase.functions.invoke('get-stock-data', {
+      const { data, error } = await db.functions.invoke('get-stock-data', {
         body: { action: 'batch', tickers },
       });
       
@@ -247,7 +257,7 @@ const MogulMarkets = () => {
         const stockData = stock as { price?: number };
         const position = portfolio.positions.find(p => p.ticker === ticker);
         if (position && stockData.price) {
-          await supabase
+          await db
             .from('trading_positions')
             .update({
               current_price: stockData.price,
