@@ -833,7 +833,6 @@ export type Database = {
           created_by: string | null
           expires_at: string | null
           id: string | null
-          invite_code: string | null
           recipient_name: string | null
           status: string | null
         }
@@ -844,7 +843,6 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string | null
-          invite_code?: string | null
           recipient_name?: string | null
           status?: string | null
         }
@@ -855,7 +853,6 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string | null
-          invite_code?: string | null
           recipient_name?: string | null
           status?: string | null
         }
