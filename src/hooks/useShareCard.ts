@@ -55,6 +55,16 @@ const normalizeGradientTextForCanvas = (root: HTMLElement) => {
   // html2canvas (esp. without foreignObjectRendering) often drops background-clip:text,
   // resulting in fully transparent text (looks like a black card). For the clone only,
   // convert gradient-text to solid text using computed color.
+  const isNearBlack = (cssColor: string): boolean => {
+    const m = cssColor.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (!m) return false;
+    const r = Number(m[1]);
+    const g = Number(m[2]);
+    const b = Number(m[3]);
+    const brightness = (r + g + b) / 3;
+    return brightness < 40;
+  };
+
   const nodes = Array.from(root.querySelectorAll<HTMLElement>('*'));
   nodes.forEach((node) => {
     const cs = window.getComputedStyle(node);
@@ -68,7 +78,13 @@ const normalizeGradientTextForCanvas = (root: HTMLElement) => {
     if (!isTransparentFill) return;
 
     // Use computed color so the screenshot matches theme as closely as possible.
-    const fallbackColor = cs.color && cs.color !== 'transparent' ? cs.color : 'rgb(245, 243, 238)';
+    // Some gradient-text nodes report a default computed color (often black) even though
+    // the actual visible text comes from the gradient. If we blindly use that, the text
+    // becomes effectively invisible on dark cards.
+    const fallbackColor =
+      cs.color && cs.color !== 'transparent' && !isNearBlack(cs.color)
+        ? cs.color
+        : 'rgb(245, 243, 238)';
     (node.style as unknown as { webkitTextFillColor?: string }).webkitTextFillColor = fallbackColor;
     node.style.color = fallbackColor;
     node.style.backgroundImage = 'none';
@@ -203,18 +219,20 @@ export const useShareCard = ({
 
       prepareCloneForCapture(clone);
 
-      const captureRoot = document.createElement('div');
-      captureRoot.style.cssText = `
-        position: fixed;
-        left: 0;
-        top: 0;
-        transform: translateX(-200vw);
-        width: ${width}px;
-        padding: 0 0 8px 0;
-        overflow: visible;
-        z-index: 2147483647;
-        pointer-events: none;
-      `;
+       const captureRoot = document.createElement('div');
+       // NOTE: Using large transforms for off-screen positioning can cause WebKit
+       // to “paint” nothing (resulting in black captures). A negative left keeps
+       // it out of view while remaining paintable.
+       captureRoot.style.cssText = `
+         position: fixed;
+         left: -10000px;
+         top: 0;
+         width: ${width}px;
+         padding: 0 0 8px 0;
+         overflow: visible;
+         z-index: 2147483647;
+         pointer-events: none;
+       `;
       captureRoot.appendChild(clone);
 
       document.body.appendChild(captureRoot);
@@ -270,32 +288,54 @@ export const useShareCard = ({
           windowHeight: height,
         } as const;
 
-        // Prefer foreignObjectRendering except on Safari where it can silently render black.
-        const tryForeignObject = !isSafari();
+         // Prefer foreignObjectRendering except on Safari where it can silently render black.
+         const preferForeignObject = !isSafari();
 
-        let canvas: HTMLCanvasElement;
+         const attemptRender = async (options: Parameters<typeof html2canvas>[1]) => {
+           return html2canvas(captureRoot, options);
+         };
 
-        if (tryForeignObject) {
-          try {
-            canvas = await html2canvas(captureRoot, {
-              ...baseOptions,
-              foreignObjectRendering: true,
-            });
-          } catch {
-            canvas = await html2canvas(captureRoot, baseOptions);
-          }
-        } else {
-          canvas = await html2canvas(captureRoot, baseOptions);
-        }
+         let canvas: HTMLCanvasElement | null = null;
 
-        // If we got a "successful" but black render, retry with safer settings.
-        if (isCanvasMostlyBackground(canvas)) {
-          canvas = await html2canvas(captureRoot, {
-            ...baseOptions,
-            foreignObjectRendering: false,
-            scale: 1.25,
-          });
-        }
+         // Attempt 1: preferred strategy
+         if (preferForeignObject) {
+           try {
+             canvas = await attemptRender({ ...baseOptions, foreignObjectRendering: true });
+           } catch {
+             canvas = await attemptRender(baseOptions);
+           }
+         } else {
+           canvas = await attemptRender(baseOptions);
+         }
+
+         // Attempt 2: safer settings (no foreignObject, lower scale)
+         if (canvas && isCanvasMostlyBackground(canvas)) {
+           canvas = await attemptRender({
+             ...baseOptions,
+             foreignObjectRendering: false,
+             scale: 1.25,
+           });
+         }
+
+         // Attempt 3: last-resort toggle (sometimes helps on non-standard WebKit wrappers)
+         if (canvas && isCanvasMostlyBackground(canvas)) {
+           try {
+             canvas = await attemptRender({
+               ...baseOptions,
+               foreignObjectRendering: true,
+               scale: 1.25,
+             });
+           } catch {
+             // keep previous canvas
+           }
+         }
+
+         if (!canvas) return null;
+
+         // If it's still basically a solid background, don't return a black image.
+         if (isCanvasMostlyBackground(canvas)) {
+           throw new Error('CAPTURE_RENDER_FAILED');
+         }
 
         return new Promise((resolve) => {
           canvas.toBlob((blob) => {
@@ -307,6 +347,11 @@ export const useShareCard = ({
       }
     } catch (err) {
       console.error('Failed to generate image:', err);
+      if (err instanceof Error && err.message === 'CAPTURE_RENDER_FAILED') {
+        toast.error('Could not generate the share image on this device.', {
+          description: 'Try again, or use a different browser/device to export the card.',
+        });
+      }
       return null;
     }
   }, [cardRef]);
