@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { GoldBars } from './GoldBars';
-import { StockSearch } from './StockSearch';
+import { StockSearchWithAutocomplete } from './StockSearchWithAutocomplete';
 
 interface Position {
   id: string;
@@ -153,7 +153,7 @@ export function TradingCockpit({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <StockSearch onSelectStock={onSelectStock} />
+            <StockSearchWithAutocomplete onSelectStock={onSelectStock} />
             
             {/* Quick Access Tickers */}
             <div className="flex flex-wrap gap-1.5">

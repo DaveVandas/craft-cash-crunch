@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -96,8 +96,11 @@ const CelebrityPortfolios = () => {
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(false);
   const [loadingName, setLoadingName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [selectedHoldings, setSelectedHoldings] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   const guestSessionId = useMemo(() => {
     if (user) return null;
@@ -228,6 +231,48 @@ const CelebrityPortfolios = () => {
     window.location.href = '/mogul-markets?from=celebrity-portfolio';
   };
 
+  // Filter suggestions for autocomplete
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return featuredFigures
+      .filter(f => 
+        f.name.toLowerCase().includes(q) || 
+        f.title.toLowerCase().includes(q)
+      )
+      .slice(0, 5);
+  }, [searchQuery, featuredFigures]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedSuggestionIndex(prev => Math.min(prev + 1, searchSuggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedSuggestionIndex(prev => Math.max(prev - 1, -1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedSuggestionIndex >= 0 && searchSuggestions[selectedSuggestionIndex]) {
+        handleSelectFigure(searchSuggestions[selectedSuggestionIndex].name);
+      } else if (searchQuery.trim()) {
+        handleSelectFigure(searchQuery.trim());
+      }
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
+
   const filteredFigures = featuredFigures.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     f.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -282,27 +327,68 @@ const CelebrityPortfolios = () => {
 
         {!selectedPortfolio ? (
           <>
-            {/* Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by name or search for any public figure..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-20"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2"
-                  disabled={!searchQuery.trim() || isLoadingPortfolio}
-                >
-                  {isLoadingPortfolio ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
-                </Button>
-              </div>
-            </form>
+            {/* Search Bar with Autocomplete */}
+            <div ref={searchWrapperRef} className="relative mb-6">
+              <form onSubmit={handleSearchSubmit}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by name or search for any public figure..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                      setSelectedSuggestionIndex(-1);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onKeyDown={handleSearchKeyDown}
+                    className="pl-10 pr-20"
+                    autoComplete="off"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                    disabled={!searchQuery.trim() || isLoadingPortfolio}
+                  >
+                    {isLoadingPortfolio ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+                  </Button>
+                </div>
+              </form>
+
+              {/* Autocomplete dropdown */}
+              {showSuggestions && searchQuery.length >= 2 && searchSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50">
+                  <ul>
+                    {searchSuggestions.map((figure, index) => (
+                      <li
+                        key={figure.name}
+                        onClick={() => {
+                          handleSelectFigure(figure.name);
+                          setShowSuggestions(false);
+                        }}
+                        className={cn(
+                          "px-4 py-3 cursor-pointer flex items-center gap-3 transition-colors",
+                          index === selectedSuggestionIndex ? "bg-primary/20" : "hover:bg-muted"
+                        )}
+                      >
+                        <div className={cn(
+                          "p-2 rounded-lg",
+                          categoryColors[figure.category] || 'bg-muted'
+                        )}>
+                          {categoryIcons[figure.category] || <User className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <span className="font-medium">{figure.name}</span>
+                          <p className="text-xs text-muted-foreground">{figure.title}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
 
             {/* Featured Figures Grid */}
             {isLoadingList ? (
