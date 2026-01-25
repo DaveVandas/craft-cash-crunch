@@ -65,6 +65,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
   investor: <Briefcase className="h-4 w-4" />,
   celebrity: <User className="h-4 w-4" />,
   tech: <Cpu className="h-4 w-4" />,
+  international: <Crown className="h-4 w-4" />,
 };
 
 const categoryColors: Record<string, string> = {
@@ -72,20 +73,48 @@ const categoryColors: Record<string, string> = {
   investor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   celebrity: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   tech: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  international: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
 };
 
-// Fallback featured figures in case API fails
+const categoryLabels: Record<string, string> = {
+  all: 'All',
+  politician: 'Politicians',
+  investor: 'Investors',
+  celebrity: 'Celebrities',
+  tech: 'Tech Leaders',
+  international: 'International',
+};
+
+// Fallback featured figures in case API fails - expanded
 const FALLBACK_FIGURES: FeaturedFigure[] = [
+  // Politicians
   { name: 'Nancy Pelosi', title: 'U.S. House Representative', category: 'politician' },
   { name: 'Dan Crenshaw', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Tommy Tuberville', title: 'U.S. Senator', category: 'politician' },
+  { name: 'Marjorie Taylor Greene', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Josh Gottheimer', title: 'U.S. House Representative', category: 'politician' },
+  // Investors
   { name: 'Warren Buffett', title: 'Berkshire Hathaway CEO', category: 'investor' },
   { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor' },
   { name: 'Cathie Wood', title: 'ARK Invest CEO', category: 'investor' },
   { name: 'Bill Ackman', title: 'Pershing Square CEO', category: 'investor' },
   { name: 'Ray Dalio', title: 'Bridgewater Founder', category: 'investor' },
-  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
+  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor' },
+  { name: 'George Soros', title: 'Soros Fund Management', category: 'investor' },
+  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor' },
+  // Tech
   { name: 'Elon Musk', title: 'Tesla/SpaceX CEO', category: 'tech' },
   { name: 'Jeff Bezos', title: 'Amazon Founder', category: 'tech' },
+  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech' },
+  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech' },
+  // Celebrity
+  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
+  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity' },
+  { name: 'Jay-Z', title: 'Marcy Venture Partners', category: 'celebrity' },
+  { name: 'Serena Williams', title: 'Serena Ventures', category: 'celebrity' },
+  // International
+  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international' },
+  { name: 'Bernard Arnault', title: 'LVMH CEO', category: 'international' },
 ];
 
 const CelebrityPortfolios = () => {
@@ -96,9 +125,11 @@ const CelebrityPortfolios = () => {
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(false);
   const [loadingName, setLoadingName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [selectedHoldings, setSelectedHoldings] = useState<Set<string>>(new Set());
+  const [isDiscovering, setIsDiscovering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -273,10 +304,46 @@ const CelebrityPortfolios = () => {
     }
   };
 
-  const filteredFigures = featuredFigures.filter(f =>
-    f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Discover new figures via AI
+  const handleDiscover = async (category: string) => {
+    setIsDiscovering(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('get-celebrity-portfolio', {
+        body: { action: 'discover', category },
+      });
+      
+      if (!error && data?.figures?.length > 0) {
+        // Add discovered figures to the list (avoid duplicates)
+        setFeaturedFigures(prev => {
+          const existingNames = new Set(prev.map(f => f.name.toLowerCase()));
+          const newFigures = data.figures.filter(
+            (f: FeaturedFigure) => !existingNames.has(f.name.toLowerCase())
+          );
+          if (newFigures.length > 0) {
+            toast.success(`Discovered ${newFigures.length} new ${categoryLabels[category] || category}!`);
+            return [...prev, ...newFigures];
+          } else {
+            toast.info('No new figures found. Try a different category.');
+            return prev;
+          }
+        });
+      } else {
+        toast.error('Could not discover new figures. Try again later.');
+      }
+    } catch (err) {
+      console.error('Discovery error:', err);
+      toast.error('Discovery failed. Please try again.');
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
+  const filteredFigures = featuredFigures.filter(f => {
+    const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      f.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === 'all' || f.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -388,6 +455,49 @@ const CelebrityPortfolios = () => {
                   </ul>
                 </div>
               )}
+            </div>
+
+            {/* Category Filter Tabs */}
+            <div className="mb-6">
+              <div className="flex flex-wrap items-center gap-2">
+                {['all', 'politician', 'investor', 'celebrity', 'tech', 'international'].map((cat) => (
+                  <Button
+                    key={cat}
+                    variant={activeCategory === cat ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveCategory(cat)}
+                    className={cn(
+                      "gap-2",
+                      activeCategory === cat && "bg-primary text-primary-foreground"
+                    )}
+                  >
+                    {cat !== 'all' && categoryIcons[cat]}
+                    {categoryLabels[cat]}
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {cat === 'all' 
+                        ? featuredFigures.length 
+                        : featuredFigures.filter(f => f.category === cat).length
+                      }
+                    </Badge>
+                  </Button>
+                ))}
+                
+                {/* Discover More Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDiscover(activeCategory === 'all' ? 'investor' : activeCategory)}
+                  disabled={isDiscovering}
+                  className="ml-auto border-primary/50 text-primary hover:bg-primary/10"
+                >
+                  {isDiscovering ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Search className="h-4 w-4 mr-2" />
+                  )}
+                  Discover More
+                </Button>
+              </div>
             </div>
 
             {/* Featured Figures Grid */}
