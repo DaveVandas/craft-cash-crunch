@@ -13,6 +13,10 @@ const GUEST_SESSION_KEY = 'mogul_markets_session';
 const GUEST_SESSION_EXPIRY_KEY = 'mogul_markets_session_expiry';
 const SESSION_EXPIRY_DAYS = 7;
 
+function isValidGuestSessionId(sessionId: string | null): sessionId is string {
+  return typeof sessionId === 'string' && sessionId.startsWith('guest_') && sessionId.length > 'guest_'.length;
+}
+
 /**
  * Check if the session is expired
  */
@@ -47,18 +51,33 @@ export function getGuestSessionId(): string | null {
     clearSession();
     return null;
   }
-  
-  return localStorage.getItem(GUEST_SESSION_KEY);
+
+  const sessionId = localStorage.getItem(GUEST_SESSION_KEY);
+
+  // Migrate legacy / invalid session IDs (prevents backend from rejecting them)
+  if (!isValidGuestSessionId(sessionId)) {
+    clearSession();
+    return null;
+  }
+
+  return sessionId;
 }
 
 export function getOrCreateGuestSession(): string {
   // Check for existing valid session
   const existingSession = localStorage.getItem(GUEST_SESSION_KEY);
-  
-  if (existingSession && !isSessionExpired()) {
+
+  // If we have a legacy/invalid session id, wipe it so we don't get rejected by backend checks
+  if (existingSession && !isValidGuestSessionId(existingSession)) {
+    clearSession();
+  }
+
+  const existingAfterCleanup = localStorage.getItem(GUEST_SESSION_KEY);
+
+  if (existingAfterCleanup && !isSessionExpired() && isValidGuestSessionId(existingAfterCleanup)) {
     // Rotate expiry on active use (sliding expiration)
     setSessionExpiry();
-    return existingSession;
+    return existingAfterCleanup;
   }
   
   // Clear any expired session and create new one
