@@ -1,25 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const ALLOWED_ORIGINS = [
-  'https://craft-cash-crunch.lovable.app',
-  'https://earningsexplorer.shop',
-  'https://www.earningsexplorer.shop',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:8080',
-];
-
-function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app'))
-    ? origin
-    : ALLOWED_ORIGINS[0];
-
+// NOTE: The app can run inside a sandboxed iframe (Origin can be `null`).
+// Use permissive CORS (same pattern as other working backend functions).
+function getCorsHeaders(_origin: string | null): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-id',
-    'Access-Control-Allow-Credentials': 'true',
   };
 }
 
