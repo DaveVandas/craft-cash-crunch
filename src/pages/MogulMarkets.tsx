@@ -328,7 +328,7 @@ const MogulMarkets = () => {
             <MarketStatus />
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {!user && (
               <div className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30">
                 <p className="text-xs text-amber-400">
@@ -336,6 +336,31 @@ const MogulMarkets = () => {
                 </p>
               </div>
             )}
+            
+            <Button 
+              variant="outline"
+              size="sm"
+              asChild
+              className="gap-2"
+            >
+              <Link to="/celebrity-portfolios">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Copy Portfolios</span>
+                <span className="sm:hidden">Copy</span>
+              </Link>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="sm"
+              asChild
+              className="gap-2"
+            >
+              <Link to="/mogul-academy">
+                <GraduationCap className="h-4 w-4" />
+                <span className="hidden sm:inline">Learn</span>
+              </Link>
+            </Button>
             
             <Button 
               onClick={handleBuyCash}
@@ -358,21 +383,11 @@ const MogulMarkets = () => {
         <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-amber-500/5">
           <CardContent className="py-2 px-4">
             <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-4">
-                <span className="text-muted-foreground">Paper Trading Mode</span>
-              </div>
+              <span className="text-muted-foreground">Paper Trading Mode</span>
               <div className="flex items-center gap-1.5 text-primary">
                 <Zap className="h-3 w-3" />
                 <span className="font-medium">Live Market Data</span>
               </div>
-              <Link to="/celebrity-portfolios" className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
-                <Users className="h-3 w-3" />
-                <span className="font-medium">Copy Portfolios</span>
-              </Link>
-              <Link to="/mogul-academy" className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors">
-                <GraduationCap className="h-3 w-3" />
-                <span className="font-medium">Learn Trading</span>
-              </Link>
             </div>
           </CardContent>
         </Card>
