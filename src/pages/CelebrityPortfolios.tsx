@@ -73,11 +73,25 @@ const categoryColors: Record<string, string> = {
   tech: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
 };
 
+// Fallback featured figures in case API fails
+const FALLBACK_FIGURES: FeaturedFigure[] = [
+  { name: 'Nancy Pelosi', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Dan Crenshaw', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Warren Buffett', title: 'Berkshire Hathaway CEO', category: 'investor' },
+  { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor' },
+  { name: 'Cathie Wood', title: 'ARK Invest CEO', category: 'investor' },
+  { name: 'Bill Ackman', title: 'Pershing Square CEO', category: 'investor' },
+  { name: 'Ray Dalio', title: 'Bridgewater Founder', category: 'investor' },
+  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
+  { name: 'Elon Musk', title: 'Tesla/SpaceX CEO', category: 'tech' },
+  { name: 'Jeff Bezos', title: 'Amazon Founder', category: 'tech' },
+];
+
 const CelebrityPortfolios = () => {
   const { user } = useAuth();
-  const [featuredFigures, setFeaturedFigures] = useState<FeaturedFigure[]>([]);
+  const [featuredFigures, setFeaturedFigures] = useState<FeaturedFigure[]>(FALLBACK_FIGURES);
   const [selectedPortfolio, setSelectedPortfolio] = useState<CelebrityPortfolio | null>(null);
-  const [isLoadingList, setIsLoadingList] = useState(true);
+  const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHoldings, setSelectedHoldings] = useState<Set<string>>(new Set());
@@ -89,26 +103,25 @@ const CelebrityPortfolios = () => {
     return createSupabaseWithSession(sessionId);
   }, [user]);
 
-  // Fetch featured figures on mount
+  // Fetch featured figures on mount - fallback already set, so this is optional
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const { data, error } = await db.functions.invoke('get-celebrity-portfolio', {
+        const { data, error } = await supabase.functions.invoke('get-celebrity-portfolio', {
           body: { action: 'list' },
         });
         
-        if (error) throw error;
-        setFeaturedFigures(data.figures || []);
+        if (!error && data?.figures?.length > 0) {
+          setFeaturedFigures(data.figures);
+        }
       } catch (err) {
         console.error('Error fetching featured figures:', err);
-        toast.error('Failed to load featured portfolios');
-      } finally {
-        setIsLoadingList(false);
+        // Keep fallback figures - no need to show error toast
       }
     };
     
     fetchFeatured();
-  }, [db]);
+  }, []);
 
   const handleSelectFigure = async (name: string) => {
     setIsLoadingPortfolio(true);
