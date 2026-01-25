@@ -18,18 +18,45 @@ function jsonResponse(body: Record<string, unknown>, corsHeaders: Record<string,
   });
 }
 
-// Notable public figures with known public portfolios
+// Notable public figures with known public portfolios - expanded categories
 const FEATURED_FIGURES = [
+  // Politicians (US Congress members with disclosed trades)
   { name: 'Nancy Pelosi', title: 'U.S. House Representative', category: 'politician' },
   { name: 'Dan Crenshaw', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Tommy Tuberville', title: 'U.S. Senator', category: 'politician' },
+  { name: 'Marjorie Taylor Greene', title: 'U.S. House Representative', category: 'politician' },
+  { name: 'Josh Gottheimer', title: 'U.S. House Representative', category: 'politician' },
+  
+  // Institutional Investors (13F filers)
   { name: 'Warren Buffett', title: 'Berkshire Hathaway CEO', category: 'investor' },
   { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor' },
   { name: 'Cathie Wood', title: 'ARK Invest CEO', category: 'investor' },
   { name: 'Bill Ackman', title: 'Pershing Square CEO', category: 'investor' },
   { name: 'Ray Dalio', title: 'Bridgewater Founder', category: 'investor' },
-  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
+  { name: 'David Tepper', title: 'Appaloosa Management', category: 'investor' },
+  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor' },
+  { name: 'George Soros', title: 'Soros Fund Management', category: 'investor' },
+  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor' },
+  { name: 'Ken Griffin', title: 'Citadel LLC', category: 'investor' },
+  
+  // Tech Leaders
   { name: 'Elon Musk', title: 'Tesla/SpaceX CEO', category: 'tech' },
   { name: 'Jeff Bezos', title: 'Amazon Founder', category: 'tech' },
+  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech' },
+  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech' },
+  { name: 'Tim Cook', title: 'Apple CEO', category: 'tech' },
+  
+  // Celebrity Investors
+  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
+  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity' },
+  { name: 'Jay-Z', title: 'Marcy Venture Partners', category: 'celebrity' },
+  { name: 'Serena Williams', title: 'Serena Ventures', category: 'celebrity' },
+  { name: 'Kevin Hart', title: 'Hartbeat Ventures', category: 'celebrity' },
+  
+  // International Figures
+  { name: 'Li Ka-shing', title: 'CK Hutchison Holdings', category: 'international' },
+  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international' },
+  { name: 'Bernard Arnault', title: 'LVMH CEO', category: 'international' },
 ];
 
 interface PortfolioHolding {
@@ -144,6 +171,76 @@ If no public portfolio data is available, return null in the holdings but still 
   }
 }
 
+// AI-powered discovery of new VIP figures
+async function discoverNewFigures(category: string): Promise<Array<{name: string; title: string; category: string}>> {
+  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+  
+  if (!PERPLEXITY_API_KEY) {
+    return [];
+  }
+
+  const categoryPrompts: Record<string, string> = {
+    politician: 'Find 5 current U.S. Congress members (House or Senate) who have made notable stock trades in the past 3 months based on their mandatory financial disclosures. Focus on those with significant trading activity.',
+    investor: 'Find 5 hedge fund managers or institutional investors who have recently filed 13F reports showing interesting portfolio changes. Focus on well-known investors with public track records.',
+    celebrity: 'Find 5 celebrities, athletes, or entertainers who are known active investors with venture capital firms or public investment activities.',
+    tech: 'Find 5 tech company executives or founders who have made notable stock transactions (buying or selling their company stock or other investments) recently.',
+    international: 'Find 5 notable international billionaires or business leaders outside the US who have publicly known investment portfolios or recent notable trades.',
+  };
+
+  const prompt = categoryPrompts[category] || categoryPrompts.investor;
+
+  try {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown formatting, no code blocks. Just the raw JSON array.' 
+          },
+          { 
+            role: 'user', 
+            content: `${prompt}
+
+Return a JSON array of objects, each with:
+- name: full name (string)
+- title: their current position/title (string)  
+- category: "${category}" (string)
+
+Only include people with publicly available portfolio/trading data.`
+          }
+        ],
+        search_recency_filter: 'month',
+      }),
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return [];
+    
+    const parsed = JSON.parse(jsonMatch[0]);
+    return Array.isArray(parsed) ? parsed.map((p: any) => ({
+      name: String(p.name || ''),
+      title: String(p.title || ''),
+      category: category,
+    })).filter((p: any) => p.name) : [];
+  } catch (error) {
+    console.error('Discovery error:', error);
+    return [];
+  }
+}
+
 serve(async (req) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
@@ -153,12 +250,22 @@ serve(async (req) => {
   }
 
   try {
-    const { action, name } = await req.json();
+    const { action, name, category } = await req.json();
     
     // List featured figures - public, no auth needed
     if (action === 'list') {
       return jsonResponse({
         figures: FEATURED_FIGURES,
+        categories: ['politician', 'investor', 'celebrity', 'tech', 'international'],
+      }, corsHeaders);
+    }
+    
+    // Discover new figures by category - public, but rate limited
+    if (action === 'discover' && category) {
+      const discovered = await discoverNewFigures(category);
+      return jsonResponse({
+        figures: discovered,
+        category,
       }, corsHeaders);
     }
     
