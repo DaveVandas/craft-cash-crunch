@@ -222,19 +222,46 @@ const MogulMarkets = () => {
     setIsTradeModalOpen(true);
   };
 
-  const handleSelectTicker = async (ticker: string) => {
+  const handleSelectTicker = async (ticker: string): Promise<boolean> => {
     setIsRefreshing(true);
     try {
       const { data, error } = await db.functions.invoke('get-stock-data', {
         body: { action: 'search', query: ticker },
       });
-      
-      if (!error && data.stock) {
+
+      // Transport-level error (rare with our backend pattern, but handle anyway)
+      if (error) {
+        console.error('Error fetching stock:', error);
+        toast.error('Failed to load stock', {
+          description: 'Please try again in a moment.',
+        });
+        return false;
+      }
+
+      // Application-level error (returned as 200 with error payload)
+      if (data?.error) {
+        toast.error('Failed to load stock', {
+          description: String(data.error),
+        });
+        return false;
+      }
+
+      if (data?.stock) {
         setSelectedStock(data.stock);
         setIsTradeModalOpen(true);
+        return true;
       }
+
+      toast.error('Failed to load stock', {
+        description: 'No stock data returned. Try again.',
+      });
+      return false;
     } catch (err) {
       console.error('Error fetching stock:', err);
+      toast.error('Failed to load stock', {
+        description: 'Please check your connection and try again.',
+      });
+      return false;
     } finally {
       setIsRefreshing(false);
     }

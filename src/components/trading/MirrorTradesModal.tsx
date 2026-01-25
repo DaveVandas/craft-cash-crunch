@@ -16,7 +16,7 @@ interface MirrorTradesModalProps {
   isOpen: boolean;
   onClose: () => void;
   tickers: string[];
-  onSelectTicker: (ticker: string) => void;
+  onSelectTicker: (ticker: string) => Promise<boolean>;
 }
 
 export const MirrorTradesModal = ({
@@ -37,8 +37,11 @@ export const MirrorTradesModal = ({
 
   const handleTrade = async (ticker: string) => {
     setIsLoading(true);
-    await onSelectTicker(ticker);
+    const ok = await onSelectTicker(ticker);
     setIsLoading(false);
+
+    // If we couldn't load the stock/trade modal, keep this modal open.
+    if (!ok) return;
     
     // Move to next ticker or close if done
     if (currentIndex < tickers.length - 1) {
@@ -54,14 +57,6 @@ export const MirrorTradesModal = ({
     } else {
       onClose();
     }
-  };
-
-  const handleTradeAll = async () => {
-    setIsLoading(true);
-    // Open trade modal for first ticker, user can continue from there
-    await onSelectTicker(tickers[0]);
-    setIsLoading(false);
-    onClose();
   };
 
   if (tickers.length === 0) return null;
