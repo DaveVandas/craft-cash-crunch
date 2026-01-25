@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { 
   Crown,
   Loader2,
-  Plus,
   Coins,
+  Users,
   Zap,
   GraduationCap
 } from 'lucide-react';
@@ -365,6 +365,10 @@ const MogulMarkets = () => {
                 <Zap className="h-3 w-3" />
                 <span className="font-medium">Live Market Data</span>
               </div>
+              <Link to="/celebrity-portfolios" className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                <Users className="h-3 w-3" />
+                <span className="font-medium">Copy Portfolios</span>
+              </Link>
               <Link to="/mogul-academy" className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition-colors">
                 <GraduationCap className="h-3 w-3" />
                 <span className="font-medium">Learn Trading</span>

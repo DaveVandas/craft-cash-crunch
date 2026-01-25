@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.get-stock-data]
 verify_jwt = false
+
+[functions.get-celebrity-portfolio]
+verify_jwt = false

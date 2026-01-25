@@ -30,6 +30,7 @@ import Trades from "./pages/Trades";
 import MogulMarkets from "./pages/MogulMarkets";
 import MogulAcademy from "./pages/MogulAcademy";
 import DebtDestroyer from "./pages/DebtDestroyer";
+import CelebrityPortfolios from "./pages/CelebrityPortfolios";
 import LandingVariantA from "./pages/landing/LandingVariantA";
 import LandingVariantB from "./pages/landing/LandingVariantB";
 import LandingVariantC from "./pages/landing/LandingVariantC";
@@ -76,6 +77,7 @@ const App = () => (
                   <Route path="/mogul-markets" element={<MogulMarkets />} />
                   <Route path="/mogul-academy" element={<MogulAcademy />} />
                   <Route path="/debt-destroyer" element={<DebtDestroyer />} />
+                  <Route path="/celebrity-portfolios" element={<CelebrityPortfolios />} />
                   <Route path="/landing/a" element={<LandingVariantA />} />
                   <Route path="/landing/b" element={<LandingVariantB />} />
                   <Route path="/landing/c" element={<LandingVariantC />} />
