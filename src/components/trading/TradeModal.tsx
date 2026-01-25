@@ -46,6 +46,16 @@ export function TradeModal({
 
   if (!stock) return null;
 
+  // Crypto tickers that support fractional shares
+  const CRYPTO_TICKERS = ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'DOT', 'AVAX', 'MATIC', 'LINK', 'LTC', 'BCH'];
+  const isCrypto = CRYPTO_TICKERS.includes(stock.ticker.toUpperCase()) || 
+                   stock.ticker.toUpperCase().endsWith('-USD') ||
+                   stock.name.toLowerCase().includes('bitcoin') ||
+                   stock.name.toLowerCase().includes('ethereum') ||
+                   stock.name.toLowerCase().includes('crypto');
+  
+  const allowDecimals = isCrypto;
+
   const totalCost = shares * stock.price;
   const canAfford = totalCost <= cashBalance;
   const canSell = shares <= currentShares;
@@ -55,8 +65,13 @@ export function TradeModal({
   const marginRequired = totalCost * 0.5;
   const canShort = marginRequired <= cashBalance;
   
-  const maxAffordableShares = Math.floor(cashBalance / stock.price);
-  const maxShortableShares = Math.floor((cashBalance * 2) / stock.price); // 50% margin = 2x leverage
+  // For crypto, allow fractional; for stocks use floor
+  const maxAffordableShares = isCrypto 
+    ? Math.floor((cashBalance / stock.price) * 10000) / 10000  // 4 decimal places
+    : Math.floor(cashBalance / stock.price);
+  const maxShortableShares = isCrypto
+    ? Math.floor(((cashBalance * 2) / stock.price) * 10000) / 10000
+    : Math.floor((cashBalance * 2) / stock.price);
 
   const handleTrade = async () => {
     if (shares <= 0) return;
@@ -151,17 +166,17 @@ export function TradeModal({
           {/* BUY TAB */}
           <TabsContent value="buy" className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="buy-shares">Number of Shares</Label>
+              <Label htmlFor="buy-shares">{isCrypto ? 'Amount' : 'Number of Shares'}</Label>
               <NumericInput
                 id="buy-shares"
                 value={shares}
                 onChange={setShares}
-                allowDecimals={false}
-                min={1}
+                allowDecimals={allowDecimals}
+                min={allowDecimals ? 0.0001 : 1}
                 className="mt-1"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Max affordable: {maxAffordableShares} shares
+                Max affordable: {allowDecimals ? maxAffordableShares.toFixed(4) : maxAffordableShares} {isCrypto ? stock.ticker : 'shares'}
               </p>
             </div>
 
@@ -210,18 +225,18 @@ export function TradeModal({
           {/* SELL TAB */}
           <TabsContent value="sell" className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="sell-shares">Number of Shares</Label>
+              <Label htmlFor="sell-shares">{isCrypto ? 'Amount' : 'Number of Shares'}</Label>
               <NumericInput
                 id="sell-shares"
                 value={shares}
                 onChange={setShares}
-                allowDecimals={false}
-                min={1}
+                allowDecimals={allowDecimals}
+                min={allowDecimals ? 0.0001 : 1}
                 max={currentShares}
                 className="mt-1"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                You own: {currentShares} shares
+                You own: {allowDecimals ? currentShares.toFixed(4) : currentShares} {isCrypto ? stock.ticker : 'shares'}
               </p>
             </div>
 
@@ -268,17 +283,17 @@ export function TradeModal({
             </div>
             
             <div>
-              <Label htmlFor="short-shares">Number of Shares to Short</Label>
+              <Label htmlFor="short-shares">{isCrypto ? 'Amount to Short' : 'Number of Shares to Short'}</Label>
               <NumericInput
                 id="short-shares"
                 value={shares}
                 onChange={setShares}
-                allowDecimals={false}
-                min={1}
+                allowDecimals={allowDecimals}
+                min={allowDecimals ? 0.0001 : 1}
                 className="mt-1"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Max shortable: {maxShortableShares} shares (50% margin)
+                Max shortable: {allowDecimals ? maxShortableShares.toFixed(4) : maxShortableShares} {isCrypto ? stock.ticker : 'shares'} (50% margin)
               </p>
             </div>
 
@@ -333,18 +348,18 @@ export function TradeModal({
             </div>
             
             <div>
-              <Label htmlFor="cover-shares">Number of Shares to Cover</Label>
+              <Label htmlFor="cover-shares">{isCrypto ? 'Amount to Cover' : 'Number of Shares to Cover'}</Label>
               <NumericInput
                 id="cover-shares"
                 value={shares}
                 onChange={setShares}
-                allowDecimals={false}
-                min={1}
+                allowDecimals={allowDecimals}
+                min={allowDecimals ? 0.0001 : 1}
                 max={currentShortedShares}
                 className="mt-1"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                You owe: {currentShortedShares} shares
+                You owe: {allowDecimals ? currentShortedShares.toFixed(4) : currentShortedShares} {isCrypto ? stock.ticker : 'shares'}
               </p>
             </div>
 
