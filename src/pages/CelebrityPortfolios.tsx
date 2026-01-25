@@ -129,28 +129,37 @@ const CelebrityPortfolios = () => {
     setSelectedHoldings(new Set());
     
     try {
-      // Get session ID for guest users
-      const sessionId = !user ? getOrCreateGuestSession() : null;
+      // Get session ID for guest users - always include it for consistency
+      const sessionId = getOrCreateGuestSession();
       
-      const { data, error } = await supabase.functions.invoke('get-celebrity-portfolio', {
+      // Use the session-aware client which has the header pre-set
+      const client = user ? supabase : createSupabaseWithSession(sessionId);
+      
+      const { data, error: invokeError } = await client.functions.invoke('get-celebrity-portfolio', {
         body: { action: 'fetch', name },
-        headers: sessionId ? { 'x-session-id': sessionId } : undefined,
       });
       
-      if (error) throw error;
+      console.log('Portfolio response:', { data, error: invokeError });
       
-      if (data.errorCode === 'AUTH_REQUIRED') {
+      if (invokeError) {
+        console.error('Invoke error:', invokeError);
+        throw invokeError;
+      }
+      
+      if (data?.errorCode === 'AUTH_REQUIRED') {
         toast.error('Please sign in to view portfolios');
         return;
       }
       
-      if (data.errorCode === 'RATE_LIMIT') {
+      if (data?.errorCode === 'RATE_LIMIT') {
         toast.error('Too many requests. Please wait a moment.');
         return;
       }
       
-      if (data.portfolio) {
+      if (data?.portfolio) {
         setSelectedPortfolio(data.portfolio);
+      } else if (data?.error) {
+        setError(data.error);
       } else {
         setError('No portfolio data available for this person.');
       }
