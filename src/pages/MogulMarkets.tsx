@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { TradeModal } from '@/components/trading/TradeModal';
+import { MirrorTradesModal } from '@/components/trading/MirrorTradesModal';
 import { MogulMascot } from '@/components/trading/MogulMascot';
 import { MarketTicker } from '@/components/trading/MarketTicker';
 import { MarketStatus } from '@/components/trading/MarketStatus';
@@ -64,6 +65,10 @@ const MogulMarkets = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isBuyingCash, setIsBuyingCash] = useState(false);
   const [hasInitialRefresh, setHasInitialRefresh] = useState(false);
+  
+  // VIP Portfolio mirror trades
+  const [mirrorTickers, setMirrorTickers] = useState<string[]>([]);
+  const [isMirrorModalOpen, setIsMirrorModalOpen] = useState(false);
 
   // Get the appropriate Supabase client for edge function calls
   const db = useMemo(() => {
@@ -128,6 +133,30 @@ const MogulMarkets = () => {
       setIsBuyingCash(false);
     }
   };
+
+  // Handle incoming VIP Portfolio tickers
+  useEffect(() => {
+    const fromCelebrity = searchParams.get('from') === 'celebrity-portfolio';
+    
+    if (fromCelebrity) {
+      const stored = sessionStorage.getItem('copyPortfolioTickers');
+      if (stored) {
+        try {
+          const tickers = JSON.parse(stored) as string[];
+          if (tickers.length > 0) {
+            setMirrorTickers(tickers);
+            setIsMirrorModalOpen(true);
+            // Clear after reading
+            sessionStorage.removeItem('copyPortfolioTickers');
+          }
+        } catch (e) {
+          console.error('Failed to parse copyPortfolioTickers:', e);
+        }
+      }
+      // Clear the query param
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -440,6 +469,17 @@ const MogulMarkets = () => {
           if (!selectedStock) return false;
           return executeCover(selectedStock.ticker, shares, price);
         }}
+      />
+
+      {/* Mirror Trades Modal for VIP Portfolio copies */}
+      <MirrorTradesModal
+        isOpen={isMirrorModalOpen}
+        onClose={() => {
+          setIsMirrorModalOpen(false);
+          setMirrorTickers([]);
+        }}
+        tickers={mirrorTickers}
+        onSelectTicker={handleSelectTicker}
       />
       <MobileNav />
     </div>
