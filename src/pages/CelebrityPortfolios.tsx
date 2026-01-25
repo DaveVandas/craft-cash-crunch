@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PortfolioLoadingOverlay } from '@/components/trading/PortfolioLoadingOverlay';
 import { 
   Users, 
   Search, 
@@ -93,6 +94,7 @@ const CelebrityPortfolios = () => {
   const [selectedPortfolio, setSelectedPortfolio] = useState<CelebrityPortfolio | null>(null);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(false);
+  const [loadingName, setLoadingName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHoldings, setSelectedHoldings] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +130,7 @@ const CelebrityPortfolios = () => {
   }, []);
 
   const handleSelectFigure = async (name: string) => {
+    setLoadingName(name);
     setIsLoadingPortfolio(true);
     setError(null);
     setSelectedHoldings(new Set());
@@ -177,6 +180,7 @@ const CelebrityPortfolios = () => {
       setError('Failed to load portfolio data. Please try again.');
     } finally {
       setIsLoadingPortfolio(false);
+      setLoadingName('');
     }
   };
 
@@ -232,6 +236,11 @@ const CelebrityPortfolios = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+
+      {/* Full-screen loading overlay when fetching portfolio */}
+      {isLoadingPortfolio && loadingName && (
+        <PortfolioLoadingOverlay name={loadingName} />
+      )}
       
       <main className="flex-1 container py-6 md:py-8 pb-24 md:pb-8">
         <Breadcrumb currentPage="Celebrity Portfolios" />
