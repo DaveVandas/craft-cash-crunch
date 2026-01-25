@@ -133,10 +133,21 @@ const CelebrityPortfolios = () => {
     setSelectedHoldings(new Set());
     
     try {
+      // IMPORTANT: do NOT pass `headers` here. In some environments it can replace the
+      // underlying required headers and cause the function call to fail.
+      // We rely on the session-aware client (db) which already injects `x-session-id`.
       const { data, error: invokeError } = await db.functions.invoke('get-celebrity-portfolio', {
         body: { action: 'fetch', name },
-        // Explicitly pass guest session header to guarantee the backend recognizes guest mode
-        headers: !user && guestSessionId ? { 'x-session-id': guestSessionId } : undefined,
+      });
+
+      // Debug (will show in console snapshot on next message)
+      console.log('[VIP portfolios] fetch', {
+        name,
+        isAuthed: Boolean(user),
+        guestSessionId,
+        hasData: Boolean(data),
+        errorCode: data?.errorCode,
+        invokeError,
       });
       
       if (invokeError) {
