@@ -97,11 +97,15 @@ const CelebrityPortfolios = () => {
   const [selectedHoldings, setSelectedHoldings] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
+  const guestSessionId = useMemo(() => {
+    if (user) return null;
+    return getOrCreateGuestSession();
+  }, [user]);
+
   const db = useMemo(() => {
     if (user) return supabase;
-    const sessionId = getOrCreateGuestSession();
-    return createSupabaseWithSession(sessionId);
-  }, [user]);
+    return createSupabaseWithSession(guestSessionId);
+  }, [user, guestSessionId]);
 
   // Fetch featured figures on mount - fallback already set, so this is optional
   useEffect(() => {
@@ -129,17 +133,11 @@ const CelebrityPortfolios = () => {
     setSelectedHoldings(new Set());
     
     try {
-      // Get session ID for guest users - always include it for consistency
-      const sessionId = getOrCreateGuestSession();
-      
-      // Use the session-aware client which has the header pre-set
-      const client = user ? supabase : createSupabaseWithSession(sessionId);
-      
-      const { data, error: invokeError } = await client.functions.invoke('get-celebrity-portfolio', {
+      const { data, error: invokeError } = await db.functions.invoke('get-celebrity-portfolio', {
         body: { action: 'fetch', name },
+        // Explicitly pass guest session header to guarantee the backend recognizes guest mode
+        headers: !user && guestSessionId ? { 'x-session-id': guestSessionId } : undefined,
       });
-      
-      console.log('Portfolio response:', { data, error: invokeError });
       
       if (invokeError) {
         console.error('Invoke error:', invokeError);
