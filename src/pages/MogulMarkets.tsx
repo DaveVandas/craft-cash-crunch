@@ -7,11 +7,11 @@ import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { JeweledCrown } from '@/components/icons/JeweledCrown';
 import { 
   Crown,
   Loader2,
   Coins,
-  Users,
   Zap,
   GraduationCap
 } from 'lucide-react';
@@ -342,13 +342,13 @@ const MogulMarkets = () => {
               variant="outline"
               size="sm"
               asChild
-              className="gap-2 relative"
+              className="gap-2 relative border-primary/40 bg-gradient-to-r from-primary/10 via-background to-primary/5 shadow-sm shadow-primary/10 ring-1 ring-primary/15 transition-all hover:border-primary/60 hover:ring-primary/25"
             >
               <Link to="/celebrity-portfolios">
-                <Crown className="h-4 w-4" />
+                <JeweledCrown className="h-4 w-4" />
                 <span className="hidden sm:inline">VIP Portfolios</span>
                 <span className="sm:hidden">VIP</span>
-                <Badge className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground animate-pulse">
+                <Badge className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] animate-pulse">
                   NEW
                 </Badge>
               </Link>
@@ -358,11 +358,12 @@ const MogulMarkets = () => {
               variant="outline"
               size="sm"
               asChild
-              className="gap-2"
+              className="gap-2 border-primary/25 bg-gradient-to-r from-background via-background to-primary/5 transition-all hover:border-primary/45 hover:bg-primary/5"
             >
               <Link to="/mogul-academy">
                 <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline">Learn</span>
+                <span className="hidden sm:inline">Academy</span>
+                <span className="sm:hidden">Learn</span>
               </Link>
             </Button>
             
