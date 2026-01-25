@@ -6,6 +6,7 @@ import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
   Crown,
   Loader2,
@@ -341,12 +342,15 @@ const MogulMarkets = () => {
               variant="outline"
               size="sm"
               asChild
-              className="gap-2"
+              className="gap-2 relative"
             >
               <Link to="/celebrity-portfolios">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Copy Portfolios</span>
                 <span className="sm:hidden">Copy</span>
+                <Badge className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground animate-pulse">
+                  NEW
+                </Badge>
               </Link>
             </Button>
             

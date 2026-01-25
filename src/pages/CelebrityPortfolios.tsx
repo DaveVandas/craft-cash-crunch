@@ -129,8 +129,12 @@ const CelebrityPortfolios = () => {
     setSelectedHoldings(new Set());
     
     try {
-      const { data, error } = await db.functions.invoke('get-celebrity-portfolio', {
+      // Get session ID for guest users
+      const sessionId = !user ? getOrCreateGuestSession() : null;
+      
+      const { data, error } = await supabase.functions.invoke('get-celebrity-portfolio', {
         body: { action: 'fetch', name },
+        headers: sessionId ? { 'x-session-id': sessionId } : undefined,
       });
       
       if (error) throw error;
