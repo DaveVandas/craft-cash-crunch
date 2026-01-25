@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import CategoryCarousels from '@/components/home/CategoryCarousels';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -424,6 +425,17 @@ const CelebrityPortfolios = () => {
                 ))}
               </div>
             )}
+
+            {/* Celebrity Carousels by Personality Type */}
+            <div className="mt-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">👑</span>
+                <h2 className="font-serif text-lg font-bold">
+                  Explore <span className="gradient-gold-text">Moguls</span> by Type
+                </h2>
+              </div>
+              <CategoryCarousels />
+            </div>
           </>
         ) : (
           /* Portfolio Detail View */

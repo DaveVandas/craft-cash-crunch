@@ -6,7 +6,6 @@ import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomple
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
 import CompactCategories from '@/components/home/CompactCategories';
-import CategoryCarousels from '@/components/home/CategoryCarousels';
 import DailyWealthFact from '@/components/home/DailyWealthFact';
 import WealthWisdomPromo from '@/components/home/WealthWisdomPromo';
 import RichHabits from '@/components/home/RichHabits';
@@ -83,20 +82,9 @@ const Index = () => {
         </section>
 
         {/* Browse Categories - Horizontal Scroll */}
-        <section className="container mb-6">
+        <section className="container mb-8">
           <h2 className="font-serif text-lg font-bold mb-3">Browse by Category</h2>
           <CompactCategories />
-        </section>
-
-        {/* Celebrity Carousels by Personality Type */}
-        <section className="container mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">👑</span>
-            <h2 className="font-serif text-lg font-bold">
-              Explore <span className="gradient-gold-text">Moguls</span>
-            </h2>
-          </div>
-          <CategoryCarousels />
         </section>
 
         {/* Featured Tools - Side Hustle & Mogul Markets */}
