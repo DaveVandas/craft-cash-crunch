@@ -38,9 +38,15 @@ export default function BecomeAffiliate() {
   
   const [formData, setFormData] = useState({
     display_name: '',
+    legal_name: '',
     email: '',
     payout_method: 'paypal',
     payout_details: '',
+    street_address: '',
+    city: '',
+    state_province: '',
+    postal_code: '',
+    country: 'US',
     social_platform: '',
     followers_count: '',
   });
@@ -63,8 +69,9 @@ export default function BecomeAffiliate() {
       return;
     }
 
-    if (!formData.display_name || !formData.email || !formData.payout_details) {
-      toast.error('Please fill in all required fields');
+    if (!formData.display_name || !formData.email || !formData.payout_details || 
+        !formData.street_address || !formData.city || !formData.state_province || !formData.postal_code) {
+      toast.error('Please fill in all required fields including your mailing address');
       return;
     }
 
@@ -77,10 +84,16 @@ export default function BecomeAffiliate() {
         user_id: user.id,
         affiliate_code: affiliateCode,
         display_name: formData.display_name,
+        legal_name: formData.legal_name || formData.display_name,
         email: formData.email,
-        commission_rate: 1.00, // Standard rate for public signups
+        commission_rate: 1.00,
         payout_method: formData.payout_method,
         payout_details: formData.payout_details,
+        street_address: formData.street_address,
+        city: formData.city,
+        state_province: formData.state_province,
+        postal_code: formData.postal_code,
+        country: formData.country,
         is_vip: false,
         status: 'pending',
       });
@@ -261,90 +274,202 @@ export default function BecomeAffiliate() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Your Name *</Label>
-                    <Input
-                      id="name"
-                      placeholder="John Doe"
-                      value={formData.display_name}
-                      onChange={e => setFormData({ ...formData, display_name: e.target.value })}
-                      required
-                    />
-                  </div>
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Personal Information</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Display Name *</Label>
+                        <Input
+                          id="name"
+                          placeholder="John Doe"
+                          value={formData.display_name}
+                          onChange={e => setFormData({ ...formData, display_name: e.target.value })}
+                          required
+                        />
+                        <p className="text-xs text-muted-foreground">Shown on your affiliate page</p>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john@example.com"
-                      value={formData.email}
-                      onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Payout Method *</Label>
-                      <Select
-                        value={formData.payout_method}
-                        onValueChange={value => setFormData({ ...formData, payout_method: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="paypal">PayPal</SelectItem>
-                          <SelectItem value="cashapp">Cash App</SelectItem>
-                          <SelectItem value="venmo">Venmo</SelectItem>
-                          <SelectItem value="bank">Bank Transfer</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        <Label htmlFor="legal_name">Legal Name (for tax docs)</Label>
+                        <Input
+                          id="legal_name"
+                          placeholder="John Michael Doe"
+                          value={formData.legal_name}
+                          onChange={e => setFormData({ ...formData, legal_name: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground">Leave blank if same as display name</p>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="payout_details">Payout Username/Email *</Label>
+                      <Label htmlFor="email">Email Address *</Label>
                       <Input
-                        id="payout_details"
-                        placeholder="@cashapptag or email"
-                        value={formData.payout_details}
-                        onChange={e => setFormData({ ...formData, payout_details: e.target.value })}
+                        id="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
+                  {/* Mailing Address for Tax Documents */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Mailing Address (for 1099 tax forms)</h3>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="social">Main Social Platform (optional)</Label>
-                      <Select
-                        value={formData.social_platform}
-                        onValueChange={value => setFormData({ ...formData, social_platform: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select platform" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="instagram">Instagram</SelectItem>
-                          <SelectItem value="tiktok">TikTok</SelectItem>
-                          <SelectItem value="twitter">Twitter/X</SelectItem>
-                          <SelectItem value="youtube">YouTube</SelectItem>
-                          <SelectItem value="facebook">Facebook</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="street_address">Street Address *</Label>
+                      <Input
+                        id="street_address"
+                        placeholder="123 Main Street, Apt 4B"
+                        value={formData.street_address}
+                        onChange={e => setFormData({ ...formData, street_address: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City *</Label>
+                        <Input
+                          id="city"
+                          placeholder="New York"
+                          value={formData.city}
+                          onChange={e => setFormData({ ...formData, city: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="state_province">State/Province *</Label>
+                        <Input
+                          id="state_province"
+                          placeholder="NY"
+                          value={formData.state_province}
+                          onChange={e => setFormData({ ...formData, state_province: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="postal_code">ZIP/Postal Code *</Label>
+                        <Input
+                          id="postal_code"
+                          placeholder="10001"
+                          value={formData.postal_code}
+                          onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
+                          required
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="followers">Follower Count (optional)</Label>
-                      <Input
-                        id="followers"
-                        placeholder="e.g., 5000"
-                        value={formData.followers_count}
-                        onChange={e => setFormData({ ...formData, followers_count: e.target.value })}
-                      />
+                      <Label htmlFor="country">Country *</Label>
+                      <Select
+                        value={formData.country}
+                        onValueChange={value => setFormData({ ...formData, country: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="US">United States</SelectItem>
+                          <SelectItem value="CA">Canada</SelectItem>
+                          <SelectItem value="UK">United Kingdom</SelectItem>
+                          <SelectItem value="AU">Australia</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+                  </div>
+
+                  {/* Payout Information */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Payout Information</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Payout Method *</Label>
+                        <Select
+                          value={formData.payout_method}
+                          onValueChange={value => setFormData({ ...formData, payout_method: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="paypal">PayPal</SelectItem>
+                            <SelectItem value="cashapp">Cash App</SelectItem>
+                            <SelectItem value="venmo">Venmo</SelectItem>
+                            <SelectItem value="bank">Bank Transfer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="payout_details">Payout Username/Email *</Label>
+                        <Input
+                          id="payout_details"
+                          placeholder="@cashapptag or email"
+                          value={formData.payout_details}
+                          onChange={e => setFormData({ ...formData, payout_details: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Info (Optional) */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Social Presence (Optional)</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="social">Main Social Platform</Label>
+                        <Select
+                          value={formData.social_platform}
+                          onValueChange={value => setFormData({ ...formData, social_platform: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select platform" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="instagram">Instagram</SelectItem>
+                            <SelectItem value="tiktok">TikTok</SelectItem>
+                            <SelectItem value="twitter">Twitter/X</SelectItem>
+                            <SelectItem value="youtube">YouTube</SelectItem>
+                            <SelectItem value="facebook">Facebook</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="followers">Follower Count</Label>
+                        <Input
+                          id="followers"
+                          placeholder="e.g., 5000"
+                          value={formData.followers_count}
+                          onChange={e => setFormData({ ...formData, followers_count: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tax Disclosure Notice */}
+                  <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                      📋 Tax Information Notice
+                    </h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      <strong>IRS 1099 Reporting:</strong> If your total affiliate earnings reach or exceed <strong>$600</strong> in a calendar year, 
+                      we are required by U.S. law to issue you a 1099-NEC form for tax reporting purposes. This form will be mailed to the address 
+                      you provide above. For U.S. affiliates, we may request a W-9 form before processing payments exceeding $600. 
+                      International affiliates may be subject to different tax withholding requirements.
+                    </p>
                   </div>
 
                   <div className="pt-4">
@@ -358,7 +483,8 @@ export default function BecomeAffiliate() {
                       {isSubmitting ? 'Joining the Elite...' : 'Join the Mogul Movement'}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center mt-3">
-                      By applying, you agree to join our elite mogul network. Earn $1/signup for first 1,000 referrals, then $2/signup forever! 👑
+                      By applying, you agree to our affiliate terms including tax reporting requirements. 
+                      Earn $1/signup for first 1,000 referrals, then $2/signup forever! 👑
                     </p>
                   </div>
                 </form>
@@ -392,6 +518,26 @@ export default function BecomeAffiliate() {
                 <h3 className="font-semibold mb-2">Can I share on multiple platforms?</h3>
                 <p className="text-muted-foreground text-sm">
                   Absolutely! Share your link on Instagram, TikTok, YouTube, your blog, or anywhere else. The more you share, the more you earn!
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50 border-border/50">
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-2">What about taxes and 1099 forms?</h3>
+                <p className="text-muted-foreground text-sm">
+                  If you earn $600 or more in a calendar year, we're required by U.S. law to issue you a 1099-NEC tax form. 
+                  That's why we collect your mailing address during signup. For U.S. affiliates earning over $600, we may 
+                  request a W-9 form before processing additional payments. Don't worry — we'll reach out with clear instructions 
+                  when the time comes!
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50 border-border/50">
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-2">I'm outside the U.S. — can I still join?</h3>
+                <p className="text-muted-foreground text-sm">
+                  Yes! International affiliates are welcome. Tax withholding rules may differ based on your country's tax treaty 
+                  with the U.S. We'll work with you to ensure compliance with applicable regulations.
                 </p>
               </CardContent>
             </Card>
