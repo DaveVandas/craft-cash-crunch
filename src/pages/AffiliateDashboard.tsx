@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -23,7 +24,10 @@ import {
   Sparkles,
   Rocket,
   Target,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  ExternalLink,
+  Mail
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -39,6 +43,7 @@ interface AffiliateData {
   pending_payout: number;
   status: string;
   created_at: string;
+  tax_id_collected: boolean | null;
 }
 
 interface ReferralData {
@@ -339,6 +344,99 @@ export default function AffiliateDashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* W-9 Tax Alert - Shows when approaching $600 threshold */}
+        {affiliate.total_earnings >= 500 && !affiliate.tax_id_collected && (
+          <Card className="mb-8 border-2 bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-amber-500/20 border-amber-500/50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row md:items-start gap-4">
+                <div className="p-3 rounded-full bg-amber-500/20 flex-shrink-0">
+                  <FileText className="h-8 w-8 text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    📋 Tax Document Required - W-9 Form
+                    {affiliate.total_earnings >= 600 && (
+                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Action Required</Badge>
+                    )}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {affiliate.total_earnings >= 600 
+                      ? `You've earned $${affiliate.total_earnings.toFixed(2)} — you've crossed the IRS $600 reporting threshold!`
+                      : `You've earned $${affiliate.total_earnings.toFixed(2)} — you're approaching the IRS $600 reporting threshold.`
+                    } 
+                    {' '}We need your W-9 form to issue your 1099-NEC at year end.
+                  </p>
+                  
+                  <div className="mt-4 p-4 bg-card/50 rounded-lg border border-border/50">
+                    <h4 className="font-medium text-sm mb-2">How to submit your W-9:</h4>
+                    <ol className="text-sm text-muted-foreground space-y-2">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-primary">1.</span>
+                        <span>Download the official IRS W-9 form</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-primary">2.</span>
+                        <span>Fill in your legal name, address, and SSN or EIN</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-primary">3.</span>
+                        <span>Sign and date the form</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-primary">4.</span>
+                        <span>Email your completed W-9 to: <strong className="text-foreground">hello@wealthperspective.app</strong></span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    <a
+                      href="https://www.irs.gov/pub/irs-pdf/fw9.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex"
+                    >
+                      <Button className="gap-2">
+                        <FileText className="h-4 w-4" />
+                        Download W-9 Form
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </a>
+                    <a
+                      href="mailto:hello@wealthperspective.app?subject=W-9%20Submission%20-%20Affiliate%20Code%3A%20" 
+                      className="inline-flex"
+                    >
+                      <Button variant="outline" className="gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email Your W-9
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* W-9 Submitted Confirmation */}
+        {affiliate.tax_id_collected && (
+          <Card className="mb-8 border-2 bg-gradient-to-r from-green-500/20 to-green-500/5 border-green-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-green-500/20">
+                  <FileText className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-green-400">W-9 Form Received ✓</p>
+                  <p className="text-xs text-muted-foreground">
+                    Your tax information is on file. You'll receive your 1099-NEC by January 31st if your earnings exceed $600.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
