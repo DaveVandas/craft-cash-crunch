@@ -8,8 +8,7 @@ export const usePWAUpdate = () => {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
-      console.log('Service Worker registered:', swUrl);
+    onRegisteredSW(_swUrl, registration) {
       // Check for updates every 15 minutes
       if (registration) {
         setInterval(() => {
@@ -17,8 +16,8 @@ export const usePWAUpdate = () => {
         }, 15 * 60 * 1000);
       }
     },
-    onRegisterError(error) {
-      console.error('Service Worker registration error:', error);
+    onRegisterError(_error) {
+      // Service worker registration failed - silently handle
     },
   });
 

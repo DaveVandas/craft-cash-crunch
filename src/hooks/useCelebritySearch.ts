@@ -101,7 +101,6 @@ export const useCelebritySearch = () => {
           // For AI_ERROR, PARSE_ERROR, etc., try fallback data first
           const fallback = getFallbackCelebrity(name);
           if (fallback) {
-            console.log('Using fallback data for:', name);
             return fallback;
           }
           toast.error("We couldn't fetch data right now. Please try again in a moment.");

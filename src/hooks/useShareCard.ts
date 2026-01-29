@@ -346,7 +346,6 @@ export const useShareCard = ({
         document.body.removeChild(captureRoot);
       }
     } catch (err) {
-      console.error('Failed to generate image:', err);
       if (err instanceof Error && err.message === 'CAPTURE_RENDER_FAILED') {
         toast.error('Could not generate the share image on this device.', {
           description: 'Try again, or use a different browser/device to export the card.',
@@ -374,8 +373,8 @@ export const useShareCard = ({
         const file = new File([blob], filename, { type: 'image/jpeg' });
         preGeneratedImageRef.current = { blob, file };
       }
-    } catch (err) {
-      console.error('Pre-generation failed:', err);
+    } catch (_err) {
+      // Pre-generation failed silently - will regenerate on demand
     } finally {
       setIsPreGenerating(false);
     }
@@ -479,7 +478,6 @@ export const useShareCard = ({
             return;
           }
           // Share failed, continue to fallback
-          console.log('Native share failed, falling back:', err);
         }
       }
 
@@ -504,8 +502,7 @@ export const useShareCard = ({
           description: 'Check your downloads folder',
         });
       }
-    } catch (err) {
-      console.error('handleSaveImage error:', err);
+    } catch (_err) {
       toast.error('Failed to save image');
     } finally {
       setIsGeneratingImage(false);
@@ -542,7 +539,6 @@ export const useShareCard = ({
           } catch (err) {
             if ((err as Error).name === 'AbortError') return;
             // Continue to try without file
-            console.log('Share with file failed, trying without:', err);
           }
         }
         
@@ -557,7 +553,6 @@ export const useShareCard = ({
         } catch (err) {
           if ((err as Error).name === 'AbortError') return;
           // Continue to clipboard fallback
-          console.log('Share without file failed, using clipboard:', err);
         }
       }
       

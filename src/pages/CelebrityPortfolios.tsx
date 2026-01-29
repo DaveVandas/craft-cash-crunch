@@ -154,8 +154,7 @@ const CelebrityPortfolios = () => {
         if (!error && data?.figures?.length > 0) {
           setFeaturedFigures(data.figures);
         }
-      } catch (err) {
-        console.error('Error fetching featured figures:', err);
+      } catch (_err) {
         // Keep fallback figures - no need to show error toast
       }
     };
@@ -176,19 +175,8 @@ const CelebrityPortfolios = () => {
       const { data, error: invokeError } = await db.functions.invoke('get-celebrity-portfolio', {
         body: { action: 'fetch', name },
       });
-
-      // Debug (will show in console snapshot on next message)
-      console.log('[VIP portfolios] fetch', {
-        name,
-        isAuthed: Boolean(user),
-        guestSessionId,
-        hasData: Boolean(data),
-        errorCode: data?.errorCode,
-        invokeError,
-      });
       
       if (invokeError) {
-        console.error('Invoke error:', invokeError);
         throw invokeError;
       }
       

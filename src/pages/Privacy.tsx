@@ -102,7 +102,10 @@ const Privacy = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">9. Contact Us</h2>
                 <p className="text-muted-foreground">
-                  If you have questions about this Privacy Policy, please contact us through our website.
+                  If you have questions about this Privacy Policy, please contact us at{' '}
+                  <a href="mailto:vandasdave@gmail.com" className="text-primary hover:underline">
+                    vandasdave@gmail.com
+                  </a>.
                 </p>
               </section>
             </CardContent>

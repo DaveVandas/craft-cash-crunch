@@ -39,8 +39,6 @@ export function useAffiliateAttribution() {
       // Store the affiliate code for attribution after signup
       localStorage.setItem(AFFILIATE_CODE_KEY, code);
       localStorage.setItem(AFFILIATE_VARIANT_KEY, variant);
-      
-      console.log('[Affiliate] Attribution stored:', code, 'from variant:', variant);
     }
   }, [searchParams, location.pathname]);
 }

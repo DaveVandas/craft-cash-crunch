@@ -48,13 +48,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: accessData, error } = await supabase.functions.invoke('check-access');
       
       if (error) {
-        console.error('Error invoking check-access:', error);
         return;
       }
       
       // Handle stale session - if server says we need auth, clear local state
       if (accessData?.requiresAuth) {
-        console.warn('Session is stale, clearing local auth state');
         setUser(null);
         setSession(null);
         setAccessInfo(null);
@@ -64,13 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (accessData?.error) {
-        console.error('check-access returned error:', accessData.error);
         return;
       }
       
       setAccessInfo(accessData as AccessInfo);
-    } catch (err) {
-      console.error('Error checking access:', err);
+    } catch (_err) {
+      // Error checking access - handled silently
     }
   };
 
@@ -156,7 +153,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.functions.invoke('create-payment');
       
       if (error) {
-        console.error('Payment initiation error:', error);
         toast.error('Unable to start payment. Please try again.', {
           description: 'If this persists, please contact support.',
         });
@@ -164,7 +160,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data?.error) {
-        console.error('Payment service error:', data.error);
         toast.error('Payment service unavailable', {
           description: data.error || 'Please try again later.',
         });
@@ -179,8 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: 'Please try again or contact support.',
         });
       }
-    } catch (err) {
-      console.error('Unexpected payment error:', err);
+    } catch (_err) {
       toast.error('Something went wrong', {
         description: 'Please try again later.',
       });

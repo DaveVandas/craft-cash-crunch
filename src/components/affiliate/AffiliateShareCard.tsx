@@ -115,8 +115,8 @@ export function AffiliateShareCard({
             toast.success('Card image copied! 📋 Paste it anywhere!');
             setTimeout(() => setCopied(false), 2000);
             return;
-          } catch (imgError) {
-            console.log('Image clipboard failed, trying alternative...', imgError);
+          } catch (_imgError) {
+            // Image clipboard failed, trying alternative
           }
         }
         
