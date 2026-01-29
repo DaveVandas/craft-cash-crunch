@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Celebrity } from '@/lib/types';
 import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calculateTimeToEarn, generateComparisons } from '@/lib/earnings';
 import { getAvatarEmoji } from '@/lib/avatar';
@@ -88,6 +88,7 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
     handleTextShare,
     handleInstagramShare,
     handleTikTokShare,
+    clearPreGeneratedImage,
   } = useShareCard({
     cardRef: cardRef as React.RefObject<HTMLDivElement>,
     shareText: getShareText(),
@@ -95,6 +96,11 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
     imageName,
     title: flexMode ? 'Wealth Showdown - FLEX MODE' : 'Wealth Showdown',
   });
+
+  // Clear pre-generated image when flex mode changes so we regenerate the correct version
+  useEffect(() => {
+    clearPreGeneratedImage();
+  }, [flexMode, clearPreGeneratedImage]);
 
   return (
     <div className="space-y-4">
@@ -152,8 +158,19 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             {/* Person 1 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
-                  <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
+              <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
+                  {person1.imageUrl ? (
+                    <img 
+                      src={person1.imageUrl} 
+                      alt={person1.name} 
+                      className="aspect-square h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        // Hide broken image so fallback shows
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
                   <AvatarFallback className={`text-2xl bg-gradient-to-br ${flexMode ? 'from-orange-900/50 to-orange-800/30' : 'from-amber-900/50 to-amber-800/30'}`}>
                     {person1.emoji || getAvatarEmoji(person1.profession)}
                   </AvatarFallback>
@@ -180,8 +197,19 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             {/* Person 2 */}
             <div className="flex-1 text-center">
               <div className="relative inline-block">
-                <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
-                  <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
+              <Avatar className={`h-16 w-16 mx-auto ring-2 shadow-lg ${flexMode ? 'ring-orange-500/50' : 'ring-amber-500/50'}`}>
+                  {person2.imageUrl ? (
+                    <img 
+                      src={person2.imageUrl} 
+                      alt={person2.name} 
+                      className="aspect-square h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        // Hide broken image so fallback shows
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
                   <AvatarFallback className={`text-2xl bg-gradient-to-br ${flexMode ? 'from-orange-900/50 to-orange-800/30' : 'from-amber-900/50 to-amber-800/30'}`}>
                     {person2.emoji || getAvatarEmoji(person2.profession)}
                   </AvatarFallback>
