@@ -28,18 +28,18 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "pwa-192x192.png",
+            src: "app-icons/android-xxxhdpi-192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "pwa-512x512.png",
+            src: "app-icons/ios-1024x1024.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
+            src: "app-icons/ios-1024x1024.png",
+            sizes: "1024x1024",
             type: "image/png",
             purpose: "any maskable",
           },
