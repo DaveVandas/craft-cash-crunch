@@ -124,58 +124,82 @@ export type Database = {
           affiliate_code: string
           approved_at: string | null
           approved_by: string | null
+          city: string | null
           commission_rate: number
+          country: string | null
           created_at: string
           display_name: string
           email: string
           id: string
           is_vip: boolean
+          legal_name: string | null
           payout_details: string | null
           payout_method: string | null
           pending_payout: number
+          postal_code: string | null
+          state_province: string | null
           status: string
+          street_address: string | null
+          tax_id_collected: boolean | null
           total_earnings: number
           total_referrals: number
           updated_at: string
           user_id: string | null
+          w9_submitted_at: string | null
         }
         Insert: {
           affiliate_code: string
           approved_at?: string | null
           approved_by?: string | null
+          city?: string | null
           commission_rate?: number
+          country?: string | null
           created_at?: string
           display_name: string
           email: string
           id?: string
           is_vip?: boolean
+          legal_name?: string | null
           payout_details?: string | null
           payout_method?: string | null
           pending_payout?: number
+          postal_code?: string | null
+          state_province?: string | null
           status?: string
+          street_address?: string | null
+          tax_id_collected?: boolean | null
           total_earnings?: number
           total_referrals?: number
           updated_at?: string
           user_id?: string | null
+          w9_submitted_at?: string | null
         }
         Update: {
           affiliate_code?: string
           approved_at?: string | null
           approved_by?: string | null
+          city?: string | null
           commission_rate?: number
+          country?: string | null
           created_at?: string
           display_name?: string
           email?: string
           id?: string
           is_vip?: boolean
+          legal_name?: string | null
           payout_details?: string | null
           payout_method?: string | null
           pending_payout?: number
+          postal_code?: string | null
+          state_province?: string | null
           status?: string
+          street_address?: string | null
+          tax_id_collected?: boolean | null
           total_earnings?: number
           total_referrals?: number
           updated_at?: string
           user_id?: string | null
+          w9_submitted_at?: string | null
         }
         Relationships: []
       }
