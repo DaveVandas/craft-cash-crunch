@@ -126,8 +126,7 @@ const RealityCheckShareCard = ({
           resolve(blob);
         }, 'image/jpeg', 0.92);
       });
-    } catch (err) {
-      console.error('Failed to generate image:', err);
+    } catch (_err) {
       return null;
     }
   };
@@ -220,7 +219,7 @@ const RealityCheckShareCard = ({
           return;
         } catch (err) {
           if ((err as Error).name === 'AbortError') return;
-          console.log('Share API failed, falling back to download:', err);
+          // Share API failed, falling back to download
         }
       }
 
@@ -244,8 +243,9 @@ const RealityCheckShareCard = ({
         });
       }
     } catch (err) {
-      console.error('handleSaveImage error:', err);
-      toast.error('Failed to save image');
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Failed to save image');
+      }
     } finally {
       setIsGeneratingImage(false);
     }
@@ -275,7 +275,7 @@ const RealityCheckShareCard = ({
               return; // Success
             } catch (err) {
               if ((err as Error).name === 'AbortError') return;
-              console.log('Share with file failed, trying without:', err);
+              // Share with file failed, trying without
             }
           }
         }
@@ -289,7 +289,7 @@ const RealityCheckShareCard = ({
           return; // Success
         } catch (err) {
           if ((err as Error).name === 'AbortError') return;
-          console.log('Share without file failed, using clipboard:', err);
+          // Share without file failed, using clipboard
         }
       }
       

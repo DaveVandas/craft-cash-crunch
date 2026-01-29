@@ -104,7 +104,10 @@ const Terms = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">9. Contact</h2>
                 <p className="text-muted-foreground">
-                  For questions about these Terms of Service, please contact us through our website.
+                  For questions about these Terms of Service, please contact us at{' '}
+                  <a href="mailto:vandasdave@gmail.com" className="text-primary hover:underline">
+                    vandasdave@gmail.com
+                  </a>.
                 </p>
               </section>
             </CardContent>

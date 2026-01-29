@@ -55,24 +55,18 @@ export function useTradingPortfolio() {
       setIsLoading(true);
       setError(null);
       
-      console.log('Fetching portfolio, user:', user?.id || 'guest');
-      
       let portfolioQuery = db
         .from('trading_portfolios')
         .select('*');
       
       if (user) {
-        console.log('Querying by user_id:', user.id);
         portfolioQuery = portfolioQuery.eq('user_id', user.id);
       } else {
         const sessionId = getOrCreateGuestSession();
-        console.log('Querying by session_id:', sessionId);
         portfolioQuery = portfolioQuery.eq('session_id', sessionId);
       }
       
       const { data: portfolioData, error: portfolioError } = await portfolioQuery.maybeSingle();
-      
-      console.log('Portfolio query result:', portfolioData, 'error:', portfolioError);
       
       if (portfolioError) {
         throw portfolioError;

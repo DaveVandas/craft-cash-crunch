@@ -105,8 +105,8 @@ export default function AffiliateDashboard() {
         });
         setReferralsByVariant(variantCounts);
       }
-    } catch (error) {
-      console.error('Error fetching affiliate data:', error);
+    } catch (_error) {
+      // Error fetching affiliate data - handled by loading state
     } finally {
       setLoading(false);
     }
@@ -124,8 +124,6 @@ export default function AffiliateDashboard() {
   useEffect(() => {
     if (!affiliate?.id) return;
 
-    console.log('[Realtime] Setting up affiliate dashboard subscriptions');
-
     const channel = supabase
       .channel('affiliate-dashboard')
       .on(
@@ -137,7 +135,6 @@ export default function AffiliateDashboard() {
           filter: `id=eq.${affiliate.id}`,
         },
         (payload) => {
-          console.log('[Realtime] Affiliate update:', payload);
           if (payload.eventType === 'UPDATE' && payload.new) {
             setAffiliate(payload.new as AffiliateData);
             // Show toast for earnings updates
@@ -159,7 +156,6 @@ export default function AffiliateDashboard() {
           filter: `affiliate_id=eq.${affiliate.id}`,
         },
         (payload) => {
-          console.log('[Realtime] New referral:', payload);
           if (payload.new) {
             setReferrals((prev) => [payload.new as ReferralData, ...prev]);
             toast.success('🎉 New signup! Someone just used your link!');
@@ -175,7 +171,6 @@ export default function AffiliateDashboard() {
           filter: `affiliate_id=eq.${affiliate.id}`,
         },
         (payload) => {
-          console.log('[Realtime] Referral updated:', payload);
           if (payload.new) {
             setReferrals((prev) =>
               prev.map((r) =>
@@ -187,12 +182,9 @@ export default function AffiliateDashboard() {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] Subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('[Realtime] Cleaning up affiliate dashboard subscriptions');
       supabase.removeChannel(channel);
     };
   }, [affiliate?.id]);

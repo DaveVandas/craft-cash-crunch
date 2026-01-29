@@ -221,17 +221,15 @@ const Quiz = () => {
       });
       
       if (!error && data?.questions?.length >= 3) {
-        console.log('Using AI-generated questions:', data.questions.length);
         setShuffledQuestions(data.questions);
       } else {
-        console.log('Falling back to static questions:', error);
         // Fall back to static questions
         const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
         setShuffledQuestions(shuffled);
         setUsedFallback(true);
       }
-    } catch (err) {
-      console.error('Error fetching quiz questions:', err);
+    } catch (_err) {
+      // Fall back to static questions
       // Fall back to static questions
       const shuffled = [...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
       setShuffledQuestions(shuffled);

@@ -49,9 +49,8 @@ const LandingShareButtons = ({
           text: shareText,
           url: shareUrl,
         });
-      } catch (err) {
-        // User cancelled or share failed
-        console.log('Share cancelled or failed:', err);
+      } catch (_err) {
+        // User cancelled or share failed - silently handle
       }
     } else {
       handleCopyLink();
