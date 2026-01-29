@@ -13,6 +13,7 @@ import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift, Users } fr
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
+import { usePricing } from '@/hooks/usePricing';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -23,6 +24,7 @@ const Auth = () => {
   const showReferralInfo = searchParams.get('showReferral') === 'true';
   const refCodeFromUrl = searchParams.get('ref');
   const { user, signIn, signUp, resetPassword, loading: authLoading } = useAuth();
+  const { regularPrice } = usePricing();
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
   const [affiliateName, setAffiliateName] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -428,7 +430,7 @@ const Auth = () => {
                     <span className="text-muted-foreground"> included with every account</span>
                   </p>
                   <p className="text-xs text-center text-muted-foreground mt-1">
-                    Unlock unlimited access for just $6.99 — one time, forever
+                    Unlock unlimited access for just {regularPrice} — one time, forever
                   </p>
                 </div>
               </>

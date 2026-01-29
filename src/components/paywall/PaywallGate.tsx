@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Crown, Lock, Sparkles, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { usePricing } from '@/hooks/usePricing';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
@@ -20,6 +21,7 @@ interface PaywallGateProps {
 
 const PaywallGate = ({ children }: PaywallGateProps) => {
   const { user, accessInfo, initiatePayment, loading, paymentLoading } = useAuth();
+  const { regularPrice, canUseStripe } = usePricing();
   
   // Check if user should be blocked
   const anonSearchCount = getAnonSearchCount();
@@ -48,7 +50,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           </h2>
           
           <p className="text-muted-foreground mb-6">
-            You've explored the wealth gap — now unlock unlimited access to all features for just <span className="text-primary font-bold">$6.99</span> (one time, forever).
+            You've explored the wealth gap — now unlock unlimited access to all features for just <span className="text-primary font-bold">{regularPrice}</span> (one time, forever).
           </p>
 
           <div className="space-y-3 text-left mb-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
@@ -75,18 +77,31 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           </p>
 
           {user ? (
-            <Button 
-              onClick={initiatePayment}
-              disabled={paymentLoading}
-              className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
-            >
-              {paymentLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
+            canUseStripe ? (
+              <Button 
+                onClick={initiatePayment}
+                disabled={paymentLoading}
+                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+              >
+                {paymentLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Crown className="mr-2 h-5 w-5" />
+                )}
+                {paymentLoading ? 'Processing...' : `Get Lifetime Access - ${regularPrice}`}
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => {
+                  // TODO: Implement IAP when ready
+                  console.log('Native IAP not yet implemented');
+                }}
+                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+              >
                 <Crown className="mr-2 h-5 w-5" />
-              )}
-              {paymentLoading ? 'Processing...' : 'Get Lifetime Access - $6.99'}
-            </Button>
+                Get Lifetime Access - {regularPrice}
+              </Button>
+            )
           ) : (
             <div className="space-y-3">
               <Button 
