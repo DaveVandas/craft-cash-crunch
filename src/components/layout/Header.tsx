@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { usePricing } from '@/hooks/usePricing';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
@@ -28,6 +29,7 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment, paymentLoading } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const { profile } = useUserProfile();
+  const { regularPrice } = usePricing();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -158,7 +160,7 @@ const Header = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>$6.99 one-time • All sales final</p>
+                    <p>{regularPrice} one-time • All sales final</p>
                   </TooltipContent>
                 </Tooltip>
               )}

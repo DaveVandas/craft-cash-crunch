@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { getFallbackCelebrity } from '@/lib/fallbackCelebrities';
+import { getCurrentRegularPrice } from '@/lib/pricing';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
@@ -71,8 +72,9 @@ export const useCelebritySearch = () => {
         const errorCode = data.errorCode || 'ERROR';
 
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
+          const price = getCurrentRegularPrice();
           toast("You've sampled the goods — now join the winners circle 🏆", {
-            description: '$6.99 once. Unlimited access. No subscriptions. Real mogul energy.',
+            description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
               onClick: async () => {
@@ -85,8 +87,9 @@ export const useCelebritySearch = () => {
           setError(data.error);
           return null;
         } else if (errorCode === 'LIMIT_REACHED') {
+          const price = getCurrentRegularPrice();
           toast.error(data.error, {
-            description: 'Unlock unlimited access for just $6.99',
+            description: `Unlock unlimited access for just ${price}`,
             action: {
               label: 'Upgrade',
               onClick: async () => {
@@ -155,8 +158,9 @@ export const useCelebritySearch = () => {
         const errorCode = data.errorCode || 'ERROR';
 
         if (errorCode === 'AUTH_REQUIRED' || errorCode === 'ANON_LIMIT_REACHED') {
+          const price = getCurrentRegularPrice();
           toast("You've sampled the goods — now join the winners circle 🏆", {
-            description: '$4.99 once. Unlimited access. No subscriptions. Real mogul energy.',
+            description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
               onClick: async () => {

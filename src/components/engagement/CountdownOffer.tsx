@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Clock, Zap, Sparkles } from 'lucide-react';
+import { usePricing } from '@/hooks/usePricing';
 
 interface CountdownOfferProps {
   open: boolean;
@@ -20,6 +21,7 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const { user, initiatePayment } = useAuth();
   const navigate = useNavigate();
+  const { regularPrice, discountPrice, discountPercent, canUseStripe } = usePricing();
 
   useEffect(() => {
     // Check if offer was already seen and get expiry time
@@ -60,12 +62,15 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
     onOpenChange(false);
     if (!user) {
       navigate('/auth');
-    } else {
+    } else if (canUseStripe) {
       try {
         await initiatePayment();
       } catch (err) {
         console.error('Payment error:', err);
       }
+    } else {
+      // TODO: Implement IAP when ready
+      console.log('Native IAP not yet implemented');
     }
   };
 
@@ -117,9 +122,9 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
             )}
 
             <div className="mt-4 space-y-1">
-              <span className="block text-sm text-muted-foreground line-through">$6.99</span>
-              <span className="block text-3xl font-bold gradient-gold-text">$5.99</span>
-              <span className="block text-sm text-muted-foreground">Save 14% - One-time payment</span>
+              <span className="block text-sm text-muted-foreground line-through">{regularPrice}</span>
+              <span className="block text-3xl font-bold gradient-gold-text">{discountPrice}</span>
+              <span className="block text-sm text-muted-foreground">Save {discountPercent}% - One-time payment</span>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -131,7 +136,11 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
             disabled={isExpired}
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            {isExpired ? 'Offer Expired' : 'Claim $5.99 Deal'}
+            {isExpired ? 'Offer Expired' : `Claim ${discountPrice} Deal`}
+          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            <Clock className="mr-2 h-4 w-4" />
+            I'll pay full price later
           </Button>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             <Clock className="mr-2 h-4 w-4" />
