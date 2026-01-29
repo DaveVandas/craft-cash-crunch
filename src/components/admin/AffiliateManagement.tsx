@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send, QrCode, Edit2 } from 'lucide-react';
+import { Users, DollarSign, Link, Plus, Copy, Check, RefreshCw, Send, QrCode, Edit2, FileText, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -29,6 +29,15 @@ interface Affiliate {
   status: string;
   created_at: string;
   approved_at: string | null;
+  // Tax compliance fields
+  legal_name: string | null;
+  street_address: string | null;
+  city: string | null;
+  state_province: string | null;
+  postal_code: string | null;
+  country: string | null;
+  tax_id_collected: boolean | null;
+  w9_submitted_at: string | null;
 }
 
 interface Referral {
@@ -462,6 +471,10 @@ export function AffiliateManagement() {
       <Tabs defaultValue="affiliates" className="space-y-4">
         <TabsList>
           <TabsTrigger value="affiliates">Affiliates ({affiliates.length})</TabsTrigger>
+          <TabsTrigger value="tax" className="gap-1">
+            <FileText className="h-3 w-3" />
+            Tax/W-9
+          </TabsTrigger>
           <TabsTrigger value="referrals">Referrals ({referrals.length})</TabsTrigger>
           <TabsTrigger value="payouts">Payouts ({payouts.length})</TabsTrigger>
         </TabsList>
@@ -634,6 +647,216 @@ export function AffiliateManagement() {
               </TableBody>
             </Table>
           </Card>
+        </TabsContent>
+
+        {/* Tax Compliance Tab */}
+        <TabsContent value="tax">
+          <div className="space-y-6">
+            {/* Tax Compliance Alert Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-red-500/20 to-red-500/5 border-red-500/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-8 w-8 text-red-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Need W-9 (≥$600)</p>
+                      <p className="text-2xl font-bold text-red-400">
+                        {affiliates.filter(a => a.total_earnings >= 600 && !a.tax_id_collected).length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-yellow-500/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-8 w-8 text-yellow-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Approaching $600</p>
+                      <p className="text-2xl font-bold text-yellow-400">
+                        {affiliates.filter(a => a.total_earnings >= 500 && a.total_earnings < 600).length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-8 w-8 text-green-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">W-9 Collected</p>
+                      <p className="text-2xl font-bold text-green-400">
+                        {affiliates.filter(a => a.tax_id_collected).length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Info Card */}
+            <Card className="bg-blue-500/10 border-blue-500/30">
+              <CardContent className="p-4">
+                <div className="flex gap-3">
+                  <FileText className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-400">1099-NEC Tax Reporting</p>
+                    <p className="text-muted-foreground mt-1">
+                      The IRS requires you to issue a 1099-NEC to any affiliate who earns <strong>$600 or more</strong> in a calendar year.
+                      You must collect a W-9 form from these affiliates to obtain their legal name, address, and SSN/EIN for tax reporting.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Affiliates Needing W-9 */}
+            <Card className="bg-card/50 border-border/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <AlertTriangle className="h-5 w-5 text-red-400" />
+                  Action Required: W-9 Collection
+                </CardTitle>
+              </CardHeader>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Affiliate</TableHead>
+                    <TableHead>Legal Name</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Total Earnings</TableHead>
+                    <TableHead>W-9 Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {affiliates
+                    .filter(a => a.total_earnings >= 500 || a.tax_id_collected)
+                    .sort((a, b) => b.total_earnings - a.total_earnings)
+                    .map(affiliate => {
+                      const needsW9 = affiliate.total_earnings >= 600 && !affiliate.tax_id_collected;
+                      const approaching = affiliate.total_earnings >= 500 && affiliate.total_earnings < 600;
+                      const hasAddress = affiliate.street_address && affiliate.city && affiliate.state_province && affiliate.postal_code;
+                      
+                      return (
+                        <TableRow key={affiliate.id} className={needsW9 ? 'bg-red-500/5' : ''}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{affiliate.display_name}</p>
+                              <p className="text-xs text-muted-foreground">{affiliate.email}</p>
+                              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{affiliate.affiliate_code}</code>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {affiliate.legal_name ? (
+                              <span>{affiliate.legal_name}</span>
+                            ) : (
+                              <span className="text-muted-foreground italic">Not provided</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {hasAddress ? (
+                              <div className="text-xs">
+                                <p>{affiliate.street_address}</p>
+                                <p>{affiliate.city}, {affiliate.state_province} {affiliate.postal_code}</p>
+                                <p>{affiliate.country || 'US'}</p>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground italic flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                Missing
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`font-mono font-bold ${
+                              affiliate.total_earnings >= 600 ? 'text-red-400' :
+                              affiliate.total_earnings >= 500 ? 'text-yellow-400' : 'text-green-400'
+                            }`}>
+                              ${affiliate.total_earnings.toFixed(2)}
+                            </span>
+                            {needsW9 && (
+                              <Badge className="ml-2 bg-red-500/20 text-red-400 text-xs">1099 Required</Badge>
+                            )}
+                            {approaching && (
+                              <Badge className="ml-2 bg-yellow-500/20 text-yellow-400 text-xs">Near Threshold</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {affiliate.tax_id_collected ? (
+                              <Badge className="bg-green-500/20 text-green-400 gap-1">
+                                <CheckCircle className="h-3 w-3" />
+                                Collected
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-muted text-muted-foreground">Not Collected</Badge>
+                            )}
+                            {affiliate.w9_submitted_at && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {formatDate(affiliate.w9_submitted_at)}
+                              </p>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant={affiliate.tax_id_collected ? 'ghost' : 'default'}
+                              onClick={async () => {
+                                try {
+                                  const { error } = await supabase
+                                    .from('affiliates')
+                                    .update({
+                                      tax_id_collected: !affiliate.tax_id_collected,
+                                      w9_submitted_at: !affiliate.tax_id_collected ? new Date().toISOString() : null,
+                                    })
+                                    .eq('id', affiliate.id);
+                                  
+                                  if (error) throw error;
+                                  toast.success(
+                                    affiliate.tax_id_collected 
+                                      ? 'W-9 status cleared' 
+                                      : 'W-9 marked as collected!'
+                                  );
+                                  fetchData();
+                                } catch (err) {
+                                  console.error('Error updating W-9 status:', err);
+                                  toast.error('Failed to update W-9 status');
+                                }
+                              }}
+                              className="gap-1"
+                            >
+                              {affiliate.tax_id_collected ? (
+                                <>
+                                  <Check className="h-3 w-3" />
+                                  W-9 ✓
+                                </>
+                              ) : (
+                                <>
+                                  <FileText className="h-3 w-3" />
+                                  Mark W-9 Received
+                                </>
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  {affiliates.filter(a => a.total_earnings >= 500 || a.tax_id_collected).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                        <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No affiliates approaching the $600 threshold yet.</p>
+                        <p className="text-xs mt-1">Affiliates will appear here when they earn $500+</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="referrals">
