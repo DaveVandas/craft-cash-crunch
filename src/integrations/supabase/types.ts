@@ -410,6 +410,36 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_hash: string | null
+          last_activity_at: string
+          session_id: string
+          user_agent_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_activity_at?: string
+          session_id: string
+          user_agent_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_activity_at?: string
+          session_id?: string
+          user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -892,6 +922,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_expired_guest_sessions: { Args: never; Returns: number }
       cleanup_rate_limits: {
         Args: { p_older_than_minutes?: number }
         Returns: number
@@ -907,6 +938,10 @@ export type Database = {
       increment_affiliate_referrals: {
         Args: { affiliate_uuid: string }
         Returns: undefined
+      }
+      is_valid_guest_session: {
+        Args: { p_session_id: string }
+        Returns: boolean
       }
     }
     Enums: {
