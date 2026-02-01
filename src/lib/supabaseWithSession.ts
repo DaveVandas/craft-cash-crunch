@@ -1,6 +1,8 @@
 /**
  * Creates a Supabase client with guest session ID in headers
  * This is required for RLS policies to validate guest session ownership
+ * 
+ * Server-side session tracking is enforced via guest_sessions table
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -11,6 +13,7 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const GUEST_SESSION_KEY = 'mogul_markets_session';
 const GUEST_SESSION_EXPIRY_KEY = 'mogul_markets_session_expiry';
+const GUEST_SESSION_REGISTERED_KEY = 'mogul_markets_session_registered';
 const SESSION_EXPIRY_DAYS = 7;
 
 function isValidGuestSessionId(sessionId: string | null): sessionId is string {
@@ -41,6 +44,42 @@ function setSessionExpiry(): void {
 function clearSession(): void {
   localStorage.removeItem(GUEST_SESSION_KEY);
   localStorage.removeItem(GUEST_SESSION_EXPIRY_KEY);
+  localStorage.removeItem(GUEST_SESSION_REGISTERED_KEY);
+}
+
+/**
+ * Register session with server for server-side tracking and expiry validation
+ * This is required for RLS policies to work properly
+ */
+async function registerSessionWithServer(sessionId: string): Promise<boolean> {
+  // Check if already registered in this browser session
+  const registeredSession = localStorage.getItem(GUEST_SESSION_REGISTERED_KEY);
+  if (registeredSession === sessionId) {
+    return true; // Already registered
+  }
+  
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/register-guest-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_PUBLISHABLE_KEY,
+        'x-session-id': sessionId,
+      },
+      body: JSON.stringify({ sessionId }),
+    });
+    
+    if (response.ok) {
+      localStorage.setItem(GUEST_SESSION_REGISTERED_KEY, sessionId);
+      return true;
+    }
+    
+    console.error('Failed to register guest session:', await response.text());
+    return false;
+  } catch (error) {
+    console.error('Error registering guest session:', error);
+    return false;
+  }
 }
 
 export function getGuestSessionId(): string | null {
@@ -77,6 +116,8 @@ export function getOrCreateGuestSession(): string {
   if (existingAfterCleanup && !isSessionExpired() && isValidGuestSessionId(existingAfterCleanup)) {
     // Rotate expiry on active use (sliding expiration)
     setSessionExpiry();
+    // Register with server asynchronously (fire and forget for existing sessions)
+    registerSessionWithServer(existingAfterCleanup);
     return existingAfterCleanup;
   }
   
@@ -85,6 +126,9 @@ export function getOrCreateGuestSession(): string {
   const sessionId = `guest_${crypto.randomUUID()}`;
   localStorage.setItem(GUEST_SESSION_KEY, sessionId);
   setSessionExpiry();
+  
+  // Register the new session with the server
+  registerSessionWithServer(sessionId);
   
   return sessionId;
 }

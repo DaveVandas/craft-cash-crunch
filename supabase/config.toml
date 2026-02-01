@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.get-celebrity-portfolio]
 verify_jwt = false
+
+[functions.register-guest-session]
+verify_jwt = false
