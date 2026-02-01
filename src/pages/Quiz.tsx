@@ -16,17 +16,28 @@ import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSound } from '@/contexts/SoundContext';
+// Enhanced question interface supporting multiple question types
+type QuestionType = 'time_to_earn' | 'net_worth_comparison' | 'income_source' | 'wealth_fact';
+
 interface QuizQuestion {
+  questionType?: QuestionType;
+  questionText?: string;
   celebrity: string;
+  celebrity2?: string;
   emoji: string;
+  emoji2?: string;
   category: string;
-  correctTime: string;
+  correctAnswer?: string;
+  correctTime?: string; // Legacy field for fallback questions
   options: string[];
-  itemName: string;
-  itemEmoji: string;
-  itemValue: number;
-  annualEarnings: number;
-  funFact: string;
+  explanation?: string;
+  educationalFact?: string;
+  // Legacy fields for fallback
+  itemName?: string;
+  itemEmoji?: string;
+  itemValue?: number;
+  annualEarnings?: number;
+  funFact?: string;
 }
 
 const quizQuestions: QuizQuestion[] = [
@@ -245,12 +256,17 @@ const Quiz = () => {
     setGameState('playing');
   };
 
+  // Get the correct answer - handles both new and legacy formats
+  const getCorrectAnswer = (q: QuizQuestion): string => {
+    return q.correctAnswer || q.correctTime || '';
+  };
+
   const handleAnswer = (answer: string) => {
     if (selectedAnswer) return;
 
     setSelectedAnswer(answer);
-    const correct = answer === shuffledQuestions[currentQuestion].correctTime;
-    setIsCorrect(correct);
+    const correctAnswer = getCorrectAnswer(shuffledQuestions[currentQuestion]);
+    const correct = answer === correctAnswer;
     
     if (correct) {
       const newStreak = streak + 1;
@@ -335,14 +351,14 @@ const Quiz = () => {
               <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-amber-500/5 mb-8">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-4">How It Works</h3>
-                  <div className="grid gap-4 text-left">
+                    <div className="grid gap-4 text-left">
                     <div className="flex items-start gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                         <span className="text-sm font-bold text-primary">1</span>
                       </div>
                       <div>
-                        <p className="font-medium">Guess the time</p>
-                        <p className="text-sm text-muted-foreground">How long does it take a celebrity to earn enough for an item?</p>
+                        <p className="font-medium">Answer questions</p>
+                        <p className="text-sm text-muted-foreground">Net worth battles, income breakdowns, wealth facts & more!</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -355,12 +371,12 @@ const Quiz = () => {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-                        <Trophy className="h-4 w-4 text-green-500" />
+                      <div className="h-8 w-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+                        <Trophy className="h-4 w-4 text-success" />
                       </div>
                       <div>
-                        <p className="font-medium">Get your title</p>
-                        <p className="text-sm text-muted-foreground">Earn a rank based on your wealth knowledge!</p>
+                        <p className="font-medium">Learn wealth wisdom</p>
+                        <p className="text-sm text-muted-foreground">Discover how the ultra-rich build their fortunes!</p>
                       </div>
                     </div>
                   </div>
@@ -439,37 +455,60 @@ const Quiz = () => {
               {/* Question Card */}
               <Card className="border-border/50 bg-card/80 backdrop-blur overflow-hidden">
                 <CardContent className="p-6">
-                  {/* Celebrity Header */}
-                  <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                    <span className="text-4xl">{question.emoji}</span>
-                    <div>
-                      <p className="font-bold text-lg text-foreground">{question.celebrity}</p>
-                      <p className="text-sm text-primary">{question.category}</p>
+                  {/* Celebrity Header - Adaptive for comparison questions */}
+                  {question.questionType === 'net_worth_comparison' && question.celebrity2 ? (
+                    <div className="flex items-center justify-center gap-4 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="text-center">
+                        <span className="text-3xl block mb-1">{question.emoji}</span>
+                        <p className="font-bold text-sm text-foreground">{question.celebrity}</p>
+                      </div>
+                      <span className="text-2xl font-bold text-primary">VS</span>
+                      <div className="text-center">
+                        <span className="text-3xl block mb-1">{question.emoji2}</span>
+                        <p className="font-bold text-sm text-foreground">{question.celebrity2}</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <span className="text-4xl">{question.emoji}</span>
+                      <div>
+                        <p className="font-bold text-lg text-foreground">{question.celebrity}</p>
+                        <p className="text-sm text-primary">{question.category}</p>
+                      </div>
+                    </div>
+                  )}
 
+                  {/* Question Text - Adaptive for different question types */}
                   <h2 className="text-xl md:text-2xl font-bold mb-2 text-foreground">
-                    How long to earn a {question.itemEmoji} <span className="text-primary">{question.itemName}</span>?
+                    {question.questionText ? (
+                      question.questionText
+                    ) : (
+                      <>How long to earn a {question.itemEmoji} <span className="text-primary">{question.itemName}</span>?</>
+                    )}
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    (Worth {formatLargeCurrency(question.itemValue)})
-                  </p>
+                  
+                  {/* Subtitle - only for time_to_earn with item value */}
+                  {question.itemValue && (
+                    <p className="text-sm text-muted-foreground mb-6">
+                      (Worth {formatLargeCurrency(question.itemValue)})
+                    </p>
+                  )}
+                  
+                  {!question.itemValue && <div className="mb-6" />}
 
                   <div className="grid grid-cols-2 gap-3">
                     {question.options.map((option) => {
+                      const correctAnswer = getCorrectAnswer(question);
                       let buttonClass = 'h-auto py-4 text-base font-medium transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
                       if (selectedAnswer) {
-                        if (option === question.correctTime) {
-                          buttonClass += ' bg-green-500/20 border-green-500 text-green-400 scale-105';
+                        if (option === correctAnswer) {
+                          buttonClass += ' bg-success/20 border-success text-success scale-105';
                         } else if (option === selectedAnswer && !isCorrect) {
-                          buttonClass += ' bg-red-500/20 border-red-500 text-red-400 scale-95 opacity-60';
+                          buttonClass += ' bg-destructive/20 border-destructive text-destructive scale-95 opacity-60';
                         } else {
                           buttonClass += ' opacity-40';
                         }
                       } else {
-                        // Prevent "sticky hover" on touch devices (notably iOS Safari) from making the next question
-                        // look like a prior option is still selected. We neutralize the base outline hover styles,
-                        // then re-enable hover effects only on devices that actually support hover.
                         buttonClass += ' hover:bg-transparent hover:text-foreground [@media(hover:hover)]:hover:border-primary/50 [@media(hover:hover)]:hover:bg-primary/5 [@media(hover:hover)]:hover:scale-[1.02]';
                       }
 
@@ -482,7 +521,7 @@ const Quiz = () => {
                           disabled={!!selectedAnswer}
                         >
                           {option}
-                          {selectedAnswer && option === question.correctTime && (
+                          {selectedAnswer && option === correctAnswer && (
                             <CheckCircle className="ml-2 h-5 w-5" />
                           )}
                           {selectedAnswer && option === selectedAnswer && !isCorrect && (
@@ -493,13 +532,20 @@ const Quiz = () => {
                     })}
                   </div>
 
-                  {/* Feedback */}
+                  {/* Feedback - Enhanced for educational facts */}
                   {selectedAnswer && (
-                    <div className={`mt-5 p-4 rounded-xl animate-fade-in ${isCorrect ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
-                      <p className={`font-bold text-lg mb-1 ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-                        {isCorrect ? '🎉 Correct!' : `❌ Nope! It's ${question.correctTime}`}
+                    <div className={`mt-5 p-4 rounded-xl animate-fade-in ${isCorrect ? 'bg-success/10 border border-success/30' : 'bg-destructive/10 border border-destructive/30'}`}>
+                      <p className={`font-bold text-lg mb-1 ${isCorrect ? 'text-success' : 'text-destructive'}`}>
+                        {isCorrect ? '🎉 Correct!' : `❌ Nope! It's ${getCorrectAnswer(question)}`}
                       </p>
-                      <p className="text-sm text-foreground/70">{question.funFact}</p>
+                      <p className="text-sm text-foreground/70 mb-2">
+                        {question.explanation || question.funFact}
+                      </p>
+                      {question.educationalFact && (
+                        <p className="text-xs text-primary/80 border-t border-border/30 pt-2 mt-2">
+                          💡 {question.educationalFact}
+                        </p>
+                      )}
                       {isCorrect && streak >= 2 && (
                         <p className="text-sm text-amber-400 mt-2 font-medium">
                           🔥 {streak}x streak bonus: +{100 * Math.min(streak, 5)} pts!
