@@ -30,7 +30,7 @@ interface QuizQuestion {
   questionType: QuestionType;
   questionText: string;
   celebrity: string;
-  celebrity2?: string; // For comparison questions
+  celebrity2?: string;
   emoji: string;
   emoji2?: string;
   category: string;
@@ -303,10 +303,10 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
     
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured');
+    if (!PERPLEXITY_API_KEY) {
+      console.error('PERPLEXITY_API_KEY not configured');
       return new Response(JSON.stringify({ error: 'API key not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -326,7 +326,7 @@ serve(async (req) => {
     }
     const shuffledTypes = shuffleArray(questionTypes);
     
-    // Get AI-powered celebrity data for time_to_earn and net_worth_comparison questions
+    // Get celebrities for AI-powered questions
     const shuffledCelebs = shuffleArray([...CELEBRITY_POOL]).slice(0, safeCount + 2);
     
     for (let i = 0; i < safeCount; i++) {
@@ -334,44 +334,63 @@ serve(async (req) => {
       
       try {
         if (questionType === 'time_to_earn') {
-          // Time to earn question - uses AI for earnings data
+          // Time to earn question - uses Perplexity for grounded earnings data
           const celeb = shuffledCelebs[i % shuffledCelebs.length];
           const item = QUIZ_ITEMS[Math.floor(Math.random() * QUIZ_ITEMS.length)];
           
-          console.log(`Fetching earnings for ${celeb.name}...`);
+          console.log(`Fetching earnings for ${celeb.name} via Perplexity...`);
           
-          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          const response = await fetch('https://api.perplexity.ai/chat/completions', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+              'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'google/gemini-3-flash-preview',
+              model: 'sonar',
               messages: [
                 {
                   role: 'system',
-                  content: 'You are a financial data expert. Return ONLY valid JSON with no markdown, no code blocks, no explanation.'
+                  content: 'You are a financial data expert. Return ONLY valid JSON with no markdown, no code blocks, no explanation. Just the raw JSON object.'
                 },
                 {
                   role: 'user',
-                  content: `What is ${celeb.name}'s estimated annual earnings for 2024? Return JSON: {"annualEarnings": number, "educationalFact": "one sentence about how they built their wealth"}`
+                  content: `What is ${celeb.name}'s estimated annual earnings or income for 2024? I need their YEARLY income from all sources (salary, endorsements, investments, etc).
+
+Return a JSON object with:
+- annualEarnings: number in USD (e.g., 100000000 for $100 million per year)
+- educationalFact: a short educational fact about how they built their wealth (max 100 characters)
+
+Be accurate based on recent Forbes, Bloomberg, or financial reports. Return ONLY the JSON.`
                 }
               ],
+              search_recency_filter: 'month',
               temperature: 0,
             }),
           });
 
-          if (!response.ok) continue;
+          if (!response.ok) {
+            console.error(`Perplexity error for ${celeb.name}:`, response.status);
+            continue;
+          }
 
           const data = await response.json();
           const content = data.choices?.[0]?.message?.content || '';
+          
+          console.log(`Perplexity response for ${celeb.name}:`, content.substring(0, 200));
+          
           const jsonMatch = content.match(/\{[\s\S]*\}/);
-          if (!jsonMatch) continue;
+          if (!jsonMatch) {
+            console.log(`Could not parse JSON for ${celeb.name}`);
+            continue;
+          }
           
           const parsed = JSON.parse(jsonMatch[0]);
           const annualEarnings = Number(parsed.annualEarnings);
-          if (!annualEarnings || annualEarnings < 1000000) continue;
+          if (!annualEarnings || annualEarnings < 1000000) {
+            console.log(`Invalid earnings for ${celeb.name}:`, annualEarnings);
+            continue;
+          }
           
           const { time: correctTime, seconds } = calculateTimeToEarn(annualEarnings, item.value);
           const options = generateTimeOptions(correctTime, seconds);
@@ -385,36 +404,39 @@ serve(async (req) => {
             correctAnswer: correctTime,
             options,
             explanation: `${celeb.name} earns approximately ${formatMoney(annualEarnings)} per year.`,
-            educationalFact: parsed.educationalFact || `${celeb.name} is known for multiple income streams.`,
+            educationalFact: parsed.educationalFact || `${celeb.name} has built wealth through multiple income streams.`,
           });
           
         } else if (questionType === 'net_worth_comparison') {
-          // Net worth comparison - two celebrities
+          // Net worth comparison - two celebrities via Perplexity
           const celeb1 = shuffledCelebs[i % shuffledCelebs.length];
           const celeb2 = shuffledCelebs[(i + 1) % shuffledCelebs.length];
           
           if (celeb1.name === celeb2.name) continue;
           
-          console.log(`Comparing net worth: ${celeb1.name} vs ${celeb2.name}...`);
+          console.log(`Comparing net worth via Perplexity: ${celeb1.name} vs ${celeb2.name}...`);
           
-          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          const response = await fetch('https://api.perplexity.ai/chat/completions', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+              'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'google/gemini-3-flash-preview',
+              model: 'sonar',
               messages: [
                 {
                   role: 'system',
-                  content: 'You are a financial data expert. Return ONLY valid JSON.'
+                  content: 'You are a financial data expert. Return ONLY valid JSON with no markdown.'
                 },
                 {
                   role: 'user',
-                  content: `Compare net worth of ${celeb1.name} vs ${celeb2.name}. Return JSON: {"winner": "name of richer person", "netWorth1": number, "netWorth2": number, "difference": "X times richer" or "$XB more", "educationalFact": "one sentence about wealth building insight"}`
+                  content: `Compare the net worth of ${celeb1.name} vs ${celeb2.name} based on Forbes/Bloomberg data.
+
+Return JSON: {"winner": "name of richer person", "netWorth1": number for ${celeb1.name}, "netWorth2": number for ${celeb2.name}, "difference": "X times richer" or "$XB more", "educationalFact": "one sentence wealth-building insight"}`
                 }
               ],
+              search_recency_filter: 'month',
               temperature: 0,
             }),
           });
@@ -445,7 +467,7 @@ serve(async (req) => {
           });
           
         } else if (questionType === 'income_source') {
-          // Income source breakdown - uses static data
+          // Income source breakdown - uses static verified data
           const sourceData = INCOME_SOURCES[Math.floor(Math.random() * INCOME_SOURCES.length)];
           const wrongOptions = sourceData.sources
             .filter(s => s.source !== sourceData.correct)
@@ -470,7 +492,7 @@ serve(async (req) => {
           });
           
         } else if (questionType === 'wealth_fact') {
-          // True/False wealth facts - uses static data
+          // True/False wealth facts - uses static verified data
           const fact = WEALTH_FACTS[Math.floor(Math.random() * WEALTH_FACTS.length)];
           const isTrue = Math.random() > 0.5;
           const statement = isTrue ? fact.trueFact : fact.falseFact;

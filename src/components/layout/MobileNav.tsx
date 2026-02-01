@@ -118,7 +118,11 @@ const MobileNav = () => {
                   <Link
                     key={item.to}
                     to={item.to}
-                    onClick={() => setMoreMenuOpen(false)}
+                    onClick={() => {
+                      setMoreMenuOpen(false);
+                      // Scroll to top after navigation
+                      setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 0);
+                    }}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {item.label}
