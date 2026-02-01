@@ -42,6 +42,12 @@ const MobileNav = () => {
     { to: '/side-hustle', icon: Sparkles, label: 'Side Hustle' },
   ];
 
+  const legalNavItems = [
+    { to: '/about', label: 'About & FAQ' },
+    { to: '/terms', label: 'Terms' },
+    { to: '/privacy', label: 'Privacy' },
+  ];
+
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -105,8 +111,30 @@ const MobileNav = () => {
               ))}
             </div>
             
-            {/* Check for Updates */}
+            {/* Legal Links */}
             <div className="border-t border-border/40 pt-4 pb-2">
+              <div className="flex items-center justify-center gap-4 mb-3">
+                {legalNavItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+              <a 
+                href="mailto:vandasdave@gmail.com" 
+                className="block text-center text-xs text-primary hover:text-primary/80 transition-colors mb-3"
+              >
+                📧 Contact: vandasdave@gmail.com
+              </a>
+            </div>
+            
+            {/* Check for Updates */}
+            <div className="border-t border-border/40 pt-3 pb-2">
               <button
                 onClick={() => {
                   setMoreMenuOpen(false);
