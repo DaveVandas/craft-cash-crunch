@@ -104,7 +104,7 @@ const WealthWisdomPromo = () => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <PremiumShareIconButton />
+              <PremiumShareIconButton iconOnly />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
