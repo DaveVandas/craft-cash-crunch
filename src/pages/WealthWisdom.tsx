@@ -438,7 +438,7 @@ const WealthWisdom = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Join 0 moguls-in-training. Unsubscribe anytime.
+                  Join 8,245 moguls-in-training. Unsubscribe anytime.
                 </p>
               </form>
             )}
