@@ -1,5 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Quote } from 'lucide-react';
+import { Quote, Share2, MessageCircle, Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+import {
+  TwitterIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  LinkedInIcon,
+  InstagramIcon,
+  TikTokIcon,
+} from '@/components/share/ShareMenuDropdown';
 
 interface RichHabit {
   habit: string;
@@ -29,6 +45,8 @@ const richHabits: RichHabit[] = [
   { habit: "Stay hungry, stay foolish. Complacency kills success.", source: "Steve Jobs" },
 ];
 
+const SITE_URL = "https://earningsexplorer.shop";
+
 const RichHabits = () => {
   const [habit, setHabit] = useState<RichHabit | null>(null);
 
@@ -40,11 +58,68 @@ const RichHabits = () => {
 
   if (!habit) return null;
 
+  const shareText = `💰 Rich Habit: "${habit.habit}"\n\n— ${habit.source}\n\n🔥 More wealth wisdom at ${SITE_URL}`;
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Rich Habit',
+          text: shareText,
+          url: SITE_URL,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      handleCopyText();
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleTwitterShare = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleFacebookShare = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(`💰 "${habit.habit}" — ${habit.source}`)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleLinkedInShare = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleInstagramShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  };
+
+  const handleTikTokShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  };
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Copied to clipboard!');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
+
   return (
     <div className="relative py-6">
       <div className="flex items-start gap-3 max-w-2xl mx-auto px-4">
         <Quote className="h-5 w-5 text-primary/40 shrink-0 mt-0.5" />
-        <div className="space-y-1">
+        <div className="space-y-1 flex-1">
           <p className="text-sm md:text-base text-foreground/80 italic leading-relaxed">
             {habit.habit}
           </p>
@@ -52,6 +127,48 @@ const RichHabits = () => {
             — {habit.source}
           </p>
         </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+              <MessageCircle className="h-4 w-4" />
+              <span className="ml-2">Text / Message</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleWhatsAppShare} className="cursor-pointer">
+              <WhatsAppIcon />
+              <span className="ml-2">WhatsApp</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleTwitterShare} className="cursor-pointer">
+              <TwitterIcon />
+              <span className="ml-2">X (Twitter)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleFacebookShare} className="cursor-pointer">
+              <FacebookIcon />
+              <span className="ml-2">Facebook</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLinkedInShare} className="cursor-pointer">
+              <LinkedInIcon />
+              <span className="ml-2">LinkedIn</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleInstagramShare} className="cursor-pointer">
+              <InstagramIcon />
+              <span className="ml-2">Instagram</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleTikTokShare} className="cursor-pointer">
+              <TikTokIcon />
+              <span className="ml-2">TikTok</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleCopyText} className="cursor-pointer">
+              <Copy className="h-4 w-4" />
+              <span className="ml-2">Copy Text</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

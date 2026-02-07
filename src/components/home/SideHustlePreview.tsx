@@ -1,8 +1,23 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, ChevronRight, Rocket } from 'lucide-react';
+import { Flame, ChevronRight, Rocket, Share2, MessageCircle, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+import {
+  TwitterIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  LinkedInIcon,
+  InstagramIcon,
+  TikTokIcon,
+} from '@/components/share/ShareMenuDropdown';
 
 interface SideHustle {
   name: string;
@@ -43,6 +58,8 @@ const PREVIEW_HUSTLES: SideHustle[] = [
   },
 ];
 
+const SITE_URL = "https://earningsexplorer.shop";
+
 const SideHustlePreview = () => {
   // Rotate which hustles show based on day (after affiliate which is always first)
   const dayOfYear = Math.floor(Date.now() / 86400000);
@@ -60,6 +77,63 @@ const SideHustlePreview = () => {
     return profit >= 1000 ? `$${(profit / 1000).toFixed(1)}k` : `$${profit.toFixed(0)}`;
   };
 
+  const shareText = `🚀 Looking for side hustle ideas?\n\n💰 Thrift Flipping: $600/mo\n💻 Digital Products: $1k+/mo\n💎 Affiliate Marketing: $750+/mo\n\n🔥 Browse 30+ profit-tested hustles at ${SITE_URL}/side-hustle`;
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Side Hustle Ideas',
+          text: shareText,
+          url: `${SITE_URL}/side-hustle`,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      handleCopyText();
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleTwitterShare = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleFacebookShare = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/side-hustle`)}&quote=${encodeURIComponent('🚀 Browse 30+ profit-tested side hustle ideas')}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleLinkedInShare = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/side-hustle`)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleInstagramShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  };
+
+  const handleTikTokShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  };
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Copied to clipboard!');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
+
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-emerald-500/5">
       <CardHeader className="pb-3">
@@ -72,6 +146,47 @@ const SideHustlePreview = () => {
               Hot
             </Badge>
           </CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                <MessageCircle className="h-4 w-4" />
+                <span className="ml-2">Text / Message</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleWhatsAppShare} className="cursor-pointer">
+                <WhatsAppIcon />
+                <span className="ml-2">WhatsApp</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleTwitterShare} className="cursor-pointer">
+                <TwitterIcon />
+                <span className="ml-2">X (Twitter)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleFacebookShare} className="cursor-pointer">
+                <FacebookIcon />
+                <span className="ml-2">Facebook</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLinkedInShare} className="cursor-pointer">
+                <LinkedInIcon />
+                <span className="ml-2">LinkedIn</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleInstagramShare} className="cursor-pointer">
+                <InstagramIcon />
+                <span className="ml-2">Instagram</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleTikTokShare} className="cursor-pointer">
+                <TikTokIcon />
+                <span className="ml-2">TikTok</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCopyText} className="cursor-pointer">
+                <Copy className="h-4 w-4" />
+                <span className="ml-2">Copy Text</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <p className="text-sm text-muted-foreground">Quick ways to stack cash on the side</p>
       </CardHeader>
