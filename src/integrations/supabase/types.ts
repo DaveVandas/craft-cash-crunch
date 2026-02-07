@@ -928,6 +928,7 @@ export type Database = {
         Returns: number
       }
       get_request_session_id: { Args: never; Returns: string }
+      get_subscriber_count: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
