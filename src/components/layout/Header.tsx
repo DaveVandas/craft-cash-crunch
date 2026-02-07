@@ -145,8 +145,8 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Theme Toggle - Desktop only */}
-          <div className="hidden md:block">
+          {/* Theme Toggle - Desktop only (lg+) */}
+          <div className="hidden lg:block">
             <ThemeToggle />
           </div>
 
@@ -268,8 +268,8 @@ const Header = () => {
                       <FavoritesDropdown />
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  {/* Theme Toggle - Mobile/Tablet only (desktop has it in header) */}
-                  <div className="md:hidden">
+                  {/* Theme Toggle - Mobile/Tablet only (below lg breakpoint) */}
+                  <div className="lg:hidden">
                     <DropdownMenuSeparator />
                     <ThemeToggleMenuItem />
                   </div>
