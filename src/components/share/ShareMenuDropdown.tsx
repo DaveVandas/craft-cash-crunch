@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Share2, Image, Copy, MessageCircle, Loader2 } from 'lucide-react';
+import { Share2, Image, Copy, MessageCircle, Loader2, Sparkles } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,18 @@ export const TikTokIcon = () => (
   </svg>
 );
 
+// Premium gold share button styles
+const PREMIUM_BUTTON_CLASS = `
+  w-full max-w-xs relative overflow-hidden
+  bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500
+  hover:from-amber-400 hover:via-yellow-300 hover:to-amber-400
+  text-amber-950 font-semibold
+  shadow-[0_0_20px_rgba(245,158,11,0.4)]
+  hover:shadow-[0_0_30px_rgba(245,158,11,0.6)]
+  transition-all duration-300
+  border border-amber-300/50
+`;
+
 interface ShareMenuDropdownProps {
   isGeneratingImage: boolean;
   isPreGenerating?: boolean;
@@ -59,6 +71,7 @@ interface ShareMenuDropdownProps {
   onCopyLink: () => void;
   buttonClassName?: string;
   buttonText?: string;
+  variant?: 'premium' | 'default';
 }
 
 const ShareMenuDropdown = ({
@@ -74,8 +87,9 @@ const ShareMenuDropdown = ({
   onTikTokShare,
   onSaveImage,
   onCopyLink,
-  buttonClassName = 'w-full max-w-xs bg-gradient-to-r from-primary to-primary/80',
-  buttonText = 'Share Card',
+  buttonClassName,
+  buttonText = 'Share',
+  variant = 'premium',
 }: ShareMenuDropdownProps) => {
   const handleOpenChange = (open: boolean) => {
     if (open && onMenuOpen) {
@@ -83,21 +97,32 @@ const ShareMenuDropdown = ({
     }
   };
 
+  // Use premium styling by default, allow override
+  const finalButtonClass = buttonClassName || (variant === 'premium' ? PREMIUM_BUTTON_CLASS : 'w-full max-w-xs bg-gradient-to-r from-primary to-primary/80');
+
   return (
     <div className="flex justify-center">
       <DropdownMenu onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>
           <Button 
-            className={buttonClassName}
+            className={finalButtonClass}
             disabled={isGeneratingImage}
             onPointerDown={() => onMenuOpen?.()}
           >
             {isGeneratingImage ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
-              <Share2 className="h-4 w-4 mr-2" />
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+              </>
             )}
             {buttonText}
+            {/* Shimmer effect overlay */}
+            {variant === 'premium' && !isGeneratingImage && (
+              <span className="absolute inset-0 overflow-hidden rounded-md pointer-events-none">
+                <span className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </span>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center" className="w-48">
