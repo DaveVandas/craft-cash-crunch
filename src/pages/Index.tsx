@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
-import MobileFooter from '@/components/layout/MobileFooter';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import QuickActions from '@/components/home/QuickActions';
 import TrendingSearches from '@/components/home/TrendingSearches';
@@ -119,7 +118,6 @@ const Index = () => {
       </main>
 
       <Footer />
-      <MobileFooter />
       <MobileNav />
     </div>
   );
