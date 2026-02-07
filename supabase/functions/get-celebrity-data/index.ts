@@ -3,8 +3,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 // CORS configuration - restrict to allowed origins
 const ALLOWED_ORIGINS = [
-  'https://craft-cash-crunch.lovable.app',
-  'https://id-preview--86ba5315-0e8e-45d4-9ce2-019ca156c207.lovable.app',
   'https://earningsexplorer.shop',
   'https://www.earningsexplorer.shop',
   'http://localhost:5173',
@@ -13,6 +11,7 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
+  // Allow production, localhost, and preview/staging domains
   const allowedOrigin = origin && ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith('.lovable.app'))
     ? origin
     : ALLOWED_ORIGINS[0];

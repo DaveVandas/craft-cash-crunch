@@ -14,7 +14,7 @@ function isAllowedOrigin(origin: string): boolean {
   if (ALLOWED_ORIGINS.includes(origin)) return true;
   try {
     const { hostname } = new URL(origin);
-    // Allow Lovable preview + published domains
+    // Allow preview and staging domains
     return hostname.endsWith('.lovable.app');
   } catch {
     return false;

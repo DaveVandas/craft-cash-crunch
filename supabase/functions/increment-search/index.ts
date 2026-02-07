@@ -11,7 +11,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+  // Allow production, localhost, and preview/staging domains
+  const allowedOrigin = origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app'))
     ? origin
     : ALLOWED_ORIGINS[0];
 
