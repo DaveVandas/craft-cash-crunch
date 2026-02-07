@@ -1,10 +1,25 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, TrendingUp, TrendingDown, ChevronRight, Zap, DollarSign } from 'lucide-react';
+import { Crown, TrendingUp, TrendingDown, ChevronRight, DollarSign, Share2, MessageCircle, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { formatCurrency } from '@/lib/earnings';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+import {
+  TwitterIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  LinkedInIcon,
+  InstagramIcon,
+  TikTokIcon,
+} from '@/components/share/ShareMenuDropdown';
 
 const TRENDING_TICKERS = [
   { symbol: 'AAPL', name: 'Apple', change: 2.4 },
@@ -12,6 +27,8 @@ const TRENDING_TICKERS = [
   { symbol: 'NVDA', name: 'NVIDIA', change: 5.1 },
   { symbol: 'META', name: 'Meta', change: 1.8 },
 ];
+
+const SITE_URL = "https://earningsexplorer.shop";
 
 const MogulMarketsPreview = () => {
   const { portfolio, isLoading } = useTradingPortfolio();
@@ -25,6 +42,63 @@ const MogulMarketsPreview = () => {
   const totalGainLoss = totalValue - 10000; // Starting amount
   const hasActivity = portfolio && (portfolio.positions?.length > 0 || portfolio.orders?.length > 0);
 
+  const shareText = `📈 Paper trading on Mogul Markets!\n\n${hasActivity ? `💰 Portfolio: ${formatCurrency(totalValue)}\n📊 P&L: ${totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totalGainLoss)}` : '💵 Start with $10,000 in paper money'}\n\n🔥 Trade risk-free at ${SITE_URL}/mogul-markets`;
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Mogul Markets',
+          text: shareText,
+          url: `${SITE_URL}/mogul-markets`,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      handleCopyText();
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleTwitterShare = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleFacebookShare = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/mogul-markets`)}&quote=${encodeURIComponent('📈 Paper trading on Mogul Markets!')}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleLinkedInShare = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/mogul-markets`)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  };
+
+  const handleInstagramShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  };
+
+  const handleTikTokShare = () => {
+    handleCopyText();
+    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  };
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Copied to clipboard!');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
+
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-amber-500/5 overflow-hidden">
       <CardHeader className="pb-3">
@@ -36,12 +110,55 @@ const MogulMarketsPreview = () => {
               NEW
             </Badge>
           </CardTitle>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-muted-foreground">Live Market Data</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-muted-foreground hidden sm:inline">Live</span>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="ml-2">Text / Message</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleWhatsAppShare} className="cursor-pointer">
+                  <WhatsAppIcon />
+                  <span className="ml-2">WhatsApp</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleTwitterShare} className="cursor-pointer">
+                  <TwitterIcon />
+                  <span className="ml-2">X (Twitter)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFacebookShare} className="cursor-pointer">
+                  <FacebookIcon />
+                  <span className="ml-2">Facebook</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLinkedInShare} className="cursor-pointer">
+                  <LinkedInIcon />
+                  <span className="ml-2">LinkedIn</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleInstagramShare} className="cursor-pointer">
+                  <InstagramIcon />
+                  <span className="ml-2">Instagram</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleTikTokShare} className="cursor-pointer">
+                  <TikTokIcon />
+                  <span className="ml-2">TikTok</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyText} className="cursor-pointer">
+                  <Copy className="h-4 w-4" />
+                  <span className="ml-2">Copy Text</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">Paper trade stocks risk-free</p>
