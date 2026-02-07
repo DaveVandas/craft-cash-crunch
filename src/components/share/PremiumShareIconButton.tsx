@@ -21,7 +21,7 @@ const PremiumShareIconButton = forwardRef<HTMLButtonElement, PremiumShareIconBut
         size="sm"
         onClick={onClick}
         className={cn(
-          `relative overflow-hidden
+          `relative overflow-hidden flex items-center justify-center
           bg-gradient-to-r from-amber-500/20 to-yellow-500/10 
           border border-amber-500/40 
           hover:from-amber-500/30 hover:to-yellow-500/20 
@@ -29,12 +29,15 @@ const PremiumShareIconButton = forwardRef<HTMLButtonElement, PremiumShareIconBut
           hover:shadow-[0_0_12px_rgba(245,158,11,0.4)] 
           transition-all duration-300`,
           iconOnly 
-            ? (isSmall ? 'h-7 w-7 p-0' : 'h-8 w-8 p-0')
+            ? (isSmall ? 'h-7 w-7 min-w-7 p-0' : 'h-8 w-8 min-w-8 p-0')
             : (isSmall ? 'h-7 px-2 text-xs gap-1' : 'h-8 px-3 text-xs gap-1.5'),
           className
         )}
       >
-        <Sparkles className={`${isSmall ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-amber-500 shrink-0`} />
+        <Sparkles className={cn(
+          'text-amber-500 shrink-0',
+          isSmall ? 'h-3 w-3' : 'h-3.5 w-3.5'
+        )} />
         {!iconOnly && <span className="text-amber-500 font-medium">Share</span>}
         
         {/* Shimmer effect on hover */}
