@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, ChevronRight, Rocket, Share2, MessageCircle, Copy } from 'lucide-react';
+import { Flame, ChevronRight, Rocket, MessageCircle, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,9 +149,7 @@ const SideHustlePreview = () => {
           </CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Share2 className="h-4 w-4" />
-              </Button>
+              <PremiumShareIconButton />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
