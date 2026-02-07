@@ -406,6 +406,21 @@ const WealthWisdom = () => {
 
   const SITE_URL = "https://earningsexplorer.shop";
   
+  // Generate a stable story ID from title
+  const getStoryId = () => story.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
+  
+  const trackShare = async (platform: string) => {
+    try {
+      await supabase.rpc('track_story_share', {
+        p_story_id: getStoryId(),
+        p_story_title: story.title,
+        p_platform: platform
+      });
+    } catch {
+      // Silent fail - don't interrupt sharing
+    }
+  };
+  
   const getStoryShareText = () => {
     return `📚 ${story.title}\n\n"${story.quote}"\n\n🔥 Read the full rags-to-riches story at ${SITE_URL}/wealth-wisdom`;
   };
@@ -418,6 +433,7 @@ const WealthWisdom = () => {
           text: getStoryShareText(),
           url: `${SITE_URL}/wealth-wisdom`,
         });
+        trackShare('native');
       } catch {
         // User cancelled
       }
@@ -428,34 +444,41 @@ const WealthWisdom = () => {
 
   const handleStoryWhatsAppShare = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(getStoryShareText())}`, '_blank');
+    trackShare('whatsapp');
   };
 
   const handleStoryTwitterShare = () => {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getStoryShareText())}`, '_blank', 'width=550,height=420');
+    trackShare('twitter');
   };
 
   const handleStoryFacebookShare = () => {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}&quote=${encodeURIComponent(story.title)}`, '_blank', 'width=550,height=420');
+    trackShare('facebook');
   };
 
   const handleStoryLinkedInShare = () => {
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}`, '_blank', 'width=550,height=420');
+    trackShare('linkedin');
   };
 
   const handleStoryInstagramShare = () => {
     handleStoryCopyText();
     toast.success('Text copied! Open Instagram and paste in your story or post.');
+    trackShare('instagram');
   };
 
   const handleStoryTikTokShare = () => {
     handleStoryCopyText();
     toast.success('Text copied! Open TikTok and paste in your video caption.');
+    trackShare('tiktok');
   };
 
   const handleStoryCopyText = async () => {
     try {
       await navigator.clipboard.writeText(getStoryShareText());
       toast.success('Story copied to clipboard!');
+      trackShare('copy');
     } catch {
       toast.error('Failed to copy');
     }

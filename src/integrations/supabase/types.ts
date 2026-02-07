@@ -545,6 +545,30 @@ export type Database = {
         }
         Relationships: []
       }
+      story_share_analytics: {
+        Row: {
+          id: string
+          platform: string
+          shared_at: string
+          story_id: string
+          story_title: string
+        }
+        Insert: {
+          id?: string
+          platform: string
+          shared_at?: string
+          story_id: string
+          story_title: string
+        }
+        Update: {
+          id?: string
+          platform?: string
+          shared_at?: string
+          story_id?: string
+          story_title?: string
+        }
+        Relationships: []
+      }
       trading_achievements: {
         Row: {
           achievement_id: string
@@ -943,6 +967,10 @@ export type Database = {
       is_valid_guest_session: {
         Args: { p_session_id: string }
         Returns: boolean
+      }
+      track_story_share: {
+        Args: { p_platform: string; p_story_id: string; p_story_title: string }
+        Returns: undefined
       }
     }
     Enums: {
