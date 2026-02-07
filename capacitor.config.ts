@@ -1,13 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.86ba53150e8e45d49ce2019ca156c207',
+  appId: 'com.northspan.wealthperspective',
   appName: 'Wealth Perspective',
   webDir: 'dist',
   server: {
     // For development - enables hot reload from the sandbox preview
     // Comment out or remove for production builds
-    url: 'https://86ba5315-0e8e-45d4-9ce2-019ca156c207.lovableproject.com?forceHideBadge=true',
+    url: 'https://earningsexplorer.shop',
     cleartext: true,
   },
   ios: {
