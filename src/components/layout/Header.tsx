@@ -3,6 +3,7 @@ import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Hear
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 import { NotificationsDropdown } from '@/components/notifications/NotificationsDropdown';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -112,6 +113,11 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Theme Toggle - Desktop only */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
+
           {/* Sound Toggle - Desktop only */}
           <Tooltip>
             <TooltipTrigger asChild>

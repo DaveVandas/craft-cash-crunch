@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { FeaturedCelebrityProvider } from "@/contexts/FeaturedCelebrityContext";
@@ -45,55 +46,57 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <SoundProvider>
-          <FeaturedCelebrityProvider>
-            <ProfileSetupGuard>
-              <Toaster />
-              <Sonner />
-              <UpdateNotification />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/profile/:id" element={<Profile />} />
-                  <Route path="/category/:id" element={<Category />} />
-                  <Route path="/calculator" element={<Calculator />} />
-                  <Route path="/compare" element={<Compare />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/share" element={<Share />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/payment-success" element={<PaymentSuccess />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/quiz" element={<Quiz />} />
-                  <Route path="/referral" element={<Referral />} />
-                  <Route path="/side-hustle" element={<SideHustle />} />
-                  <Route path="/wealth-wisdom" element={<WealthWisdom />} />
-                  <Route path="/trades" element={<Trades />} />
-                  <Route path="/mogul-markets" element={<MogulMarkets />} />
-                  <Route path="/mogul-academy" element={<MogulAcademy />} />
-                  <Route path="/debt-destroyer" element={<DebtDestroyer />} />
-                  <Route path="/celebrity-portfolios" element={<CelebrityPortfolios />} />
-                  <Route path="/landing/a" element={<LandingVariantA />} />
-                  <Route path="/landing/b" element={<LandingVariantB />} />
-                  <Route path="/landing/c" element={<LandingVariantC />} />
-                  <Route path="/landing/d" element={<LandingVariantD />} />
-                  <Route path="/beta" element={<BetaInvite />} />
-                  <Route path="/become-affiliate" element={<BecomeAffiliate />} />
-                  <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
-                  <Route path="/ref/:code" element={<AffiliateReferral />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </ProfileSetupGuard>
-          </FeaturedCelebrityProvider>
-        </SoundProvider>
-      </AuthProvider>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <TooltipProvider>
+        <AuthProvider>
+          <SoundProvider>
+            <FeaturedCelebrityProvider>
+              <ProfileSetupGuard>
+                <Toaster />
+                <Sonner />
+                <UpdateNotification />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/profile/:id" element={<Profile />} />
+                    <Route path="/category/:id" element={<Category />} />
+                    <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/compare" element={<Compare />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/share" element={<Share />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/payment-success" element={<PaymentSuccess />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/quiz" element={<Quiz />} />
+                    <Route path="/referral" element={<Referral />} />
+                    <Route path="/side-hustle" element={<SideHustle />} />
+                    <Route path="/wealth-wisdom" element={<WealthWisdom />} />
+                    <Route path="/trades" element={<Trades />} />
+                    <Route path="/mogul-markets" element={<MogulMarkets />} />
+                    <Route path="/mogul-academy" element={<MogulAcademy />} />
+                    <Route path="/debt-destroyer" element={<DebtDestroyer />} />
+                    <Route path="/celebrity-portfolios" element={<CelebrityPortfolios />} />
+                    <Route path="/landing/a" element={<LandingVariantA />} />
+                    <Route path="/landing/b" element={<LandingVariantB />} />
+                    <Route path="/landing/c" element={<LandingVariantC />} />
+                    <Route path="/landing/d" element={<LandingVariantD />} />
+                    <Route path="/beta" element={<BetaInvite />} />
+                    <Route path="/become-affiliate" element={<BecomeAffiliate />} />
+                    <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
+                    <Route path="/ref/:code" element={<AffiliateReferral />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </ProfileSetupGuard>
+            </FeaturedCelebrityProvider>
+          </SoundProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

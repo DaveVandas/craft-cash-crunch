@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, TrendingUp, Brain, MoreHorizontal } from 'lucide-react';
+import { Home, Search, TrendingUp, Brain, MoreHorizontal, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import {
   Sheet,
   SheetContent,
@@ -11,6 +12,35 @@ import {
 import { RefreshCw, Calculator, GitCompareArrows, BookOpen, Sparkles, Skull, GraduationCap } from 'lucide-react';
 import { usePWAUpdate } from '@/hooks/usePWAUpdate';
 import { toast } from 'sonner';
+
+// Theme toggle row for mobile
+const ThemeToggleRow = () => {
+  const { setTheme, theme } = useTheme();
+  
+  return (
+    <div className="flex items-center justify-center gap-2 w-full py-2">
+      <span className="text-sm text-muted-foreground mr-2">Theme:</span>
+      <button
+        onClick={() => setTheme('light')}
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+          theme === 'light' ? 'bg-primary/20 text-primary' : 'bg-muted/30 text-muted-foreground'
+        }`}
+      >
+        <Sun className="h-4 w-4" />
+        Light
+      </button>
+      <button
+        onClick={() => setTheme('dark')}
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+          theme === 'dark' ? 'bg-primary/20 text-primary' : 'bg-muted/30 text-muted-foreground'
+        }`}
+      >
+        <Moon className="h-4 w-4" />
+        Dark
+      </button>
+    </div>
+  );
+};
 
 const MobileNav = () => {
   const location = useLocation();
@@ -137,8 +167,9 @@ const MobileNav = () => {
               </a>
             </div>
             
-            {/* Check for Updates */}
-            <div className="border-t border-border/40 pt-3 pb-2">
+            {/* Theme & Updates */}
+            <div className="border-t border-border/40 pt-3 pb-2 space-y-2">
+              <ThemeToggleRow />
               <button
                 onClick={() => {
                   setMoreMenuOpen(false);
