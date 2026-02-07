@@ -15,12 +15,13 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket, Share2
 } from 'lucide-react';
 import BetaManagement from '@/components/admin/BetaManagement';
 import { AffiliateManagement } from '@/components/admin/AffiliateManagement';
 import { RevenueDashboard } from '@/components/admin/RevenueDashboard';
 import DeploymentGuide from '@/components/admin/DeploymentGuide';
+import StoryShareAnalytics from '@/components/admin/StoryShareAnalytics';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
@@ -712,6 +713,10 @@ const Admin = () => {
               <Rocket className="h-4 w-4" />
               Deployment
             </TabsTrigger>
+            <TabsTrigger value="shares" className="gap-2">
+              <Share2 className="h-4 w-4" />
+              Story Shares
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="revenue">
@@ -1095,6 +1100,11 @@ const Admin = () => {
           {/* Deployment Guide Tab */}
           <TabsContent value="deployment">
             <DeploymentGuide />
+          </TabsContent>
+
+          {/* Story Share Analytics Tab */}
+          <TabsContent value="shares">
+            <StoryShareAnalytics />
           </TabsContent>
         </Tabs>
       </main>
