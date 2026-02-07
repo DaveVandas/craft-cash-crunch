@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
@@ -166,14 +166,14 @@ const Header = () => {
             </TooltipContent>
           </Tooltip>
 
-          {/* Share App Button - Desktop only */}
+          {/* Share App Button - Desktop only - Premium gold style */}
           <Button 
             variant="ghost" 
             onClick={() => setInviteModalOpen(true)} 
-            className="h-9 px-3 hidden md:flex"
+            className="h-9 px-3 hidden lg:flex bg-gradient-to-r from-amber-500/10 to-yellow-500/5 border border-amber-500/30 hover:from-amber-500/20 hover:to-yellow-500/10 hover:border-amber-400/50 hover:shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all duration-300"
           >
-            <Share2 className="h-4 w-4 mr-1.5" />
-            <span className="text-sm">Share</span>
+            <Sparkles className="h-4 w-4 mr-1.5 text-amber-500" />
+            <span className="text-sm text-amber-500">Share</span>
           </Button>
 
           {user ? (

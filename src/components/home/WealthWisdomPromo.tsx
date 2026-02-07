@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Sparkles, ArrowRight, Share2, MessageCircle, Copy } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, MessageCircle, Copy } from 'lucide-react';
+import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,9 +104,7 @@ const WealthWisdomPromo = () => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="shrink-0">
-                <Share2 className="h-4 w-4" />
-              </Button>
+              <PremiumShareIconButton />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">

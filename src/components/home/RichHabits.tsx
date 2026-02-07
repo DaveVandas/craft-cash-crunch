@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Quote, Share2, MessageCircle, Copy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Quote, MessageCircle, Copy } from 'lucide-react';
+import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,9 +130,7 @@ const RichHabits = () => {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <PremiumShareIconButton className="shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">

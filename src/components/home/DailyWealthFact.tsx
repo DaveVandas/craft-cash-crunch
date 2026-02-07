@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Lightbulb, Share2, RefreshCw } from 'lucide-react';
+import { Lightbulb, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -195,9 +196,7 @@ const DailyWealthFact = () => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Share2 className="h-3.5 w-3.5" />
-              </Button>
+              <PremiumShareIconButton size="sm" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
