@@ -123,7 +123,7 @@ const Footer = () => {
             All figures are estimates and may differ from actual values due to private holdings and undisclosed assets.
           </p>
           <p className="text-xs text-muted-foreground/50 mt-2">
-            © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Vandas Inc.
+            © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Northspan Industries, LLC.
           </p>
         </div>
       </div>
