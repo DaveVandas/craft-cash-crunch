@@ -367,7 +367,6 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
         onTikTokShare={handleTikTokShare}
         onSaveImage={handleSaveImage}
         onCopyLink={handleCopyLink}
-        buttonClassName={`w-full ${flexMode ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' : 'bg-gradient-to-r from-primary to-primary/80'}`}
         buttonText="Share Showdown"
       />
     </div>
