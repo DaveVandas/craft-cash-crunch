@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
@@ -20,8 +26,19 @@ import {
   Flame,
   Crown,
   Rocket,
-  Target
+  Target,
+  Share2,
+  MessageCircle,
+  Copy
 } from 'lucide-react';
+import {
+  TwitterIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  LinkedInIcon,
+  InstagramIcon,
+  TikTokIcon,
+} from '@/components/share/ShareMenuDropdown';
 
 // Featured story - rotates every 3 days for more frequent updates
 const getWeeklyStory = () => {
@@ -386,6 +403,63 @@ const WealthWisdom = () => {
       setLoading(false);
     }
   };
+
+  const SITE_URL = "https://earningsexplorer.shop";
+  
+  const getStoryShareText = () => {
+    return `📚 ${story.title}\n\n"${story.quote}"\n\n🔥 Read the full rags-to-riches story at ${SITE_URL}/wealth-wisdom`;
+  };
+
+  const handleStoryNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: story.title,
+          text: getStoryShareText(),
+          url: `${SITE_URL}/wealth-wisdom`,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      handleStoryCopyText();
+    }
+  };
+
+  const handleStoryWhatsAppShare = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(getStoryShareText())}`, '_blank');
+  };
+
+  const handleStoryTwitterShare = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getStoryShareText())}`, '_blank', 'width=550,height=420');
+  };
+
+  const handleStoryFacebookShare = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}&quote=${encodeURIComponent(story.title)}`, '_blank', 'width=550,height=420');
+  };
+
+  const handleStoryLinkedInShare = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}`, '_blank', 'width=550,height=420');
+  };
+
+  const handleStoryInstagramShare = () => {
+    handleStoryCopyText();
+    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  };
+
+  const handleStoryTikTokShare = () => {
+    handleStoryCopyText();
+    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  };
+
+  const handleStoryCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(getStoryShareText());
+      toast.success('Story copied to clipboard!');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -467,10 +541,53 @@ const WealthWisdom = () => {
             <div className="flex items-center gap-2 mb-6">
               <Crown className="h-6 w-6 text-primary" />
               <h2 className="font-serif text-2xl font-bold">This Week's Story</h2>
-              <Badge variant="outline" className="ml-auto">
-                <Flame className="h-3 w-3 mr-1 text-orange-500" />
-                Featured
-              </Badge>
+              <div className="ml-auto flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleStoryNativeShare} className="cursor-pointer">
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="ml-2">Text / Message</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryWhatsAppShare} className="cursor-pointer">
+                      <WhatsAppIcon />
+                      <span className="ml-2">WhatsApp</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryTwitterShare} className="cursor-pointer">
+                      <TwitterIcon />
+                      <span className="ml-2">X (Twitter)</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryFacebookShare} className="cursor-pointer">
+                      <FacebookIcon />
+                      <span className="ml-2">Facebook</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryLinkedInShare} className="cursor-pointer">
+                      <LinkedInIcon />
+                      <span className="ml-2">LinkedIn</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryInstagramShare} className="cursor-pointer">
+                      <InstagramIcon />
+                      <span className="ml-2">Instagram</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryTikTokShare} className="cursor-pointer">
+                      <TikTokIcon />
+                      <span className="ml-2">TikTok</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleStoryCopyText} className="cursor-pointer">
+                      <Copy className="h-4 w-4" />
+                      <span className="ml-2">Copy Text</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Badge variant="outline">
+                  <Flame className="h-3 w-3 mr-1 text-orange-500" />
+                  Featured
+                </Badge>
+              </div>
             </div>
             
             <Card className="border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
