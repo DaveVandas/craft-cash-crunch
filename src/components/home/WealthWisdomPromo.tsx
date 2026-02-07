@@ -101,7 +101,7 @@ const WealthWisdomPromo = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <PremiumShareIconButton iconOnly />
@@ -142,7 +142,7 @@ const WealthWisdomPromo = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button asChild size="sm" className="group w-full sm:w-auto shrink-0">
+          <Button asChild size="sm" className="group flex-1 sm:flex-initial">
             <Link to="/wealth-wisdom">
               Read Story
               <ArrowRight className="h-4 w-4 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
