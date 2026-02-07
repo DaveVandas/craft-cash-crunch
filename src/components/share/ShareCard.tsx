@@ -354,7 +354,6 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
             onTikTokShare={handleTikTokShare}
             onSaveImage={handleSaveImage}
             onCopyLink={handleCopyLink}
-            buttonClassName={`w-full ${flexMode ? 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-black' : 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black'} font-semibold`}
             buttonText="Share Wealth Card"
           />
 

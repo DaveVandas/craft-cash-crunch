@@ -622,7 +622,6 @@ const Quiz = () => {
                   onTikTokShare={handleTikTokShare}
                   onSaveImage={handleSaveImage}
                   onCopyLink={handleCopyLink}
-                  buttonClassName="w-full bg-gradient-to-r from-primary to-amber-500"
                   buttonText="Share Results"
                 />
                 <Button onClick={startQuiz} variant="outline" size="lg" className="w-full">
