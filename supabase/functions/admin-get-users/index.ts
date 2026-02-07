@@ -21,9 +21,10 @@ function isAllowedOrigin(origin: string): boolean {
   }
 }
 
-function getCorsHeaders(_origin: string | null): Record<string, string> {
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && isAllowedOrigin(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
