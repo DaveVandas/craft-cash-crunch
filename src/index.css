@@ -4,67 +4,69 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wealth Perspective - Dark & Luxurious Design System */
+/* Wealth Perspective - Luxurious Design System */
 
 @layer base {
   :root {
-    --background: 220 20% 7%;
-    --foreground: 45 30% 96%;
+    /* Light Luxurious Theme - Cream/Ivory with Gold */
+    --background: 40 33% 96%;
+    --foreground: 220 20% 15%;
 
-    --card: 220 18% 10%;
-    --card-foreground: 45 30% 96%;
+    --card: 40 30% 98%;
+    --card-foreground: 220 20% 15%;
 
-    --popover: 220 18% 12%;
-    --popover-foreground: 45 30% 96%;
+    --popover: 40 30% 99%;
+    --popover-foreground: 220 20% 15%;
 
-    --primary: 45 100% 50%;
-    --primary-foreground: 220 20% 7%;
+    --primary: 45 100% 42%;
+    --primary-foreground: 40 33% 98%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 45 30% 96%;
+    --secondary: 40 20% 90%;
+    --secondary-foreground: 220 20% 20%;
 
-    --muted: 220 15% 25%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 40 15% 85%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 45 80% 45%;
-    --accent-foreground: 220 20% 7%;
+    --accent: 45 80% 40%;
+    --accent-foreground: 40 33% 98%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 85% 97%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 45 100% 50%;
+    --border: 40 20% 85%;
+    --input: 40 20% 88%;
+    --ring: 45 100% 42%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 18% 8%;
-    --sidebar-foreground: 45 30% 96%;
-    --sidebar-primary: 45 100% 50%;
-    --sidebar-primary-foreground: 220 20% 7%;
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 45 30% 96%;
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: 45 100% 50%;
+    --sidebar-background: 40 25% 95%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 45 100% 42%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 40 20% 90%;
+    --sidebar-accent-foreground: 220 20% 20%;
+    --sidebar-border: 40 20% 85%;
+    --sidebar-ring: 45 100% 42%;
 
-    --chart-1: 45 100% 50%;
-    --chart-2: 45 80% 45%;
-    --chart-3: 45 60% 40%;
-    --chart-4: 220 15% 40%;
-    --chart-5: 220 15% 30%;
+    --chart-1: 45 100% 45%;
+    --chart-2: 45 80% 40%;
+    --chart-3: 45 60% 35%;
+    --chart-4: 220 15% 50%;
+    --chart-5: 220 15% 40%;
 
-    --gold: 45 100% 50%;
-    --gold-light: 45 100% 65%;
-    --gold-dark: 45 80% 35%;
+    --gold: 45 100% 42%;
+    --gold-light: 45 100% 55%;
+    --gold-dark: 45 80% 30%;
 
     --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Playfair Display', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 
-    --shadow-gold: 0 0 20px hsl(45 100% 50% / 0.2);
-    --shadow-gold-lg: 0 0 40px hsl(45 100% 50% / 0.3);
+    --shadow-gold: 0 0 20px hsl(45 100% 42% / 0.15);
+    --shadow-gold-lg: 0 0 40px hsl(45 100% 42% / 0.25);
   }
 
   .dark {
+    /* Dark Luxurious Theme - Deep blacks with Gold */
     --background: 220 20% 7%;
     --foreground: 45 30% 96%;
 
@@ -107,6 +109,13 @@
     --chart-3: 45 60% 40%;
     --chart-4: 220 15% 40%;
     --chart-5: 220 15% 30%;
+
+    --gold: 45 100% 50%;
+    --gold-light: 45 100% 65%;
+    --gold-dark: 45 80% 35%;
+
+    --shadow-gold: 0 0 20px hsl(45 100% 50% / 0.2);
+    --shadow-gold-lg: 0 0 40px hsl(45 100% 50% / 0.3);
   }
 }
 
