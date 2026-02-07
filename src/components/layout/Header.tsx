@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2 } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Share2, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
 import BetaFeedbackModal from '@/components/beta/BetaFeedbackModal';
@@ -24,6 +25,37 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
+
+// Theme toggle menu item for mobile dropdown
+const ThemeToggleMenuItem = () => {
+  const { setTheme, theme } = useTheme();
+  
+  return (
+    <div className="px-2 py-2">
+      <p className="text-xs text-muted-foreground mb-2 px-2">Appearance</p>
+      <div className="flex gap-1">
+        <button
+          onClick={() => setTheme('light')}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm transition-colors ${
+            theme === 'light' ? 'bg-primary/20 text-primary' : 'bg-muted/30 text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          <Sun className="h-4 w-4" />
+          Light
+        </button>
+        <button
+          onClick={() => setTheme('dark')}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm transition-colors ${
+            theme === 'dark' ? 'bg-primary/20 text-primary' : 'bg-muted/30 text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          <Moon className="h-4 w-4" />
+          Dark
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Header = () => {
   const navigate = useNavigate();
@@ -236,6 +268,11 @@ const Header = () => {
                       <FavoritesDropdown />
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
+                  {/* Theme Toggle - Mobile/Tablet only (desktop has it in header) */}
+                  <div className="md:hidden">
+                    <DropdownMenuSeparator />
+                    <ThemeToggleMenuItem />
+                  </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
