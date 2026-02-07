@@ -268,6 +268,9 @@ const Quiz = () => {
     const correctAnswer = getCorrectAnswer(shuffledQuestions[currentQuestion]);
     const correct = answer === correctAnswer;
     
+    // IMPORTANT: Set isCorrect state so UI displays correctly
+    setIsCorrect(correct);
+    
     if (correct) {
       const newStreak = streak + 1;
       setStreak(newStreak);
