@@ -320,16 +320,32 @@ const quickWisdom = [
   { icon: "⏰", title: "Time is Money", text: "Calculate your hourly rate. Every hour wasted on non-productive activities costs you that amount." },
 ];
 
+const BASE_SUBSCRIBER_COUNT = 8245;
+
 const WealthWisdom = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(BASE_SUBSCRIBER_COUNT);
   
   const story = getWeeklyStory();
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Fetch real subscriber count and add to base
+    const fetchCount = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_subscriber_count');
+        if (!error && data !== null) {
+          setSubscriberCount(BASE_SUBSCRIBER_COUNT + data);
+        }
+      } catch {
+        // Keep base count on error
+      }
+    };
+    fetchCount();
   }, []);
   
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -438,7 +454,7 @@ const WealthWisdom = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Join 8,245 moguls-in-training. Unsubscribe anytime.
+                  Join {subscriberCount.toLocaleString()} moguls-in-training. Unsubscribe anytime.
                 </p>
               </form>
             )}
