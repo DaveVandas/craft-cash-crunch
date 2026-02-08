@@ -38,6 +38,8 @@ async function fetchNetWorthFromPerplexity(name: string): Promise<{
   category: string | null;
   biggestDeal: string | null;
   source: string | null;
+  imageUrl: string | null;
+  wikipediaSlug: string | null;
 } | null> {
   const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
   
@@ -71,6 +73,8 @@ async function fetchNetWorthFromPerplexity(name: string): Promise<{
 - category: one of (athletes, hollywood, musicians, tech-billionaires, politicians, influencers, historical)
 - biggestDeal: their most famous deal or contract
 - source: the source of this data (e.g., "Forbes Real-Time Billionaires 2024")
+- imageUrl: a direct URL to their official photo or Wikipedia image (must be a valid image URL ending in .jpg, .jpeg, .png, or .webp, or from wikipedia/wikimedia). Prioritize Wikipedia, official sources, or major news outlets. Return null if unsure.
+- wikipediaSlug: the exact Wikipedia article title/slug for this person (e.g., "Elon_Musk", "Taylor_Swift", "LeBron_James"). This should be the exact title used in the Wikipedia URL.
 
 Return ONLY the JSON object, no other text.`
           }
@@ -104,7 +108,23 @@ Return ONLY the JSON object, no other text.`
       parsed.source = `${parsed.source || 'Perplexity Search'} - ${citations[0]}`;
     }
     
-    console.log(`Perplexity parsed data: netWorth=${parsed.netWorth}, annualEarnings=${parsed.annualEarnings}`);
+    // Validate image URL
+    let imageUrl = parsed.imageUrl || null;
+    if (imageUrl) {
+      // Ensure it's a valid image URL
+      const isValidImageUrl = /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(imageUrl) || 
+                              imageUrl.includes('wikipedia.org') || 
+                              imageUrl.includes('wikimedia.org') ||
+                              imageUrl.includes('upload.wikimedia.org');
+      if (!isValidImageUrl) {
+        console.log(`Invalid image URL from Perplexity: ${imageUrl}`);
+        imageUrl = null;
+      } else {
+        console.log(`Valid image URL from Perplexity: ${imageUrl}`);
+      }
+    }
+    
+    console.log(`Perplexity parsed data: netWorth=${parsed.netWorth}, annualEarnings=${parsed.annualEarnings}, imageUrl=${imageUrl ? 'found' : 'none'}`);
     
     return {
       netWorth: Number(parsed.netWorth) || null,
@@ -113,6 +133,8 @@ Return ONLY the JSON object, no other text.`
       category: parsed.category || null,
       biggestDeal: parsed.biggestDeal || null,
       source: parsed.source || null,
+      imageUrl: imageUrl,
+      wikipediaSlug: parsed.wikipediaSlug || null,
     };
   } catch (error) {
     console.error('Perplexity fetch error:', error);
@@ -247,7 +269,7 @@ function getProfessionEmoji(profession: string): string {
 const STAGE_NAME_MAPPINGS: Record<string, string[]> = {
   'robyn rihanna fenty': ['Rihanna'],
   'aubrey drake graham': ['Drake'],
-  'shawn corey carter': ['Jay-Z', 'Jay Z'],
+  'shawn corey carter': ['Jay-Z', 'Jay Z', 'JAY-Z'],
   'onika tanya maraj': ['Nicki Minaj'],
   'stefani joanne angelina germanotta': ['Lady Gaga'],
   'belcalis marlenis almánzar': ['Cardi B'],
@@ -271,6 +293,39 @@ const STAGE_NAME_MAPPINGS: Record<string, string[]> = {
   'montero lamar hill': ['Lil Nas X'],
   'tahliah debrett barnett': ['FKA Twigs'],
   'robyn fenty': ['Rihanna'],
+  // Additional mappings for common celebrities
+  'eldrick tont woods': ['Tiger Woods'],
+  'lebron raymone james': ['LeBron James'],
+  'michael jeffrey jordan': ['Michael Jordan'],
+  'kobe bean bryant': ['Kobe Bryant'],
+  'dwayne douglas johnson': ['Dwayne Johnson', 'The Rock'],
+  'beyoncé giselle knowles-carter': ['Beyoncé', 'Beyonce'],
+  'beyoncé knowles': ['Beyoncé', 'Beyonce'],
+  'kanye omari west': ['Kanye West', 'Ye'],
+  'tramar lacel dillard': ['Flo Rida'],
+  'armando christian pérez': ['Pitbull'],
+  'obi martin agbaji': ['Dr. Alban'],
+  'melissa arnette elliott': ['Missy Elliott'],
+  'sean john combs': ['Diddy', 'P. Diddy', 'Puff Daddy'],
+  'curtis james jackson iii': ['50 Cent'],
+  'shawn corey carter': ['Jay-Z'],
+  'cameron jibril thomaz': ['Wiz Khalifa'],
+  'william leonard roberts ii': ['Rick Ross'],
+  'jacques berman webster ii': ['Travis Scott'],
+  'rakim hasheme allen': ['PnB Rock'],
+  'jahseh dwayne ricardo onfroy': ['XXXTentacion'],
+  'michael bakari jordan': ['Michael B. Jordan'],
+  'o\'shea jackson': ['Ice Cube'],
+  'andre romelle young': ['Dr. Dre'],
+  'tracy lauren marrow': ['Ice-T'],
+  'faheem rasheed najm': ['T-Pain'],
+  'cornell iral haynes jr': ['Nelly'],
+  'teyana me shay jacqueli shumpert': ['Teyana Taylor'],
+  'ciara princess harris': ['Ciara'],
+  'aliaune damala badara akon thiam': ['Akon'],
+  'pharrell lanscilo williams': ['Pharrell Williams', 'Pharrell'],
+  'solange piaget knowles': ['Solange', 'Solange Knowles'],
+  'robyn': ['Robyn'],
 };
 
 // Get stage names for a celebrity
@@ -624,12 +679,47 @@ async function getWikipediaImage(name: string, profession?: string): Promise<str
   return null;
 }
 
-// Get celebrity image - try multiple name variations
+// Try other Wikipedia language editions (often have images when English doesn't)
+async function tryOtherWikipediaLanguages(name: string): Promise<string | null> {
+  const languages = ['de', 'fr', 'es', 'it', 'pt', 'ja', 'zh', 'ru'];
+  
+  for (const lang of languages) {
+    try {
+      const wikiTitle = name.trim().replace(/\s+/g, '_');
+      const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
+      
+      const res = await fetch(url, {
+        headers: { 'User-Agent': WIKI_USER_AGENT, 'Api-User-Agent': WIKI_USER_AGENT }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.type !== 'disambiguation') {
+          if (data.originalimage?.source) {
+            console.log(`Found image on ${lang}.wikipedia for ${name}`);
+            return data.originalimage.source;
+          }
+          if (data.thumbnail?.source) {
+            console.log(`Found thumbnail on ${lang}.wikipedia for ${name}`);
+            return data.thumbnail.source.replace(/\/\d+px-/, '/400px-');
+          }
+        }
+      }
+    } catch (e) {
+      // Continue to next language
+    }
+  }
+  return null;
+}
+
+// Get celebrity image - try multiple sources with Perplexity hints
 async function getCelebrityImage(
   aiName: string,        // Name returned by AI (e.g., "Robyn Rihanna Fenty")
   originalSearch: string, // Original user search term (e.g., "Rihanna")  
   profession: string,
-  supabaseClient: any
+  supabaseClient: any,
+  perplexityImageUrl?: string | null,  // Image URL from Perplexity
+  perplexityWikiSlug?: string | null   // Wikipedia slug from Perplexity
 ): Promise<{ imageUrl: string | null; emoji: string }> {
   const slug = aiName.toLowerCase().replace(/\s+/g, '-');
   const emoji = getProfessionEmoji(profession);
@@ -662,28 +752,65 @@ async function getCelebrityImage(
       }
     }
     
-    // Try original search term FIRST (more likely to match Wikipedia)
-    console.log(`Trying Wikipedia with original search: "${originalSearch}"`);
-    let wikiImage = await getWikipediaImage(originalSearch, profession);
+    let finalImageUrl: string | null = null;
     
-    // If that fails and AI name is different, try AI name
-    if (!wikiImage && aiName.toLowerCase() !== originalSearch.toLowerCase()) {
-      console.log(`Trying Wikipedia with AI name: "${aiName}"`);
-      wikiImage = await getWikipediaImage(aiName, profession);
+    // Strategy 1: Use Perplexity-provided image URL if valid
+    if (perplexityImageUrl) {
+      console.log(`Trying Perplexity-provided image URL: ${perplexityImageUrl}`);
+      // Verify the URL is accessible
+      try {
+        const headRes = await fetch(perplexityImageUrl, { method: 'HEAD' });
+        if (headRes.ok && headRes.headers.get('content-type')?.startsWith('image/')) {
+          console.log(`Perplexity image URL verified: ${perplexityImageUrl}`);
+          finalImageUrl = perplexityImageUrl;
+        }
+      } catch (e) {
+        console.log(`Perplexity image URL not accessible: ${e}`);
+      }
     }
     
-    if (wikiImage) {
-      // Cache the Wikipedia URL
+    // Strategy 2: Use Perplexity-provided Wikipedia slug
+    if (!finalImageUrl && perplexityWikiSlug) {
+      console.log(`Trying Perplexity Wikipedia slug: ${perplexityWikiSlug}`);
+      finalImageUrl = await tryWikipediaPageSummary(perplexityWikiSlug);
+      if (!finalImageUrl) {
+        finalImageUrl = await tryWikipediaActionAPI(perplexityWikiSlug);
+      }
+    }
+    
+    // Strategy 3: Try original search term (most likely to match Wikipedia)
+    if (!finalImageUrl) {
+      console.log(`Trying Wikipedia with original search: "${originalSearch}"`);
+      finalImageUrl = await getWikipediaImage(originalSearch, profession);
+    }
+    
+    // Strategy 4: If that fails and AI name is different, try AI name
+    if (!finalImageUrl && aiName.toLowerCase() !== originalSearch.toLowerCase()) {
+      console.log(`Trying Wikipedia with AI name: "${aiName}"`);
+      finalImageUrl = await getWikipediaImage(aiName, profession);
+    }
+    
+    // Strategy 5: Try other Wikipedia language editions
+    if (!finalImageUrl) {
+      console.log(`Trying other Wikipedia languages for: ${originalSearch}`);
+      finalImageUrl = await tryOtherWikipediaLanguages(originalSearch);
+      if (!finalImageUrl && aiName.toLowerCase() !== originalSearch.toLowerCase()) {
+        finalImageUrl = await tryOtherWikipediaLanguages(aiName);
+      }
+    }
+    
+    if (finalImageUrl) {
+      // Cache the image URL
       await supabaseClient
         .from('celebrity_images')
         .upsert({
           celebrity_slug: slug,
           celebrity_name: aiName,
-          image_url: wikiImage
+          image_url: finalImageUrl
         }, { onConflict: 'celebrity_slug' });
       
-      console.log(`Cached Wikipedia image for ${aiName}`);
-      return { imageUrl: wikiImage, emoji };
+      console.log(`Cached image for ${aiName}`);
+      return { imageUrl: finalImageUrl, emoji };
     }
     
     // No image found, return emoji only
@@ -904,9 +1031,16 @@ Return ONLY valid JSON, no markdown or explanation.`
         console.warn(`WARNING: Zero/missing annualEarnings for ${parsed.name || name}, netWorth: ${finalNetWorth}`);
       }
       
-      // Get image with aggressive Wikipedia + emoji fallback
+      // Get image with aggressive Wikipedia + Perplexity hints + emoji fallback
       // Try original search term first (what user typed), then AI name
-      const { imageUrl, emoji } = await getCelebrityImage(parsed.name || name, name, finalProfession, supabaseClient);
+      const { imageUrl, emoji } = await getCelebrityImage(
+        parsed.name || name, 
+        name, 
+        finalProfession, 
+        supabaseClient,
+        perplexityData?.imageUrl,
+        perplexityData?.wikipediaSlug
+      );
       
       // Fallback: If earnings are 0 but we have net worth, estimate at 5% annual return
       if (finalAnnualEarnings === 0 && finalNetWorth > 0) {
