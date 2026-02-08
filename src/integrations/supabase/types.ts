@@ -545,6 +545,45 @@ export type Database = {
         }
         Relationships: []
       }
+      share_analytics: {
+        Row: {
+          context: Json | null
+          created_at: string
+          device_type: string | null
+          feature: string
+          id: string
+          platform: string
+          referrer: string | null
+          session_id: string | null
+          share_type: string
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          device_type?: string | null
+          feature: string
+          id?: string
+          platform: string
+          referrer?: string | null
+          session_id?: string | null
+          share_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          device_type?: string | null
+          feature?: string
+          id?: string
+          platform?: string
+          referrer?: string | null
+          session_id?: string | null
+          share_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       story_share_analytics: {
         Row: {
           id: string
@@ -968,6 +1007,17 @@ export type Database = {
       is_valid_guest_session: {
         Args: { p_session_id: string }
         Returns: boolean
+      }
+      track_share: {
+        Args: {
+          p_context?: Json
+          p_device_type?: string
+          p_feature: string
+          p_platform: string
+          p_referrer?: string
+          p_share_type?: string
+        }
+        Returns: undefined
       }
       track_story_share: {
         Args: { p_platform: string; p_story_id: string; p_story_title: string }

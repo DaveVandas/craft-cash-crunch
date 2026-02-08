@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { getShareUrl } from '@/lib/shareUrls';
+import { trackShareEvent } from '@/hooks/useShareTracking';
 
 interface LandingShareButtonsProps {
   shareText?: string;
@@ -26,6 +27,7 @@ const LandingShareButtons = ({
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       toast.success('Link copied!');
+      trackShareEvent('landing', 'copy', 'link');
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Failed to copy link');
@@ -33,11 +35,13 @@ const LandingShareButtons = ({
   };
 
   const handleTwitterShare = () => {
+    trackShareEvent('landing', 'twitter', 'link');
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleFacebookShare = () => {
+    trackShareEvent('landing', 'facebook', 'link');
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
@@ -45,6 +49,7 @@ const LandingShareButtons = ({
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
+        trackShareEvent('landing', 'native', 'link');
         await navigator.share({
           title: 'Wealth Perspective',
           text: shareText,
