@@ -25,8 +25,9 @@ const About = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p>
-                Wealth Perspective helps you understand just how much the world's wealthiest individuals earn 
-                by putting their income into relatable, tangible comparisons.
+                Wealth Perspective, owned and operated by Northspan Industries, LLC, helps you understand 
+                just how much the world's wealthiest individuals earn by putting their income into relatable, 
+                tangible comparisons.
               </p>
               <p>
                 Ever wondered how long it takes a billionaire to earn your yearly salary? Or how many houses 
