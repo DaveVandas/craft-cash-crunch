@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Copy, Check, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getShareUrl } from '@/lib/shareUrls';
 
 // Social media icons
 const TwitterIcon = () => (
@@ -31,12 +32,15 @@ interface InviteFriendsModalProps {
 
 const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => {
   const [copied, setCopied] = useState(false);
-  const shareUrl = 'https://earningsexplorer.shop';
+  // Use OG-optimized URL for social sharing (serves proper meta tags to crawlers)
+  const ogShareUrl = getShareUrl('home');
+  const displayUrl = 'https://earningsexplorer.shop';
   const shareText = "🤑 Ever wonder how much celebrities REALLY make? Check out Wealth Perspective - it shows mind-blowing earnings comparisons!";
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      // Copy the OG-optimized URL for better social previews
+      await navigator.clipboard.writeText(ogShareUrl);
       setCopied(true);
       toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
@@ -46,17 +50,17 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
   };
 
   const handleTwitterShare = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleFacebookShare = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogShareUrl)}&quote=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleWhatsAppShare = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + ogShareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -66,7 +70,7 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
         await navigator.share({
           title: 'Wealth Perspective',
           text: shareText,
-          url: shareUrl,
+          url: ogShareUrl,
         });
       } catch (err) {
         // User cancelled or error occurred
@@ -97,7 +101,7 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
             <div className="flex gap-2">
               <Input
                 readOnly
-                value={shareUrl}
+                value={displayUrl}
                 className="bg-muted/50"
               />
               <Button onClick={handleCopy} variant="outline" className="shrink-0">
