@@ -7,20 +7,16 @@ import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import CompareResult from '@/components/compare/CompareResult';
+import ComparePersonSelector from '@/components/compare/ComparePersonSelector';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { Celebrity, Category } from '@/lib/types';
-import { getAvatarEmoji } from '@/lib/avatar';
 import { getSimilarCelebrities, getCategoryEmoji } from '@/lib/similarCelebrities';
-import { Scale, Search, X, Sparkles } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Scale, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const Compare = () => {
   const location = useLocation();
-  const [query1, setQuery1] = useState('');
-  const [query2, setQuery2] = useState('');
   const [person1, setPerson1] = useState<Celebrity | null>(null);
   const [person2, setPerson2] = useState<Celebrity | null>(null);
   const { fetchCelebrity, loading } = useCelebrityData();
@@ -31,11 +27,9 @@ const Compare = () => {
 
     if (location.state?.person1) {
       setPerson1(location.state.person1);
-      setQuery1(location.state.person1.name);
     }
     if (location.state?.person2) {
       setPerson2(location.state.person2);
-      setQuery2(location.state.person2.name);
     }
   }, [location.state]);
 
@@ -46,34 +40,9 @@ const Compare = () => {
   }, [person1]);
 
   const handleSuggestionClick = async (name: string) => {
-    setQuery2(name);
     const result = await fetchCelebrity(name);
     setPerson2(result);
   };
-
-  const handleCompare = async () => {
-    if (!query1.trim() || !query2.trim()) return;
-    
-    const [result1, result2] = await Promise.all([
-      fetchCelebrity(query1.trim()),
-      fetchCelebrity(query2.trim())
-    ]);
-    
-    setPerson1(result1);
-    setPerson2(result2);
-  };
-
-  const clearPerson1 = () => {
-    setPerson1(null);
-    setQuery1('');
-  };
-
-  const clearPerson2 = () => {
-    setPerson2(null);
-    setQuery2('');
-  };
-
-  const bothReady = query1.trim() && query2.trim();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -110,97 +79,32 @@ const Compare = () => {
             </p>
           </div>
 
-          {/* Search Layout */}
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm mb-8 shadow-lg shadow-primary/5">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-stretch gap-4">
-                {/* Tycoon 1 Input */}
-                <div className="flex-1">
-                  <label className="text-sm text-muted-foreground block mb-2">Tycoon #1</label>
-                  {person1 ? (
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5">
-                      <Avatar className="h-10 w-10 ring-2 ring-primary/30">
-                        <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
-                        <AvatarFallback className="text-lg">{person1.emoji || getAvatarEmoji(person1.profession)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{person1.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{person1.profession}</p>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={clearPerson1}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="e.g. Elon Musk"
-                        value={query1}
-                        onChange={(e) => setQuery1(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && bothReady && handleCompare()}
-                        className="pl-10"
-                      />
-                    </div>
-                  )}
-                </div>
+          {/* Selection Layout */}
+          <div className="grid md:grid-cols-[1fr,auto,1fr] gap-4 md:gap-6 items-start mb-8">
+            {/* Tycoon 1 Selector */}
+            <ComparePersonSelector
+              label="Tycoon #1"
+              selected={person1}
+              onSelect={setPerson1}
+              placeholder="e.g. Elon Musk, Drake Maye..."
+            />
 
-                {/* VS Badge - Premium */}
-                <div className="flex items-center justify-center md:pt-6">
-                  <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary to-amber-600 shadow-xl shadow-primary/30 border border-primary/50">
-                    <Scale className="h-7 w-7 text-primary-foreground" />
-                    <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-amber-400 animate-pulse" />
-                  </div>
-                </div>
-
-                {/* Tycoon 2 Input */}
-                <div className="flex-1">
-                  <label className="text-sm text-muted-foreground block mb-2">Tycoon #2</label>
-                  {person2 ? (
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5">
-                      <Avatar className="h-10 w-10 ring-2 ring-primary/30">
-                        <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
-                        <AvatarFallback className="text-lg">{person2.emoji || getAvatarEmoji(person2.profession)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{person2.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{person2.profession}</p>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={clearPerson2}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="e.g. Jeff Bezos"
-                        value={query2}
-                        onChange={(e) => setQuery2(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && bothReady && handleCompare()}
-                        className="pl-10"
-                      />
-                    </div>
-                  )}
-                </div>
+            {/* VS Badge - Premium */}
+            <div className="flex items-center justify-center py-4 md:pt-8">
+              <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 shadow-xl shadow-primary/30 border border-primary/50">
+                <Scale className="h-7 w-7 text-primary-foreground" />
+                <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-primary-foreground/80 animate-pulse" />
               </div>
+            </div>
 
-              {/* Compare Button */}
-              {(!person1 || !person2) && (
-                <div className="mt-6 text-center">
-                  <Button 
-                    onClick={handleCompare} 
-                    disabled={loading || !bothReady}
-                    className="bg-gradient-to-r from-primary to-amber-600 hover:from-primary/90 hover:to-amber-600/90 px-8"
-                    size="lg"
-                  >
-                    {loading ? 'Searching...' : 'Compare Wealth'}
-                    <Scale className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            {/* Tycoon 2 Selector */}
+            <ComparePersonSelector
+              label="Tycoon #2"
+              selected={person2}
+              onSelect={setPerson2}
+              placeholder="e.g. Jeff Bezos, Kid Rock..."
+            />
+          </div>
 
           {/* Category Suggestions */}
           {person1 && !person2 && suggestions.length > 0 && (
