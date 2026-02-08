@@ -96,6 +96,18 @@ export default {
         'shimmer': {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' }
+        },
+        'diamond-shimmer': {
+          '0%, 100%': { 
+            opacity: '1',
+            transform: 'scale(1)',
+            filter: 'brightness(1)'
+          },
+          '50%': { 
+            opacity: '0.8',
+            transform: 'scale(1.1)',
+            filter: 'brightness(1.3)'
+          }
         }
       },
       animation: {
@@ -105,7 +117,8 @@ export default {
         'scale-in': 'scale-in 0.3s ease-out',
         'slide-up': 'slide-up 0.5s ease-out',
         'slide-in-right': 'slide-in-right 0.5s ease-out',
-        'shimmer': 'shimmer 2s infinite'
+        'shimmer': 'shimmer 2s infinite',
+        'diamond-shimmer': 'diamond-shimmer 1.5s ease-in-out infinite'
       },
       fontFamily: {
         sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
