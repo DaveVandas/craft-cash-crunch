@@ -70,12 +70,33 @@ const PROMO_CONTENT: Record<string, PromoContent> = {
     shareText: `💀 Drowning in debt? This calculator shows you the way out.\n\n📊 Avalanche vs Snowball methods\n💵 See exactly how much interest you're paying\n🚀 Find your fastest path to freedom\n\n🔥 Crush your debt!`,
     url: `${SITE_URL}/debt-destroyer`,
     ogPage: 'debt-destroyer',
-    trackingFeature: 'side-hustle', // Maps to closest feature
+    trackingFeature: 'side-hustle',
+  },
+  sideHustle: {
+    title: 'Side Hustle Ideas',
+    shareText: `💰 50+ side hustles ranked by PROFIT:\n\n🔥 Reselling, flipping, digital products\n📊 Real profit calculators\n📚 Step-by-step guides for each\n\n🚀 Find your perfect money maker!`,
+    url: `${SITE_URL}/side-hustle`,
+    ogPage: 'side-hustle',
+    trackingFeature: 'side-hustle',
+  },
+  affiliate: {
+    title: 'Get Paid to Share',
+    shareText: `💎 Get PAID to share viral wealth content!\n\n💵 $1-2 per signup\n📈 No cap on earnings\n🚀 One viral TikTok = $39,000\n\n👑 Join the Mogul Movement!`,
+    url: `${SITE_URL}/become-affiliate`,
+    ogPage: 'affiliate',
+    trackingFeature: 'affiliate',
+  },
+  compare: {
+    title: 'Celebrity Compare',
+    shareText: `⚔️ Who earns more? Compare any two celebrities!\n\n💰 Mind-blowing earnings differences\n📊 Real-time data\n🔥 Prepare to be shocked\n\n🏆 Pick your winner!`,
+    url: `${SITE_URL}/compare`,
+    ogPage: 'compare',
+    trackingFeature: 'compare',
   },
 };
 
 interface FeaturePromoShareProps {
-  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios' | 'wealthQuiz' | 'realityCheck' | 'debtDestroyer';
+  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios' | 'wealthQuiz' | 'realityCheck' | 'debtDestroyer' | 'sideHustle' | 'affiliate' | 'compare';
   size?: 'sm' | 'default';
   showLabel?: boolean;
   variant?: 'ghost' | 'outline' | 'default';

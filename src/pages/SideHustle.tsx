@@ -11,6 +11,7 @@ import { TrendingUp, DollarSign, Rocket, Flame, Zap, Crown, ArrowDown, BookOpen 
 import { formatCurrency } from '@/lib/earnings';
 import AllHustlesModal, { type SideHustle as SideHustleType } from '@/components/side-hustle/AllHustlesModal';
 import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 
 interface CalculationResult {
   profit: number;
@@ -391,9 +392,12 @@ const SideHustle = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
           </div>
           
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-5">
-            <Rocket className="h-4 w-4 text-primary" />
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">Side Hustle Guide</span>
+          <div className="flex items-center justify-center gap-3 mb-5">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+              <Rocket className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Side Hustle Guide</span>
+            </div>
+            <FeaturePromoShare feature="sideHustle" size="sm" showLabel />
           </div>
           
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
