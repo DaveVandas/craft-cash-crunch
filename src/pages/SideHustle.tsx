@@ -13,6 +13,7 @@ import AllHustlesModal, { type SideHustle as SideHustleType } from '@/components
 import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import SideHustleShareCard from '@/components/side-hustle/SideHustleShareCard';
+import AffiliateStoryCard from '@/components/side-hustle/AffiliateStoryCard';
 
 interface CalculationResult {
   profit: number;
@@ -743,18 +744,33 @@ const SideHustle = () => {
               </Card>
 
               {/* Share This Hustle Card */}
-              <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-emerald-500/5">
+              <Card className={`border-primary/20 bg-gradient-to-br from-card via-card ${
+                selectedHustle.name === 'Wealth Perspective Affiliate' 
+                  ? 'to-violet-500/5' 
+                  : 'to-emerald-500/5'
+              }`}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Share2 className="h-5 w-5 text-emerald-500" />
+                    <Share2 className={`h-5 w-5 ${
+                      selectedHustle.name === 'Wealth Perspective Affiliate' 
+                        ? 'text-violet-500' 
+                        : 'text-emerald-500'
+                    }`} />
                     Share This Hustle
                   </CardTitle>
                   <CardDescription>
-                    Know someone who'd crush it with {selectedHustle.name}? Share this breakdown!
+                    {selectedHustle.name === 'Wealth Perspective Affiliate' 
+                      ? 'Show your friends how to turn TikToks into income 🚀'
+                      : `Know someone who'd crush it with ${selectedHustle.name}? Share this breakdown!`
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SideHustleShareCard hustle={selectedHustle} />
+                  {selectedHustle.name === 'Wealth Perspective Affiliate' ? (
+                    <AffiliateStoryCard />
+                  ) : (
+                    <SideHustleShareCard hustle={selectedHustle} />
+                  )}
                 </CardContent>
               </Card>
 
