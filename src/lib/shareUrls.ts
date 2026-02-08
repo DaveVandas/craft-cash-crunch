@@ -7,6 +7,7 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export type ShareablePage = 
+  | 'home'
   | 'debt-destroyer'
   | 'quiz'
   | 'calculator'
@@ -29,6 +30,7 @@ export function getShareUrl(page: ShareablePage): string {
  * Page key to friendly name mapping
  */
 export const PAGE_NAMES: Record<ShareablePage, string> = {
+  'home': 'Wealth Perspective',
   'debt-destroyer': 'Debt Destroyer',
   'quiz': 'Wealth Quiz',
   'calculator': 'Reality Check',

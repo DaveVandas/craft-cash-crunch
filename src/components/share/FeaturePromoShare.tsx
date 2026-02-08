@@ -16,6 +16,7 @@ import {
   InstagramIcon,
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
+import { getShareUrl, type ShareablePage } from '@/lib/shareUrls';
 
 const SITE_URL = "https://earningsexplorer.shop";
 
@@ -23,38 +24,45 @@ interface PromoContent {
   title: string;
   shareText: string;
   url: string;
+  ogPage: ShareablePage; // For social media previews
 }
 
 const PROMO_CONTENT: Record<string, PromoContent> = {
   trades: {
     title: 'Who Needs College',
-    shareText: `💰 8 trades that pay MORE than most degrees:\n\n⚡ Electrician: $95k/yr\n🔧 Plumber: $90k/yr\n❄️ HVAC Tech: $85k/yr\n🔥 Welder: $80k/yr\n\n📈 Start earning at 18 while others rack up $100k+ in debt.\n\n🎓 Skip college. Stack wealth. ${SITE_URL}/trades`,
+    shareText: `💰 8 trades that pay MORE than most degrees:\n\n⚡ Electrician: $95k/yr\n🔧 Plumber: $90k/yr\n❄️ HVAC Tech: $85k/yr\n🔥 Welder: $80k/yr\n\n📈 Start earning at 18 while others rack up $100k+ in debt.\n\n🎓 Skip college. Stack wealth.`,
     url: `${SITE_URL}/trades`,
+    ogPage: 'trades',
   },
   mogulMarkets: {
     title: 'Mogul Markets',
-    shareText: `📈 Mogul Markets - Trade like a billionaire!\n\n💵 $10,000 paper money to start\n🎯 Real-time stock prices\n👑 Copy celebrity portfolios\n📊 Track your P&L\n\n🔥 Practice trading risk-free at ${SITE_URL}/mogul-markets`,
+    shareText: `📈 Mogul Markets - Trade like a billionaire!\n\n💵 $10,000 paper money to start\n🎯 Real-time stock prices\n👑 Copy celebrity portfolios\n📊 Track your P&L\n\n🔥 Practice trading risk-free!`,
     url: `${SITE_URL}/mogul-markets`,
+    ogPage: 'mogul-markets',
   },
   vipPortfolios: {
     title: 'VIP Portfolios',
-    shareText: `👑 Ever wonder what stocks politicians trade?\n\n📊 See Nancy Pelosi's portfolio\n💼 Track Warren Buffett's moves\n🎯 Copy trades to your paper portfolio\n\n🔥 Mirror the VIPs at ${SITE_URL}/celebrity-portfolios`,
+    shareText: `👑 Ever wonder what stocks politicians trade?\n\n📊 See Nancy Pelosi's portfolio\n💼 Track Warren Buffett's moves\n🎯 Copy trades to your paper portfolio\n\n🔥 Mirror the VIPs!`,
     url: `${SITE_URL}/celebrity-portfolios`,
+    ogPage: 'celebrity-portfolios',
   },
   wealthQuiz: {
     title: 'Wealth Quiz',
-    shareText: `🧠 Think you know how fast billionaires make money?\n\n💰 Guess celebrity earnings\n🔥 Build streaks for bonus points\n🏆 Earn your wealth title\n\n🎯 Test your mogul IQ at ${SITE_URL}/quiz`,
+    shareText: `🧠 Think you know how fast billionaires make money?\n\n💰 Guess celebrity earnings\n🔥 Build streaks for bonus points\n🏆 Earn your wealth title\n\n🎯 Test your mogul IQ!`,
     url: `${SITE_URL}/quiz`,
+    ogPage: 'quiz',
   },
   realityCheck: {
     title: 'Reality Check',
-    shareText: `💭 Ever wonder how your salary compares to celebrities?\n\n⏱️ See how fast they earn YOUR salary\n😅 Prepare to be humbled\n💡 Get motivated to build wealth\n\n🔥 Get your reality check at ${SITE_URL}/calculator`,
+    shareText: `💭 Ever wonder how your salary compares to celebrities?\n\n⏱️ See how fast they earn YOUR salary\n😅 Prepare to be humbled\n💡 Get motivated to build wealth\n\n🔥 Get your reality check!`,
     url: `${SITE_URL}/calculator`,
+    ogPage: 'calculator',
   },
   debtDestroyer: {
     title: 'Debt Destroyer',
-    shareText: `💀 Drowning in debt? This calculator shows you the way out.\n\n📊 Avalanche vs Snowball methods\n💵 See exactly how much interest you're paying\n🚀 Find your fastest path to freedom\n\n🔥 Crush your debt at ${SITE_URL}/debt-destroyer`,
+    shareText: `💀 Drowning in debt? This calculator shows you the way out.\n\n📊 Avalanche vs Snowball methods\n💵 See exactly how much interest you're paying\n🚀 Find your fastest path to freedom\n\n🔥 Crush your debt!`,
     url: `${SITE_URL}/debt-destroyer`,
+    ogPage: 'debt-destroyer',
   },
 };
 
@@ -76,13 +84,16 @@ const FeaturePromoShare = ({
   const content = PROMO_CONTENT[feature];
   if (!content) return null;
 
+  // Get the OG-optimized URL for social sharing
+  const ogUrl = getShareUrl(content.ogPage);
+
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: content.title,
           text: content.shareText,
-          url: content.url,
+          url: ogUrl, // Use OG URL for rich previews
         });
       } catch {
         // User cancelled
@@ -93,22 +104,24 @@ const FeaturePromoShare = ({
   };
 
   const handleWhatsAppShare = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(content.shareText)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(content.shareText + '\n\n' + ogUrl)}`;
     window.open(url, '_blank');
   };
 
   const handleTwitterShare = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(content.shareText)}`;
+    // Twitter/X uses the URL for OG previews
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(content.shareText)}&url=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleFacebookShare = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(content.url)}&quote=${encodeURIComponent(content.shareText.split('\n')[0])}`;
+    // Facebook scrapes the URL for OG tags
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleLinkedInShare = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(content.url)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
@@ -124,7 +137,7 @@ const FeaturePromoShare = ({
 
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(content.shareText);
+      await navigator.clipboard.writeText(content.shareText + '\n\n' + ogUrl);
       toast.success('Copied to clipboard!');
     } catch {
       toast.error('Failed to copy');
