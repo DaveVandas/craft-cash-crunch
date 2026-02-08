@@ -378,19 +378,23 @@ const Calculator = () => {
                       {selectedHustle && (
                         <div className="animate-fade-in space-y-4">
                           {/* Hustle Header */}
-                          <div className={`flex items-center gap-3 p-4 rounded-xl bg-card border ${selectedHustle.isPinned ? 'border-amber-500/50' : 'border-border/50'}`}>
-                            <span className="text-3xl">{selectedHustle.emoji}</span>
-                            <div className="flex-1">
-                              <p className="text-lg font-bold text-foreground">{selectedHustle.name}</p>
-                              <p className="text-sm text-primary">💡 {selectedHustle.tip}</p>
+                          <div className={`p-4 rounded-xl bg-card border ${selectedHustle.isPinned ? 'border-amber-500/50' : 'border-border/50'}`}>
+                            <div className="flex items-start gap-3">
+                              <span className="text-3xl flex-shrink-0">{selectedHustle.emoji}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                  <p className="text-lg font-bold text-foreground truncate">{selectedHustle.name}</p>
+                                  {selectedHustle.isPinned && selectedHustle.link && (
+                                    <Link to={selectedHustle.link} className="flex-shrink-0">
+                                      <Button size="sm" className="gap-1 bg-gradient-to-r from-amber-500 to-primary">
+                                        Join <ArrowRight className="h-3 w-3" />
+                                      </Button>
+                                    </Link>
+                                  )}
+                                </div>
+                                <p className="text-sm text-primary">💡 {selectedHustle.tip}</p>
+                              </div>
                             </div>
-                            {selectedHustle.isPinned && selectedHustle.link && (
-                              <Link to={selectedHustle.link}>
-                                <Button size="sm" className="gap-1 bg-gradient-to-r from-amber-500 to-primary">
-                                  Join <ArrowRight className="h-3 w-3" />
-                                </Button>
-                              </Link>
-                            )}
                           </div>
 
                           {/* AFFILIATE CALCULATOR - Special tiered referral UI */}
