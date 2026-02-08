@@ -16,9 +16,11 @@ export type ShareablePage =
   | 'celebrity-portfolios'
   | 'side-hustle'
   | 'compare'
-  | 'affiliate';
+  | 'affiliate'
+  | 'wealth-wisdom'
+  | 'wealth-facts';
 
-const SHARE_URL_VERSION = 3;
+const SHARE_URL_VERSION = 4;
 
 function normalizeRedirectPath(redirectPath: string): string {
   if (!redirectPath) return "/";
@@ -57,4 +59,6 @@ export const PAGE_NAMES: Record<ShareablePage, string> = {
   'side-hustle': 'Side Hustles',
   'compare': 'Celebrity Compare',
   'affiliate': 'Get Paid to Share',
+  'wealth-wisdom': 'Wealth Wisdom',
+  'wealth-facts': 'Wealth Facts',
 };

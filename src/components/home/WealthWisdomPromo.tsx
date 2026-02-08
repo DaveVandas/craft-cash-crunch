@@ -16,11 +16,13 @@ import {
   InstagramIcon,
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
+import { getShareUrl } from '@/lib/shareUrls';
 
 const SITE_URL = "https://earningsexplorer.shop";
 
 const WealthWisdomPromo = () => {
-  const shareText = `📚 Weekly rags-to-riches stories from billionaires who started with nothing.\n\n🔥 Read their journeys at ${SITE_URL}/wealth-wisdom`;
+  const ogShareUrl = getShareUrl('wealth-wisdom');
+  const shareText = `📚 Weekly rags-to-riches stories from billionaires who started with nothing.\n\n🔥 Read their journeys at`;
 
   const handleNativeShare = async () => {
     if (navigator.share) {
@@ -28,7 +30,7 @@ const WealthWisdomPromo = () => {
         await navigator.share({
           title: 'Wealth Wisdom',
           text: shareText,
-          url: `${SITE_URL}/wealth-wisdom`,
+          url: ogShareUrl,
         });
       } catch {
         // User cancelled
@@ -39,22 +41,22 @@ const WealthWisdomPromo = () => {
   };
 
   const handleWhatsAppShare = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${ogShareUrl}`)}`;
     window.open(url, '_blank');
   };
 
   const handleTwitterShare = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleFacebookShare = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}&quote=${encodeURIComponent('📚 Weekly rags-to-riches stories from billionaires')}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogShareUrl)}&quote=${encodeURIComponent('📚 Weekly rags-to-riches stories from billionaires')}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleLinkedInShare = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
@@ -70,7 +72,7 @@ const WealthWisdomPromo = () => {
 
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(`${shareText} ${ogShareUrl}`);
       toast.success('Copied to clipboard!');
     } catch {
       toast.error('Failed to copy');
