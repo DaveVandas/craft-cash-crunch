@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, TrendingUp, TrendingDown, ChevronRight, DollarSign, MessageCircle, Copy } from 'lucide-react';
+import { Crown, TrendingUp, TrendingDown, ChevronRight, DollarSign, MessageCircle, Copy, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
@@ -119,9 +119,14 @@ const MogulMarketsPreview = () => {
               </span>
               <span className="text-muted-foreground hidden sm:inline">Live</span>
             </div>
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => console.log('MogulMarkets dropdown open:', open)}>
               <DropdownMenuTrigger asChild>
-                <PremiumShareIconButton iconOnly />
+                <button 
+                  className="relative overflow-hidden flex items-center justify-center h-8 w-8 min-w-8 p-0 rounded-md bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/40 hover:from-amber-500/30 hover:to-yellow-500/20 hover:border-amber-400/60 hover:shadow-[0_0_12px_rgba(245,158,11,0.4)] transition-all duration-300"
+                  onClick={() => console.log('MogulMarkets button clicked')}
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
