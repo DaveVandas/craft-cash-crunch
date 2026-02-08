@@ -149,7 +149,8 @@ const HeroSpotlight = () => {
 
         {/* CTA */}
         <Button 
-          className="w-full bg-gradient-to-r from-primary/20 to-primary/10 hover:from-primary hover:to-primary/80 text-primary hover:text-primary-foreground border border-primary/30 hover:border-primary transition-all duration-300 shadow-lg shadow-primary/10 group-hover:shadow-primary/20"
+          variant="outline"
+          className="w-full border-primary/50 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
         >
           <span>View Full Profile</span>
           <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
