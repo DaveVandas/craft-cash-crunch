@@ -154,15 +154,16 @@ const Profile = () => {
   const isLoadingWithPreview = loading && !!(previewCelebrity || prefetchedCelebrity);
   const isLoadingWithoutPreview = (loading || authLoading) && !previewCelebrity && !prefetchedCelebrity;
 
-  // Show loading skeleton while fetching (without preview data)
+  // Show branded loading state while fetching (without preview data)
   if (isLoadingWithoutPreview) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 container py-8">
-          <Skeleton className="h-40 w-full mb-8 animate-pulse" />
-          <Skeleton className="h-64 w-full mb-8 animate-pulse" />
-          <Skeleton className="h-96 w-full animate-pulse" />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="text-5xl animate-pulse">💎</div>
+            <p className="text-muted-foreground text-sm">Loading profile...</p>
+          </div>
         </main>
         <Footer />
       </div>
