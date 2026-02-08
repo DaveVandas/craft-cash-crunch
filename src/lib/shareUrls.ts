@@ -1,0 +1,40 @@
+/**
+ * Generate OG-optimized share URLs for social media.
+ * These URLs point to the edge function which serves proper OG meta tags
+ * for Twitter, Facebook, LinkedIn, etc.
+ */
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+export type ShareablePage = 
+  | 'debt-destroyer'
+  | 'quiz'
+  | 'calculator'
+  | 'mogul-markets'
+  | 'trades'
+  | 'celebrity-portfolios'
+  | 'side-hustle'
+  | 'compare';
+
+/**
+ * Get the social-optimized share URL for a page.
+ * When shared on Twitter/Facebook, this URL will return proper OG meta tags.
+ * When clicked by regular users, it redirects to the actual page.
+ */
+export function getShareUrl(page: ShareablePage): string {
+  return `${SUPABASE_URL}/functions/v1/og-share?page=${page}`;
+}
+
+/**
+ * Page key to friendly name mapping
+ */
+export const PAGE_NAMES: Record<ShareablePage, string> = {
+  'debt-destroyer': 'Debt Destroyer',
+  'quiz': 'Wealth Quiz',
+  'calculator': 'Reality Check',
+  'mogul-markets': 'Mogul Markets',
+  'trades': 'Trade History',
+  'celebrity-portfolios': 'VIP Portfolios',
+  'side-hustle': 'Side Hustles',
+  'compare': 'Celebrity Compare',
+};
