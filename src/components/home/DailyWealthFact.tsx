@@ -30,6 +30,9 @@ const wealthFacts = [
   "Larry Ellison earns about $36,000 per minute from Oracle dividends alone.",
   "The Walton family (Walmart heirs) earns $70,000 per minute from their holdings.",
   "Bernard Arnault (LVMH) added $62 billion to his net worth in 2023 alone.",
+  "Elon Musk's net worth fluctuates by billions daily — more than most lottery jackpots.",
+  "Jeff Bezos could buy a new house every hour for 1,000 years and still be rich.",
+  "The top 10 billionaires have more wealth than the bottom 3.5 billion people.",
   
   // Celebrity earnings
   "Taylor Swift's Eras Tour grossed $2.2 billion — more than the GDP of 30 countries.",
@@ -46,6 +49,16 @@ const wealthFacts = [
   "Michael Jordan earns more from Nike annually than he ever did playing basketball.",
   "Rihanna is worth over $1.4 billion — mostly from Fenty Beauty, not music.",
   "Jay-Z became hip-hop's first billionaire in 2019.",
+  "Kim Kardashian makes $1.8 million per sponsored Instagram post.",
+  "Travis Kelce's endorsement deals doubled after dating Taylor Swift.",
+  "Shaq has made more money since retiring than he did playing basketball.",
+  "Post Malone spent $40,000 on Postmates delivery in one year.",
+  "Snoop Dogg makes $500,000 just to show up at a party.",
+  "Floyd Mayweather earned $275 million for a single 36-minute fight.",
+  "Dr. Dre sold Beats to Apple for $3 billion — mostly from headphones.",
+  "Kanye West made $1.8 billion from Yeezy before Adidas dropped him.",
+  "Ed Sheeran's Mathematics Tour became the highest-grossing tour ever.",
+  "Bad Bunny earned $88 million in 2023 — more than any Latin artist ever.",
   
   // Corporate comparisons
   "Apple makes $1.7 million every 5 minutes.",
@@ -54,6 +67,12 @@ const wealthFacts = [
   "Netflix spends more on content annually than most countries spend on their military.",
   "Microsoft makes $1 billion in profit every 3 days.",
   "Nvidia's market cap grew by $200 billion in a single day in 2024.",
+  "Disney makes more in a day than most people will earn in 10 lifetimes.",
+  "Walmart's revenue exceeds the GDP of 170 countries.",
+  "Apple has more cash reserves than the US Treasury.",
+  "Amazon delivers 1.6 million packages per day — that is 18 per second.",
+  "Tesla's stock once rose $50 billion in a single trading session.",
+  "Saudi Aramco made $161 billion profit in one year — $5,100 per second.",
   
   // Inequality facts
   "The top 1% own more wealth than the bottom 90% combined.",
@@ -62,6 +81,10 @@ const wealthFacts = [
   "The average CEO makes 344 times more than their median worker.",
   "It would take the average American worker 3.75 million years to earn $1 billion.",
   "The wealth of the top 5 billionaires has doubled since 2020.",
+  "8 people own as much wealth as the poorest half of humanity.",
+  "The richest 1% captured 63% of all new wealth created since 2020.",
+  "A minimum wage worker would need 7 million years to earn Elon's net worth.",
+  "Billionaires add $2.7 billion to their fortunes every single day.",
   
   // Historical wealth
   "Mansa Musa (14th century) was so rich he caused inflation across the Mediterranean.",
@@ -69,6 +92,11 @@ const wealthFacts = [
   "Cleopatra's Egypt had more gold reserves than most modern central banks.",
   "The Medici family funded the entire Renaissance from their banking fortune.",
   "Andrew Carnegie gave away 90% of his fortune — $350 billion in today's dollars.",
+  "King Solomon's wealth would be worth $2.2 trillion in today's dollars.",
+  "The Rothschild family was once worth more than every country's GDP combined.",
+  "Julius Caesar was worth $4.6 trillion adjusted for inflation.",
+  "Genghis Khan controlled 25% of Earth's land — the largest empire ever.",
+  "Augustus Caesar had a fortune equal to 25% of the entire Roman economy.",
   
   // Mind-bending comparisons
   "If you stacked $1 billion in $100 bills, it would be 3,300 feet tall.",
@@ -76,6 +104,34 @@ const wealthFacts = [
   "Elon Musk could buy every NFL, NBA, MLB, and NHL team — and still have $150 billion left.",
   "Jeff Bezos's wealth could give every Amazon employee a $200,000 bonus.",
   "The iPhone you are holding costs more than 90% of the world earns in a month.",
+  "You'd need to spend $10,000 per day for 274 years to spend $1 billion.",
+  "A stack of $1 billion in $1 bills would reach 68 miles into space.",
+  "If Jeff Bezos dropped $1,000, picking it up would waste his time — he makes more per second.",
+  "Elon Musk makes the average US salary every 3 seconds.",
+  "If you earned $10,000 per day since ancient Egypt, you'd still have less than Bezos.",
+  "1 billion seconds ago, it was 1993. 1 billion minutes ago was around 100 AD.",
+  
+  // Spending comparisons
+  "Billionaires could end world hunger 7 times over with just 2% of their wealth.",
+  "Jeff Bezos's yacht cost $500 million — plus a $75 million support yacht.",
+  "Elon Musk paid $44 billion for Twitter — the GDP of Ethiopia.",
+  "Mark Cuban bought the Dallas Mavericks for $285 million — now worth $4 billion.",
+  "Larry Ellison owns 98% of the Hawaiian island Lanai.",
+  "Bill Gates owns more US farmland than anyone — 270,000 acres.",
+  "The most expensive home ever sold was $238 million — a penthouse in NYC.",
+  "A Bugatti Chiron costs $3 million. Musk could buy 100,000 of them.",
+  "The most expensive yacht ever built cost $600 million — owned by a Russian oligarch.",
+  "Jeff Bezos's space flight cost $5.5 billion — that is $55 million per minute.",
+  
+  // Sports wealth
+  "The Dallas Cowboys are worth $9 billion — more than many countries' economies.",
+  "Tiger Woods made $100 million playing and $1.7 billion from endorsements.",
+  "Patrick Mahomes signed a $450 million contract — the largest in sports history.",
+  "Real Madrid is worth $6.6 billion — more than Netflix when it started.",
+  "Michael Jordan's $10 million gambling loss is 0.3% of his net worth.",
+  "Shohei Ohtani's $700 million contract would take 14,000 years at minimum wage.",
+  "The average NFL team is worth $4.5 billion — up 12% from last year.",
+  "The Saudi Pro League spent $900 million on players in one transfer window.",
 ];
 
 const DailyWealthFact = () => {
