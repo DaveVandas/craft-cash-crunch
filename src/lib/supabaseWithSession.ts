@@ -136,11 +136,14 @@ export function getOrCreateGuestSession(): string {
 /**
  * Returns a Supabase client with the guest session ID header set
  * This allows RLS policies to validate session ownership
+ * 
+ * NOTE: global.headers may not be passed to functions.invoke() calls.
+ * For edge function calls, use invokeWithSession() or pass headers explicitly.
  */
 export function createSupabaseWithSession(sessionId?: string | null) {
   const effectiveSessionId = sessionId ?? getGuestSessionId();
   
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: localStorage,
       persistSession: true,
@@ -152,4 +155,19 @@ export function createSupabaseWithSession(sessionId?: string | null) {
       } : {},
     },
   });
+
+  // Monkey-patch functions.invoke to always include session header
+  const originalInvoke = client.functions.invoke.bind(client.functions);
+  client.functions.invoke = async (functionName: string, options?: { body?: unknown; headers?: Record<string, string> }) => {
+    const mergedHeaders = {
+      ...(effectiveSessionId ? { 'x-session-id': effectiveSessionId } : {}),
+      ...options?.headers,
+    };
+    return originalInvoke(functionName, {
+      ...options,
+      headers: mergedHeaders,
+    });
+  };
+
+  return client;
 }
