@@ -127,17 +127,14 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
                 </Avatar>
               </div>
               <h2 
-                className="font-serif text-2xl md:text-3xl font-bold px-2 leading-tight break-words"
+                className="font-serif text-2xl md:text-3xl font-bold px-2 leading-tight break-words text-orange-100"
                 style={{ 
-                  background: 'linear-gradient(90deg, #fb923c, #f97316, #ea580c)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
                   wordBreak: 'break-word',
                 }}
               >
                 {celebrity.name}
               </h2>
+              <p className="text-orange-300/70 text-sm font-medium mt-1">{celebrity.profession}</p>
             </div>
 
             {/* Net Worth, Annual & Hourly Earnings */}
