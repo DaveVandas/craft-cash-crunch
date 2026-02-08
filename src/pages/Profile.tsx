@@ -161,7 +161,7 @@ const Profile = () => {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4 animate-fade-in">
-            <div className="text-5xl animate-pulse">💎</div>
+            <div className="text-5xl animate-diamond-shimmer">💎</div>
             <p className="text-muted-foreground text-sm">Loading profile...</p>
           </div>
         </main>
