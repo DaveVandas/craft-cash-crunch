@@ -19,7 +19,11 @@ export type ShareablePage =
   | 'affiliate'
   | 'wealth-wisdom'
   | 'wealth-facts'
-  | 'mogul-academy';
+  | 'mogul-academy'
+  | 'landing-a'
+  | 'landing-b'
+  | 'landing-c'
+  | 'landing-d';
 
 const SHARE_URL_VERSION = 5;
 
@@ -63,4 +67,8 @@ export const PAGE_NAMES: Record<ShareablePage, string> = {
   'wealth-wisdom': 'Wealth Wisdom',
   'wealth-facts': 'Wealth Facts',
   'mogul-academy': 'Mogul Academy',
+  'landing-a': 'Think Like The 1%',
+  'landing-b': 'Wealth Reality Check',
+  'landing-c': 'Wealth Perspective',
+  'landing-d': 'Get Paid to Share',
 };
