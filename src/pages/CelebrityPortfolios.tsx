@@ -60,6 +60,8 @@ interface FeaturedFigure {
   name: string;
   title: string;
   category: string;
+  verified?: boolean;
+  dataSource?: string;
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -87,36 +89,36 @@ const categoryLabels: Record<string, string> = {
   international: 'International',
 };
 
-// Fallback featured figures in case API fails - expanded
+// Fallback featured figures - VERIFIED figures with known public disclosures
 const FALLBACK_FIGURES: FeaturedFigure[] = [
-  // Politicians
-  { name: 'Nancy Pelosi', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Dan Crenshaw', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Tommy Tuberville', title: 'U.S. Senator', category: 'politician' },
-  { name: 'Marjorie Taylor Greene', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Josh Gottheimer', title: 'U.S. House Representative', category: 'politician' },
-  // Investors
-  { name: 'Warren Buffett', title: 'Berkshire Hathaway CEO', category: 'investor' },
-  { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor' },
-  { name: 'Cathie Wood', title: 'ARK Invest CEO', category: 'investor' },
-  { name: 'Bill Ackman', title: 'Pershing Square CEO', category: 'investor' },
-  { name: 'Ray Dalio', title: 'Bridgewater Founder', category: 'investor' },
-  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor' },
-  { name: 'George Soros', title: 'Soros Fund Management', category: 'investor' },
-  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor' },
-  // Tech
-  { name: 'Elon Musk', title: 'Tesla/SpaceX CEO', category: 'tech' },
-  { name: 'Jeff Bezos', title: 'Amazon Founder', category: 'tech' },
-  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech' },
-  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech' },
-  // Celebrity
-  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
-  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity' },
-  { name: 'Jay-Z', title: 'Marcy Venture Partners', category: 'celebrity' },
-  { name: 'Serena Williams', title: 'Serena Ventures', category: 'celebrity' },
+  // Politicians with STOCK Act disclosures
+  { name: 'Nancy Pelosi', title: 'U.S. House (D-CA)', category: 'politician', verified: true, dataSource: 'STOCK Act' },
+  { name: 'Dan Crenshaw', title: 'U.S. House (R-TX)', category: 'politician', verified: true, dataSource: 'STOCK Act' },
+  { name: 'Tommy Tuberville', title: 'U.S. Senator (R-AL)', category: 'politician', verified: true, dataSource: 'STOCK Act' },
+  { name: 'Josh Gottheimer', title: 'U.S. House (D-NJ)', category: 'politician', verified: true, dataSource: 'STOCK Act' },
+  { name: 'Michael McCaul', title: 'U.S. House (R-TX)', category: 'politician', verified: true, dataSource: 'STOCK Act' },
+  // 13F Filers - Hedge Funds
+  { name: 'Warren Buffett', title: 'Berkshire Hathaway', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Cathie Wood', title: 'ARK Invest', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Bill Ackman', title: 'Pershing Square', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Ray Dalio', title: 'Bridgewater Associates', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'David Tepper', title: 'Appaloosa Management', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Ken Griffin', title: 'Citadel LLC', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  { name: 'Seth Klarman', title: 'Baupost Group', category: 'investor', verified: true, dataSource: 'SEC 13F' },
+  // Tech Executives - SEC Form 4
+  { name: 'Elon Musk', title: 'Tesla/SpaceX/X CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Satya Nadella', title: 'Microsoft CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Tim Cook', title: 'Apple CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  // Celebrity Investors
+  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity', verified: false, dataSource: 'Public' },
+  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity', verified: false, dataSource: 'Public' },
   // International
-  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international' },
-  { name: 'Bernard Arnault', title: 'LVMH CEO', category: 'international' },
+  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international', verified: true, dataSource: 'Public Filings' },
 ];
 
 const CelebrityPortfolios = () => {
@@ -509,7 +511,10 @@ const CelebrityPortfolios = () => {
                 {filteredFigures.map((figure) => (
                   <Card 
                     key={figure.name}
-                    className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+                    className={cn(
+                      "cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5",
+                      figure.verified && "ring-1 ring-emerald-500/20"
+                    )}
                     onClick={() => handleSelectFigure(figure.name)}
                   >
                     <CardContent className="p-4">
@@ -522,8 +527,16 @@ const CelebrityPortfolios = () => {
                             {categoryIcons[figure.category] || <User className="h-4 w-4" />}
                           </div>
                           <div>
-                            <h3 className="font-semibold">{figure.name}</h3>
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="font-semibold">{figure.name}</h3>
+                              {figure.verified && (
+                                <span className="text-emerald-500 text-xs" title="Verified SEC/Congressional data">✓</span>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground">{figure.title}</p>
+                            {figure.dataSource && (
+                              <p className="text-xs text-primary/70 mt-0.5">{figure.dataSource}</p>
+                            )}
                           </div>
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />
