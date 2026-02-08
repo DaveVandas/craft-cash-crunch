@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PortfolioLoadingOverlay } from '@/components/trading/PortfolioLoadingOverlay';
+import { VIPPortfolioDisclaimer } from '@/components/info/VIPPortfolioDisclaimer';
 import { 
   Users, 
   Search, 
@@ -377,12 +378,15 @@ const CelebrityPortfolios = () => {
         {/* Info Banner */}
         <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-amber-500/5">
           <CardContent className="py-3 px-4">
-            <div className="flex items-center gap-3 text-sm">
-              <Crown className="h-4 w-4 text-primary flex-shrink-0" />
-              <p className="text-muted-foreground">
-                View publicly disclosed portfolios of politicians, investors, and public figures. 
-                Copy their trades to your Mogul Markets paper trading portfolio!
-              </p>
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex items-center gap-3">
+                <Crown className="h-4 w-4 text-primary flex-shrink-0" />
+                <p className="text-muted-foreground">
+                  View publicly disclosed portfolios of politicians, investors, and public figures. 
+                  Copy their trades to your Mogul Markets paper trading portfolio!
+                </p>
+              </div>
+              <VIPPortfolioDisclaimer variant="link" className="flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
