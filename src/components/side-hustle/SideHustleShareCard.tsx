@@ -4,7 +4,13 @@ import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/earnings';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
-import { Rocket, TrendingUp, Target, Zap } from 'lucide-react';
+import { Rocket, TrendingUp, Target, Zap, Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export interface SideHustle {
   name: string;
@@ -119,7 +125,21 @@ const SideHustleShareCard = ({ hustle, className = '' }: SideHustleShareCardProp
               {hustle.name}
             </h2>
             <p className="text-emerald-400/80 text-sm font-medium">{hustle.description}</p>
-            <p className="text-emerald-300/50 text-xs mt-1">Side Hustle Profit Breakdown</p>
+            <div className="flex items-center justify-center gap-1 mt-1">
+              <p className="text-emerald-300/50 text-xs">Side Hustle Profit Breakdown</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-emerald-300/40 hover:text-emerald-300/80 transition-colors">
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[200px] text-xs">
+                    Estimates based on average market prices, typical sales volume, and community data.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           {/* Difficulty Badge */}
