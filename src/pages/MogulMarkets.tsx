@@ -15,6 +15,7 @@ import {
   Zap,
   GraduationCap
 } from 'lucide-react';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
 import { TradeModal } from '@/components/trading/TradeModal';
 import { MirrorTradesModal } from '@/components/trading/MirrorTradesModal';
@@ -422,6 +423,8 @@ const MogulMarkets = () => {
                 <span className="sm:hidden">Learn</span>
               </Link>
             </Button>
+            
+            <FeaturePromoShare feature="mogulMarkets" showLabel />
             
             <Button 
               onClick={handleBuyCash}
