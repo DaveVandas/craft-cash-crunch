@@ -108,9 +108,19 @@ const InstallPrompt = () => {
             </p>
             
             {isIOS ? (
-              <div className="flex items-center gap-2 mt-2 text-xs text-primary">
-                <Share className="h-4 w-4" />
-                <span>Tap Share → Add to Home Screen</span>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  Use Safari's share button below:
+                </p>
+                <div className="flex items-center gap-2 text-xs text-primary font-medium">
+                  <Share className="h-4 w-4" />
+                  <span>Share</span>
+                  <span className="text-muted-foreground">→</span>
+                  <span>Add to Home Screen</span>
+                </div>
+                <div className="flex justify-center mt-1 animate-bounce">
+                  <span className="text-primary text-lg">↓</span>
+                </div>
               </div>
             ) : (
               <Button
