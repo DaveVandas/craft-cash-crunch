@@ -18,9 +18,10 @@ export type ShareablePage =
   | 'compare'
   | 'affiliate'
   | 'wealth-wisdom'
-  | 'wealth-facts';
+  | 'wealth-facts'
+  | 'mogul-academy';
 
-const SHARE_URL_VERSION = 4;
+const SHARE_URL_VERSION = 5;
 
 function normalizeRedirectPath(redirectPath: string): string {
   if (!redirectPath) return "/";
@@ -61,4 +62,5 @@ export const PAGE_NAMES: Record<ShareablePage, string> = {
   'affiliate': 'Get Paid to Share',
   'wealth-wisdom': 'Wealth Wisdom',
   'wealth-facts': 'Wealth Facts',
+  'mogul-academy': 'Mogul Academy',
 };
