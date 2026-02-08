@@ -50,9 +50,10 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-border/40 bg-card/30 py-8 mt-auto hidden md:block">
+    <footer className="border-t border-border/40 bg-card/30 py-6 md:py-8 mt-auto">
       <div className="container">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Desktop layout */}
+        <div className="hidden md:flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="text-xl">💎</span>
             <span className="font-serif text-lg font-semibold gradient-gold-text">
@@ -96,19 +97,54 @@ const Footer = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile layout - compact */}
+        <div className="md:hidden flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💎</span>
+            <span className="font-serif text-base font-semibold gradient-gold-text">
+              Wealth Perspective
+            </span>
+          </div>
+          
+          {/* Share buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleTwitterShare}
+              className="p-2 rounded-full bg-muted/50 text-muted-foreground transition-colors"
+              aria-label="Share on Twitter"
+            >
+              <TwitterIcon />
+            </button>
+            <button
+              onClick={handleFacebookShare}
+              className="p-2 rounded-full bg-muted/50 text-muted-foreground transition-colors"
+              aria-label="Share on Facebook"
+            >
+              <FacebookIcon />
+            </button>
+            <button
+              onClick={handleWhatsAppShare}
+              className="p-2 rounded-full bg-muted/50 text-muted-foreground transition-colors"
+              aria-label="Share on WhatsApp"
+            >
+              <WhatsAppIcon />
+            </button>
+          </div>
+        </div>
         
-        <div className="mt-6 pt-4 border-t border-border/30 flex flex-col items-center gap-3">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
+        <div className="mt-4 md:mt-6 pt-4 border-t border-border/30 flex flex-col items-center gap-2 md:gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 md:gap-x-4 gap-y-2 text-xs">
             <Link to="/wealth-wisdom" className="text-primary hover:text-primary/80 transition-colors font-medium">
-              📚 Wealth Wisdom Blog
+              📚 Blog
             </Link>
-            <span className="text-border">•</span>
+            <span className="text-border hidden md:inline">•</span>
             <Link to="/become-affiliate" className="text-primary hover:text-primary/80 transition-colors font-medium">
-              💰 Become an Affiliate
+              💰 Affiliate
             </Link>
-            <span className="text-border">•</span>
+            <span className="text-border hidden md:inline">•</span>
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About & FAQ
+              About
             </Link>
             <span className="text-border">•</span>
             <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -119,12 +155,12 @@ const Footer = () => {
               Privacy
             </Link>
           </div>
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-            <span>Disclaimer: All figures are estimates from public sources.</span>
+          <div className="flex items-center justify-center gap-2 text-[10px] md:text-xs text-muted-foreground/70 text-center px-4">
+            <span>Estimates from public sources.</span>
             <HowWeCalculateModal variant="link" />
           </div>
-          <p className="text-xs text-muted-foreground/50 mt-2">
-            © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Northspan Industries, LLC.
+          <p className="text-[10px] md:text-xs text-muted-foreground/50 text-center">
+            © {new Date().getFullYear()} Wealth Perspective • Northspan Industries, LLC
           </p>
         </div>
       </div>
