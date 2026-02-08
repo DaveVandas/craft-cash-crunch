@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import LandingShareButtons from '@/components/landing/LandingShareButtons';
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
+import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 
 interface AffiliateInfo {
   id: string;
@@ -115,7 +116,7 @@ const AffiliateReferral = () => {
           <div className="absolute top-6 right-6 z-20">
             <LandingShareButtons 
               shareText={`🔥 ${affiliate.display_name} invited you to check out this app that shows how fast billionaires make money!`}
-              shareUrl={`https://earningsexplorer.shop/ref/${affiliate.affiliate_code}`}
+              shareUrl={getShareUrlWithRedirect('home', `/ref/${affiliate.affiliate_code}`)}
             />
           </div>
 
