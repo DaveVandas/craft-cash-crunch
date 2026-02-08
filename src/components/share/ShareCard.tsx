@@ -160,6 +160,9 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               className="text-center py-8 rounded-2xl border-2 border-orange-500/40"
               style={{ background: 'linear-gradient(145deg, rgba(249,115,22,0.2) 0%, rgba(10,10,11,0.9) 100%)' }}
             >
+              <p className="text-orange-400/60 text-[10px] text-center mb-1">
+                Total purchasing power over 5 years
+              </p>
               <p className="text-orange-300/80 text-sm uppercase tracking-widest mb-4">
                 5-Year Empire
               </p>
@@ -252,6 +255,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
                 {celebrity.name}
               </h2>
               <p className="text-amber-400/80 text-sm font-medium">{celebrity.profession}</p>
+              <p className="text-amber-300/50 text-xs mt-1">Estimated Wealth Breakdown</p>
             </div>
 
             {/* Net Worth Section */}
@@ -302,8 +306,11 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               className="p-4 rounded-xl border border-amber-500/20"
               style={{ background: 'rgba(184,134,11,0.05)' }}
             >
-              <p className="text-amber-400/60 text-xs uppercase tracking-wider text-center mb-3">
-                What they can buy yearly
+              <p className="text-amber-400/60 text-xs uppercase tracking-wider text-center mb-1">
+                Mogul Purchasing Power
+              </p>
+              <p className="text-amber-300/40 text-[10px] text-center mb-3">
+                What they could buy in a year
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {topComparisons.slice(0, 4).map((comparison, index) => (
