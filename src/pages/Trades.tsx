@@ -36,6 +36,7 @@ import {
   BookOpen,
   Search
 } from 'lucide-react';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatCompactCurrency } from '@/lib/earnings';
 
@@ -296,9 +297,12 @@ const Trades = () => {
         <PaywallGate>
           {/* Hero Section */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4">
-              <Crown className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">The Mogul Path</span>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
+                <Crown className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">The Mogul Path</span>
+              </div>
+              <FeaturePromoShare feature="trades" showLabel />
             </div>
             
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
