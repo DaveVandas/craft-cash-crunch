@@ -39,6 +39,7 @@ import {
   InstagramIcon,
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
+import { getShareUrl } from '@/lib/shareUrls';
 
 // Featured story - rotates every 3 days for more frequent updates
 const getWeeklyStory = () => {
@@ -404,7 +405,7 @@ const WealthWisdom = () => {
     }
   };
 
-  const SITE_URL = "https://earningsexplorer.shop";
+  const SITE_URL = "https://earningsexplorer.shop"; // Used for display purposes
   
   // Generate a stable story ID from title
   const getStoryId = () => story.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
@@ -421,8 +422,11 @@ const WealthWisdom = () => {
     }
   };
   
+  // Use the OG-optimized share URL for proper social media previews
+  const ogShareUrl = getShareUrl('wealth-wisdom');
+  
   const getStoryShareText = () => {
-    return `📚 ${story.title}\n\n"${story.quote}"\n\n🔥 Read the full rags-to-riches story at ${SITE_URL}/wealth-wisdom`;
+    return `📚 ${story.title}\n\n"${story.quote}"\n\n🔥 Read the full rags-to-riches story`;
   };
 
   const handleStoryNativeShare = async () => {
@@ -431,7 +435,7 @@ const WealthWisdom = () => {
         await navigator.share({
           title: story.title,
           text: getStoryShareText(),
-          url: `${SITE_URL}/wealth-wisdom`,
+          url: ogShareUrl,
         });
         trackShare('native');
       } catch {
@@ -443,22 +447,22 @@ const WealthWisdom = () => {
   };
 
   const handleStoryWhatsAppShare = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(getStoryShareText())}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(getStoryShareText() + '\n\n' + ogShareUrl)}`, '_blank');
     trackShare('whatsapp');
   };
 
   const handleStoryTwitterShare = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getStoryShareText())}`, '_blank', 'width=550,height=420');
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getStoryShareText())}&url=${encodeURIComponent(ogShareUrl)}`, '_blank', 'width=550,height=420');
     trackShare('twitter');
   };
 
   const handleStoryFacebookShare = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}&quote=${encodeURIComponent(story.title)}`, '_blank', 'width=550,height=420');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogShareUrl)}&quote=${encodeURIComponent(story.title)}`, '_blank', 'width=550,height=420');
     trackShare('facebook');
   };
 
   const handleStoryLinkedInShare = () => {
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${SITE_URL}/wealth-wisdom`)}`, '_blank', 'width=550,height=420');
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ogShareUrl)}`, '_blank', 'width=550,height=420');
     trackShare('linkedin');
   };
 
@@ -476,7 +480,7 @@ const WealthWisdom = () => {
 
   const handleStoryCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(getStoryShareText());
+      await navigator.clipboard.writeText(getStoryShareText() + '\n\n' + ogShareUrl);
       toast.success('Story copied to clipboard!');
       trackShare('copy');
     } catch {
