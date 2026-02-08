@@ -16,6 +16,7 @@ import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import SideHustlePreview from '@/components/home/SideHustlePreview';
 import MogulMarketsPreview from '@/components/home/MogulMarketsPreview';
 import HeroSpotlight from '@/components/home/HeroSpotlight';
+import { DownloadAppSection } from '@/components/home/DownloadAppSection';
 import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
 
 const Index = () => {
@@ -116,6 +117,11 @@ const Index = () => {
         {/* Rich Habits Quote */}
         <section className="container mb-8">
           <RichHabits />
+        </section>
+
+        {/* Download App Section */}
+        <section className="container mb-8">
+          <DownloadAppSection />
         </section>
 
         {/* Wealth Wisdom Promo */}
