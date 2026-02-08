@@ -21,8 +21,6 @@ function isAllowedOrigin(origin: string): boolean {
   }
 }
 
-// NOTE: The app can run inside a sandboxed iframe (Origin can be `null`).
-// Use origin validation with fallback for security.
 function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowedOrigin = origin && isAllowedOrigin(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
@@ -39,45 +37,46 @@ function jsonResponse(body: Record<string, unknown>, corsHeaders: Record<string,
   });
 }
 
-// Notable public figures with known public portfolios - expanded categories
+// VERIFIED figures with KNOWN public disclosures - these are guaranteed to have data
+// Politicians: Required to disclose via STOCK Act - data available on CapitolTrades.com and House/Senate disclosures
+// Hedge Funds: Required 13F filings with SEC - data available on SEC EDGAR
 const FEATURED_FIGURES = [
-  // Politicians (US Congress members with disclosed trades)
-  { name: 'Nancy Pelosi', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Dan Crenshaw', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Tommy Tuberville', title: 'U.S. Senator', category: 'politician' },
-  { name: 'Marjorie Taylor Greene', title: 'U.S. House Representative', category: 'politician' },
-  { name: 'Josh Gottheimer', title: 'U.S. House Representative', category: 'politician' },
+  // Politicians with VERIFIED active trading (STOCK Act disclosures)
+  { name: 'Nancy Pelosi', title: 'U.S. House Representative (D-CA)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Dan Crenshaw', title: 'U.S. House Representative (R-TX)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Tommy Tuberville', title: 'U.S. Senator (R-AL)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Josh Gottheimer', title: 'U.S. House Representative (D-NJ)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Michael McCaul', title: 'U.S. House Representative (R-TX)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Ro Khanna', title: 'U.S. House Representative (D-CA)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
+  { name: 'Mark Green', title: 'U.S. House Representative (R-TN)', category: 'politician', verified: true, dataSource: 'STOCK Act Disclosure' },
   
-  // Institutional Investors (13F filers)
-  { name: 'Warren Buffett', title: 'Berkshire Hathaway CEO', category: 'investor' },
-  { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor' },
-  { name: 'Cathie Wood', title: 'ARK Invest CEO', category: 'investor' },
-  { name: 'Bill Ackman', title: 'Pershing Square CEO', category: 'investor' },
-  { name: 'Ray Dalio', title: 'Bridgewater Founder', category: 'investor' },
-  { name: 'David Tepper', title: 'Appaloosa Management', category: 'investor' },
-  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor' },
-  { name: 'George Soros', title: 'Soros Fund Management', category: 'investor' },
-  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor' },
-  { name: 'Ken Griffin', title: 'Citadel LLC', category: 'investor' },
+  // 13F Filers - Hedge Funds with VERIFIED SEC filings
+  { name: 'Warren Buffett', title: 'Berkshire Hathaway', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Michael Burry', title: 'Scion Asset Management', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Cathie Wood', title: 'ARK Invest', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Bill Ackman', title: 'Pershing Square Capital', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Ray Dalio', title: 'Bridgewater Associates', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Stanley Druckenmiller', title: 'Duquesne Family Office', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'David Tepper', title: 'Appaloosa Management', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Carl Icahn', title: 'Icahn Enterprises', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Ken Griffin', title: 'Citadel LLC', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'George Soros', title: 'Soros Fund Management', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Chase Coleman', title: 'Tiger Global Management', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
+  { name: 'Seth Klarman', title: 'Baupost Group', category: 'investor', verified: true, dataSource: 'SEC 13F Filing' },
   
-  // Tech Leaders
-  { name: 'Elon Musk', title: 'Tesla/SpaceX CEO', category: 'tech' },
-  { name: 'Jeff Bezos', title: 'Amazon Founder', category: 'tech' },
-  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech' },
-  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech' },
-  { name: 'Tim Cook', title: 'Apple CEO', category: 'tech' },
+  // Tech Executives with SEC Form 4 filings (insider transactions)
+  { name: 'Elon Musk', title: 'Tesla/SpaceX/X CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Mark Zuckerberg', title: 'Meta CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Jensen Huang', title: 'NVIDIA CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Satya Nadella', title: 'Microsoft CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
+  { name: 'Tim Cook', title: 'Apple CEO', category: 'tech', verified: true, dataSource: 'SEC Form 4' },
   
-  // Celebrity Investors
-  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity' },
-  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity' },
-  { name: 'Jay-Z', title: 'Marcy Venture Partners', category: 'celebrity' },
-  { name: 'Serena Williams', title: 'Serena Ventures', category: 'celebrity' },
-  { name: 'Kevin Hart', title: 'Hartbeat Ventures', category: 'celebrity' },
+  // Celebrity Investors with known VC portfolios
+  { name: 'Mark Cuban', title: 'Investor & Shark Tank', category: 'celebrity', verified: false, dataSource: 'Public Statements' },
+  { name: 'Ashton Kutcher', title: 'A-Grade Investments', category: 'celebrity', verified: false, dataSource: 'Public Statements' },
   
-  // International Figures
-  { name: 'Li Ka-shing', title: 'CK Hutchison Holdings', category: 'international' },
-  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international' },
-  { name: 'Bernard Arnault', title: 'LVMH CEO', category: 'international' },
+  // International with public holdings
+  { name: 'Masayoshi Son', title: 'SoftBank CEO', category: 'international', verified: true, dataSource: 'Public Filings' },
 ];
 
 interface PortfolioHolding {
@@ -101,7 +100,7 @@ interface CelebrityPortfolio {
   dataSource?: string;
 }
 
-async function fetchPortfolioFromPerplexity(figureName: string): Promise<CelebrityPortfolio | null> {
+async function fetchPortfolioFromPerplexity(figureName: string, figureData?: any): Promise<CelebrityPortfolio | null> {
   const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
   
   if (!PERPLEXITY_API_KEY) {
@@ -109,8 +108,30 @@ async function fetchPortfolioFromPerplexity(figureName: string): Promise<Celebri
     return null;
   }
 
+  // Determine the best search strategy based on figure type
+  const isPolitician = figureData?.category === 'politician' || figureName.toLowerCase().includes('senator') || figureName.toLowerCase().includes('representative');
+  const isInvestor = figureData?.category === 'investor';
+  const isTech = figureData?.category === 'tech';
+  
+  let searchContext = '';
+  let dataSourceHint = '';
+  
+  if (isPolitician) {
+    searchContext = `Search Congressional stock disclosures, Capitol Trades, House/Senate financial disclosure databases, and Quiver Quantitative for STOCK Act filings.`;
+    dataSourceHint = 'STOCK Act Disclosure via Capitol Trades or House/Senate disclosure';
+  } else if (isInvestor) {
+    searchContext = `Search SEC EDGAR database for 13F filings, Whale Wisdom, and Dataroma for hedge fund portfolio holdings.`;
+    dataSourceHint = 'SEC 13F Filing via EDGAR';
+  } else if (isTech) {
+    searchContext = `Search SEC EDGAR for Form 4 insider transaction filings and company proxy statements.`;
+    dataSourceHint = 'SEC Form 4 Insider Transaction';
+  } else {
+    searchContext = `Search public investment records, SEC filings, and verified news sources for portfolio information.`;
+    dataSourceHint = 'Public Records';
+  }
+
   try {
-    console.log(`Fetching portfolio data from Perplexity for: ${figureName}`);
+    console.log(`Fetching portfolio data from Perplexity for: ${figureName} (${figureData?.category || 'unknown'})`);
     
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -119,34 +140,53 @@ async function fetchPortfolioFromPerplexity(figureName: string): Promise<Celebri
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar',
+        model: 'sonar-pro', // Use sonar-pro for better accuracy
         messages: [
           { 
             role: 'system', 
-            content: 'You are a financial data assistant specializing in public portfolio disclosures. Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object.' 
+            content: `You are a financial data researcher specializing in public portfolio disclosures. ${searchContext}
+            
+CRITICAL: Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object.
+If you cannot find verified stock holdings data, return the topHoldings array as empty [].
+Only include holdings you can verify from official sources - do not make up or guess holdings.` 
           },
           { 
             role: 'user', 
-            content: `Find the most recent publicly disclosed stock portfolio holdings for "${figureName}". For politicians, look at their Congressional stock disclosures. For investors/fund managers, look at their 13F filings or public statements. Return a JSON object with:
-- name: full name (string)
-- title: their current position/title (string)
-- category: one of "politician", "investor", "celebrity", "tech" (string)
-- portfolioSummary: 1-2 sentence summary of their investment style or notable trades (string)
-- topHoldings: array of their top 5-10 stock holdings, each with:
-  - ticker: stock ticker symbol (string)
-  - companyName: full company name (string)
-  - value: approximate value if known (string like "$1M-$5M" or "Unknown")
-  - percentOfPortfolio: rough percentage if known (number or null)
-  - recentAction: "buy", "sell", or "hold" based on recent activity (string)
-  - reportDate: when this was reported (string like "Q4 2024" or "Jan 2025")
-- totalValue: estimated total portfolio value (string)
-- lastUpdated: when data was last updated (string)
-- dataSource: where this data comes from (string like "Congressional Disclosure" or "13F Filing")
+            content: `Find the most recent publicly disclosed stock portfolio holdings for "${figureName}".
 
-If no public portfolio data is available, return null in the holdings but still include name and title.`
+${searchContext}
+
+Return a JSON object with EXACTLY this structure:
+{
+  "name": "${figureName}",
+  "title": "their current position/title",
+  "category": "${figureData?.category || 'investor'}",
+  "portfolioSummary": "1-2 sentence summary of their investment style or recent notable trades",
+  "topHoldings": [
+    {
+      "ticker": "AAPL",
+      "companyName": "Apple Inc.",
+      "value": "$5M-$10M",
+      "percentOfPortfolio": 15,
+      "recentAction": "buy",
+      "reportDate": "Q4 2024"
+    }
+  ],
+  "totalValue": "estimated total if known",
+  "lastUpdated": "most recent filing date",
+  "dataSource": "${dataSourceHint}"
+}
+
+IMPORTANT:
+- Only include stocks you can VERIFY from official filings
+- For politicians: Look for trades from the last 6 months
+- For 13F filers: Use their most recent quarterly filing
+- If no verified data exists, return an empty topHoldings array []
+- Include the actual filing/disclosure date in reportDate`
           }
         ],
         search_recency_filter: 'month',
+        temperature: 0.1, // Low temperature for more factual responses
       }),
     });
 
@@ -157,8 +197,9 @@ If no public portfolio data is available, return null in the holdings but still 
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
+    const citations = data.citations || [];
     
-    console.log(`Perplexity raw response length: ${content.length}`);
+    console.log(`Perplexity response for ${figureName}: ${content.length} chars, ${citations.length} citations`);
     
     // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -169,22 +210,35 @@ If no public portfolio data is available, return null in the holdings but still 
     
     const parsed = JSON.parse(jsonMatch[0]);
     
+    // Filter out any holdings without valid tickers
+    const validHoldings = Array.isArray(parsed.topHoldings) 
+      ? parsed.topHoldings
+          .filter((h: any) => h.ticker && typeof h.ticker === 'string' && h.ticker.length > 0 && h.ticker.length <= 5)
+          .map((h: any) => ({
+            ticker: String(h.ticker || '').toUpperCase().replace(/[^A-Z]/g, ''),
+            companyName: String(h.companyName || 'Unknown'),
+            value: h.value ? String(h.value) : undefined,
+            percentOfPortfolio: h.percentOfPortfolio ? Number(h.percentOfPortfolio) : undefined,
+            recentAction: ['buy', 'sell', 'hold'].includes(h.recentAction) ? h.recentAction : undefined,
+            reportDate: h.reportDate ? String(h.reportDate) : undefined,
+          }))
+      : [];
+    
+    // Add citation info to data source
+    let dataSourceWithCitations = parsed.dataSource ? String(parsed.dataSource) : figureData?.dataSource;
+    if (citations.length > 0) {
+      dataSourceWithCitations += ` via ${citations[0].split('/')[2] || 'verified sources'}`;
+    }
+    
     return {
       name: String(parsed.name || figureName),
-      title: String(parsed.title || 'Public Figure'),
-      category: String(parsed.category || 'other'),
+      title: String(parsed.title || figureData?.title || 'Public Figure'),
+      category: String(parsed.category || figureData?.category || 'investor'),
       portfolioSummary: String(parsed.portfolioSummary || ''),
-      topHoldings: Array.isArray(parsed.topHoldings) ? parsed.topHoldings.map((h: any) => ({
-        ticker: String(h.ticker || '').toUpperCase(),
-        companyName: String(h.companyName || 'Unknown'),
-        value: h.value ? String(h.value) : undefined,
-        percentOfPortfolio: h.percentOfPortfolio ? Number(h.percentOfPortfolio) : undefined,
-        recentAction: ['buy', 'sell', 'hold'].includes(h.recentAction) ? h.recentAction : undefined,
-        reportDate: h.reportDate ? String(h.reportDate) : undefined,
-      })) : [],
+      topHoldings: validHoldings,
       totalValue: parsed.totalValue ? String(parsed.totalValue) : undefined,
       lastUpdated: parsed.lastUpdated ? String(parsed.lastUpdated) : undefined,
-      dataSource: parsed.dataSource ? String(parsed.dataSource) : undefined,
+      dataSource: dataSourceWithCitations,
     };
   } catch (error) {
     console.error('Perplexity fetch error:', error);
@@ -192,8 +246,8 @@ If no public portfolio data is available, return null in the holdings but still 
   }
 }
 
-// AI-powered discovery of new VIP figures
-async function discoverNewFigures(category: string): Promise<Array<{name: string; title: string; category: string}>> {
+// AI-powered discovery of new VIP figures - focus on those with VERIFIED public data
+async function discoverNewFigures(category: string): Promise<Array<{name: string; title: string; category: string; verified: boolean; dataSource: string}>> {
   const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
   
   if (!PERPLEXITY_API_KEY) {
@@ -201,11 +255,11 @@ async function discoverNewFigures(category: string): Promise<Array<{name: string
   }
 
   const categoryPrompts: Record<string, string> = {
-    politician: 'Find 5 current U.S. Congress members (House or Senate) who have made notable stock trades in the past 3 months based on their mandatory financial disclosures. Focus on those with significant trading activity.',
-    investor: 'Find 5 hedge fund managers or institutional investors who have recently filed 13F reports showing interesting portfolio changes. Focus on well-known investors with public track records.',
-    celebrity: 'Find 5 celebrities, athletes, or entertainers who are known active investors with venture capital firms or public investment activities.',
-    tech: 'Find 5 tech company executives or founders who have made notable stock transactions (buying or selling their company stock or other investments) recently.',
-    international: 'Find 5 notable international billionaires or business leaders outside the US who have publicly known investment portfolios or recent notable trades.',
+    politician: 'Find 5 U.S. Congress members who have made stock trades in the last 3 months according to Capitol Trades or House/Senate financial disclosures. Focus on those with the MOST RECENT and ACTIVE trading.',
+    investor: 'Find 5 hedge fund managers or institutional investors who filed 13F reports with the SEC in the last quarter showing notable portfolio changes. Use SEC EDGAR data.',
+    celebrity: 'Find 5 celebrities or athletes who are known venture capital investors with publicly tracked investments through firms like A-Grade, Serena Ventures, or similar.',
+    tech: 'Find 5 tech company CEOs or executives who have made notable insider stock transactions (Form 4 filings) in the last 3 months according to SEC EDGAR.',
+    international: 'Find 5 international billionaires or fund managers with publicly disclosed holdings through regulatory filings in their countries.',
   };
 
   const prompt = categoryPrompts[category] || categoryPrompts.investor;
@@ -218,11 +272,11 @@ async function discoverNewFigures(category: string): Promise<Array<{name: string
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar',
+        model: 'sonar-pro',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown formatting, no code blocks. Just the raw JSON array.' 
+            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown formatting, no code blocks. Just the raw JSON array. Only include people with VERIFIED, PUBLICLY AVAILABLE portfolio data from official sources.' 
           },
           { 
             role: 'user', 
@@ -232,11 +286,14 @@ Return a JSON array of objects, each with:
 - name: full name (string)
 - title: their current position/title (string)  
 - category: "${category}" (string)
+- verified: true if they have official regulatory filings, false otherwise (boolean)
+- dataSource: where their data comes from, e.g. "SEC 13F Filing", "STOCK Act Disclosure", "SEC Form 4" (string)
 
-Only include people with publicly available portfolio/trading data.`
+ONLY include people whose portfolio data you can actually find from official sources.`
           }
         ],
-        search_recency_filter: 'month',
+        search_recency_filter: 'week',
+        temperature: 0.1,
       }),
     });
 
@@ -255,6 +312,8 @@ Only include people with publicly available portfolio/trading data.`
       name: String(p.name || ''),
       title: String(p.title || ''),
       category: category,
+      verified: Boolean(p.verified),
+      dataSource: String(p.dataSource || 'Public Records'),
     })).filter((p: any) => p.name) : [];
   } catch (error) {
     console.error('Discovery error:', error);
@@ -353,13 +412,27 @@ serve(async (req) => {
         }, corsHeaders);
       }
       
-      const portfolio = await fetchPortfolioFromPerplexity(name);
+      // Find figure data if in our list
+      const figureData = FEATURED_FIGURES.find(f => f.name.toLowerCase() === name.toLowerCase());
+      
+      const portfolio = await fetchPortfolioFromPerplexity(name, figureData);
       
       if (!portfolio) {
         return jsonResponse({
           error: 'Could not fetch portfolio data',
           errorCode: 'DATA_UNAVAILABLE',
           portfolio: null,
+        }, corsHeaders);
+      }
+      
+      // If portfolio has no holdings, return a more helpful message
+      if (portfolio.topHoldings.length === 0) {
+        return jsonResponse({
+          portfolio: {
+            ...portfolio,
+            portfolioSummary: portfolio.portfolioSummary || 'No recent stock holdings data found in public disclosures. This person may not have active stock trades or their disclosures are not yet available.',
+          },
+          warning: 'No holdings data found in recent filings',
         }, corsHeaders);
       }
       
