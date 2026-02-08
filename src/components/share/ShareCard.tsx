@@ -316,19 +316,27 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               <p className="text-amber-300/40 text-[10px] text-center mb-3">
                 What they could buy in a year
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {topComparisons.slice(0, 4).map((comparison, index) => (
                   <div 
                     key={index} 
-                    className="flex items-center gap-2 p-2 rounded-lg"
-                    style={{ background: 'rgba(0,0,0,0.3)' }}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20"
+                    style={{ background: 'rgba(0,0,0,0.4)' }}
                   >
-                    <span className="text-xl">{comparison.emoji}</span>
-                    <div className="overflow-hidden">
-                      <p className="text-amber-100 text-xs font-bold truncate">
+                    <span className="text-3xl">{comparison.emoji}</span>
+                    <div className="overflow-hidden flex-1">
+                      <p 
+                        className="text-xl font-black truncate"
+                        style={{ 
+                          background: 'linear-gradient(90deg, #ffd700, #ffb347)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
                         {comparison.quantity.toLocaleString()}
                       </p>
-                      <p className="text-amber-300/60 text-[10px] truncate">
+                      <p className="text-amber-200/80 text-xs font-semibold truncate">
                         {pluralizeItem(comparison.item, comparison.quantity)}
                       </p>
                     </div>
