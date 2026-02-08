@@ -119,6 +119,7 @@ const SideHustleShareCard = ({ hustle, className = '' }: SideHustleShareCardProp
               {hustle.name}
             </h2>
             <p className="text-emerald-400/80 text-sm font-medium">{hustle.description}</p>
+            <p className="text-emerald-300/50 text-xs mt-1">Side Hustle Profit Breakdown</p>
           </div>
 
           {/* Difficulty Badge */}
@@ -137,7 +138,10 @@ const SideHustleShareCard = ({ hustle, className = '' }: SideHustleShareCardProp
             className="p-4 rounded-xl border border-emerald-500/30 text-center"
             style={{ background: 'rgba(16,185,129,0.1)' }}
           >
-            <p className="text-emerald-300/60 text-xs uppercase tracking-widest mb-1">Potential Monthly Profit</p>
+            <p className="text-emerald-400/60 text-[10px] uppercase tracking-wider mb-1">
+              Estimated Earnings
+            </p>
+            <p className="text-emerald-300/60 text-xs mb-2">Potential monthly profit</p>
             <p 
               className="text-4xl font-black"
               style={{ 
