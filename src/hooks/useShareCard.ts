@@ -38,6 +38,70 @@ const isSafari = (): boolean => {
 
 const getCaptureScale = (): number => (isMobile() ? 1.5 : 2);
 
+// Convert external image to data URL to bypass CORS issues in html2canvas
+const imageToDataUrl = async (imgSrc: string): Promise<string | null> => {
+  try {
+    // Try fetching through a CORS proxy approach using canvas
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(null), 3000);
+      
+      img.onload = () => {
+        clearTimeout(timeout);
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(dataUrl);
+          } else {
+            resolve(null);
+          }
+        } catch {
+          // Canvas tainted - CORS blocked
+          resolve(null);
+        }
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve(null);
+      };
+      
+      img.src = imgSrc;
+    });
+  } catch {
+    return null;
+  }
+};
+
+// Pre-convert images in the clone to data URLs for reliable capture
+const convertImagesToDataUrls = async (root: HTMLElement): Promise<void> => {
+  const imgs = Array.from(root.querySelectorAll('img'));
+  
+  await Promise.all(
+    imgs.map(async (img) => {
+      const src = img.src;
+      if (!src || src.startsWith('data:')) return;
+      
+      // Try to convert to data URL
+      const dataUrl = await imageToDataUrl(src);
+      if (dataUrl) {
+        img.src = dataUrl;
+        img.removeAttribute('crossorigin');
+      } else {
+        // If conversion fails, hide the image so fallback shows
+        img.style.display = 'none';
+      }
+    })
+  );
+};
+
 const prepareCloneForCapture = (root: HTMLElement) => {
   // Force overflow visible on clone tree to avoid clipping
   root.querySelectorAll('*').forEach((el) => {
@@ -218,21 +282,24 @@ export const useShareCard = ({
       clone.style.boxSizing = 'border-box';
 
       prepareCloneForCapture(clone);
+      
+      // Convert external images to data URLs for reliable capture
+      await convertImagesToDataUrls(clone);
 
-       const captureRoot = document.createElement('div');
-       // NOTE: Using large transforms for off-screen positioning can cause WebKit
-       // to “paint” nothing (resulting in black captures). A negative left keeps
-       // it out of view while remaining paintable.
-       captureRoot.style.cssText = `
-         position: fixed;
-         left: -10000px;
-         top: 0;
-         width: ${width}px;
-         padding: 0 0 8px 0;
-         overflow: visible;
-         z-index: 2147483647;
-         pointer-events: none;
-       `;
+      const captureRoot = document.createElement('div');
+      // NOTE: Using large transforms for off-screen positioning can cause WebKit
+      // to "paint" nothing (resulting in black captures). A negative left keeps
+      // it out of view while remaining paintable.
+      captureRoot.style.cssText = `
+        position: fixed;
+        left: -10000px;
+        top: 0;
+        width: ${width}px;
+        padding: 0 0 8px 0;
+        overflow: visible;
+        z-index: 2147483647;
+        pointer-events: none;
+      `;
       captureRoot.appendChild(clone);
 
       document.body.appendChild(captureRoot);
@@ -288,54 +355,54 @@ export const useShareCard = ({
           windowHeight: height,
         } as const;
 
-         // Prefer foreignObjectRendering except on Safari where it can silently render black.
-         const preferForeignObject = !isSafari();
+        // Prefer foreignObjectRendering except on Safari where it can silently render black.
+        const preferForeignObject = !isSafari();
 
-         const attemptRender = async (options: Parameters<typeof html2canvas>[1]) => {
-           return html2canvas(captureRoot, options);
-         };
+        const attemptRender = async (options: Parameters<typeof html2canvas>[1]) => {
+          return html2canvas(captureRoot, options);
+        };
 
-         let canvas: HTMLCanvasElement | null = null;
+        let canvas: HTMLCanvasElement | null = null;
 
-         // Attempt 1: preferred strategy
-         if (preferForeignObject) {
-           try {
-             canvas = await attemptRender({ ...baseOptions, foreignObjectRendering: true });
-           } catch {
-             canvas = await attemptRender(baseOptions);
-           }
-         } else {
-           canvas = await attemptRender(baseOptions);
-         }
+        // Attempt 1: preferred strategy
+        if (preferForeignObject) {
+          try {
+            canvas = await attemptRender({ ...baseOptions, foreignObjectRendering: true });
+          } catch {
+            canvas = await attemptRender(baseOptions);
+          }
+        } else {
+          canvas = await attemptRender(baseOptions);
+        }
 
-         // Attempt 2: safer settings (no foreignObject, lower scale)
-         if (canvas && isCanvasMostlyBackground(canvas)) {
-           canvas = await attemptRender({
-             ...baseOptions,
-             foreignObjectRendering: false,
-             scale: 1.25,
-           });
-         }
+        // Attempt 2: safer settings (no foreignObject, lower scale)
+        if (canvas && isCanvasMostlyBackground(canvas)) {
+          canvas = await attemptRender({
+            ...baseOptions,
+            foreignObjectRendering: false,
+            scale: 1.25,
+          });
+        }
 
-         // Attempt 3: last-resort toggle (sometimes helps on non-standard WebKit wrappers)
-         if (canvas && isCanvasMostlyBackground(canvas)) {
-           try {
-             canvas = await attemptRender({
-               ...baseOptions,
-               foreignObjectRendering: true,
-               scale: 1.25,
-             });
-           } catch {
-             // keep previous canvas
-           }
-         }
+        // Attempt 3: last-resort toggle (sometimes helps on non-standard WebKit wrappers)
+        if (canvas && isCanvasMostlyBackground(canvas)) {
+          try {
+            canvas = await attemptRender({
+              ...baseOptions,
+              foreignObjectRendering: true,
+              scale: 1.25,
+            });
+          } catch {
+            // keep previous canvas
+          }
+        }
 
-         if (!canvas) return null;
+        if (!canvas) return null;
 
-         // If it's still basically a solid background, don't return a black image.
-         if (isCanvasMostlyBackground(canvas)) {
-           throw new Error('CAPTURE_RENDER_FAILED');
-         }
+        // If it's still basically a solid background, don't return a black image.
+        if (isCanvasMostlyBackground(canvas)) {
+          throw new Error('CAPTURE_RENDER_FAILED');
+        }
 
         return new Promise((resolve) => {
           canvas.toBlob((blob) => {
@@ -450,7 +517,7 @@ export const useShareCard = ({
     if (!preGeneratedImageRef.current) {
       void handleMenuOpen();
       toast.info('Preparing image…', {
-        description: 'Give it a second, then tap “Save to Photos” again.',
+        description: 'Give it a second, then tap "Save to Photos" again.',
         duration: 3500,
       });
       return;
