@@ -147,14 +147,15 @@ const SideHustlePreview = () => {
               Hot
             </Badge>
           </CardTitle>
-          <DropdownMenu onOpenChange={(open) => console.log('SideHustle dropdown open:', open)}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button 
-                className="relative overflow-hidden flex items-center justify-center h-8 w-8 min-w-8 p-0 rounded-md bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/40 hover:from-amber-500/30 hover:to-yellow-500/20 hover:border-amber-400/60 hover:shadow-[0_0_12px_rgba(245,158,11,0.4)] transition-all duration-300"
-                onClick={() => console.log('SideHustle button clicked')}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative overflow-hidden flex items-center justify-center h-8 w-8 min-w-8 p-0 bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/40 hover:from-amber-500/30 hover:to-yellow-500/20 hover:border-amber-400/60 hover:shadow-[0_0_12px_rgba(245,158,11,0.4)] transition-all duration-300"
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
