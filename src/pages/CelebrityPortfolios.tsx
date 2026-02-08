@@ -586,7 +586,7 @@ const CelebrityPortfolios = () => {
             {/* Holdings List */}
             <Card>
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <CardTitle className="text-lg">Top Holdings</CardTitle>
                   <div className="flex items-center gap-2">
                     <Button
@@ -601,10 +601,12 @@ const CelebrityPortfolios = () => {
                       size="sm"
                       onClick={handleCopyToMarkets}
                       disabled={selectedHoldings.size === 0}
-                      className="gap-2"
+                      className="gap-1.5 text-xs sm:text-sm"
                     >
-                      <Copy className="h-4 w-4" />
-                      Copy to Markets ({selectedHoldings.size})
+                      <Copy className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Copy to Markets</span>
+                      <span className="sm:hidden">Copy</span>
+                      <span>({selectedHoldings.size})</span>
                     </Button>
                   </div>
                 </div>
