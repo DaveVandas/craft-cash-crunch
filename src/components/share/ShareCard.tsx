@@ -7,12 +7,13 @@ import { getAvatarEmoji } from '@/lib/avatar';
 import { getSimilarCelebrities, nameToSlug } from '@/lib/similarCelebrities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { DollarSign, Clock, TrendingUp, Zap, Flame, Sparkles } from 'lucide-react';
+import { DollarSign, Clock, TrendingUp, Zap, Flame, Sparkles, Info } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
+import { HowWeCalculateModal } from '@/components/info/HowWeCalculateModal';
 
 interface ShareCardProps {
   celebrity: Celebrity;
@@ -255,7 +256,10 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
                 {celebrity.name}
               </h2>
               <p className="text-amber-400/80 text-sm font-medium">{celebrity.profession}</p>
-              <p className="text-amber-300/50 text-xs mt-1">Estimated Wealth Breakdown</p>
+              <div className="flex items-center justify-center gap-1 mt-1">
+                <p className="text-amber-300/50 text-xs">Estimated Wealth Breakdown</p>
+                <HowWeCalculateModal variant="icon" className="h-4 w-4 text-amber-300/40 hover:text-amber-300/80" />
+              </div>
             </div>
 
             {/* Net Worth Section */}
