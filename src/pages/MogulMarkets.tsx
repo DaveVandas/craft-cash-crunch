@@ -24,6 +24,7 @@ import { MogulMascot } from '@/components/trading/MogulMascot';
 import { MarketTicker } from '@/components/trading/MarketTicker';
 import { MarketStatus } from '@/components/trading/MarketStatus';
 import { TradingCockpit } from '@/components/trading/TradingCockpit';
+import { PaperTradingDisclaimer } from '@/components/info/PaperTradingDisclaimer';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -454,7 +455,10 @@ const MogulMarkets = () => {
         <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-amber-500/5">
           <CardContent className="py-2 px-4">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Paper Trading Mode</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Paper Trading Mode</span>
+                <PaperTradingDisclaimer variant="icon" />
+              </div>
               <div className="flex items-center gap-1.5 text-primary">
                 <Zap className="h-3 w-3" />
                 <span className="font-medium">Live Market Data</span>
