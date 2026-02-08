@@ -30,12 +30,12 @@ const popularCelebrities = [
 ];
 
 const SIDE_HUSTLE_IDEAS = [
-  { name: 'Wealth Perspective Affiliate', emoji: '💎', avgProfit: 200, salesPerMonth: 10, tip: 'Share this app, earn $1-2.50 per signup!', isPinned: true, link: '/become-affiliate' },
-  { name: 'Reselling Sneakers', emoji: '👟', avgProfit: 100, salesPerMonth: 8, tip: 'Follow drops, use bots, check StockX' },
-  { name: 'Print on Demand', emoji: '👕', avgProfit: 16, salesPerMonth: 30, tip: 'Printful + Etsy = passive income' },
-  { name: 'Thrift Flipping', emoji: '🏷️', avgProfit: 30, salesPerMonth: 20, tip: 'Vintage & designer on Poshmark' },
-  { name: 'Dropshipping', emoji: '📦', avgProfit: 17, salesPerMonth: 50, tip: 'Find winners on TikTok, automate' },
-  { name: 'Digital Products', emoji: '💻', avgProfit: 29, salesPerMonth: 40, tip: 'Notion templates are hot right now' },
+  { name: 'Wealth Perspective Affiliate', emoji: '💎', avgProfit: 200, salesPerMonth: 10, tip: 'Share this app, earn $1-2 per signup!', isPinned: true, link: '/become-affiliate', isAffiliate: true },
+  { name: 'Reselling Sneakers', emoji: '👟', avgProfit: 100, salesPerMonth: 8, tip: 'Follow drops, use bots, check StockX', isAffiliate: false },
+  { name: 'Print on Demand', emoji: '👕', avgProfit: 16, salesPerMonth: 30, tip: 'Printful + Etsy = passive income', isAffiliate: false },
+  { name: 'Thrift Flipping', emoji: '🏷️', avgProfit: 30, salesPerMonth: 20, tip: 'Vintage & designer on Poshmark', isAffiliate: false },
+  { name: 'Dropshipping', emoji: '📦', avgProfit: 17, salesPerMonth: 50, tip: 'Find winners on TikTok, automate', isAffiliate: false },
+  { name: 'Digital Products', emoji: '💻', avgProfit: 29, salesPerMonth: 40, tip: 'Notion templates are hot right now', isAffiliate: false },
 ];
 
 type SelectedCelebrity = {
@@ -61,6 +61,16 @@ const Calculator = () => {
   const [salesVolume, setSalesVolume] = useState('');
   const [hustleResult, setHustleResult] = useState<{ monthly: number; yearly: number } | null>(null);
   const [selectedHustle, setSelectedHustle] = useState<typeof SIDE_HUSTLE_IDEAS[0] | null>(null);
+  
+  // Affiliate calculator state
+  const [affiliateReferrals, setAffiliateReferrals] = useState('50');
+  const [affiliateResult, setAffiliateResult] = useState<{
+    tier1Earnings: number;
+    tier2Earnings: number;
+    totalEarnings: number;
+    referralsInTier1: number;
+    referralsInTier2: number;
+  } | null>(null);
   
   const { searchCelebrity } = useCelebritySearch();
 
@@ -136,19 +146,45 @@ const Calculator = () => {
     }
   };
 
+  // Calculate affiliate earnings based on tier structure
+  const calculateAffiliateEarnings = (totalReferrals: number) => {
+    const TIER_1_LIMIT = 1000;
+    const TIER_1_RATE = 1; // $1 per signup
+    const TIER_2_RATE = 2; // $2 per signup after 1,000
+    
+    const referralsInTier1 = Math.min(totalReferrals, TIER_1_LIMIT);
+    const referralsInTier2 = Math.max(0, totalReferrals - TIER_1_LIMIT);
+    
+    const tier1Earnings = referralsInTier1 * TIER_1_RATE;
+    const tier2Earnings = referralsInTier2 * TIER_2_RATE;
+    const totalEarnings = tier1Earnings + tier2Earnings;
+    
+    return { tier1Earnings, tier2Earnings, totalEarnings, referralsInTier1, referralsInTier2 };
+  };
+
   const applyHustlePreset = (hustle: typeof SIDE_HUSTLE_IDEAS[0]) => {
     setSelectedHustle(hustle);
     
-    // Populate the calculator with realistic example values
-    const buyPriceVal = Math.round(hustle.avgProfit * 0.4);
-    const sellPriceVal = Math.round(hustle.avgProfit * 1.4);
-    setBuyPrice(String(buyPriceVal));
-    setSellPrice(String(sellPriceVal));
-    setSalesVolume(String(hustle.salesPerMonth));
-    
-    // Calculate and show results
-    const monthly = hustle.avgProfit * hustle.salesPerMonth;
-    setHustleResult({ monthly, yearly: monthly * 12 });
+    if (hustle.isAffiliate) {
+      // For affiliate, calculate based on referral tiers
+      const referrals = parseInt(affiliateReferrals) || 50;
+      setAffiliateResult(calculateAffiliateEarnings(referrals));
+      // Clear regular hustle results
+      setHustleResult(null);
+    } else {
+      // Clear affiliate results
+      setAffiliateResult(null);
+      // Populate the calculator with realistic example values
+      const buyPriceVal = Math.round(hustle.avgProfit * 0.4);
+      const sellPriceVal = Math.round(hustle.avgProfit * 1.4);
+      setBuyPrice(String(buyPriceVal));
+      setSellPrice(String(sellPriceVal));
+      setSalesVolume(String(hustle.salesPerMonth));
+      
+      // Calculate and show results
+      const monthly = hustle.avgProfit * hustle.salesPerMonth;
+      setHustleResult({ monthly, yearly: monthly * 12 });
+    }
   };
 
   return (
@@ -357,106 +393,223 @@ const Calculator = () => {
                             )}
                           </div>
 
-                          {/* Adjustable Inputs */}
-                          <div className="grid grid-cols-3 gap-3">
-                            <div>
-                              <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
-                              <div className="relative mt-1">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                <Input
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={buyPrice}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                                    setBuyPrice(value);
-                                    const buy = parseFloat(value) || 0;
-                                    const sell = parseFloat(sellPrice) || 0;
-                                    const sales = parseFloat(salesVolume) || 0;
-                                    if (sell > buy && sales > 0) {
-                                      const profit = sell - buy;
-                                      const monthly = profit * sales;
-                                      setHustleResult({ monthly, yearly: monthly * 12 });
-                                    }
-                                  }}
-                                  className="pl-7 h-10"
-                                />
+                          {/* AFFILIATE CALCULATOR - Special tiered referral UI */}
+                          {selectedHustle.isAffiliate && (
+                            <div className="space-y-4">
+                              {/* Tier Breakdown Visual */}
+                              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-primary/10 border border-amber-500/30">
+                                <p className="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-2">
+                                  👑 Our Tiered Commission Structure
+                                </p>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="p-3 rounded-lg bg-card/50 border border-border/30 text-center">
+                                    <p className="text-2xl font-bold text-emerald-400">$1</p>
+                                    <p className="text-xs text-muted-foreground">per signup</p>
+                                    <p className="text-xs font-medium text-foreground/70 mt-1">First 1,000 referrals</p>
+                                  </div>
+                                  <div className="p-3 rounded-lg bg-card/50 border border-primary/30 text-center">
+                                    <p className="text-2xl font-bold text-primary">$2</p>
+                                    <p className="text-xs text-muted-foreground">per signup</p>
+                                    <p className="text-xs font-medium text-foreground/70 mt-1">After 1,000 referrals</p>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
-                              <div className="relative mt-1">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                <Input
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={sellPrice}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                                    setSellPrice(value);
-                                    const buy = parseFloat(buyPrice) || 0;
-                                    const sell = parseFloat(value) || 0;
-                                    const sales = parseFloat(salesVolume) || 0;
-                                    if (sell > buy && sales > 0) {
-                                      const profit = sell - buy;
-                                      const monthly = profit * sales;
-                                      setHustleResult({ monthly, yearly: monthly * 12 });
-                                    }
-                                  }}
-                                  className="pl-7 h-10"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
-                              <Input
-                                type="text"
-                                inputMode="numeric"
-                                value={salesVolume}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/[^0-9]/g, '');
-                                  setSalesVolume(value);
-                                  const buy = parseFloat(buyPrice) || 0;
-                                  const sell = parseFloat(sellPrice) || 0;
-                                  const sales = parseFloat(value) || 0;
-                                  if (sell > buy && sales > 0) {
-                                    const profit = sell - buy;
-                                    const monthly = profit * sales;
-                                    setHustleResult({ monthly, yearly: monthly * 12 });
-                                  }
-                                }}
-                                className="h-10 mt-1"
-                              />
-                            </div>
-                          </div>
 
-                          {/* Results */}
-                          {hustleResult && hustleResult.monthly > 0 && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="text-center p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                                <p className="text-xs text-foreground/60 font-medium mb-1">Monthly Income</p>
-                                <p className="text-2xl font-bold text-green-500">{formatCurrency(hustleResult.monthly)}</p>
+                              {/* Referral Input Slider */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm font-medium text-foreground">How many signups can you get?</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="text"
+                                      inputMode="numeric"
+                                      value={affiliateReferrals}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                        setAffiliateReferrals(value);
+                                        const refs = parseInt(value) || 0;
+                                        setAffiliateResult(calculateAffiliateEarnings(refs));
+                                      }}
+                                      className="w-24 h-9 text-center font-bold text-lg"
+                                    />
+                                    <span className="text-sm text-muted-foreground">signups</span>
+                                  </div>
+                                </div>
+                                
+                                {/* Quick preset buttons */}
+                                <div className="flex flex-wrap gap-2">
+                                  {[10, 50, 100, 500, 1000, 2000, 5000].map((num) => (
+                                    <button
+                                      key={num}
+                                      onClick={() => {
+                                        setAffiliateReferrals(String(num));
+                                        setAffiliateResult(calculateAffiliateEarnings(num));
+                                      }}
+                                      className={`px-3 py-1.5 text-xs rounded-full transition-all ${
+                                        parseInt(affiliateReferrals) === num
+                                          ? 'bg-primary text-primary-foreground font-bold'
+                                          : 'bg-secondary/50 text-foreground/70 hover:bg-secondary'
+                                      }`}
+                                    >
+                                      {num.toLocaleString()}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="text-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                <p className="text-xs text-foreground/60 font-medium mb-1">Yearly Potential</p>
-                                <p className="text-2xl font-bold text-amber-500">{formatCurrency(hustleResult.yearly)}</p>
-                              </div>
+
+                              {/* Affiliate Earnings Breakdown */}
+                              {affiliateResult && (
+                                <div className="space-y-3">
+                                  {/* Tier breakdown */}
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                                      <p className="text-[10px] text-emerald-400/70 font-medium">Tier 1 Earnings</p>
+                                      <p className="text-lg font-bold text-emerald-400">{formatCurrency(affiliateResult.tier1Earnings)}</p>
+                                      <p className="text-[10px] text-muted-foreground">{affiliateResult.referralsInTier1.toLocaleString()} × $1</p>
+                                    </div>
+                                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+                                      <p className="text-[10px] text-primary/70 font-medium">Tier 2 Earnings</p>
+                                      <p className="text-lg font-bold text-primary">{formatCurrency(affiliateResult.tier2Earnings)}</p>
+                                      <p className="text-[10px] text-muted-foreground">{affiliateResult.referralsInTier2.toLocaleString()} × $2</p>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Total */}
+                                  <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-primary/20 border border-amber-500/30 text-center">
+                                    <p className="text-xs text-amber-400/80 font-medium mb-1">Total Affiliate Earnings</p>
+                                    <p className="text-3xl font-bold gradient-gold-text">{formatCurrency(affiliateResult.totalEarnings)}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      from {parseInt(affiliateReferrals || '0').toLocaleString()} referrals
+                                    </p>
+                                  </div>
+
+                                  {/* Comparison to salary if available */}
+                                  {salary > 0 && affiliateResult.totalEarnings > 0 && (
+                                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+                                      <p className="text-sm font-semibold text-primary">
+                                        {affiliateResult.totalEarnings >= salary ? (
+                                          <>🔥 That's {((affiliateResult.totalEarnings / salary) * 100).toFixed(0)}% of your annual salary!</>
+                                        ) : (
+                                          <>💪 That's {((affiliateResult.totalEarnings / salary) * 100).toFixed(0)}% of your salary — keep sharing!</>
+                                        )}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Viral potential callout */}
+                                  <div className="text-center text-xs text-muted-foreground">
+                                    <p>📱 One viral TikTok or tweet can easily hit 50+ signups</p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
 
-                          {/* Motivational Message */}
-                          {hustleResult && hustleResult.yearly > 0 && (
-                            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
-                              {salary > 0 && hustleResult.yearly >= salary * 0.5 ? (
-                                <p className="text-base font-semibold text-primary">
-                                  🔥 {formatCurrency(hustleResult.yearly)}/year extra — that's {((hustleResult.yearly / salary) * 100).toFixed(0)}% of your salary!
-                                </p>
-                              ) : (
-                                <p className="text-base font-semibold text-primary">
-                                  💪 {formatCurrency(hustleResult.yearly)}/year — every dollar counts. Keep stacking!
-                                </p>
+                          {/* REGULAR HUSTLE CALCULATOR */}
+                          {!selectedHustle.isAffiliate && (
+                            <>
+                              {/* Adjustable Inputs */}
+                              <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                  <Label className="text-xs text-foreground/70 font-medium">Buy Price</Label>
+                                  <div className="relative mt-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                    <Input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={buyPrice}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9.]/g, '');
+                                        setBuyPrice(value);
+                                        const buy = parseFloat(value) || 0;
+                                        const sell = parseFloat(sellPrice) || 0;
+                                        const sales = parseFloat(salesVolume) || 0;
+                                        if (sell > buy && sales > 0) {
+                                          const profit = sell - buy;
+                                          const monthly = profit * sales;
+                                          setHustleResult({ monthly, yearly: monthly * 12 });
+                                        }
+                                      }}
+                                      className="pl-7 h-10"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-foreground/70 font-medium">Sell Price</Label>
+                                  <div className="relative mt-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                    <Input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={sellPrice}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9.]/g, '');
+                                        setSellPrice(value);
+                                        const buy = parseFloat(buyPrice) || 0;
+                                        const sell = parseFloat(value) || 0;
+                                        const sales = parseFloat(salesVolume) || 0;
+                                        if (sell > buy && sales > 0) {
+                                          const profit = sell - buy;
+                                          const monthly = profit * sales;
+                                          setHustleResult({ monthly, yearly: monthly * 12 });
+                                        }
+                                      }}
+                                      className="pl-7 h-10"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-foreground/70 font-medium">Sales/Month</Label>
+                                  <Input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={salesVolume}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9]/g, '');
+                                      setSalesVolume(value);
+                                      const buy = parseFloat(buyPrice) || 0;
+                                      const sell = parseFloat(sellPrice) || 0;
+                                      const sales = parseFloat(value) || 0;
+                                      if (sell > buy && sales > 0) {
+                                        const profit = sell - buy;
+                                        const monthly = profit * sales;
+                                        setHustleResult({ monthly, yearly: monthly * 12 });
+                                      }
+                                    }}
+                                    className="h-10 mt-1"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Results */}
+                              {hustleResult && hustleResult.monthly > 0 && (
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="text-center p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                    <p className="text-xs text-foreground/60 font-medium mb-1">Monthly Income</p>
+                                    <p className="text-2xl font-bold text-emerald-500">{formatCurrency(hustleResult.monthly)}</p>
+                                  </div>
+                                  <div className="text-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                    <p className="text-xs text-foreground/60 font-medium mb-1">Yearly Potential</p>
+                                    <p className="text-2xl font-bold text-amber-500">{formatCurrency(hustleResult.yearly)}</p>
+                                  </div>
+                                </div>
                               )}
-                            </div>
+
+                              {/* Motivational Message */}
+                              {hustleResult && hustleResult.yearly > 0 && (
+                                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                                  {salary > 0 && hustleResult.yearly >= salary * 0.5 ? (
+                                    <p className="text-base font-semibold text-primary">
+                                      🔥 {formatCurrency(hustleResult.yearly)}/year extra — that's {((hustleResult.yearly / salary) * 100).toFixed(0)}% of your salary!
+                                    </p>
+                                  ) : (
+                                    <p className="text-base font-semibold text-primary">
+                                      💪 {formatCurrency(hustleResult.yearly)}/year — every dollar counts. Keep stacking!
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
