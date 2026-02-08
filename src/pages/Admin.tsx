@@ -22,6 +22,7 @@ import { AffiliateManagement } from '@/components/admin/AffiliateManagement';
 import { RevenueDashboard } from '@/components/admin/RevenueDashboard';
 import DeploymentGuide from '@/components/admin/DeploymentGuide';
 import StoryShareAnalytics from '@/components/admin/StoryShareAnalytics';
+import ShareAnalytics from '@/components/admin/ShareAnalytics';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
@@ -717,6 +718,10 @@ const Admin = () => {
               <Share2 className="h-4 w-4" />
               Story Shares
             </TabsTrigger>
+            <TabsTrigger value="share-analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Share Analytics
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="revenue">
@@ -1105,6 +1110,11 @@ const Admin = () => {
           {/* Story Share Analytics Tab */}
           <TabsContent value="shares">
             <StoryShareAnalytics />
+          </TabsContent>
+
+          {/* Share Analytics Tab (All Shares) */}
+          <TabsContent value="share-analytics">
+            <ShareAnalytics />
           </TabsContent>
         </Tabs>
       </main>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Copy, Check, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getShareUrl } from '@/lib/shareUrls';
+import { trackShareEvent } from '@/hooks/useShareTracking';
 
 // Social media icons
 const TwitterIcon = () => (
@@ -43,6 +44,7 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
       await navigator.clipboard.writeText(ogShareUrl);
       setCopied(true);
       toast.success('Link copied to clipboard!');
+      trackShareEvent('invite', 'copy', 'link');
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Failed to copy link');
@@ -50,16 +52,19 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
   };
 
   const handleTwitterShare = () => {
+    trackShareEvent('invite', 'twitter', 'link');
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleFacebookShare = () => {
+    trackShareEvent('invite', 'facebook', 'link');
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogShareUrl)}&quote=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleWhatsAppShare = () => {
+    trackShareEvent('invite', 'whatsapp', 'link');
     const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + ogShareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -67,6 +72,7 @@ const InviteFriendsModal = ({ open, onOpenChange }: InviteFriendsModalProps) => 
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
+        trackShareEvent('invite', 'native', 'link');
         await navigator.share({
           title: 'Wealth Perspective',
           text: shareText,

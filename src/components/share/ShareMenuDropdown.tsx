@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { trackShareEvent, type ShareFeature, type SharePlatform, type ShareType } from '@/hooks/useShareTracking';
 
 // Social media icons
 export const TwitterIcon = () => (
@@ -72,6 +73,10 @@ interface ShareMenuDropdownProps {
   buttonClassName?: string;
   buttonText?: string;
   variant?: 'premium' | 'default';
+  /** Feature name for analytics tracking */
+  trackingFeature?: ShareFeature;
+  /** Additional context for analytics */
+  trackingContext?: Record<string, unknown>;
 }
 
 const ShareMenuDropdown = ({
@@ -90,7 +95,19 @@ const ShareMenuDropdown = ({
   buttonClassName,
   buttonText = 'Share',
   variant = 'premium',
+  trackingFeature,
+  trackingContext = {},
 }: ShareMenuDropdownProps) => {
+  // Wrap handlers with tracking
+  const withTracking = (platform: SharePlatform, shareType: ShareType, handler: () => void) => {
+    return () => {
+      if (trackingFeature) {
+        trackShareEvent(trackingFeature, platform, shareType, trackingContext);
+      }
+      handler();
+    };
+  };
+
   const handleOpenChange = (open: boolean) => {
     if (open && onMenuOpen) {
       onMenuOpen();
@@ -126,40 +143,40 @@ const ShareMenuDropdown = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center" className="w-48">
-          <DropdownMenuItem onClick={onTextShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('native', 'link', onTextShare)} className="cursor-pointer">
             <MessageCircle className="h-4 w-4" />
             <span className="ml-2">Text / Message</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onWhatsAppShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('whatsapp', 'link', onWhatsAppShare)} className="cursor-pointer">
             <WhatsAppIcon />
             <span className="ml-2">WhatsApp</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onTwitterShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('twitter', 'link', onTwitterShare)} className="cursor-pointer">
             <TwitterIcon />
             <span className="ml-2">X (Twitter)</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onFacebookShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('facebook', 'link', onFacebookShare)} className="cursor-pointer">
             <FacebookIcon />
             <span className="ml-2">Facebook</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onLinkedInShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('linkedin', 'link', onLinkedInShare)} className="cursor-pointer">
             <LinkedInIcon />
             <span className="ml-2">LinkedIn</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onInstagramShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('instagram', 'text', onInstagramShare)} className="cursor-pointer">
             <InstagramIcon />
             <span className="ml-2">Instagram</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onTikTokShare} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('tiktok', 'text', onTikTokShare)} className="cursor-pointer">
             <TikTokIcon />
             <span className="ml-2">TikTok</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onSaveImage} className="cursor-pointer" disabled={isPreGenerating}>
+          <DropdownMenuItem onClick={withTracking('save-image', 'image', onSaveImage)} className="cursor-pointer" disabled={isPreGenerating}>
             <Image className="h-4 w-4" />
             <span className="ml-2">Save to Photos</span>
             {isPreGenerating && <Loader2 className="h-3 w-3 ml-auto animate-spin opacity-50" />}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onCopyLink} className="cursor-pointer">
+          <DropdownMenuItem onClick={withTracking('copy', 'text', onCopyLink)} className="cursor-pointer">
             <Copy className="h-4 w-4" />
             <span className="ml-2">Copy Text</span>
           </DropdownMenuItem>

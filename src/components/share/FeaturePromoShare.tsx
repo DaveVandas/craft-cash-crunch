@@ -17,6 +17,7 @@ import {
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
 import { getShareUrl, type ShareablePage } from '@/lib/shareUrls';
+import { trackShareEvent, type ShareFeature as TrackingFeature } from '@/hooks/useShareTracking';
 
 const SITE_URL = "https://earningsexplorer.shop";
 
@@ -25,6 +26,7 @@ interface PromoContent {
   shareText: string;
   url: string;
   ogPage: ShareablePage; // For social media previews
+  trackingFeature: TrackingFeature; // For analytics
 }
 
 const PROMO_CONTENT: Record<string, PromoContent> = {
@@ -33,36 +35,42 @@ const PROMO_CONTENT: Record<string, PromoContent> = {
     shareText: `💰 8 trades that pay MORE than most degrees:\n\n⚡ Electrician: $95k/yr\n🔧 Plumber: $90k/yr\n❄️ HVAC Tech: $85k/yr\n🔥 Welder: $80k/yr\n\n📈 Start earning at 18 while others rack up $100k+ in debt.\n\n🎓 Skip college. Stack wealth.`,
     url: `${SITE_URL}/trades`,
     ogPage: 'trades',
+    trackingFeature: 'trades',
   },
   mogulMarkets: {
     title: 'Mogul Markets',
     shareText: `📈 Mogul Markets - Trade like a billionaire!\n\n💵 $10,000 paper money to start\n🎯 Real-time stock prices\n👑 Copy celebrity portfolios\n📊 Track your P&L\n\n🔥 Practice trading risk-free!`,
     url: `${SITE_URL}/mogul-markets`,
     ogPage: 'mogul-markets',
+    trackingFeature: 'mogul-markets',
   },
   vipPortfolios: {
     title: 'VIP Portfolios',
     shareText: `👑 Ever wonder what stocks politicians trade?\n\n📊 See Nancy Pelosi's portfolio\n💼 Track Warren Buffett's moves\n🎯 Copy trades to your paper portfolio\n\n🔥 Mirror the VIPs!`,
     url: `${SITE_URL}/celebrity-portfolios`,
     ogPage: 'celebrity-portfolios',
+    trackingFeature: 'celebrity-portfolios',
   },
   wealthQuiz: {
     title: 'Wealth Quiz',
     shareText: `🧠 Think you know how fast billionaires make money?\n\n💰 Guess celebrity earnings\n🔥 Build streaks for bonus points\n🏆 Earn your wealth title\n\n🎯 Test your mogul IQ!`,
     url: `${SITE_URL}/quiz`,
     ogPage: 'quiz',
+    trackingFeature: 'quiz',
   },
   realityCheck: {
     title: 'Reality Check',
     shareText: `💭 Ever wonder how your salary compares to celebrities?\n\n⏱️ See how fast they earn YOUR salary\n😅 Prepare to be humbled\n💡 Get motivated to build wealth\n\n🔥 Get your reality check!`,
     url: `${SITE_URL}/calculator`,
     ogPage: 'calculator',
+    trackingFeature: 'calculator',
   },
   debtDestroyer: {
     title: 'Debt Destroyer',
     shareText: `💀 Drowning in debt? This calculator shows you the way out.\n\n📊 Avalanche vs Snowball methods\n💵 See exactly how much interest you're paying\n🚀 Find your fastest path to freedom\n\n🔥 Crush your debt!`,
     url: `${SITE_URL}/debt-destroyer`,
     ogPage: 'debt-destroyer',
+    trackingFeature: 'side-hustle', // Maps to closest feature
   },
 };
 
@@ -90,6 +98,7 @@ const FeaturePromoShare = ({
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
+        trackShareEvent(content.trackingFeature, 'native', 'link');
         await navigator.share({
           title: content.title,
           text: content.shareText,
@@ -104,33 +113,39 @@ const FeaturePromoShare = ({
   };
 
   const handleWhatsAppShare = () => {
+    trackShareEvent(content.trackingFeature, 'whatsapp', 'link');
     const url = `https://wa.me/?text=${encodeURIComponent(content.shareText + '\n\n' + ogUrl)}`;
     window.open(url, '_blank');
   };
 
   const handleTwitterShare = () => {
+    trackShareEvent(content.trackingFeature, 'twitter', 'link');
     // Twitter/X uses the URL for OG previews
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(content.shareText)}&url=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleFacebookShare = () => {
+    trackShareEvent(content.trackingFeature, 'facebook', 'link');
     // Facebook scrapes the URL for OG tags
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleLinkedInShare = () => {
+    trackShareEvent(content.trackingFeature, 'linkedin', 'link');
     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ogUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleInstagramShare = () => {
+    trackShareEvent(content.trackingFeature, 'instagram', 'text');
     handleCopyText();
     toast.success('Text copied! Open Instagram and paste in your story or post.');
   };
 
   const handleTikTokShare = () => {
+    trackShareEvent(content.trackingFeature, 'tiktok', 'text');
     handleCopyText();
     toast.success('Text copied! Open TikTok and paste in your video caption.');
   };
@@ -138,6 +153,7 @@ const FeaturePromoShare = ({
   const handleCopyText = async () => {
     try {
       await navigator.clipboard.writeText(content.shareText + '\n\n' + ogUrl);
+      trackShareEvent(content.trackingFeature, 'copy', 'text');
       toast.success('Copied to clipboard!');
     } catch {
       toast.error('Failed to copy');
