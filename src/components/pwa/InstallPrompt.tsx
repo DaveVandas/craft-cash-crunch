@@ -96,7 +96,7 @@ const InstallPrompt = () => {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-[90] md:hidden animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-4 left-4 right-4 z-[90] md:hidden animate-in slide-in-from-bottom-4 duration-300">
       <div className="bg-card/95 backdrop-blur-xl border border-primary/20 rounded-2xl p-4 shadow-lg shadow-primary/10">
         <button
           onClick={handleDismiss}
@@ -113,19 +113,29 @@ const InstallPrompt = () => {
           
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-foreground mb-0.5">
-              Add to Home Screen
+              Unlock the Full App
             </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed mb-2">
               {isIOS 
-                ? "Tap the share button below, then 'Add to Home Screen' for quick access!"
-                : "Get the full app experience with one tap from your home screen."}
+                ? "Add to Home Screen for quick navigation, offline access & app-like experience!"
+                : "Install for quick navigation bar, offline access & app-like experience!"}
             </p>
             
+            {/* Benefits pills */}
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                🚀 Quick Nav
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                📴 Works Offline
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                ⚡ Faster
+              </span>
+            </div>
+            
             {isIOS ? (
-              <div className="mt-2 space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  Use Safari's share button below:
-                </p>
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs text-primary font-medium">
                   <Share className="h-4 w-4" />
                   <span>Share</span>
@@ -140,10 +150,10 @@ const InstallPrompt = () => {
               <Button
                 onClick={handleInstall}
                 size="sm"
-                className="mt-2 h-8 px-3 text-xs bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-amber-950 font-medium"
+                className="h-8 px-3 text-xs bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-amber-950 font-medium"
               >
                 <Download className="h-3.5 w-3.5 mr-1.5" />
-                Install App
+                Install Free
               </Button>
             )}
           </div>
