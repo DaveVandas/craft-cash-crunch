@@ -25,7 +25,8 @@ export type ShareFeature =
   | 'celebrity-portfolios'
   | 'wealth-wisdom'
   | 'landing'
-  | 'side-hustle';
+  | 'side-hustle'
+  | 'mogul-academy';
 
 export type ShareType = 'link' | 'image' | 'text';
 

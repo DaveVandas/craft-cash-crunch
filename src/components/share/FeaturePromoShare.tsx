@@ -93,10 +93,17 @@ const PROMO_CONTENT: Record<string, PromoContent> = {
     ogPage: 'compare',
     trackingFeature: 'compare',
   },
+  mogulAcademy: {
+    title: 'Mogul Academy',
+    shareText: `🎓 FREE financial education that actually makes sense!\n\n📈 Stocks, compound interest, ROI explained\n💡 Written at a 5th-grade level\n📚 Lessons rotate weekly\n\n🚀 Level up your money IQ!`,
+    url: `${SITE_URL}/mogul-academy`,
+    ogPage: 'mogul-academy',
+    trackingFeature: 'mogul-academy',
+  },
 };
 
 interface FeaturePromoShareProps {
-  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios' | 'wealthQuiz' | 'realityCheck' | 'debtDestroyer' | 'sideHustle' | 'affiliate' | 'compare';
+  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios' | 'wealthQuiz' | 'realityCheck' | 'debtDestroyer' | 'sideHustle' | 'affiliate' | 'compare' | 'mogulAcademy';
   size?: 'sm' | 'default';
   showLabel?: boolean;
   variant?: 'ghost' | 'outline' | 'default';

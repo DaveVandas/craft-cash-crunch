@@ -25,6 +25,7 @@ import {
   Rocket,
   ArrowLeft
 } from 'lucide-react';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 
 // Lessons rotate every 4 days
 const getLessonOfTheWeek = () => {
@@ -514,10 +515,13 @@ const MogulAcademy = () => {
             </Link>
             
             <div className="text-center max-w-3xl mx-auto">
-              <Badge className="mb-4 bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                <GraduationCap className="h-3 w-3 mr-1" />
-                Free Education
-              </Badge>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                  <GraduationCap className="h-3 w-3 mr-1" />
+                  Free Education
+                </Badge>
+                <FeaturePromoShare feature="mogulAcademy" size="sm" showLabel />
+              </div>
               <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4">
                 Mogul <span className="gradient-gold-text">Academy</span>
               </h1>

@@ -1,5 +1,5 @@
 // OG Share Edge Function - Serves dynamic OG tags for social media crawlers
-// Version: 2026-02-08-v4 (added wealth-wisdom and wealth-facts)
+// Version: 2026-02-08-v5 (added mogul-academy)
 const SITE_URL = "https://earningsexplorer.shop";
 
 interface PageMeta {
@@ -81,6 +81,12 @@ const PAGE_META: Record<string, PageMeta> = {
     description: "Mind-blowing wealth facts that will change how you see money. Did you know billionaires earn your salary in seconds?",
     image: "/og-wealth-facts.png",
     path: "/",
+  },
+  "mogul-academy": {
+    title: "Mogul Academy | Wealth Perspective",
+    description: "Free financial education for everyone. Learn investing, compound interest, and wealth-building from beginner to pro level.",
+    image: "/og-mogul-academy.png",
+    path: "/mogul-academy",
   },
 };
 
