@@ -19,7 +19,7 @@ const PremiumShareIconButton = forwardRef<HTMLButtonElement, PremiumShareIconBut
         ref={ref}
         variant="ghost"
         size="sm"
-        onClick={onClick}
+        {...(onClick && { onClick })}
         className={cn(
           `relative overflow-hidden flex items-center justify-center
           bg-gradient-to-r from-amber-500/20 to-yellow-500/10 
