@@ -38,50 +38,58 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
   }
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center p-4">
-      <Card className="max-w-md w-full border-primary/30 bg-gradient-to-br from-card via-card to-primary/10">
-        <CardContent className="p-8 text-center">
-          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto mb-6">
-            <Lock className="h-10 w-10 text-primary" />
+    <div className="min-h-[60vh] flex items-center justify-center p-4 pb-24">
+      <Card className="max-w-md w-full border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 shadow-lg">
+        <CardContent className="p-6 md:p-8 text-center space-y-5">
+          {/* Icon */}
+          <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto">
+            <Lock className="h-8 w-8 md:h-10 md:w-10 text-primary" />
           </div>
           
-          <h2 className="font-serif text-2xl font-bold mb-3">
-            Time to Join the <span className="gradient-gold-text">Winners Circle</span>
-          </h2>
-          
-          <p className="text-muted-foreground mb-6">
-            You've explored the wealth gap — now unlock unlimited access to all features for just <span className="text-primary font-bold">{regularPrice}</span> (one time, forever).
-          </p>
+          {/* Headline */}
+          <div>
+            <h2 className="font-serif text-xl md:text-2xl font-bold mb-2">
+              Time to Join the <span className="gradient-gold-text">Winners Circle</span>
+            </h2>
+            
+            <p className="text-sm md:text-base text-muted-foreground">
+              You've explored the wealth gap — now unlock unlimited access for just <span className="text-primary font-bold">{regularPrice}</span> (one time, forever).
+            </p>
+          </div>
 
-          <div className="space-y-3 text-left mb-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-            <div className="flex items-center gap-2 text-sm">
+          {/* Features List */}
+          <div className="space-y-2.5 text-left p-4 rounded-xl bg-primary/5 border border-primary/20">
+            <div className="flex items-center gap-3 text-sm">
               <Sparkles className="h-4 w-4 text-primary shrink-0" />
               <span>Unlimited celebrity searches</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-3 text-sm">
               <Sparkles className="h-4 w-4 text-primary shrink-0" />
               <span>Reality Check calculator</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-3 text-sm">
               <Sparkles className="h-4 w-4 text-primary shrink-0" />
               <span>Wealth Showdown comparisons</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-3 text-sm">
               <Sparkles className="h-4 w-4 text-primary shrink-0" />
               <span>Wealth Quiz & all premium features</span>
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-4 italic">
-            "You can afford $7 once to hang in this winners circle, right?!" 💪
+          {/* Persuasive Text */}
+          <p className="text-sm text-muted-foreground italic">
+            "You can afford {regularPrice} once to hang in this winners circle, right?!" 💪
           </p>
 
+          {/* CTA Buttons */}
           {user ? (
             canUseStripe ? (
               <Button 
                 onClick={initiatePayment}
                 disabled={paymentLoading}
-                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+                size="lg"
+                className="w-full text-base md:text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 shadow-gold"
               >
                 {paymentLoading ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -96,7 +104,8 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
                   // TODO: Implement IAP when ready
                   console.log('Native IAP not yet implemented');
                 }}
-                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+                size="lg"
+                className="w-full text-base md:text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 shadow-gold"
               >
                 <Crown className="mr-2 h-5 w-5" />
                 Get Lifetime Access - {regularPrice}
@@ -106,15 +115,16 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
             <div className="space-y-3">
               <Button 
                 asChild
-                className="w-full h-12 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90"
+                size="lg"
+                className="w-full text-base md:text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 shadow-gold"
               >
                 <Link to="/auth">
                   <Crown className="mr-2 h-5 w-5" />
                   Sign Up & Get Lifetime Access
                 </Link>
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Already have an account? <Link to="/auth" className="text-primary hover:underline">Sign in</Link>
+              <p className="text-sm text-muted-foreground">
+                Already have an account? <Link to="/auth" className="text-primary hover:underline font-medium">Sign in</Link>
               </p>
             </div>
           )}
