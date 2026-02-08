@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect } from 'react';
 import Header from '@/components/layout/Header';
+import PageMeta from '@/components/seo/PageMeta';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
@@ -36,6 +37,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="See Wealth in Perspective"
+        description="Master the game of money. Explore celebrity wealth, build side income, and trade like a mogul with our wealth comparison tools."
+        image="/og-image.png"
+        path="/"
+      />
       <Header />
       <OnboardingTour />
       <ExitIntentPopup />
