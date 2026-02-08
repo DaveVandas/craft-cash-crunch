@@ -50,21 +50,34 @@ const Index = () => {
       <SocialProofNotifications />
 
       <main className="flex-1 animate-fade-in pb-20 md:pb-0">
-        {/* Hero Section - Split Layout */}
-        <section className="relative py-6 md:py-10">
+        {/* Hero Section - Premium Split Layout */}
+        <section className="relative py-8 md:py-12 overflow-hidden">
+          {/* Subtle background effects */}
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/3 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          
           <div className="container relative">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left side - Title, subtitle, search */}
-              <div className="animate-fade-in">
-                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 text-left">
-                  See Wealth in <span className="gradient-gold-text">Perspective</span>
-                </h1>
-                <p className="text-base md:text-lg text-muted-foreground mb-5 text-left max-w-lg">
-                  Master the game of money. Explore wealth, build side income, and trade like a <span className="gradient-gold-text font-semibold">mogul</span>.
-                </p>
+              <div className="animate-fade-in space-y-6">
+                <div className="space-y-3">
+                  <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+                    See Wealth in{' '}
+                    <span className="gradient-gold-text relative">
+                      Perspective
+                      <svg className="absolute -bottom-2 left-0 w-full h-3 text-primary/30" viewBox="0 0 200 12" preserveAspectRatio="none">
+                        <path d="M0,6 Q50,0 100,6 T200,6" stroke="currentColor" strokeWidth="3" fill="none" />
+                      </svg>
+                    </span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed">
+                    Master the game of money. Explore wealth, build side income, and trade like a{' '}
+                    <span className="gradient-gold-text font-semibold">mogul</span>.
+                  </p>
+                </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <SearchBarWithAutocomplete />
                   <DailyWealthFact />
                 </div>
@@ -72,9 +85,11 @@ const Index = () => {
 
               {/* Right side - Featured Mogul Spotlight */}
               <div className="animate-fade-in lg:animate-slide-in-right" data-tour="celebrity-spotlight">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xl">👑</span>
-                  <h2 className="font-serif text-base font-bold">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span className="text-lg">👑</span>
+                  </div>
+                  <h2 className="font-serif text-lg font-bold">
                     Today's <span className="gradient-gold-text">Mogul</span>
                   </h2>
                 </div>
@@ -85,18 +100,19 @@ const Index = () => {
         </section>
 
         {/* Trending Now */}
-        <section className="container mb-6">
+        <section className="container mb-8">
           <TrendingSearches />
         </section>
 
-        {/* Browse Categories - Horizontal Scroll */}
-        <section className="container mb-8">
-          <h2 className="font-serif text-lg font-bold mb-3">Browse by Category</h2>
+        {/* Browse Categories */}
+        <section className="container mb-10">
+          <SectionHeader icon="📂" title="Browse by" highlight="Category" />
           <CompactCategories />
         </section>
 
         {/* Featured Tools - Side Hustle & Mogul Markets */}
-        <section className="container mb-8">
+        <section className="container mb-10">
+          <SectionHeader icon="⚡" title="Featured" highlight="Tools" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <MogulMarketsPreview />
             <SideHustlePreview />
@@ -104,23 +120,18 @@ const Index = () => {
         </section>
 
         {/* Other Mogul Tools */}
-        <section className="container mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">🛠️</span>
-            <h2 className="font-serif text-lg font-bold">
-              More <span className="gradient-gold-text">Mogul</span> Tools
-            </h2>
-          </div>
+        <section className="container mb-10">
+          <SectionHeader icon="🛠️" title="More Mogul" highlight="Tools" />
           <QuickActions />
         </section>
 
         {/* Rich Habits Quote */}
-        <section className="container mb-8">
+        <section className="container mb-10">
           <RichHabits />
         </section>
 
         {/* Download App Section */}
-        <section className="container mb-8">
+        <section className="container mb-10">
           <DownloadAppSection />
         </section>
 
@@ -135,5 +146,19 @@ const Index = () => {
     </div>
   );
 };
+
+// Reusable polished section header component
+function SectionHeader({ icon, title, highlight }: { icon: string; title: string; highlight: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shadow-sm">
+        <span className="text-lg">{icon}</span>
+      </div>
+      <h2 className="font-serif text-xl font-bold">
+        {title} <span className="gradient-gold-text">{highlight}</span>
+      </h2>
+    </div>
+  );
+}
 
 export default Index;
