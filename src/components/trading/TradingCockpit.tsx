@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Zap,
   Crown,
-  Activity
+  Activity,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -61,7 +62,7 @@ interface TradingCockpitProps {
   isRefreshing: boolean;
   onSelectStock: (stock: StockData) => void;
   onSelectPosition: (ticker: string, currentPrice: number) => void;
-  onSelectTicker: (ticker: string) => void;
+  onSelectTicker: (ticker: string) => Promise<boolean> | void;
   onRefreshPrices: () => void;
 }
 
@@ -79,6 +80,7 @@ export function TradingCockpit({
   onSelectTicker,
   onRefreshPrices,
 }: TradingCockpitProps) {
+  const [loadingTicker, setLoadingTicker] = useState<string | null>(null);
   const isPositive = totalGainLoss >= 0;
 
   // Quick access tickers
@@ -157,17 +159,35 @@ export function TradingCockpit({
             
             {/* Quick Access Tickers */}
             <div className="flex flex-wrap gap-1.5">
-              {quickTickers.map((ticker) => (
-                <Button
-                  key={ticker}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onSelectTicker(ticker)}
-                  className="h-7 px-2 text-xs hover:bg-primary/20 hover:border-primary/50"
-                >
-                  {ticker}
-                </Button>
-              ))}
+              {quickTickers.map((ticker) => {
+                const isLoading = loadingTicker === ticker;
+                return (
+                  <Button
+                    key={ticker}
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading || loadingTicker !== null}
+                    onClick={async () => {
+                      setLoadingTicker(ticker);
+                      try {
+                        await onSelectTicker(ticker);
+                      } finally {
+                        setLoadingTicker(null);
+                      }
+                    }}
+                    className={cn(
+                      "h-7 px-2 text-xs hover:bg-primary/20 hover:border-primary/50 min-w-[52px]",
+                      isLoading && "opacity-70"
+                    )}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      ticker
+                    )}
+                  </Button>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
