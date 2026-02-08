@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import PageMeta from '@/components/seo/PageMeta';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -335,6 +336,12 @@ const CelebrityPortfolios = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="VIP Portfolios"
+        description="See what politicians and billionaires are trading. View Nancy Pelosi's portfolio, track Warren Buffett's moves, and more!"
+        image="/og-celebrity-portfolios.png"
+        path="/celebrity-portfolios"
+      />
       <Header />
 
       {/* Full-screen loading overlay when fetching portfolio */}

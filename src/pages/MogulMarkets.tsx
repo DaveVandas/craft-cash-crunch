@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import PageMeta from '@/components/seo/PageMeta';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -362,6 +363,12 @@ const MogulMarkets = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Mogul Markets"
+        description="Trade like a billionaire! $10,000 paper money to start. Real-time stock prices. Copy celebrity portfolios."
+        image="/og-mogul-markets.png"
+        path="/mogul-markets"
+      />
       <Header />
       
       {/* Live Market Ticker */}

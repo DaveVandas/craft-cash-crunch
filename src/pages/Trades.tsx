@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import PageMeta from '@/components/seo/PageMeta';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -291,6 +292,12 @@ const Trades = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Who Needs College?"
+        description="Skip the debt. Master a trade. 8 skilled trades that pay more than most college degrees. Start earning at 18!"
+        image="/og-trades.png"
+        path="/trades"
+      />
       <Header />
       
       <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">
