@@ -63,6 +63,12 @@ const PAGE_META: Record<string, PageMeta> = {
     image: "/og-compare.png",
     path: "/compare",
   },
+  "affiliate": {
+    title: "Get Paid to Share | Wealth Perspective",
+    description: "Join the mogul movement and earn cash for every friend you bring. Share viral wealth content and get paid!",
+    image: "/og-affiliate.png",
+    path: "/become-affiliate",
+  },
 };
 
 const corsHeaders = {

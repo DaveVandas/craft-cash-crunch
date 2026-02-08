@@ -25,7 +25,7 @@ export function AffiliateShareCard({
 
   const referralRedirectPath = `/ref/${affiliateCode}`;
   const referralDestinationUrl = `https://earningsexplorer.shop${referralRedirectPath}`;
-  const referralShareUrl = getShareUrlWithRedirect('home', referralRedirectPath);
+  const referralShareUrl = getShareUrlWithRedirect('affiliate', referralRedirectPath);
   
   const generateCardImage = async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;

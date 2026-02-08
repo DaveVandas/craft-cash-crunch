@@ -15,7 +15,8 @@ export type ShareablePage =
   | 'trades'
   | 'celebrity-portfolios'
   | 'side-hustle'
-  | 'compare';
+  | 'compare'
+  | 'affiliate';
 
 const SHARE_URL_VERSION = 2;
 
@@ -55,4 +56,5 @@ export const PAGE_NAMES: Record<ShareablePage, string> = {
   'celebrity-portfolios': 'VIP Portfolios',
   'side-hustle': 'Side Hustles',
   'compare': 'Celebrity Compare',
+  'affiliate': 'Get Paid to Share',
 };
