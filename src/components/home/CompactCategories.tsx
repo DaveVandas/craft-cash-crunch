@@ -12,22 +12,27 @@ const CompactCategories = () => {
             key={category.id}
             to={`/category/${category.id}`}
             className={cn(
-              "group flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl min-w-[90px]",
-              "border border-border/50 bg-card/50 hover:bg-card",
-              "hover:border-primary/50 hover:shadow-[0_0_15px_hsl(var(--primary)/0.2)]",
-              "transition-all duration-300 flex-shrink-0"
+              "group relative flex flex-col items-center gap-2 px-5 py-4 rounded-xl min-w-[100px]",
+              "border border-border/50 bg-gradient-to-br from-card/80 to-card/40",
+              "hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10",
+              "transition-all duration-300 flex-shrink-0 overflow-hidden"
             )}
           >
-            <span className="text-2xl group-hover:scale-110 transition-transform">
-              {category.icon}
-            </span>
-            <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+            {/* Subtle gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Icon with background */}
+            <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center group-hover:border-primary/30 group-hover:scale-105 transition-all duration-300 shadow-sm">
+              <span className="text-2xl">{category.icon}</span>
+            </div>
+            
+            <span className="relative text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap">
               {category.name}
             </span>
           </Link>
         ))}
       </div>
-      <ScrollBar orientation="horizontal" className="bg-primary/20 [&>div]:bg-primary/60" />
+      <ScrollBar orientation="horizontal" className="bg-primary/10 [&>div]:bg-primary/40" />
     </ScrollArea>
   );
 };
