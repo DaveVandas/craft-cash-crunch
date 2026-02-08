@@ -165,12 +165,46 @@ const MogulMarkets = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Auto-refresh prices on page load and every 60 seconds
+  // Helper to check if market is open (to avoid unnecessary API calls)
+  const isMarketOpen = (): boolean => {
+    const now = new Date();
+    const etOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    };
+    const etDateOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'America/New_York',
+      weekday: 'long',
+    };
+    
+    const etTimeStr = now.toLocaleString('en-US', etOptions);
+    const [hours, minutes] = etTimeStr.split(':').map(Number);
+    const currentMinutes = hours * 60 + minutes;
+    const dayOfWeek = now.toLocaleString('en-US', etDateOptions);
+    
+    const marketOpen = 9 * 60 + 30; // 9:30 AM ET
+    const marketClose = 16 * 60; // 4:00 PM ET
+    
+    const isWeekend = dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
+    const isMarketHours = currentMinutes >= marketOpen && currentMinutes < marketClose;
+    
+    return !isWeekend && isMarketHours;
+  };
+
+  // Auto-refresh prices on page load ONLY if market is open
   useEffect(() => {
     if (!portfolio || portfolio.positions.length === 0) return;
-    if (hasInitialRefresh) return; // Only run once on initial load
+    if (hasInitialRefresh) return;
     
-    // Refresh prices on initial load
+    // Skip initial refresh if market is closed - prices won't change
+    if (!isMarketOpen()) {
+      setHasInitialRefresh(true);
+      return;
+    }
+    
+    // Refresh prices on initial load (silent - no toast)
     const initialRefresh = async () => {
       setIsRefreshing(true);
       setHasInitialRefresh(true);
@@ -180,9 +214,7 @@ const MogulMarkets = () => {
           body: { action: 'batch', tickers },
         });
         
-        // stocks is an object keyed by ticker, not an array
         if (!error && data?.stocks && Object.keys(data.stocks).length > 0) {
-          // Update prices in database
           for (const [ticker, stock] of Object.entries(data.stocks)) {
             const stockData = stock as { price?: number };
             const position = portfolio.positions.find(p => p.ticker === ticker);
@@ -196,7 +228,6 @@ const MogulMarkets = () => {
                 .eq('id', position.id);
             }
           }
-          
           await fetchPortfolio();
         }
       } catch (err) {
@@ -209,12 +240,15 @@ const MogulMarkets = () => {
     initialRefresh();
   }, [portfolio?.id, portfolio?.positions.length, hasInitialRefresh, fetchPortfolio, db]);
 
-  // Separate effect for periodic refresh every 60 seconds
+  // Periodic refresh every 60 seconds - ONLY when market is open
   useEffect(() => {
     if (!portfolio || portfolio.positions.length === 0) return;
     
     const intervalId = setInterval(() => {
-      handleRefreshPrices();
+      // Only auto-refresh when market is open
+      if (isMarketOpen()) {
+        handleRefreshPrices();
+      }
     }, 60000);
     
     return () => clearInterval(intervalId);
