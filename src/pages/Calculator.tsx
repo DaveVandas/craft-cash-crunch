@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { useCelebritySearch } from '@/hooks/useCelebritySearch';
 import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 import { Celebrity } from '@/lib/types';
-import { Search, Loader2, Rocket, TrendingUp, Flame, ArrowRight } from 'lucide-react';
+import { Search, Loader2, Rocket, TrendingUp, Flame, ArrowRight, Crown, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/earnings';
 
@@ -350,30 +350,64 @@ const Calculator = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-5">
-                      {/* Hustle Grid */}
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                      {/* PINNED AFFILIATE OPTION - Hero Style */}
+                      {!affiliateFull && (
+                        <button
+                          onClick={() => applyHustlePreset(SIDE_HUSTLE_IDEAS.find(h => h.isAffiliate)!)}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden group ${
+                            selectedHustle?.isAffiliate
+                              ? 'border-amber-400 bg-gradient-to-r from-amber-500/20 via-primary/20 to-amber-500/20 ring-2 ring-amber-400/30 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                              : 'border-amber-500/50 bg-gradient-to-r from-amber-500/10 via-primary/10 to-amber-500/10 hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                          }`}
+                        >
+                          {/* Animated shimmer effect */}
+                          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                          
+                          <div className="flex items-center gap-4 relative z-10">
+                            {/* Icon with glow */}
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-amber-500/30 blur-xl rounded-full" />
+                              <div className="relative text-4xl">💎</div>
+                            </div>
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Crown className="h-4 w-4 text-amber-400" />
+                                <span className="text-xs font-bold text-amber-400 uppercase tracking-wide">Become a Mogul</span>
+                                <span className="text-[10px] bg-amber-500 text-amber-950 px-2 py-0.5 rounded-full font-bold animate-pulse">
+                                  HOT 🔥
+                                </span>
+                              </div>
+                              <p className="text-base font-bold text-foreground">Wealth Perspective Affiliate</p>
+                              <p className="text-sm text-amber-400/80">Earn $1-2 per signup • Unlimited potential</p>
+                            </div>
+                            
+                            {/* Arrow */}
+                            <div className="flex-shrink-0">
+                              <Sparkles className="h-5 w-5 text-amber-400" />
+                            </div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Other Hustles Grid */}
+                      <div className="grid grid-cols-5 gap-2">
                         {SIDE_HUSTLE_IDEAS
-                          .filter(hustle => !affiliateFull || !hustle.isAffiliate) // Hide affiliate when full
+                          .filter(hustle => !hustle.isAffiliate) // Affiliate is shown separately above
                           .map((hustle) => (
                           <button
                             key={hustle.name}
                             onClick={() => applyHustlePreset(hustle)}
-                            className={`p-3 rounded-xl border text-center transition-all hover:border-primary/50 hover:bg-primary/5 relative ${
+                            className={`p-3 rounded-xl border text-center transition-all hover:border-primary/50 hover:bg-primary/5 ${
                               selectedHustle?.name === hustle.name 
                                 ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
-                                : hustle.isPinned
-                                  ? 'border-amber-500/50 bg-gradient-to-br from-amber-500/10 to-primary/10'
-                                  : 'border-border/50 bg-card/50'
+                                : 'border-border/50 bg-card/50'
                             }`}
                           >
-                            {hustle.isPinned && (
-                              <span className="absolute -top-1.5 -right-1.5 text-[10px] bg-amber-500 text-amber-950 px-1.5 py-0.5 rounded-full font-bold">
-                                HOT
-                              </span>
-                            )}
                             <span className="text-2xl block mb-1">{hustle.emoji}</span>
                             <span className="text-xs font-medium block truncate text-foreground">
-                              {hustle.isPinned ? 'Affiliate' : hustle.name.split(' ')[0]}
+                              {hustle.name.split(' ')[0]}
                             </span>
                           </button>
                         ))}
