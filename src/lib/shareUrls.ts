@@ -6,7 +6,7 @@
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
-export type ShareablePage = 
+export type ShareablePage =
   | 'home'
   | 'debt-destroyer'
   | 'quiz'
@@ -17,13 +17,29 @@ export type ShareablePage =
   | 'side-hustle'
   | 'compare';
 
+const SHARE_URL_VERSION = 2;
+
+function normalizeRedirectPath(redirectPath: string): string {
+  if (!redirectPath) return "/";
+  return redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`;
+}
+
 /**
  * Get the social-optimized share URL for a page.
  * When shared on Twitter/Facebook, this URL will return proper OG meta tags.
  * When clicked by regular users, it redirects to the actual page.
  */
 export function getShareUrl(page: ShareablePage): string {
-  return `${SUPABASE_URL}/functions/v1/og-share?page=${page}`;
+  return `${SUPABASE_URL}/functions/v1/og-share?page=${page}&v=${SHARE_URL_VERSION}`;
+}
+
+/**
+ * Like getShareUrl(), but lets you redirect humans to an arbitrary in-app path
+ * (e.g. /ref/CODE, /landing-d?ref=CODE). Crawlers still get the OG HTML.
+ */
+export function getShareUrlWithRedirect(page: ShareablePage, redirectPath: string): string {
+  const redirect = normalizeRedirectPath(redirectPath);
+  return `${SUPABASE_URL}/functions/v1/og-share?page=${page}&redirect=${encodeURIComponent(redirect)}&v=${SHARE_URL_VERSION}`;
 }
 
 /**

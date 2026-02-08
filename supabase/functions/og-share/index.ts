@@ -67,7 +67,8 @@ const PAGE_META: Record<string, PageMeta> = {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req: Request) => {
@@ -79,13 +80,15 @@ Deno.serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const page = url.searchParams.get("page") || "home";
+    const rawRedirect = url.searchParams.get("redirect");
     const userAgent = req.headers.get("user-agent") || "";
-    
-    console.log(`[OG Share] Request for page: ${page}, UA: ${userAgent.substring(0, 100)}`);
 
     // Check if this is a social media crawler
-    const isCrawler = /Twitterbot|facebookexternalhit|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot/i.test(userAgent);
-    
+    const isCrawler =
+      /Twitterbot|facebookexternalhit|Facebot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Pinterest|Applebot/i.test(
+        userAgent,
+      );
+
     // Get meta for the requested page, fallback to home
     const meta = PAGE_META[page] || {
       title: "Wealth Perspective",
@@ -94,8 +97,20 @@ Deno.serve(async (req: Request) => {
       path: "/",
     };
 
+    const redirectPath =
+      rawRedirect &&
+      rawRedirect.startsWith("/") &&
+      !rawRedirect.startsWith("//") &&
+      !rawRedirect.includes("://")
+        ? rawRedirect
+        : undefined;
+
+    console.log(
+      `[OG Share] Request for page: ${page}, redirect: ${redirectPath ?? "-"}, UA: ${userAgent.substring(0, 100)}`,
+    );
+
     const fullImageUrl = `${SITE_URL}${meta.image}`;
-    const canonicalUrl = `${SITE_URL}${meta.path}`;
+    const canonicalUrl = `${SITE_URL}${redirectPath ?? meta.path}`;
 
     // For crawlers, return full HTML with OG tags
     // For regular users, redirect to the actual page
@@ -148,13 +163,14 @@ Deno.serve(async (req: Request) => {
 </body>
 </html>`;
 
-    const headers = new Headers();
-    headers.set("Content-Type", "text/html; charset=utf-8");
-    headers.set("Cache-Control", "public, max-age=3600");
-    headers.set("Access-Control-Allow-Origin", "*");
-    headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
-    
-    return new Response(html, { status: 200, headers });
+    return new Response(html, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
   } catch (error) {
     console.error("[OG Share] Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {

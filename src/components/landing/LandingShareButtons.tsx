@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { getShareUrl } from '@/lib/shareUrls';
 
 interface LandingShareButtonsProps {
   shareText?: string;
@@ -16,7 +17,7 @@ interface LandingShareButtonsProps {
 
 const LandingShareButtons = ({
   shareText = "🔥 Ever wonder how fast billionaires make money? This app is eye-opening!",
-  shareUrl = "https://earningsexplorer.shop"
+  shareUrl = getShareUrl('home'),
 }: LandingShareButtonsProps) => {
   const [copied, setCopied] = useState(false);
 

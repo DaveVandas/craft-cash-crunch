@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Share2, Copy, Check, Crown, TrendingUp, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
+import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 
 interface AffiliateShareCardProps {
   affiliateCode: string;
@@ -22,7 +23,9 @@ export function AffiliateShareCard({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const referralUrl = `${window.location.origin}/auth?ref=${affiliateCode}`;
+  const referralRedirectPath = `/ref/${affiliateCode}`;
+  const referralDestinationUrl = `https://earningsexplorer.shop${referralRedirectPath}`;
+  const referralShareUrl = getShareUrlWithRedirect('home', referralRedirectPath);
   
   const generateCardImage = async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;
@@ -76,12 +79,13 @@ export function AffiliateShareCard({
         await navigator.share({
           title: 'Join the Mogul Movement',
           text: `👑 Join the mogul lifestyle with my code ${affiliateCode}! See how the ultra-wealthy build their empires and start your journey to greatness.`,
+          url: referralShareUrl,
           files: [file],
         });
         toast.success('Shared successfully!');
       } else {
         // Fallback to copying link
-        await navigator.clipboard.writeText(referralUrl);
+        await navigator.clipboard.writeText(referralShareUrl);
         toast.success('Link copied to clipboard!');
       }
     } catch (error) {
@@ -136,7 +140,7 @@ export function AffiliateShareCard({
         setTimeout(() => setCopied(false), 2000);
       } else {
         // Ultimate fallback: copy link
-        await navigator.clipboard.writeText(referralUrl);
+        await navigator.clipboard.writeText(referralShareUrl);
         setCopied(true);
         toast.success('Link copied!');
         setTimeout(() => setCopied(false), 2000);
@@ -145,7 +149,7 @@ export function AffiliateShareCard({
       console.error('Copy failed:', error);
       // Even if everything fails, try to copy the link
       try {
-        await navigator.clipboard.writeText(referralUrl);
+        await navigator.clipboard.writeText(referralShareUrl);
         setCopied(true);
         toast.success('Link copied!');
         setTimeout(() => setCopied(false), 2000);
@@ -203,7 +207,7 @@ export function AffiliateShareCard({
           {/* QR Code */}
           <div className="relative p-4 rounded-xl shadow-xl" style={{ backgroundColor: '#FFFFFF' }}>
             <QRCodeSVG
-              value={referralUrl}
+              value={referralDestinationUrl}
               size={160}
               level="H"
               includeMargin={false}
@@ -318,9 +322,15 @@ export function AffiliateShareCard({
       </div>
 
       {/* Link preview */}
-      <div className="max-w-sm mx-auto p-3 bg-muted/50 rounded-lg">
-        <p className="text-xs text-muted-foreground mb-1">Your referral link:</p>
-        <p className="text-sm font-mono text-foreground break-all">{referralUrl}</p>
+      <div className="max-w-sm mx-auto p-3 bg-muted/50 rounded-lg space-y-2">
+        <div>
+          <p className="text-xs text-muted-foreground mb-1">Social share link (best for Twitter/Facebook):</p>
+          <p className="text-sm font-mono text-foreground break-all">{referralShareUrl}</p>
+        </div>
+        <div className="pt-2 border-t border-border/50">
+          <p className="text-xs text-muted-foreground mb-1">Redirects to:</p>
+          <p className="text-sm font-mono text-foreground break-all">{referralDestinationUrl}</p>
+        </div>
       </div>
     </div>
   );

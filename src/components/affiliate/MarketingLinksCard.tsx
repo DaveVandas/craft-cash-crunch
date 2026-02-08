@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { 
   Link2, 
   Copy, 
@@ -76,11 +77,18 @@ const MARKETING_LINKS = [
 export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const getFullUrl = (link: typeof MARKETING_LINKS[0]) => {
+  const getDirectUrl = (link: typeof MARKETING_LINKS[0]) => {
     if (link.useCodeInPath) {
       return `${BASE_URL}${link.path}${affiliateCode}`;
     }
     return `${BASE_URL}${link.path}?ref=${affiliateCode}`;
+  };
+
+  const getFullUrl = (link: typeof MARKETING_LINKS[0]) => {
+    // Use OG-share for reliable social previews, but keep the branded URL as the redirect target.
+    const directUrl = getDirectUrl(link);
+    const redirectPath = directUrl.replace(BASE_URL, '') || '/';
+    return getShareUrlWithRedirect('home', redirectPath);
   };
 
   const handleCopy = async (link: typeof MARKETING_LINKS[0]) => {
@@ -96,7 +104,7 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
   };
 
   const handleOpen = (link: typeof MARKETING_LINKS[0]) => {
-    window.open(getFullUrl(link), '_blank');
+    window.open(getDirectUrl(link), '_blank');
   };
 
   return (
