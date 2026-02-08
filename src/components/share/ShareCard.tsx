@@ -316,29 +316,31 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
               <p className="text-amber-300/40 text-[10px] text-center mb-3">
                 What they could buy in a year
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                {topComparisons.slice(0, 4).map((comparison, index) => (
+              <div className="space-y-2">
+                {topComparisons.slice(0, 3).map((comparison, index) => (
                   <div 
                     key={index} 
                     className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20"
                     style={{ background: 'rgba(0,0,0,0.4)' }}
                   >
-                    <span className="text-3xl">{comparison.emoji}</span>
-                    <div className="overflow-hidden flex-1">
-                      <p 
-                        className="text-xl font-black truncate"
-                        style={{ 
-                          background: 'linear-gradient(90deg, #ffd700, #ffb347)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                        }}
-                      >
-                        {comparison.quantity.toLocaleString()}
-                      </p>
-                      <p className="text-amber-200/80 text-xs font-semibold truncate">
-                        {pluralizeItem(comparison.item, comparison.quantity)}
-                      </p>
+                    <span className="text-3xl flex-shrink-0">{comparison.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <p 
+                          className="text-2xl font-black"
+                          style={{ 
+                            background: 'linear-gradient(90deg, #ffd700, #ffb347)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          {comparison.quantity.toLocaleString()}
+                        </p>
+                        <p className="text-amber-200/90 text-sm font-bold">
+                          {pluralizeItem(comparison.item, comparison.quantity)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
