@@ -365,6 +365,7 @@ const SideHustle = () => {
       <PageMeta
         title="Side Hustle Guide"
         description="Discover profitable side hustles with our interactive calculator. See realistic earnings for reselling, freelancing, digital products, and more."
+        image="/og-side-hustle.png"
         path="/side-hustle"
       />
       <Header />
