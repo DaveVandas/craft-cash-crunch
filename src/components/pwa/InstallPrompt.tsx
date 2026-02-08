@@ -18,24 +18,34 @@ const InstallPrompt = () => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches 
       || (window.navigator as any).standalone === true;
     setIsStandalone(standalone);
+    console.log('[PWA] Standalone mode:', standalone);
 
     // Check if iOS
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(ios);
+    console.log('[PWA] iOS detected:', ios);
+
+    // Check if on mobile
+    const mobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log('[PWA] Mobile detected:', mobile);
 
     // Check if user dismissed before (with 7-day expiry)
     const dismissedAt = localStorage.getItem('pwa-install-dismissed');
+    console.log('[PWA] Dismissed at:', dismissedAt);
     if (dismissedAt) {
       const dismissedDate = new Date(dismissedAt);
       const now = new Date();
       const daysSinceDismissed = (now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+      console.log('[PWA] Days since dismissed:', daysSinceDismissed);
       if (daysSinceDismissed < 7) {
+        console.log('[PWA] Not showing - dismissed within 7 days');
         return; // Don't show if dismissed within last 7 days
       }
     }
 
     // Listen for the beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstall = (e: Event) => {
+      console.log('[PWA] beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       // Show prompt after a short delay
@@ -46,7 +56,11 @@ const InstallPrompt = () => {
 
     // For iOS, show prompt after delay if not standalone
     if (ios && !standalone) {
-      setTimeout(() => setShowPrompt(true), 5000);
+      console.log('[PWA] iOS: will show prompt in 5 seconds');
+      setTimeout(() => {
+        console.log('[PWA] iOS: showing prompt now');
+        setShowPrompt(true);
+      }, 5000);
     }
 
     return () => {
