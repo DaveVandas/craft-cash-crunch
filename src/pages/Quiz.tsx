@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import PageMeta from '@/components/seo/PageMeta';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -330,6 +331,12 @@ const Quiz = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Wealth Quiz"
+        description="Think you know how fast billionaires make money? Test your mogul IQ with our wealth quiz!"
+        image="/og-quiz.png"
+        path="/quiz"
+      />
       <Header />
 
       <main className="flex-1 container py-8 pb-24 md:pb-8">

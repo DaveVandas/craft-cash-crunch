@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import PageMeta from '@/components/seo/PageMeta';
 import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -244,6 +245,12 @@ const DebtDestroyer = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Debt Destroyer"
+        description="Crush your debt with our calculator. See exactly how much interest you're paying and find your fastest path to freedom!"
+        image="/og-debt-destroyer.png"
+        path="/debt-destroyer"
+      />
       <Header />
       
       <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">

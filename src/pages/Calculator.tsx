@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
+import PageMeta from '@/components/seo/PageMeta';
 import SalaryInput from '@/components/calculator/SalaryInput';
 import RealityCheckResult from '@/components/calculator/RealityCheckResult';
 import RealityCheckShareCard from '@/components/calculator/RealityCheckShareCard';
@@ -152,6 +153,12 @@ const Calculator = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Reality Check"
+        description="See how fast celebrities earn your salary. Prepare to have your mind blown with our Reality Check calculator!"
+        image="/og-calculator.png"
+        path="/calculator"
+      />
       <Header />
       <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12 animate-fade-in">
         <PaywallGate>
