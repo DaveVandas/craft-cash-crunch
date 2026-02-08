@@ -214,11 +214,10 @@ serve(async (req) => {
         { global: { headers: { Authorization: authHeader } } }
       );
       
-      const token = authHeader.replace('Bearer ', '');
-      const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+      const { data: userData, error: userError } = await anonClient.auth.getUser();
       
-      if (!claimsError && claimsData?.claims?.sub) {
-        userId = claimsData.claims.sub;
+      if (!userError && userData?.user?.id) {
+        userId = userData.user.id;
       }
     }
     
