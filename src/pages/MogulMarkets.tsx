@@ -14,7 +14,9 @@ import {
   Loader2,
   Coins,
   Zap,
-  GraduationCap
+  GraduationCap,
+  PauseCircle,
+  RefreshCw
 } from 'lucide-react';
 import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { useTradingPortfolio } from '@/hooks/useTradingPortfolio';
@@ -497,9 +499,22 @@ const MogulMarkets = () => {
                 <span className="text-muted-foreground">Paper Trading Mode</span>
                 <PaperTradingDisclaimer variant="icon" />
               </div>
-              <div className="flex items-center gap-1.5 text-primary">
-                <Zap className="h-3 w-3" />
-                <span className="font-medium">Live Market Data</span>
+              <div className="flex items-center gap-3">
+                {isMarketOpen() ? (
+                  <div className="flex items-center gap-1.5 text-primary">
+                    <RefreshCw className="h-3 w-3" />
+                    <span className="font-medium">Auto-refresh active</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <PauseCircle className="h-3 w-3" />
+                    <span>Auto-refresh paused</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 text-primary">
+                  <Zap className="h-3 w-3" />
+                  <span className="font-medium">Live Data</span>
+                </div>
               </div>
             </div>
           </CardContent>
