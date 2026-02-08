@@ -15,7 +15,7 @@ function isAllowedOrigin(origin: string): boolean {
   try {
     const { hostname } = new URL(origin);
     // Allow preview and staging domains
-    return hostname.endsWith('.lovable.app');
+    return hostname.endsWith('.lovable.app') || hostname.endsWith('.lovableproject.com');
   } catch {
     return false;
   }
@@ -311,11 +311,10 @@ serve(async (req) => {
           { global: { headers: { Authorization: authHeader } } }
         );
         
-        const token = authHeader.replace('Bearer ', '');
-        const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+        const { data: userData, error: userError } = await anonClient.auth.getUser();
         
-        if (!claimsError && claimsData?.claims?.sub) {
-          userId = claimsData.claims.sub;
+        if (!userError && userData?.user?.id) {
+          userId = userData.user.id;
         }
       }
       
