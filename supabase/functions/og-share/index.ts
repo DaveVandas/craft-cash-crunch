@@ -142,14 +142,13 @@ Deno.serve(async (req: Request) => {
 </body>
 </html>`;
 
-    return new Response(html, {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
+    const headers = new Headers();
+    headers.set("Content-Type", "text/html; charset=utf-8");
+    headers.set("Cache-Control", "public, max-age=3600");
+    headers.set("Access-Control-Allow-Origin", "*");
+    headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+    
+    return new Response(html, { status: 200, headers });
   } catch (error) {
     console.error("[OG Share] Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
