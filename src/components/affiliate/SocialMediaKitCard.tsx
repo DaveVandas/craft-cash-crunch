@@ -12,6 +12,7 @@ import {
   Sparkles,
   ExternalLink
 } from 'lucide-react';
+import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 
 interface SocialMediaKitCardProps {
   affiliateCode: string;
@@ -37,14 +38,103 @@ interface SocialAsset {
     facebook: string[];
   };
   path: string;
+  /** If set, use OG share URL with this page key */
+  ogPageKey?: string;
+  category?: 'feature' | 'landing';
 }
 
 const SOCIAL_ASSETS: SocialAsset[] = [
+  // === LANDING PAGES (for recruiting/sharing) ===
+  {
+    id: 'landing-a',
+    ogImage: '/og-image.png',
+    title: 'Think Like The 1%',
+    description: 'Best for: Aspirational audiences',
+    caption: {
+      twitter: `🤯 Ever wonder how the rich REALLY think?\n\nWhile you're working 40 hours, Elon Musk makes what you'll earn in 10 lifetimes.\n\nThis app puts wealth into perspective 👇`,
+      instagram: `Ever wonder how the rich REALLY think? 🧠💰\n\nThis app shows you how fast billionaires make YOUR yearly salary...\n\nElon makes it in 0.3 seconds. I'm still processing this 😭\n\nLink in bio to see for yourself ⬆️`,
+      tiktok: `POV: You just learned Elon Musk makes your yearly salary in 0.3 seconds...\n\nThis app shows you how the 1% REALLY live 👑\n\nI'm not okay.`,
+      facebook: `Just found this eye-opening app that shows how fast billionaires make money compared to the rest of us.\n\nElon Musk earns the average salary in less than a second! Really puts things in perspective.`,
+    },
+    tags: {
+      twitter: ['#Wealth', '#Billionaire', '#Mindset'],
+      instagram: ['#wealthmindset', '#billionaire', '#motivation', '#rich', '#perspective', '#mindblown'],
+      tiktok: ['#fyp', '#billionaire', '#wealth', '#mindblown', '#viral', '#rich'],
+      facebook: ['wealth', 'perspective', 'billionaire', 'mindset'],
+    },
+    path: '/landing-a',
+    ogPageKey: 'landing-a',
+    category: 'landing',
+  },
+  {
+    id: 'landing-b',
+    ogImage: '/og-image.png',
+    title: 'Reality Check',
+    description: 'Best for: Salary comparison hook',
+    caption: {
+      twitter: `This app gives you a REALITY CHECK on wealth 📊\n\nCompare your earnings to celebrities in real-time...\n\nThe numbers will humble you 😅`,
+      instagram: `Ready for your REALITY CHECK? 📊💰\n\nThis app lets you compare your earnings to celebrities in real-time.\n\nI compared my salary to Taylor Swift's and... let's just say I need a moment 😭\n\nLink in bio ⬆️`,
+      tiktok: `This app just gave me a reality check I didn't ask for 😭\n\nYou can compare your salary to ANY celebrity in real-time...\n\nTaylor Swift makes my yearly salary in 47 seconds 💀`,
+      facebook: `Just got a "reality check" from this app that compares your earnings to celebrities in real-time.\n\nIt's humbling but also strangely motivating! Really makes you think about wealth differently.`,
+    },
+    tags: {
+      twitter: ['#RealityCheck', '#Salary', '#Wealth'],
+      instagram: ['#realitycheck', '#salary', '#celebrity', '#wealth', '#motivation', '#hustle'],
+      tiktok: ['#fyp', '#realitycheck', '#salary', '#viral', '#celebrity', '#humbled'],
+      facebook: ['reality check', 'salary', 'wealth', 'comparison'],
+    },
+    path: '/landing-b',
+    ogPageKey: 'landing-b',
+    category: 'landing',
+  },
+  {
+    id: 'landing-c',
+    ogImage: '/og-image.png',
+    title: 'Wealth Perspective',
+    description: 'Best for: General audiences',
+    caption: {
+      twitter: `Putting wealth into perspective, one mind-blowing comparison at a time 🤯\n\nThis app changed how I think about money forever.\n\nSee how fast the rich REALLY earn 👇`,
+      instagram: `See money differently 💎✨\n\nThis app puts wealth into perspective with mind-blowing comparisons.\n\nOnce you see how fast billionaires earn, you'll never think about money the same way!\n\nLink in bio ⬆️`,
+      tiktok: `This app just changed how I see money forever 🤯\n\nWealth comparisons that will blow your mind...\n\nYou're not ready for this 💀`,
+      facebook: `Found this fascinating app that puts wealth into perspective with eye-opening comparisons.\n\nReally interesting way to visualize the wealth gap and understand how the ultra-rich earn!`,
+    },
+    tags: {
+      twitter: ['#Wealth', '#Money', '#Perspective'],
+      instagram: ['#wealth', '#money', '#perspective', '#mindblown', '#rich', '#motivation'],
+      tiktok: ['#fyp', '#money', '#wealth', '#perspective', '#viral', '#mindblown'],
+      facebook: ['wealth', 'perspective', 'money', 'interesting'],
+    },
+    path: '/landing-c',
+    ogPageKey: 'landing-c',
+    category: 'landing',
+  },
+  {
+    id: 'landing-d',
+    ogImage: '/og-affiliate.png',
+    title: 'Get Paid to Share',
+    description: 'Best for: Recruiting affiliates',
+    caption: {
+      twitter: `One viral TikTok could pay you $39,000... 💰\n\nThis affiliate program pays you for every signup.\n\nI'm building passive income one share at a time 👑`,
+      instagram: `One viral post could pay you THOUSANDS 💰🔥\n\nI just joined this affiliate program that pays you for every person who signs up through your link.\n\nTop affiliates are making $39K+ from single viral posts!\n\nLink in bio to join ⬆️`,
+      tiktok: `One viral TikTok = $39,000? 💰\n\nThis affiliate program pays you $1-2 for EVERY signup.\n\nDo the math on a viral video... 🤯`,
+      facebook: `Just discovered this affiliate program where you get paid for sharing!\n\nTop affiliates are earning thousands from viral posts. It's a pretty cool way to earn passive income just by sharing content you'd share anyway.`,
+    },
+    tags: {
+      twitter: ['#Affiliate', '#PassiveIncome', '#SideHustle'],
+      instagram: ['#affiliate', '#passiveincome', '#sidehustle', '#makemoney', '#viral', '#income'],
+      tiktok: ['#fyp', '#affiliate', '#passiveincome', '#sidehustle', '#viral', '#moneytok'],
+      facebook: ['affiliate', 'passive income', 'side hustle', 'earn money'],
+    },
+    path: '/landing-d',
+    ogPageKey: 'landing-d',
+    category: 'landing',
+  },
+  // === FEATURES (for promoting specific tools) ===
   {
     id: 'home',
     ogImage: '/og-image.png',
     title: 'Wealth Perspective',
-    description: 'Main site promo - viral wealth comparisons',
+    description: 'Main site - viral wealth comparisons',
     caption: {
       twitter: `🤯 Just discovered this app that shows you how fast billionaires make YOUR yearly salary...\n\nElon makes it in 0.3 seconds. I'm not okay.\n\nCheck it out 👇`,
       instagram: `The wealth gap visualized in the most shocking way... 📊\n\nThis app shows you how long it takes YOU to earn what billionaires make in SECONDS.\n\nI spent an hour comparing my salary to celebrities and now I'm equally motivated and terrified 😭💪\n\nLink in bio to see your reality check! ⬆️`,
@@ -58,12 +148,13 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['wealth', 'money', 'perspective', 'billionaire'],
     },
     path: '/',
+    category: 'feature',
   },
   {
     id: 'quiz',
     ogImage: '/og-quiz.png',
     title: 'Wealth Quiz',
-    description: 'Viral "Who earns more?" guessing game',
+    description: 'Viral "Who earns more?" game',
     caption: {
       twitter: `I just scored 8/10 on this celebrity earnings quiz and I'm questioning everything I know about money 🤯\n\nCan you beat my score?`,
       instagram: `Test your wealth IQ! 🧠💰\n\nI just took this quiz that makes you guess who earns more between celebrities... and I was WRONG on most of them!\n\nThink you can beat my score? Try it and find out! 🔥\n\nLink in bio ⬆️`,
@@ -77,11 +168,12 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['quiz', 'fun', 'celebrity', 'game'],
     },
     path: '/quiz',
+    category: 'feature',
   },
   {
     id: 'calculator',
     ogImage: '/og-calculator.png',
-    title: 'Reality Check',
+    title: 'Reality Check Calculator',
     description: 'Compare your salary to celebrities',
     caption: {
       twitter: `This "Reality Check" calculator shows how fast celebs earn YOUR salary.\n\nRonaldo makes my monthly salary in 4.2 seconds. \n\nI need a moment. 😭`,
@@ -96,12 +188,13 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['reality check', 'salary', 'comparison', 'motivation'],
     },
     path: '/calculator',
+    category: 'feature',
   },
   {
     id: 'mogul-markets',
     ogImage: '/og-mogul-markets.png',
     title: 'Mogul Markets',
-    description: 'Paper trading game - invest like the 1%',
+    description: 'Paper trading game',
     caption: {
       twitter: `Been paper trading on Mogul Markets and I'm up 47% this week 📈\n\nNo real money, just learning how to invest like the pros.\n\nThis is how I'm practicing before going real 🔥`,
       instagram: `Learning to invest without risking real money! 📈💸\n\nFound this paper trading game where you start with $100k virtual cash and build your portfolio like real investors.\n\nUp 47% this week and it's giving me SO much confidence for when I go real!\n\nLink in bio to start your mogul journey ⬆️`,
@@ -115,6 +208,7 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['investing', 'stocks', 'learning', 'finance'],
     },
     path: '/mogul-markets',
+    category: 'feature',
   },
   {
     id: 'side-hustle',
@@ -134,11 +228,12 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['side hustle', 'extra income', 'skills', 'money'],
     },
     path: '/side-hustle',
+    category: 'feature',
   },
   {
     id: 'affiliate',
     ogImage: '/og-affiliate.png',
-    title: 'Get Paid to Share',
+    title: 'Affiliate Program',
     description: 'Recruit new affiliates',
     caption: {
       twitter: `Making money just by sharing links? Yes please. 💰\n\nThis affiliate program pays you $1-2 for every signup. No complicated funnels, just share and earn.\n\nBuilding my little empire one share at a time 👑`,
@@ -153,6 +248,7 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       facebook: ['affiliate', 'passive income', 'side hustle', 'earn money'],
     },
     path: '/become-affiliate',
+    category: 'feature',
   },
 ];
 
@@ -160,12 +256,22 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const referralUrl = `${SITE_URL}/ref/${affiliateCode}`;
+  // Generate the appropriate share URL based on asset type
+  const getShareUrl = (asset: SocialAsset): string => {
+    if (asset.ogPageKey) {
+      // Use OG-enabled share URL for landing pages
+      const redirectPath = `${asset.path}?ref=${affiliateCode}`;
+      return getShareUrlWithRedirect(asset.ogPageKey as any, redirectPath);
+    }
+    // Default referral URL for features
+    return `${SITE_URL}/ref/${affiliateCode}`;
+  };
 
   const getFullCaption = (asset: SocialAsset, platform: keyof SocialAsset['caption']) => {
     const caption = asset.caption[platform];
     const tags = asset.tags[platform].join(' ');
-    return `${caption}\n\n${tags}\n\n🔗 ${referralUrl}`;
+    const shareUrl = getShareUrl(asset);
+    return `${caption}\n\n${tags}\n\n🔗 ${shareUrl}`;
   };
 
   const handleCopyCaption = async (asset: SocialAsset, platform: keyof SocialAsset['caption']) => {
@@ -220,24 +326,37 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
     const isCaptionCopied = copiedId === `${asset.id}-${platform}-caption`;
     const isImageUrlCopied = copiedId === `${asset.id}-image-url`;
     const isDownloading = downloadingId === asset.id;
+    const isLandingPage = asset.category === 'landing';
 
     return (
       <div
         key={asset.id}
-        className="p-4 bg-muted/30 rounded-lg border border-border/50 hover:border-primary/30 transition-colors"
+        className={`p-4 rounded-lg border transition-colors ${
+          isLandingPage 
+            ? 'bg-primary/5 border-primary/30 hover:border-primary/50' 
+            : 'bg-muted/30 border-border/50 hover:border-primary/30'
+        }`}
       >
         {/* Image Preview */}
-        <div className="relative mb-4 rounded-lg overflow-hidden bg-black/20 aspect-[1200/630]">
+        <div className="relative mb-4 rounded-lg overflow-hidden bg-background/20 aspect-[1200/630]">
           <img
             src={asset.ogImage}
             alt={asset.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-2 left-2 right-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
             <Badge className="bg-background/80 text-foreground">{asset.title}</Badge>
+            {isLandingPage && (
+              <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30 text-xs">
+                OG Optimized
+              </Badge>
+            )}
           </div>
         </div>
+
+        {/* Description */}
+        <p className="text-xs text-muted-foreground mb-3">{asset.description}</p>
 
         {/* Asset Actions */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -254,10 +373,10 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
           <Button
             variant="outline"
             size="sm"
-            className={`gap-2 ${isImageUrlCopied ? 'text-green-500' : ''}`}
+            className="gap-2"
             onClick={() => handleCopyImageUrl(asset)}
           >
-            {isImageUrlCopied ? <Check className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
+            {isImageUrlCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <ExternalLink className="h-3.5 w-3.5" />}
             URL
           </Button>
         </div>
@@ -274,12 +393,13 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
 
         {/* Copy Caption Button */}
         <Button
-          className={`w-full gap-2 ${isCaptionCopied ? 'bg-green-600 hover:bg-green-700' : ''}`}
+          className="w-full gap-2"
+          variant={isCaptionCopied ? "secondary" : "default"}
           onClick={() => handleCopyCaption(asset, platform)}
         >
           {isCaptionCopied ? (
             <>
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4 text-green-500" />
               Copied!
             </>
           ) : (
@@ -300,15 +420,18 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
     { key: 'facebook' as const, label: '📘', fullLabel: 'Facebook' },
   ];
 
+  const landingAssets = SOCIAL_ASSETS.filter(a => a.category === 'landing');
+  const featureAssets = SOCIAL_ASSETS.filter(a => a.category === 'feature');
+
   return (
     <Card className="bg-card/50 border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Image className="w-5 h-5 text-primary" />
           Social Media Kit
-          <Badge className="ml-auto bg-gradient-to-r from-primary/30 to-amber-500/30 text-primary border-primary/30">
+          <Badge className="ml-auto bg-gradient-to-r from-primary/30 to-primary/10 text-primary border-primary/30">
             <Sparkles className="w-3 h-3 mr-1" />
-            NEW
+            {SOCIAL_ASSETS.length} Assets
           </Badge>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -327,30 +450,53 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
           </TabsList>
 
           {platformTabs.map((tab) => (
-            <TabsContent key={tab.key} value={tab.key}>
-              <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+            <TabsContent key={tab.key} value={tab.key} className="space-y-6">
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
                 <p className="text-sm text-center">
                   <span className="font-semibold">How to use:</span>{' '}
                   Save the image → Copy the caption → Post on {tab.fullLabel}! 🚀
                 </p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {SOCIAL_ASSETS.map((asset) => renderAssetCard(asset, tab.key))}
+
+              {/* Landing Pages Section */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                    🚀 Landing Pages
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">Best for recruiting new users</span>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {landingAssets.map((asset) => renderAssetCard(asset, tab.key))}
+                </div>
+              </div>
+
+              {/* Features Section */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                    ✨ Features
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">Promote specific tools</span>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {featureAssets.map((asset) => renderAssetCard(asset, tab.key))}
+                </div>
               </div>
             </TabsContent>
           ))}
         </Tabs>
 
-        <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-amber-500/10 rounded-lg border border-primary/20">
+        <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm">Pro Tip</span>
+            <span className="font-semibold text-sm">Pro Tips</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Post images with captions at peak hours for maximum engagement: 
-            <strong className="text-foreground"> 7-9am, 12-2pm, and 7-10pm</strong> in your timezone. 
-            Images get 2-3x more engagement than text-only posts! 📈
-          </p>
+          <ul className="text-xs text-muted-foreground space-y-1">
+            <li>• <strong className="text-foreground">Landing pages</strong> have OG-optimized URLs - they show rich previews when shared!</li>
+            <li>• Post at peak hours: <strong className="text-foreground">7-9am, 12-2pm, and 7-10pm</strong> in your timezone</li>
+            <li>• Images get 2-3x more engagement than text-only posts! 📈</li>
+          </ul>
         </div>
       </CardContent>
     </Card>
