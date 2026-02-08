@@ -55,7 +55,7 @@ export function HowWeCalculateModal({ variant = 'icon', className }: HowWeCalcul
       <DialogTrigger asChild>
         {trigger[variant]}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md pb-20 md:pb-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Info className="h-5 w-5 text-primary" />
