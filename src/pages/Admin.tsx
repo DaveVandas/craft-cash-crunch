@@ -15,8 +15,11 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket, Share2
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket, Share2, Image
 } from 'lucide-react';
+import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
+import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
+import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import BetaManagement from '@/components/admin/BetaManagement';
 import { AffiliateManagement } from '@/components/admin/AffiliateManagement';
 import { RevenueDashboard } from '@/components/admin/RevenueDashboard';
@@ -681,48 +684,56 @@ const Admin = () => {
 
         {/* Tabs for Users and Trends */}
         <Tabs defaultValue="revenue" className="space-y-4">
-          <TabsList className="flex-wrap">
-            <TabsTrigger value="revenue" className="gap-2">
-              <DollarSign className="h-4 w-4" />
-              Revenue
-            </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
-              <Users className="h-4 w-4" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="trends" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Search Trends
-            </TabsTrigger>
-            <TabsTrigger value="recent" className="gap-2">
-              <Clock className="h-4 w-4" />
-              Recent Signups
-            </TabsTrigger>
-            <TabsTrigger value="beta" className="gap-2">
-              <FlaskConical className="h-4 w-4" />
-              Beta Testers
-            </TabsTrigger>
-            <TabsTrigger value="landing" className="gap-2">
-              <Megaphone className="h-4 w-4" />
-              Landing Pages
-            </TabsTrigger>
-            <TabsTrigger value="affiliates" className="gap-2">
-              <Link2 className="h-4 w-4" />
-              Affiliates
-            </TabsTrigger>
-            <TabsTrigger value="deployment" className="gap-2">
-              <Rocket className="h-4 w-4" />
-              Deployment
-            </TabsTrigger>
-            <TabsTrigger value="shares" className="gap-2">
-              <Share2 className="h-4 w-4" />
-              Story Shares
-            </TabsTrigger>
-            <TabsTrigger value="share-analytics" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Share Analytics
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile: Scrollable horizontal tabs */}
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <TabsList className="inline-flex w-auto min-w-full md:grid md:grid-cols-6 lg:grid-cols-11 gap-1 h-auto p-1">
+              <TabsTrigger value="revenue" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Revenue</span>
+                <span className="sm:hidden">$</span>
+              </TabsTrigger>
+              <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Users</span>
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Trends</span>
+              </TabsTrigger>
+              <TabsTrigger value="recent" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Recent</span>
+              </TabsTrigger>
+              <TabsTrigger value="beta" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <FlaskConical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Beta</span>
+              </TabsTrigger>
+              <TabsTrigger value="landing" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Megaphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Landing</span>
+              </TabsTrigger>
+              <TabsTrigger value="affiliates" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Affiliates</span>
+              </TabsTrigger>
+              <TabsTrigger value="affiliate-toolkit" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Toolkit</span>
+              </TabsTrigger>
+              <TabsTrigger value="deployment" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Rocket className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Deploy</span>
+              </TabsTrigger>
+              <TabsTrigger value="shares" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Shares</span>
+              </TabsTrigger>
+              <TabsTrigger value="share-analytics" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="revenue">
             <RevenueDashboard users={users} />
@@ -1100,6 +1111,27 @@ const Admin = () => {
           {/* Affiliates Tab */}
           <TabsContent value="affiliates">
             <AffiliateManagement />
+          </TabsContent>
+
+          {/* Affiliate Toolkit Preview Tab */}
+          <TabsContent value="affiliate-toolkit">
+            <Card className="border-primary/20 mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5 text-primary" />
+                  Affiliate Toolkit Preview
+                </CardTitle>
+                <CardDescription>
+                  This is what your affiliates see in their dashboard. Preview the Social Media Kit, Captions, and Marketing Links they can use to promote your app.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <div className="space-y-6">
+              <SocialMediaKitCard affiliateCode="ADMIN-PREVIEW" />
+              <SocialCaptionsCard affiliateCode="ADMIN-PREVIEW" displayName="Affiliate" />
+              <MarketingLinksCard affiliateCode="ADMIN-PREVIEW" />
+            </div>
           </TabsContent>
 
           {/* Deployment Guide Tab */}
