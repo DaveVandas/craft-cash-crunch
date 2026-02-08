@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 import AffiliateWaitlist from '@/components/affiliate/AffiliateWaitlist';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 
 export default function BecomeAffiliate() {
   const { user } = useAuth();
@@ -167,10 +168,13 @@ export default function BecomeAffiliate() {
       <main className="container mx-auto px-4 py-8 pb-20 md:pb-0 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-gradient-to-r from-primary/20 to-primary/10 text-foreground border-primary/50">
-            <Crown className="w-3 h-3 mr-1 text-primary" />
-            Join the Mogul Movement
-          </Badge>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Badge className="bg-gradient-to-r from-primary/20 to-primary/10 text-foreground border-primary/50">
+              <Crown className="w-3 h-3 mr-1 text-primary" />
+              Join the Mogul Movement
+            </Badge>
+            <FeaturePromoShare feature="affiliate" size="sm" showLabel />
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Ready to Build Your{' '}
             <span className="text-primary">Mogul Empire?</span> 👑

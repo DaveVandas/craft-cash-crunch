@@ -18,7 +18,7 @@ export type ShareablePage =
   | 'compare'
   | 'affiliate';
 
-const SHARE_URL_VERSION = 2;
+const SHARE_URL_VERSION = 3;
 
 function normalizeRedirectPath(redirectPath: string): string {
   if (!redirectPath) return "/";
