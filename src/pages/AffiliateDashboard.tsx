@@ -15,6 +15,7 @@ import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
 import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
+import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
 import { 
   DollarSign, 
   Users, 
@@ -27,7 +28,8 @@ import {
   MessageSquare,
   FileText,
   ExternalLink,
-  Mail
+  Mail,
+  Image
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -497,8 +499,12 @@ export default function AffiliateDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="share" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="media-kit" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="media-kit" className="gap-2">
+              <Image className="w-4 h-4" />
+              <span className="hidden sm:inline">Media Kit</span>
+            </TabsTrigger>
             <TabsTrigger value="share" className="gap-2">
               <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Card</span>
@@ -521,6 +527,10 @@ export default function AffiliateDashboard() {
               <span className="sm:hidden">{referrals.length}</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="media-kit">
+            <SocialMediaKitCard affiliateCode={affiliate.affiliate_code} />
+          </TabsContent>
 
           <TabsContent value="share">
             <Card className="bg-card/50 border-border/50">
