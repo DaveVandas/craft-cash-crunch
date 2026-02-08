@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Search, TrendingUp, Brain, MoreHorizontal, Moon, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import {
   Sheet,
@@ -45,6 +45,24 @@ const ThemeToggleRow = () => {
 const MobileNav = () => {
   const location = useLocation();
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  // Only show MobileNav when app is installed as PWA (standalone mode)
+  useEffect(() => {
+    const checkStandalone = () => {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches 
+        || (window.navigator as any).standalone === true;
+      setIsStandalone(standalone);
+    };
+    
+    checkStandalone();
+    
+    // Listen for display mode changes (in case app gets installed while open)
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    mediaQuery.addEventListener('change', checkStandalone);
+    
+    return () => mediaQuery.removeEventListener('change', checkStandalone);
+  }, []);
   const { checkForUpdates, isChecking, needRefresh, applyUpdate } = usePWAUpdate();
 
   const handleCheckForUpdates = async () => {
@@ -82,6 +100,11 @@ const MobileNav = () => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
+
+  // Only render when in standalone/PWA mode
+  if (!isStandalone) {
+    return null;
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
