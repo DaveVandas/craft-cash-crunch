@@ -80,6 +80,7 @@ const Compare = () => {
       <PageMeta
         title="Wealth Showdown"
         description="Compare the earnings of any two celebrities, athletes, or billionaires. See who's stacking more cash in our head-to-head wealth comparison."
+        image="/og-compare.png"
         path="/compare"
       />
       <Header />
