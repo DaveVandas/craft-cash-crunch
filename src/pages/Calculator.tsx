@@ -496,9 +496,30 @@ const Calculator = () => {
                                     </div>
                                   )}
 
-                                  {/* Viral potential callout */}
-                                  <div className="text-center text-xs text-muted-foreground">
-                                    <p>📱 One viral TikTok or tweet can easily hit 50+ signups</p>
+                                  {/* Viral scenarios - tangible examples */}
+                                  <div className="p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20">
+                                    <p className="text-xs font-semibold text-violet-400 mb-3 text-center">🚀 Real Viral Scenarios</p>
+                                    <div className="grid grid-cols-1 gap-2 text-sm">
+                                      <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                                        <span className="text-muted-foreground">📱 One viral TikTok (500 signups)</span>
+                                        <span className="font-bold text-emerald-400">= $500</span>
+                                      </div>
+                                      <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                                        <span className="text-muted-foreground">🐦 Twitter thread goes viral (2K signups)</span>
+                                        <span className="font-bold text-emerald-400">= $3,000</span>
+                                      </div>
+                                      <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                                        <span className="text-muted-foreground">🔥 You hit 5K referrals</span>
+                                        <span className="font-bold gradient-gold-text">= $9,000</span>
+                                      </div>
+                                      <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                                        <span className="text-muted-foreground">👑 Top affiliate (10K signups)</span>
+                                        <span className="font-bold gradient-gold-text">= $19,000</span>
+                                      </div>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground text-center mt-3">
+                                      💡 Tier 1: $1/signup (first 1K) • Tier 2: $2/signup (after 1K)
+                                    </p>
                                   </div>
                                 </div>
                               )}
