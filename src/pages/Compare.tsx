@@ -88,17 +88,30 @@ const Compare = () => {
         <PaywallGate>
         <div className="max-w-4xl mx-auto">
           <Breadcrumb currentPage="Compare" />
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
-              Wealth <span className="gradient-gold-text">Showdown</span> ⚖️
+          
+          {/* Premium Hero Header */}
+          <div className="relative text-center mb-10 animate-fade-in">
+            {/* Decorative background */}
+            <div className="absolute inset-0 -z-10">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <span className="text-lg">⚔️</span>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Wealth Showdown</span>
+            </div>
+            
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+              Who's Making{' '}
+              <span className="gradient-gold-text">More?</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
               Pick your tycoons and see who's stacking more cash.
             </p>
           </div>
 
           {/* Search Layout */}
-          <Card className="border-border/50 bg-card/50 mb-8">
+          <Card className="border-border/50 bg-card/80 backdrop-blur-sm mb-8 shadow-lg shadow-primary/5">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-stretch gap-4">
                 {/* Tycoon 1 Input */}
@@ -132,10 +145,11 @@ const Compare = () => {
                   )}
                 </div>
 
-                {/* VS Badge */}
+                {/* VS Badge - Premium */}
                 <div className="flex items-center justify-center md:pt-6">
-                  <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-amber-600 shadow-lg shadow-primary/30">
-                    <Scale className="h-6 w-6 text-background" />
+                  <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary to-amber-600 shadow-xl shadow-primary/30 border border-primary/50">
+                    <Scale className="h-7 w-7 text-primary-foreground" />
+                    <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-amber-400 animate-pulse" />
                   </div>
                 </div>
 

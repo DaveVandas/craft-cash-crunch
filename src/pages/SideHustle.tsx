@@ -384,19 +384,28 @@ const SideHustle = () => {
       
       <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">
         <PaywallGate>
-        {/* Hero Section */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">
-              Side Hustle <span className="gradient-gold-text">Guide</span>
-            </h1>
+        {/* Premium Hero Section */}
+        <div className="relative text-center mb-12">
+          {/* Background glow */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
           </div>
-          <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+          
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-5">
+            <Rocket className="h-4 w-4 text-primary" />
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">Side Hustle Guide</span>
+          </div>
+          
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+            Start Stacking{' '}
+            <span className="gradient-gold-text">Cash</span>
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Every mogul started somewhere. Pick a hustle, run the numbers, and see what's possible. 💰
           </p>
           
-          {/* Inspirational Quote */}
-          <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20 max-w-xl mx-auto">
+          {/* Inspirational Quote - Premium Card */}
+          <div className="mt-8 p-5 rounded-xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 max-w-xl mx-auto shadow-lg shadow-primary/5">
             <p className="text-base md:text-lg italic text-foreground/90">"{displayedQuote.quote}"</p>
             <p className="text-sm text-muted-foreground mt-2">— {displayedQuote.author}</p>
           </div>

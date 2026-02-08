@@ -350,46 +350,64 @@ const Quiz = () => {
           {/* INTRO SCREEN */}
           {gameState === 'intro' && (
             <div className="text-center animate-fade-in">
-              <div className="mb-8">
-                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 to-amber-500/30 flex items-center justify-center mx-auto mb-6 animate-pulse">
-                  <Brain className="h-12 w-12 text-primary" />
+              {/* Premium Hero */}
+              <div className="relative mb-10">
+                {/* Background glow */}
+                <div className="absolute inset-0 -z-10">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/15 rounded-full blur-3xl" />
                 </div>
+                
+                <div className="relative h-28 w-28 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/20 to-amber-500/30 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary/20 border border-primary/20">
+                  <Brain className="h-14 w-14 text-primary" />
+                  {/* Sparkle accents */}
+                  <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-amber-400 animate-pulse" />
+                </div>
+                
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+                  <span className="text-lg">🧠</span>
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Wealth Quiz</span>
+                </div>
+                
                 <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-                  Wealth <span className="gradient-gold-text">Quiz</span>
+                  How Well Do You Know{' '}
+                  <span className="gradient-gold-text">The Rich?</span>
                 </h1>
-                <p className="text-lg text-foreground/70 max-w-md mx-auto">
+                <p className="text-lg text-muted-foreground max-w-md mx-auto">
                   Think you know how fast the ultra-rich make money? Let's find out! 💰
                 </p>
               </div>
 
-              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-amber-500/5 mb-8">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-4">How It Works</h3>
-                    <div className="grid gap-4 text-left">
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+              <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 mb-8 shadow-xl shadow-primary/5">
+                <CardContent className="p-6 md:p-8">
+                  <h3 className="font-semibold text-lg mb-6 flex items-center justify-center gap-2">
+                    <Crown className="h-5 w-5 text-primary" />
+                    How It Works
+                  </h3>
+                  <div className="grid gap-5 text-left">
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shrink-0 shadow-lg shadow-primary/10">
                         <span className="text-sm font-bold text-primary">1</span>
                       </div>
                       <div>
-                        <p className="font-medium">Answer questions</p>
+                        <p className="font-semibold">Answer Questions</p>
                         <p className="text-sm text-muted-foreground">Net worth battles, income breakdowns, wealth facts & more!</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
-                        <Flame className="h-4 w-4 text-amber-500" />
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-500/10 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
+                        <Flame className="h-5 w-5 text-amber-500" />
                       </div>
                       <div>
-                        <p className="font-medium">Build streaks</p>
+                        <p className="font-semibold">Build Streaks</p>
                         <p className="text-sm text-muted-foreground">Consecutive correct answers = bonus points!</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                        <Trophy className="h-4 w-4 text-success" />
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/10">
+                        <Trophy className="h-5 w-5 text-emerald-500" />
                       </div>
                       <div>
-                        <p className="font-medium">Learn wealth wisdom</p>
+                        <p className="font-semibold">Learn Wealth Wisdom</p>
                         <p className="text-sm text-muted-foreground">Discover how the ultra-rich build their fortunes!</p>
                       </div>
                     </div>
@@ -397,7 +415,11 @@ const Quiz = () => {
                 </CardContent>
               </Card>
 
-              <Button onClick={startQuiz} size="lg" className="h-14 px-10 text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90">
+              <Button 
+                onClick={startQuiz} 
+                size="lg" 
+                className="h-14 px-12 text-lg bg-gradient-to-r from-primary via-primary to-amber-500 hover:from-primary/90 hover:via-primary/80 hover:to-amber-500/90 shadow-xl shadow-primary/30 transition-all duration-300"
+              >
                 <Play className="mr-2 h-5 w-5" />
                 Start Quiz
               </Button>
