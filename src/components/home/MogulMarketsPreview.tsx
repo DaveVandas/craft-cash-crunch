@@ -21,6 +21,7 @@ import {
   InstagramIcon,
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
+import { handleMobileAppShare } from '@/lib/mobileShare';
 
 const TRENDING_TICKERS = [
   { symbol: 'AAPL', name: 'Apple', change: 2.4 },
@@ -81,14 +82,24 @@ const MogulMarketsPreview = () => {
     window.open(url, '_blank', 'width=550,height=420');
   };
 
-  const handleInstagramShare = () => {
-    handleCopyText();
-    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  const handleInstagramShare = async () => {
+    await handleMobileAppShare(
+      shareText,
+      `${SITE_URL}/mogul-markets`,
+      'Mogul Markets',
+      handleCopyText,
+      { success: 'Text copied!', description: 'Open Instagram and paste in your story or post.' }
+    );
   };
 
-  const handleTikTokShare = () => {
-    handleCopyText();
-    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  const handleTikTokShare = async () => {
+    await handleMobileAppShare(
+      shareText,
+      `${SITE_URL}/mogul-markets`,
+      'Mogul Markets',
+      handleCopyText,
+      { success: 'Text copied!', description: 'Open TikTok and paste in your video caption.' }
+    );
   };
 
   const handleCopyText = async () => {

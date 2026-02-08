@@ -17,6 +17,7 @@ import {
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
 import { getShareUrl } from '@/lib/shareUrls';
+import { handleMobileAppShare } from '@/lib/mobileShare';
 
 const SITE_URL = "https://earningsexplorer.shop";
 
@@ -60,14 +61,24 @@ const WealthWisdomPromo = () => {
     window.open(url, '_blank', 'width=550,height=420');
   };
 
-  const handleInstagramShare = () => {
-    handleCopyText();
-    toast.success('Text copied! Open Instagram and paste in your story or post.');
+  const handleInstagramShare = async () => {
+    await handleMobileAppShare(
+      shareText,
+      ogShareUrl,
+      'Wealth Wisdom',
+      handleCopyText,
+      { success: 'Text copied!', description: 'Open Instagram and paste in your story or post.' }
+    );
   };
 
-  const handleTikTokShare = () => {
-    handleCopyText();
-    toast.success('Text copied! Open TikTok and paste in your video caption.');
+  const handleTikTokShare = async () => {
+    await handleMobileAppShare(
+      shareText,
+      ogShareUrl,
+      'Wealth Wisdom',
+      handleCopyText,
+      { success: 'Text copied!', description: 'Open TikTok and paste in your video caption.' }
+    );
   };
 
   const handleCopyText = async () => {
