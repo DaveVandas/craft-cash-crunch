@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
+import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 
 interface ShareCardProps {
   celebrity: Celebrity;
@@ -41,7 +42,8 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
     return `💰 ${celebrity.name} earns ${formatCompactCurrency(breakdown.perSecond)}/second! That's ${formatCompactCurrency(celebrity.annualEarnings)}/year. Check out their full wealth stats:`;
   };
 
-  const shareUrl = `https://earningsexplorer.shop/profile/${celebrity.id}`;
+  // Use OG-enabled share URL that redirects to the profile page
+  const shareUrl = getShareUrlWithRedirect('home', `/profile/${celebrity.id}`);
   const imageName = `${celebrity.name.replace(/\s+/g, '-').toLowerCase()}-wealth-card`;
 
   const {
