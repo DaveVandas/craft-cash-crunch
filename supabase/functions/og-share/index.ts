@@ -1,5 +1,5 @@
 // OG Share Edge Function - Serves dynamic OG tags for social media crawlers
-// Version: 2026-02-08-v3 (regenerated all OG images)
+// Version: 2026-02-08-v4 (added wealth-wisdom and wealth-facts)
 const SITE_URL = "https://earningsexplorer.shop";
 
 interface PageMeta {
@@ -69,6 +69,18 @@ const PAGE_META: Record<string, PageMeta> = {
     description: "Join the mogul movement and earn cash for every friend you bring. Share viral wealth content and get paid!",
     image: "/og-affiliate.png",
     path: "/become-affiliate",
+  },
+  "wealth-wisdom": {
+    title: "Wealth Wisdom | Wealth Perspective",
+    description: "Weekly rags-to-riches stories from billionaires who started with nothing. Get inspired by their journeys!",
+    image: "/og-wealth-wisdom.png",
+    path: "/wealth-wisdom",
+  },
+  "wealth-facts": {
+    title: "Wealth Facts | Wealth Perspective",
+    description: "Mind-blowing wealth facts that will change how you see money. Did you know billionaires earn your salary in seconds?",
+    image: "/og-wealth-facts.png",
+    path: "/",
   },
 };
 

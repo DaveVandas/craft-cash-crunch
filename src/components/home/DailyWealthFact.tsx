@@ -17,6 +17,7 @@ import {
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
 import { MessageCircle, Copy } from 'lucide-react';
+import { getShareUrl } from '@/lib/shareUrls';
 
 const wealthFacts = [
   // Billionaire comparisons
@@ -77,9 +78,8 @@ const wealthFacts = [
   "The iPhone you are holding costs more than 90% of the world earns in a month.",
 ];
 
-const SITE_URL = "https://earningsexplorer.shop";
-
 const DailyWealthFact = () => {
+  const ogShareUrl = getShareUrl('wealth-facts');
   const [factIndex, setFactIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -114,7 +114,7 @@ const DailyWealthFact = () => {
   };
 
   const currentFact = wealthFacts[factIndex];
-  const shareText = `💡 Did you know? ${currentFact}\n\n🔥 Discover more jaw-dropping wealth facts at ${SITE_URL}`;
+  const shareText = `💡 Did you know? ${currentFact}\n\n🔥 Discover more jaw-dropping wealth facts at`;
 
   const handleNativeShare = async () => {
     if (navigator.share) {
@@ -122,7 +122,7 @@ const DailyWealthFact = () => {
         await navigator.share({
           title: 'Wealth Fact',
           text: shareText,
-          url: SITE_URL,
+          url: ogShareUrl,
         });
       } catch {
         // User cancelled
@@ -133,22 +133,22 @@ const DailyWealthFact = () => {
   };
 
   const handleWhatsAppShare = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${ogShareUrl}`)}`;
     window.open(url, '_blank');
   };
 
   const handleTwitterShare = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleFacebookShare = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(`💡 Did you know? ${currentFact}`)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogShareUrl)}&quote=${encodeURIComponent(`💡 Did you know? ${currentFact}`)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
   const handleLinkedInShare = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ogShareUrl)}`;
     window.open(url, '_blank', 'width=550,height=420');
   };
 
@@ -164,7 +164,7 @@ const DailyWealthFact = () => {
 
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(`${shareText} ${ogShareUrl}`);
       toast.success('Copied to clipboard!');
     } catch {
       toast.error('Failed to copy');
