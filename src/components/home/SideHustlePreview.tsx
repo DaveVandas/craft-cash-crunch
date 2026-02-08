@@ -149,7 +149,7 @@ const SideHustlePreview = () => {
           </CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <PremiumShareIconButton />
+              <PremiumShareIconButton iconOnly />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
