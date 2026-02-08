@@ -93,6 +93,19 @@ const About = () => {
                     helping people understand the scale of extreme wealth in a fun, engaging way.
                   </AccordionContent>
                 </AccordionItem>
+
+                <AccordionItem value="contact">
+                  <AccordionTrigger>How can I contact you?</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Have questions, feedback, or partnership inquiries? Reach out to us at{' '}
+                    <a 
+                      href="mailto:vandasdave@gmail.com" 
+                      className="text-primary hover:text-primary/80 underline transition-colors"
+                    >
+                      vandasdave@gmail.com
+                    </a>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </CardContent>
           </Card>
