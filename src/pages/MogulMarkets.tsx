@@ -378,18 +378,22 @@ const MogulMarkets = () => {
       <main className="flex-1 container py-6 md:py-8 pb-24 md:pb-8">
         <Breadcrumb currentPage="Mogul Markets" />
         
-        {/* Compact Header */}
+        {/* Premium Compact Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Crown className="h-6 w-6 text-primary" />
-              <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                Mogul <span className="gradient-gold-text">Markets</span>
-              </h1>
-              <MogulMascot 
-                mood={totalGainLoss > 0 ? 'happy' : totalGainLoss < 0 ? 'worried' : 'neutral'} 
-                size="sm" 
-              />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center shadow-lg shadow-primary/30">
+                <Crown className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold flex items-center gap-2">
+                  Mogul <span className="gradient-gold-text">Markets</span>
+                  <MogulMascot 
+                    mood={totalGainLoss > 0 ? 'happy' : totalGainLoss < 0 ? 'worried' : 'neutral'} 
+                    size="sm" 
+                  />
+                </h1>
+              </div>
             </div>
             <MarketStatus />
           </div>

@@ -202,78 +202,99 @@ const Calculator = () => {
       <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12 animate-fade-in">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <Breadcrumb currentPage="Reality Check" />
             <FeaturePromoShare feature="realityCheck" size="sm" showLabel />
           </div>
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
-              Reality <span className="gradient-gold-text">Check</span> 💭
+          
+          {/* Premium Hero Header */}
+          <div className="relative text-center mb-10 animate-fade-in">
+            {/* Decorative background */}
+            <div className="absolute inset-0 -z-10">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <span className="text-lg">💭</span>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Reality Check</span>
+            </div>
+            
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+              How Fast Do They Earn{' '}
+              <span className="gradient-gold-text">Your Salary?</span>
             </h1>
-            <p className="text-muted-foreground">
-              Prepare to have your mind blown. Enter your salary and see how it compares.
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+              Prepare to have your mind blown. Enter your salary and see how it compares to the ultra-wealthy.
             </p>
           </div>
 
           <div className="space-y-6">
             <SalaryInput onSalaryChange={handleSalaryChange} currentSalary={salary} />
 
-            {/* Selected Celebrity Display - Right below salary */}
+            {/* Selected Celebrity Display - Premium Card */}
             {selectedCeleb && (
-              <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/30 animate-fade-in">
-                <p className="text-sm text-muted-foreground">Comparing with</p>
-                <div className="flex items-center justify-center gap-3 mt-2">
-                  {selectedCeleb.imageUrl && (
+              <div className="relative overflow-hidden text-center p-5 rounded-xl bg-gradient-to-br from-primary/15 via-card to-primary/5 border border-primary/30 animate-fade-in shadow-lg shadow-primary/5">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <p className="text-xs font-medium text-primary uppercase tracking-wider mb-3">Comparing Your Salary With</p>
+                <div className="relative flex items-center justify-center gap-4">
+                  {selectedCeleb.imageUrl ? (
                     <img 
                       src={selectedCeleb.imageUrl} 
                       alt={selectedCeleb.name}
-                      className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/30"
+                      className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/20 shadow-xl"
                     />
+                  ) : selectedCeleb.emoji && (
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-3xl ring-4 ring-primary/20 shadow-xl">
+                      {selectedCeleb.emoji}
+                    </div>
                   )}
-                  <p className="text-lg font-bold text-primary">
-                    {selectedCeleb.emoji && <span className="mr-2">{selectedCeleb.emoji}</span>}
-                    {selectedCeleb.name}
-                  </p>
+                  <div className="text-left">
+                    <p className="text-xl font-bold gradient-gold-text">
+                      {selectedCeleb.name}
+                    </p>
+                    {selectedCeleb.profession && (
+                      <p className="text-sm text-muted-foreground">{selectedCeleb.profession}</p>
+                    )}
+                  </div>
                 </div>
-                {selectedCeleb.profession && (
-                  <p className="text-xs text-muted-foreground mt-1">{selectedCeleb.profession}</p>
-                )}
               </div>
             )}
 
-            {/* Compare Button - Right after comparing with */}
+            {/* Compare Button - Premium CTA */}
             {selectedCeleb && (
               <Button 
                 onClick={handleCompare}
                 disabled={salary <= 0}
-                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                size="lg"
+                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary via-primary to-primary/80 hover:from-primary/90 hover:via-primary/80 hover:to-primary/70 shadow-xl shadow-primary/20 transition-all duration-300"
               >
-                🔍 Compare My Salary
+                <Search className="w-5 h-5 mr-2" />
+                Compare My Salary
               </Button>
             )}
 
-            {/* Celebrity Search */}
-            <Card className="border-border/50 bg-card/50">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {selectedCeleb ? 'Pick another celebrity' : 'Search any celebrity'}
+            {/* Celebrity Search - Refined */}
+            <Card className="border-border/50 bg-card/80 backdrop-blur-sm shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Search className="h-5 w-5 text-primary" />
+                  {selectedCeleb ? 'Pick Another Celebrity' : 'Search Any Celebrity'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="text"
                       placeholder="e.g., Oprah, Drake, Messi..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      className="pl-10"
+                      className="h-12 text-base"
                       disabled={isSearching}
                     />
                   </div>
-                  <Button onClick={handleSearch} disabled={isSearching || !searchQuery.trim()}>
+                  <Button onClick={handleSearch} disabled={isSearching || !searchQuery.trim()} className="h-12 px-6">
                     {isSearching ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -284,22 +305,29 @@ const Calculator = () => {
               </CardContent>
             </Card>
 
-            {/* Popular Celebrities */}
-            <Card className="border-border/50 bg-card/50">
-              <CardHeader>
-                <CardTitle className="text-lg">Or pick a popular celebrity</CardTitle>
+            {/* Popular Celebrities - Refined Grid */}
+            <Card className="border-border/50 bg-card/80 backdrop-blur-sm shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Popular Celebrities
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {popularCelebrities.map((celeb) => (
                     <Button
                       key={celeb.name}
                       variant={selectedCeleb?.name === celeb.name ? "default" : "outline"}
-                      className="h-auto py-3 flex-col"
+                      className={`h-auto py-4 flex-col gap-1 transition-all duration-200 ${
+                        selectedCeleb?.name === celeb.name 
+                          ? 'shadow-lg shadow-primary/20 ring-2 ring-primary/20' 
+                          : 'hover:border-primary/50 hover:bg-primary/5'
+                      }`}
                       onClick={() => handleCelebChange(celeb)}
                     >
-                      <span className="text-xl mb-1">{celeb.emoji}</span>
-                      <span className="text-xs">{celeb.name}</span>
+                      <span className="text-2xl">{celeb.emoji}</span>
+                      <span className="text-sm font-medium">{celeb.name}</span>
                     </Button>
                   ))}
                 </div>
