@@ -9,6 +9,7 @@ import { Share2, GitCompareArrows, ArrowLeft, Search, Trophy, Scale } from 'luci
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
+import { HowWeCalculateModal } from '@/components/info/HowWeCalculateModal';
 
 interface ProfileHeroProps {
   celebrity: Celebrity;
@@ -101,6 +102,9 @@ const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
                 <p className="text-2xl font-bold text-foreground">
                   {formatCompactCurrency(celebrity.annualEarnings)}
                 </p>
+              </div>
+              <div className="flex items-end">
+                <HowWeCalculateModal variant="link" />
               </div>
             </div>
             

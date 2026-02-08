@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { HowWeCalculateModal } from '@/components/info/HowWeCalculateModal';
 
 // Social media icons
 const TwitterIcon = () => (
@@ -118,10 +119,10 @@ const Footer = () => {
               Privacy
             </Link>
           </div>
-          <p className="text-xs text-muted-foreground/70 text-center max-w-2xl">
-            Disclaimer: Earnings and net worth figures are sourced from Forbes, Bloomberg, and public financial reports. 
-            All figures are estimates and may differ from actual values due to private holdings and undisclosed assets.
-          </p>
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
+            <span>Disclaimer: All figures are estimates from public sources.</span>
+            <HowWeCalculateModal variant="link" />
+          </div>
           <p className="text-xs text-muted-foreground/50 mt-2">
             © {new Date().getFullYear()} Wealth Perspective. All rights reserved. Owned and operated by Northspan Industries, LLC.
           </p>
