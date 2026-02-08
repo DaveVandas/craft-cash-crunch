@@ -9,6 +9,7 @@ import { SoundProvider } from "@/contexts/SoundContext";
 import { FeaturedCelebrityProvider } from "@/contexts/FeaturedCelebrityContext";
 import ProfileSetupGuard from "@/components/onboarding/ProfileSetupGuard";
 import UpdateNotification from "@/components/pwa/UpdateNotification";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
@@ -55,6 +56,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <UpdateNotification />
+                <InstallPrompt />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
