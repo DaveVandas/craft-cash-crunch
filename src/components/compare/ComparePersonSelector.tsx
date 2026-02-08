@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2, Check, ChevronDown } from 'lucide-react';
+import { Search, X, Loader2, Check, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Celebrity } from '@/lib/types';
 import { getAvatarEmoji } from '@/lib/avatar';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { supabase } from '@/integrations/supabase/client';
+import { filterCelebritySuggestions, CelebritySuggestion, formatNetWorthShort } from '@/lib/celebritySuggestions';
 
 interface ComparePersonSelectorProps {
   label: string;
@@ -16,21 +17,9 @@ interface ComparePersonSelectorProps {
   placeholder?: string;
 }
 
-interface Suggestion {
-  name: string;
-  category?: string;
-  searchCount: number;
-}
-
-// Popular celebrities for quick suggestions
-const POPULAR_CELEBRITIES = [
-  'Elon Musk', 'Taylor Swift', 'LeBron James', 'Jeff Bezos', 'Cristiano Ronaldo',
-  'Drake', 'Beyoncé', 'Michael Jordan', 'Oprah Winfrey', 'The Rock'
-];
-
 const ComparePersonSelector = ({ label, selected, onSelect, placeholder = "Search anyone..." }: ComparePersonSelectorProps) => {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<CelebritySuggestion[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [previewPerson, setPreviewPerson] = useState<Celebrity | null>(null);
@@ -52,30 +41,28 @@ const ComparePersonSelector = ({ label, selected, onSelect, placeholder = "Searc
 
       setLoadingSuggestions(true);
       try {
-        // Search trending database
+        // Get trending data to boost scores
         const { data: trendingData } = await supabase
           .from('search_trends')
           .select('celebrity_name, search_count, category')
           .ilike('celebrity_name', `%${query}%`)
           .order('search_count', { ascending: false })
-          .limit(6);
+          .limit(20);
 
-        const trendingSuggestions: Suggestion[] = (trendingData || []).map(d => ({
+        const trending = (trendingData || []).map(d => ({
           name: d.celebrity_name,
+          searchCount: d.search_count,
           category: d.category || undefined,
-          searchCount: d.search_count
         }));
 
-        // Add popular matches if not enough results
-        const popularMatches = POPULAR_CELEBRITIES
-          .filter(name => name.toLowerCase().includes(query.toLowerCase()))
-          .filter(name => !trendingSuggestions.find(s => s.name.toLowerCase() === name.toLowerCase()))
-          .slice(0, 6 - trendingSuggestions.length)
-          .map(name => ({ name, searchCount: 0 }));
-
-        setSuggestions([...trendingSuggestions, ...popularMatches].slice(0, 6));
+        // Filter and rank from our comprehensive list
+        const filtered = filterCelebritySuggestions(query, 8, trending);
+        setSuggestions(filtered);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
+        // Fallback to just static suggestions
+        const filtered = filterCelebritySuggestions(query, 8);
+        setSuggestions(filtered);
       } finally {
         setLoadingSuggestions(false);
       }
@@ -318,16 +305,19 @@ const ComparePersonSelector = ({ label, selected, onSelect, placeholder = "Searc
                       index === selectedIndex ? 'bg-primary/20' : 'hover:bg-muted'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <span className="font-medium">{suggestion.name}</span>
-                        {suggestion.category && (
-                          <span className="text-xs text-muted-foreground ml-2">• {suggestion.category}</span>
-                        )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium truncate">{suggestion.name}</span>
                       </div>
+                      {suggestion.profession && (
+                        <p className="text-xs text-muted-foreground ml-6 truncate">
+                          {suggestion.profession}
+                          {suggestion.netWorth ? ` • ${formatNetWorthShort(suggestion.netWorth)}` : ''}
+                        </p>
+                      )}
                     </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground rotate-[-90deg]" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   </li>
                 ))}
               </ul>
