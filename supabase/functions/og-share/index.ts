@@ -9,6 +9,12 @@ interface PageMeta {
 }
 
 const PAGE_META: Record<string, PageMeta> = {
+  "home": {
+    title: "Wealth Perspective",
+    description: "Putting wealth into perspective, one mind-blowing comparison at a time! See how fast billionaires make money.",
+    image: "/og-image.png",
+    path: "/",
+  },
   "debt-destroyer": {
     title: "Debt Destroyer | Wealth Perspective",
     description: "Crush your debt with our calculator. See exactly how much interest you're paying and find your fastest path to freedom!",
