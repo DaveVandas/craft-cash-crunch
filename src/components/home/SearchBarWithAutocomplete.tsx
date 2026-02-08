@@ -4,41 +4,16 @@ import { Search, TrendingUp, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { filterCelebritySuggestions, CelebritySuggestion } from '@/lib/celebritySuggestions';
 
 interface SearchBarWithAutocompleteProps {
   placeholder?: string;
   categoryId?: string;
 }
 
-interface Suggestion {
-  name: string;
-  searchCount: number;
-}
-
-// Popular fallback suggestions by category
-const POPULAR_BY_CATEGORY: Record<string, string[]> = {
-  'athletes': ['LeBron James', 'Cristiano Ronaldo', 'Lionel Messi', 'Patrick Mahomes', 'Stephen Curry', 'Serena Williams', 'Tom Brady', 'Tiger Woods', 'Lewis Hamilton', 'Shohei Ohtani'],
-  'hollywood': ['Dwayne Johnson', 'Scarlett Johansson', 'Tom Cruise', 'Leonardo DiCaprio', 'Margot Robbie', 'Robert Downey Jr', 'Ryan Reynolds', 'Jennifer Lawrence', 'Brad Pitt', 'Chris Hemsworth'],
-  'musicians': ['Taylor Swift', 'Drake', 'Beyoncé', 'Ed Sheeran', 'Bad Bunny', 'The Weeknd', 'Rihanna', 'Travis Scott', 'Billie Eilish', 'Adele'],
-  'tech-billionaires': ['Elon Musk', 'Jeff Bezos', 'Mark Zuckerberg', 'Bill Gates', 'Sundar Pichai', 'Tim Cook', 'Jensen Huang', 'Satya Nadella', 'Larry Ellison', 'Sam Altman'],
-  'politicians': ['Donald Trump', 'Joe Biden', 'Barack Obama', 'Vladimir Putin', 'Emmanuel Macron', 'Rishi Sunak', 'Justin Trudeau', 'Angela Merkel', 'Nancy Pelosi', 'Bernie Sanders'],
-  'influencers': ['MrBeast', 'Kylie Jenner', 'Logan Paul', 'PewDiePie', 'Charli D\'Amelio', 'Kim Kardashian', 'Jake Paul', 'KSI', 'Ninja', 'Pokimane'],
-  'historical': ['John D. Rockefeller', 'Andrew Carnegie', 'Mansa Musa', 'Henry Ford', 'Cleopatra', 'Genghis Khan', 'J.P. Morgan', 'Cornelius Vanderbilt', 'King Solomon', 'Augustus Caesar'],
-  'royalty': ['King Charles III', 'Prince William', 'Queen Elizabeth II', 'Prince Harry', 'King Salman', 'Mohammed bin Salman', 'Sultan of Brunei', 'Prince Albert II', 'Princess Diana', 'Sheikh Mohammed'],
-  'business-titans': ['Warren Buffett', 'Jamie Dimon', 'Ray Dalio', 'Bernard Arnault', 'Mukesh Ambani', 'Michael Bloomberg', 'Stephen Schwarzman', 'Carl Icahn', 'George Soros', 'Ken Griffin'],
-};
-
-// General popular celebrities (includes variety from all categories)
-const POPULAR_CELEBRITIES = [
-  'Elon Musk', 'Taylor Swift', 'LeBron James', 'Beyoncé', 'Jeff Bezos',
-  'Cristiano Ronaldo', 'Kim Kardashian', 'Drake', 'Oprah Winfrey', 'Jay-Z',
-  'Rihanna', 'Michael Jordan', 'Lionel Messi', 'The Rock', 'Kanye West',
-  'Prince William', 'Prince Harry', 'King Charles III', 'Warren Buffett', 'MrBeast'
-];
-
 const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlete, or billionaire...", categoryId }: SearchBarWithAutocompleteProps) => {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<CelebritySuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -46,14 +21,10 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Fetch suggestions from search_trends
+  // Fetch suggestions from search_trends and static data
   useEffect(() => {
     const fetchSuggestions = async () => {
-      // Get category-specific popular celebrities
-      const popularPool = categoryId ? (POPULAR_BY_CATEGORY[categoryId] || POPULAR_CELEBRITIES) : POPULAR_CELEBRITIES;
-      
-      if (query.length < 1) {
-        // Show popular suggestions when focused but no query
+      if (query.length < 2) {
         setSuggestions([]);
         return;
       }
@@ -66,7 +37,7 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
           .select('celebrity_name, search_count, category')
           .ilike('celebrity_name', `%${query}%`)
           .order('search_count', { ascending: false })
-          .limit(5);
+          .limit(20);
 
         // Filter by category if provided
         if (categoryId) {
@@ -75,21 +46,27 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
 
         const { data: trendingData } = await dbQuery;
 
-        const trendingSuggestions: Suggestion[] = (trendingData || []).map(d => ({
+        const trending = (trendingData || []).map(d => ({
           name: d.celebrity_name,
-          searchCount: d.search_count
+          searchCount: d.search_count,
+          category: d.category || undefined,
         }));
 
-        // Add popular matches if we don't have enough
-        const popularMatches = popularPool
-          .filter(name => name.toLowerCase().includes(query.toLowerCase()))
-          .filter(name => !trendingSuggestions.find(s => s.name.toLowerCase() === name.toLowerCase()))
-          .slice(0, 5 - trendingSuggestions.length)
-          .map(name => ({ name, searchCount: 0 }));
-
-        setSuggestions([...trendingSuggestions, ...popularMatches].slice(0, 5));
+        // Filter and rank from our comprehensive list
+        const filtered = filterCelebritySuggestions(query, 6, trending);
+        
+        // If category-specific, filter to only that category
+        if (categoryId) {
+          const categoryFiltered = filtered.filter(s => !s.category || s.category === categoryId);
+          setSuggestions(categoryFiltered.slice(0, 6));
+        } else {
+          setSuggestions(filtered);
+        }
       } catch (error) {
         console.error('Error fetching suggestions:', error);
+        // Fallback to static suggestions only
+        const filtered = filterCelebritySuggestions(query, 6);
+        setSuggestions(filtered);
       } finally {
         setLoading(false);
       }
@@ -184,14 +161,21 @@ const SearchBarWithAutocomplete = ({ placeholder = "Search any celebrity, athlet
                     index === selectedIndex ? 'bg-primary/20' : 'hover:bg-muted'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <span>{suggestion.name}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{suggestion.name}</span>
+                    </div>
+                    {suggestion.profession && (
+                      <p className="text-xs text-muted-foreground ml-6 truncate">
+                        {suggestion.profession}
+                      </p>
+                    )}
                   </div>
                   {suggestion.searchCount > 0 && (
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
                       <TrendingUp className="h-3 w-3" />
-                      {suggestion.searchCount} searches
+                      {suggestion.searchCount}
                     </span>
                   )}
                 </li>
