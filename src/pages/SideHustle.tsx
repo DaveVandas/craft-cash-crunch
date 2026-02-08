@@ -7,11 +7,12 @@ import PaywallGate from '@/components/paywall/PaywallGate';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TrendingUp, DollarSign, Rocket, Flame, Zap, Crown, ArrowDown, BookOpen } from 'lucide-react';
+import { TrendingUp, DollarSign, Rocket, Flame, Zap, Crown, ArrowDown, BookOpen, Share2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/earnings';
 import AllHustlesModal, { type SideHustle as SideHustleType } from '@/components/side-hustle/AllHustlesModal';
 import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 import FeaturePromoShare from '@/components/share/FeaturePromoShare';
+import SideHustleShareCard from '@/components/side-hustle/SideHustleShareCard';
 
 interface CalculationResult {
   profit: number;
@@ -738,6 +739,22 @@ const SideHustle = () => {
                       )}
                     </>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* Share This Hustle Card */}
+              <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-emerald-500/5">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Share2 className="h-5 w-5 text-emerald-500" />
+                    Share This Hustle
+                  </CardTitle>
+                  <CardDescription>
+                    Know someone who'd crush it with {selectedHustle.name}? Share this breakdown!
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SideHustleShareCard hustle={selectedHustle} />
                 </CardContent>
               </Card>
 
