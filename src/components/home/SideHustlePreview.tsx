@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, ChevronRight, Rocket, MessageCircle, Copy, Sparkles } from 'lucide-react';
+import { Flame, ChevronRight, Rocket, MessageCircle, Copy, Sparkles, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PremiumShareIconButton from '@/components/share/PremiumShareIconButton';
 import {
@@ -19,6 +19,8 @@ import {
   InstagramIcon,
   TikTokIcon,
 } from '@/components/share/ShareMenuDropdown';
+import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
+import AffiliateWaitlist from '@/components/affiliate/AffiliateWaitlist';
 
 interface SideHustle {
   name: string;
@@ -62,15 +64,23 @@ const PREVIEW_HUSTLES: SideHustle[] = [
 const SITE_URL = "https://earningsexplorer.shop";
 
 const SideHustlePreview = () => {
+  const { isFull, spotsRemaining, loading: capacityLoading } = useAffiliateCapacity();
+  
   // Rotate which hustles show based on day (after affiliate which is always first)
   const dayOfYear = Math.floor(Date.now() / 86400000);
+  
+  // Filter out affiliate if program is full
+  const availableHustles = isFull 
+    ? PREVIEW_HUSTLES.filter(h => h.name !== 'Wealth Perspective Affiliate')
+    : PREVIEW_HUSTLES;
+  
   const rotatedHustles = [
-    PREVIEW_HUSTLES[0], // Keep affiliate first
-    ...PREVIEW_HUSTLES.slice(1).sort((a, b) => {
+    ...(isFull ? [] : [PREVIEW_HUSTLES[0]]), // Keep affiliate first only if not full
+    ...availableHustles.slice(isFull ? 0 : 1).sort((a, b) => {
       const hashA = (a.name.charCodeAt(0) + dayOfYear) % 100;
       const hashB = (b.name.charCodeAt(0) + dayOfYear) % 100;
       return hashA - hashB;
-    }).slice(0, 3)
+    }).slice(0, isFull ? 4 : 3)
   ];
 
   const formatProfit = (hustle: SideHustle) => {
@@ -229,6 +239,11 @@ const SideHustlePreview = () => {
             </Link>
           ))}
         </div>
+        
+        {/* Show waitlist when affiliate program is full */}
+        {isFull && (
+          <AffiliateWaitlist variant="compact" spotsRemaining={spotsRemaining} />
+        )}
         
         <Link to="/side-hustle">
           <Button variant="outline" className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/5">

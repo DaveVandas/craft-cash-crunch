@@ -24,12 +24,15 @@ import {
   Sparkles,
   Crown
 } from 'lucide-react';
+import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
+import AffiliateWaitlist from '@/components/affiliate/AffiliateWaitlist';
 
 export default function BecomeAffiliate() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { isFull, spotsRemaining, loading: capacityLoading } = useAffiliateCapacity();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -242,9 +245,20 @@ export default function BecomeAffiliate() {
           </div>
         </div>
 
-        {/* Application Form or Success */}
+        {/* Application Form, Success, or Waitlist */}
         <div className="max-w-2xl mx-auto">
-          {submitted ? (
+          {capacityLoading ? (
+            <Card className="bg-card/50 border-border/50">
+              <CardContent className="p-8 text-center">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-8 bg-muted rounded w-3/4 mx-auto" />
+                  <div className="h-4 bg-muted rounded w-1/2 mx-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          ) : isFull ? (
+            <AffiliateWaitlist spotsRemaining={spotsRemaining} variant="full" />
+          ) : submitted ? (
             <Card className="bg-gradient-to-br from-amber-500/20 via-primary/20 to-green-500/10 border-amber-500/30">
               <CardContent className="p-8 text-center">
                 <div className="relative inline-block mb-4">
