@@ -10,11 +10,13 @@ import SalaryInput from '@/components/calculator/SalaryInput';
 import RealityCheckResult from '@/components/calculator/RealityCheckResult';
 import RealityCheckShareCard from '@/components/calculator/RealityCheckShareCard';
 import FeaturePromoShare from '@/components/share/FeaturePromoShare';
+import AffiliateWaitlist from '@/components/affiliate/AffiliateWaitlist';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCelebritySearch } from '@/hooks/useCelebritySearch';
+import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 import { Celebrity } from '@/lib/types';
 import { Search, Loader2, Rocket, TrendingUp, Flame, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,6 +50,7 @@ type SelectedCelebrity = {
 };
 
 const Calculator = () => {
+  const { isFull: affiliateFull, spotsRemaining } = useAffiliateCapacity();
   const location = useLocation();
   const [salary, setSalary] = useState(0);
   const [selectedCeleb, setSelectedCeleb] = useState<SelectedCelebrity | null>(null);
@@ -349,7 +352,9 @@ const Calculator = () => {
                     <CardContent className="space-y-5">
                       {/* Hustle Grid */}
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {SIDE_HUSTLE_IDEAS.map((hustle) => (
+                        {SIDE_HUSTLE_IDEAS
+                          .filter(hustle => !affiliateFull || !hustle.isAffiliate) // Hide affiliate when full
+                          .map((hustle) => (
                           <button
                             key={hustle.name}
                             onClick={() => applyHustlePreset(hustle)}
@@ -373,6 +378,11 @@ const Calculator = () => {
                           </button>
                         ))}
                       </div>
+                      
+                      {/* Show waitlist when affiliate program is full */}
+                      {affiliateFull && (
+                        <AffiliateWaitlist variant="compact" spotsRemaining={spotsRemaining} />
+                      )}
 
                       {/* Results appear when hustle selected */}
                       {selectedHustle && (
@@ -384,7 +394,7 @@ const Calculator = () => {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 mb-1">
                                   <p className="text-lg font-bold text-foreground truncate">{selectedHustle.name}</p>
-                                  {selectedHustle.isPinned && selectedHustle.link && (
+                                  {selectedHustle.isPinned && selectedHustle.link && !affiliateFull && (
                                     <Link to={selectedHustle.link} className="flex-shrink-0">
                                       <Button size="sm" className="gap-1 bg-gradient-to-r from-amber-500 to-primary">
                                         Join <ArrowRight className="h-3 w-3" />

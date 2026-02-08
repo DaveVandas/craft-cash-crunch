@@ -16,10 +16,13 @@ import {
 } from 'lucide-react';
 import LandingShareButtons from '@/components/landing/LandingShareButtons';
 import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
+import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
+import AffiliateWaitlist from '@/components/affiliate/AffiliateWaitlist';
 
 const LandingVariantD = () => {
   // Track affiliate referral from ?ref=CODE query param
   useAffiliateAttribution();
+  const { isFull, spotsRemaining } = useAffiliateCapacity();
   // Calculate example earnings
   const tier1Signups = 1000;
   const tier2Signups = 19000;
@@ -77,24 +80,30 @@ const LandingVariantD = () => {
             </span>
           </div>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button asChild size="lg" className="text-lg px-8 py-6 shadow-gold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90">
-              <Link to="/become-affiliate">
-                <DollarSign className="mr-2 h-5 w-5" />
-                Start Earning Now
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
-              <Link to="/">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Explore The App First
-              </Link>
-            </Button>
-          </div>
+          {/* CTAs - Show waitlist when full */}
+          {isFull ? (
+            <div className="max-w-md mx-auto mb-8">
+              <AffiliateWaitlist variant="compact" spotsRemaining={spotsRemaining} />
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Button asChild size="lg" className="text-lg px-8 py-6 shadow-gold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90">
+                <Link to="/become-affiliate">
+                  <DollarSign className="mr-2 h-5 w-5" />
+                  Start Earning Now
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
+                <Link to="/">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Explore The App First
+                </Link>
+              </Button>
+            </div>
+          )}
 
           <p className="text-sm text-muted-foreground">
-            Already 50,000+ users • $1-2 per signup you bring
+            Already 50,000+ users • {isFull ? 'Waitlist open' : '$1-2 per signup you bring'}
           </p>
         </div>
       </section>
@@ -291,15 +300,21 @@ const LandingVariantD = () => {
               Join thousands making money by sharing an app people actually love.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px-10 py-6 shadow-gold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90">
-                <Link to="/become-affiliate">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Become an Affiliate
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
+            {isFull ? (
+              <div className="max-w-md mx-auto">
+                <AffiliateWaitlist variant="compact" spotsRemaining={spotsRemaining} />
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button asChild size="lg" className="text-lg px-10 py-6 shadow-gold bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90">
+                  <Link to="/become-affiliate">
+                    <DollarSign className="mr-2 h-5 w-5" />
+                    Become an Affiliate
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <LandingShareButtons 

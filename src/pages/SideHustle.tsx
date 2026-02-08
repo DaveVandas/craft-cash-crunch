@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { TrendingUp, DollarSign, Rocket, Flame, Zap, Crown, ArrowDown, BookOpen } from 'lucide-react';
 import { formatCurrency } from '@/lib/earnings';
 import AllHustlesModal, { type SideHustle as SideHustleType } from '@/components/side-hustle/AllHustlesModal';
+import { useAffiliateCapacity } from '@/hooks/useAffiliateCapacity';
 
 interface CalculationResult {
   profit: number;
@@ -268,8 +269,8 @@ const INSPIRATIONAL_QUOTES = [
 ];
 
 // Get rotated hustles based on day (changes daily)
-// Affiliate hustle is always pinned first, other 7 rotate
-const getRotatedHustles = () => {
+// Affiliate hustle is always pinned first (unless program is full), other 7 rotate
+const getRotatedHustles = (affiliateFull: boolean) => {
   const affiliateHustle = ALL_SIDE_HUSTLES.find(h => h.name === 'Wealth Perspective Affiliate');
   const otherHustles = ALL_SIDE_HUSTLES.filter(h => h.name !== 'Wealth Perspective Affiliate');
   
@@ -279,6 +280,11 @@ const getRotatedHustles = () => {
     const hashB = (b.name.charCodeAt(0) + dayOfYear) % 100;
     return hashA - hashB;
   });
+  
+  // If affiliate is full, don't pin it first
+  if (affiliateFull) {
+    return shuffled.slice(0, 8);
+  }
   
   // Pin affiliate first, then 7 rotating hustles
   return affiliateHustle ? [affiliateHustle, ...shuffled.slice(0, 7)] : shuffled.slice(0, 8);
@@ -291,6 +297,7 @@ const getRandomQuote = () => {
 };
 
 const SideHustle = () => {
+  const { isFull: affiliateFull } = useAffiliateCapacity();
   const [buyPrice, setBuyPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [salesPerPeriod, setSalesPerPeriod] = useState<string>('');
@@ -300,8 +307,13 @@ const SideHustle = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   
   // Get rotated content on mount
-  const [displayedHustles] = useState(() => getRotatedHustles());
+  const [displayedHustles, setDisplayedHustles] = useState<SideHustleType[]>(() => getRotatedHustles(false));
   const [displayedQuote] = useState(() => getRandomQuote());
+
+  // Update displayed hustles when affiliate capacity loads
+  useEffect(() => {
+    setDisplayedHustles(getRotatedHustles(affiliateFull));
+  }, [affiliateFull]);
 
   // Scroll to top when page loads
   useEffect(() => {

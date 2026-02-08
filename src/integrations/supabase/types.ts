@@ -951,6 +951,7 @@ export type Database = {
         Args: { p_older_than_minutes?: number }
         Returns: number
       }
+      get_affiliate_count: { Args: never; Returns: number }
       get_request_session_id: { Args: never; Returns: string }
       get_subscriber_count: { Args: never; Returns: number }
       has_role: {
