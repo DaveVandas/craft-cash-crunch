@@ -159,12 +159,6 @@ const MobileNav = () => {
                   </Link>
                 ))}
               </div>
-              <a 
-                href="mailto:vandasdave@gmail.com" 
-                className="block text-center text-xs text-primary hover:text-primary/80 transition-colors mb-3"
-              >
-                📧 Contact: vandasdave@gmail.com
-              </a>
             </div>
             
             {/* Theme & Updates */}
