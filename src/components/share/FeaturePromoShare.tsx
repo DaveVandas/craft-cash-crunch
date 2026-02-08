@@ -41,10 +41,25 @@ const PROMO_CONTENT: Record<string, PromoContent> = {
     shareText: `👑 Ever wonder what stocks politicians trade?\n\n📊 See Nancy Pelosi's portfolio\n💼 Track Warren Buffett's moves\n🎯 Copy trades to your paper portfolio\n\n🔥 Mirror the VIPs at ${SITE_URL}/celebrity-portfolios`,
     url: `${SITE_URL}/celebrity-portfolios`,
   },
+  wealthQuiz: {
+    title: 'Wealth Quiz',
+    shareText: `🧠 Think you know how fast billionaires make money?\n\n💰 Guess celebrity earnings\n🔥 Build streaks for bonus points\n🏆 Earn your wealth title\n\n🎯 Test your mogul IQ at ${SITE_URL}/quiz`,
+    url: `${SITE_URL}/quiz`,
+  },
+  realityCheck: {
+    title: 'Reality Check',
+    shareText: `💭 Ever wonder how your salary compares to celebrities?\n\n⏱️ See how fast they earn YOUR salary\n😅 Prepare to be humbled\n💡 Get motivated to build wealth\n\n🔥 Get your reality check at ${SITE_URL}/calculator`,
+    url: `${SITE_URL}/calculator`,
+  },
+  debtDestroyer: {
+    title: 'Debt Destroyer',
+    shareText: `💀 Drowning in debt? This calculator shows you the way out.\n\n📊 Avalanche vs Snowball methods\n💵 See exactly how much interest you're paying\n🚀 Find your fastest path to freedom\n\n🔥 Crush your debt at ${SITE_URL}/debt-destroyer`,
+    url: `${SITE_URL}/debt-destroyer`,
+  },
 };
 
 interface FeaturePromoShareProps {
-  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios';
+  feature: 'trades' | 'mogulMarkets' | 'vipPortfolios' | 'wealthQuiz' | 'realityCheck' | 'debtDestroyer';
   size?: 'sm' | 'default';
   showLabel?: boolean;
   variant?: 'ghost' | 'outline' | 'default';

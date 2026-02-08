@@ -3,6 +3,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -246,6 +248,12 @@ const DebtDestroyer = () => {
       
       <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">
         <PaywallGate>
+          {/* Breadcrumb with Share */}
+          <div className="flex items-center justify-between mb-6 max-w-6xl mx-auto">
+            <Breadcrumb currentPage="Debt Destroyer" />
+            <FeaturePromoShare feature="debtDestroyer" size="sm" showLabel />
+          </div>
+
           {/* Hero Section */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 mb-4">

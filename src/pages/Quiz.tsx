@@ -13,6 +13,7 @@ import quizLoadingMogul from '@/assets/quiz-loading-mogul.png';
 import { formatLargeCurrency } from '@/lib/earnings';
 import { useShareCard } from '@/hooks/useShareCard';
 import ShareMenuDropdown from '@/components/share/ShareMenuDropdown';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSound } from '@/contexts/SoundContext';
@@ -334,7 +335,10 @@ const Quiz = () => {
       <main className="flex-1 container py-8 pb-24 md:pb-8">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
-          <Breadcrumb currentPage="Wealth Quiz" />
+          <div className="flex items-center justify-between mb-4">
+            <Breadcrumb currentPage="Wealth Quiz" />
+            <FeaturePromoShare feature="wealthQuiz" size="sm" showLabel />
+          </div>
           
           {/* INTRO SCREEN */}
           {gameState === 'intro' && (

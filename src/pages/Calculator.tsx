@@ -8,6 +8,7 @@ import Breadcrumb from '@/components/navigation/Breadcrumb';
 import SalaryInput from '@/components/calculator/SalaryInput';
 import RealityCheckResult from '@/components/calculator/RealityCheckResult';
 import RealityCheckShareCard from '@/components/calculator/RealityCheckShareCard';
+import FeaturePromoShare from '@/components/share/FeaturePromoShare';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -155,7 +156,10 @@ const Calculator = () => {
       <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12 animate-fade-in">
         <PaywallGate>
         <div className="max-w-2xl mx-auto">
-          <Breadcrumb currentPage="Reality Check" />
+          <div className="flex items-center justify-between mb-4">
+            <Breadcrumb currentPage="Reality Check" />
+            <FeaturePromoShare feature="realityCheck" size="sm" showLabel />
+          </div>
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">
               Reality <span className="gradient-gold-text">Check</span> 💭
