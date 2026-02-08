@@ -30,11 +30,11 @@ const popularCelebrities = [
 ];
 
 const SIDE_HUSTLE_IDEAS = [
+  { name: 'Wealth Perspective Affiliate', emoji: '💎', avgProfit: 200, salesPerMonth: 10, tip: 'Share this app, earn $1-2.50 per signup!', isPinned: true, link: '/become-affiliate' },
   { name: 'Reselling Sneakers', emoji: '👟', avgProfit: 100, salesPerMonth: 8, tip: 'Follow drops, use bots, check StockX' },
   { name: 'Print on Demand', emoji: '👕', avgProfit: 16, salesPerMonth: 30, tip: 'Printful + Etsy = passive income' },
   { name: 'Thrift Flipping', emoji: '🏷️', avgProfit: 30, salesPerMonth: 20, tip: 'Vintage & designer on Poshmark' },
   { name: 'Dropshipping', emoji: '📦', avgProfit: 17, salesPerMonth: 50, tip: 'Find winners on TikTok, automate' },
-  { name: 'Freelance Design', emoji: '🎨', avgProfit: 150, salesPerMonth: 6, tip: 'Start Fiverr, raise prices quarterly' },
   { name: 'Digital Products', emoji: '💻', avgProfit: 29, salesPerMonth: 40, tip: 'Notion templates are hot right now' },
 ];
 
@@ -317,14 +317,23 @@ const Calculator = () => {
                           <button
                             key={hustle.name}
                             onClick={() => applyHustlePreset(hustle)}
-                            className={`p-3 rounded-xl border text-center transition-all hover:border-primary/50 hover:bg-primary/5 ${
+                            className={`p-3 rounded-xl border text-center transition-all hover:border-primary/50 hover:bg-primary/5 relative ${
                               selectedHustle?.name === hustle.name 
                                 ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
-                                : 'border-border/50 bg-card/50'
+                                : hustle.isPinned
+                                  ? 'border-amber-500/50 bg-gradient-to-br from-amber-500/10 to-primary/10'
+                                  : 'border-border/50 bg-card/50'
                             }`}
                           >
+                            {hustle.isPinned && (
+                              <span className="absolute -top-1.5 -right-1.5 text-[10px] bg-amber-500 text-amber-950 px-1.5 py-0.5 rounded-full font-bold">
+                                HOT
+                              </span>
+                            )}
                             <span className="text-2xl block mb-1">{hustle.emoji}</span>
-                            <span className="text-xs font-medium block truncate text-foreground">{hustle.name.split(' ')[0]}</span>
+                            <span className="text-xs font-medium block truncate text-foreground">
+                              {hustle.isPinned ? 'Affiliate' : hustle.name.split(' ')[0]}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -333,12 +342,19 @@ const Calculator = () => {
                       {selectedHustle && (
                         <div className="animate-fade-in space-y-4">
                           {/* Hustle Header */}
-                          <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50">
+                          <div className={`flex items-center gap-3 p-4 rounded-xl bg-card border ${selectedHustle.isPinned ? 'border-amber-500/50' : 'border-border/50'}`}>
                             <span className="text-3xl">{selectedHustle.emoji}</span>
                             <div className="flex-1">
                               <p className="text-lg font-bold text-foreground">{selectedHustle.name}</p>
                               <p className="text-sm text-primary">💡 {selectedHustle.tip}</p>
                             </div>
+                            {selectedHustle.isPinned && selectedHustle.link && (
+                              <Link to={selectedHustle.link}>
+                                <Button size="sm" className="gap-1 bg-gradient-to-r from-amber-500 to-primary">
+                                  Join <ArrowRight className="h-3 w-3" />
+                                </Button>
+                              </Link>
+                            )}
                           </div>
 
                           {/* Adjustable Inputs */}
