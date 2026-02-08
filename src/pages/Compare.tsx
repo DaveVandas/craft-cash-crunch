@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
+import PageMeta from '@/components/seo/PageMeta';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -76,6 +77,11 @@ const Compare = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Wealth Showdown"
+        description="Compare the earnings of any two celebrities, athletes, or billionaires. See who's stacking more cash in our head-to-head wealth comparison."
+        path="/compare"
+      />
       <Header />
       <main className="flex-1 container py-8 md:py-12 pb-24 md:pb-12 animate-fade-in">
         <PaywallGate>

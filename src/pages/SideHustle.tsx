@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
+import PageMeta from '@/components/seo/PageMeta';
 import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import PaywallGate from '@/components/paywall/PaywallGate';
@@ -361,6 +362,11 @@ const SideHustle = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PageMeta
+        title="Side Hustle Guide"
+        description="Discover profitable side hustles with our interactive calculator. See realistic earnings for reselling, freelancing, digital products, and more."
+        path="/side-hustle"
+      />
       <Header />
       
       <main className="flex-1 container py-10 md:py-12 pb-24 md:pb-12">
