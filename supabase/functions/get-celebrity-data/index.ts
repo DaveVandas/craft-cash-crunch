@@ -11,10 +11,14 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  // Allow production, localhost, and preview/staging domains
-  const allowedOrigin = origin && ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith('.lovable.app'))
-    ? origin
-    : ALLOWED_ORIGINS[0];
+  // Allow production, localhost, and preview/staging domains (both lovable.app and lovableproject.com)
+  const isAllowedOrigin = origin && (
+    ALLOWED_ORIGINS.some(allowed => origin === allowed) ||
+    origin.endsWith('.lovable.app') ||
+    origin.endsWith('.lovableproject.com')
+  );
+  
+  const allowedOrigin = isAllowedOrigin ? origin : ALLOWED_ORIGINS[0];
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
