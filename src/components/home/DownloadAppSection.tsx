@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Share, Plus, MoreVertical, Check, Crown, Zap, Wifi, RefreshCw } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -8,6 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function DownloadAppSection() {
+  const isMobile = useIsMobile();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [activeTab, setActiveTab] = useState<'ios' | 'android'>('ios');
@@ -44,6 +46,11 @@ export function DownloadAppSection() {
       setDeferredPrompt(null);
     }
   };
+
+  // Only show on mobile browsers, not desktop
+  if (!isMobile) {
+    return null;
+  }
 
   if (isInstalled) {
     return (
