@@ -23,7 +23,8 @@ const Privacy = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">1. Information We Collect</h2>
                 <p className="text-muted-foreground">
-                  We collect minimal information necessary to provide our service:
+                  Wealth Perspective, owned and operated by Northspan Industries, LLC, collects minimal 
+                  information necessary to provide our service:
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
                   <li>Email address (when you create an account)</li>

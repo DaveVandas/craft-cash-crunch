@@ -23,8 +23,9 @@ const Terms = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-3">1. Acceptance of Terms</h2>
                 <p className="text-muted-foreground">
-                  By accessing and using Wealth Perspective, you accept and agree to be bound by these 
-                  Terms of Service. If you do not agree to these terms, please do not use our service.
+                  By accessing and using Wealth Perspective, owned and operated by Northspan Industries, LLC, 
+                  you accept and agree to be bound by these Terms of Service. If you do not agree to these 
+                  terms, please do not use our service.
                 </p>
               </section>
 
