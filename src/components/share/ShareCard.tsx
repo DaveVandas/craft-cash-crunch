@@ -318,7 +318,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
                         {comparison.quantity.toLocaleString()}
                       </p>
                       <p className="text-amber-300/60 text-[10px] truncate">
-                        {comparison.item}
+                        {pluralizeItem(comparison.item, comparison.quantity)}
                       </p>
                     </div>
                   </div>
