@@ -1,3 +1,4 @@
+// OG Share Edge Function - Serves dynamic OG tags for social media crawlers
 const SITE_URL = "https://earningsexplorer.shop";
 
 interface PageMeta {
