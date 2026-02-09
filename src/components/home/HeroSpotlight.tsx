@@ -92,8 +92,8 @@ const HeroSpotlight = () => {
 
         {/* Avatar and name */}
         <div className="flex items-center gap-4 mb-4">
-          <div className="relative">
-            <Avatar className="h-18 w-18 md:h-20 md:w-20 border-2 border-primary/40 ring-4 ring-primary/10 shadow-xl">
+          <div className="relative flex-shrink-0">
+            <Avatar className="h-16 w-16 md:h-20 md:w-20 border-2 border-primary/40 ring-4 ring-primary/10 shadow-xl">
               <AvatarImage src={featured.imageUrl} alt={featured.name} />
               <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-2xl">
                 {getAvatarEmoji(featured.title)}
