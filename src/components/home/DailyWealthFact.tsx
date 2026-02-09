@@ -170,7 +170,8 @@ const DailyWealthFact = () => {
   };
 
   const currentFact = wealthFacts[factIndex];
-  const shareText = `💡 Did you know? ${currentFact}\n\n🔥 Discover more jaw-dropping wealth facts at`;
+  // Keep share text SHORT to avoid truncation in messaging apps
+  const shareText = `💡 ${currentFact}`;
 
   const handleNativeShare = async () => {
     if (navigator.share) {
