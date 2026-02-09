@@ -8,7 +8,8 @@ const AffiliateStoryCard = () => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const getShareText = () => {
-    return `🚀 This side hustle is INSANE:\n\n1️⃣ Get a free affiliate link\n2️⃣ Post TikToks about celebrity earnings\n3️⃣ Get paid $1-$2 for EVERY download\n\n💰 One viral video = $10,000+\n\nNo inventory. No customers. Just post & profit.\n\nJoin free:`;
+    // Keep short to avoid truncation in messaging apps
+    return `🚀 Get paid $1-$2 per download just for sharing! One viral TikTok = $10,000+`;
   };
 
   const shareUrl = getShareUrlWithRedirect('affiliate', '/become-affiliate');

@@ -50,10 +50,11 @@ const SideHustleShareCard = ({ hustle, className = '' }: SideHustleShareCardProp
   const displayYearly = isAffiliate ? affiliateYearly : yearlyProfit;
 
   const getShareText = () => {
+    // Keep share text short to avoid truncation in messaging apps
     if (isAffiliate) {
-      return `🚀 Check out this side hustle: ${hustle.name} ${hustle.emoji}\n\n💰 Potential: $750+/mo just sharing an app!\n📈 Easy difficulty, no inventory\n\n${hustle.description}\n\nExplore 30+ side hustles:`;
+      return `🚀 ${hustle.name} ${hustle.emoji} - $750+/mo potential!`;
     }
-    return `🚀 Check out this side hustle: ${hustle.name} ${hustle.emoji}\n\n💰 Monthly profit: ${formatCurrency(displayMonthly)}\n📈 ${hustle.difficulty} difficulty\n${roi !== '∞' ? `🎯 ${roi}% ROI per sale\n` : ''}\n${hustle.description}\n\nExplore 30+ side hustles:`;
+    return `🚀 ${hustle.name} ${hustle.emoji} - ${formatCurrency(displayMonthly)}/mo profit!`;
   };
 
   const shareUrl = getShareUrlWithRedirect('side-hustle', '/side-hustle');
