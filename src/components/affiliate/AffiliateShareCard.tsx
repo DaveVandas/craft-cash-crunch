@@ -76,16 +76,17 @@ export function AffiliateShareCard({
       const blob = await generateCardImage();
       if (blob && navigator.share) {
         const file = new File([blob], `mogul-affiliate-${affiliateCode}.png`, { type: 'image/png' });
+        // Use shorter, cleaner share text to avoid truncation in messaging apps
         await navigator.share({
-          title: 'Join the Mogul Movement',
-          text: `👑 Join the mogul lifestyle with my code ${affiliateCode}! See how the ultra-wealthy build their empires and start your journey to greatness.`,
-          url: referralShareUrl,
+          title: 'Wealth Perspective',
+          text: `👑 Use code ${affiliateCode}`,
+          url: referralDestinationUrl,
           files: [file],
         });
         toast.success('Shared successfully!');
       } else {
         // Fallback to copying link
-        await navigator.clipboard.writeText(referralShareUrl);
+        await navigator.clipboard.writeText(referralDestinationUrl);
         toast.success('Link copied to clipboard!');
       }
     } catch (error) {

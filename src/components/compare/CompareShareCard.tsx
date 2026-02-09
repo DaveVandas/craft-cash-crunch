@@ -55,21 +55,16 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
     .slice(0, 3);
 
   const getShareText = () => {
-    const flexText = flexMode && flexComparisons.length > 0
-      ? flexComparisons.map(c => `${c.emoji} ${c.quantity} ${c.item} ${c.timeframe}`).join('\n')
-      : normalFlex 
-        ? `${normalFlex.emoji} ${normalFlex.quantity} ${normalFlex.item} ${normalFlex.timeframe}` 
-        : '';
-    
+    // Keep short to avoid truncation in messaging apps
     if (isTie) {
-      return `💰 Wealth Showdown: ${person1.name} vs ${person2.name}\n\n🤝 It's a Draw!\n📊 Both earn approximately ${formatCompactCurrency(person1.annualEarnings)}/year`;
+      return `🤝 ${person1.name} vs ${person2.name} - It's a Draw!`;
     }
     
     if (flexMode) {
-      return `🔥 FLEX MODE: ${winner.name} vs ${loser.name}\n\n👑 ${winner.name} DOMINATES\n💰 Earns ${ratio.toFixed(1)}x more\n💸 Extra: ${formatCompactCurrency(extraIncome)}/yr\n\nWith just the EXTRA income:\n${flexText}\n\n...while ${loser.name} watches 😅`;
+      return `🔥 ${winner.name} earns ${ratio.toFixed(1)}x more than ${loser.name}!`;
     }
     
-    return `💰 Wealth Showdown: ${winner.name} vs ${loser.name}\n\n👑 Winner: ${winner.name}\n📊 Earns ${ratio.toFixed(1)}x more\n💸 Extra income: ${formatCompactCurrency(extraIncome)}/year\n⏱️ Makes ${loser.name}'s yearly salary in ${timeToEarn}${flexText ? `\n${flexText}` : ''}`;
+    return `💰 ${winner.name} vs ${loser.name}: ${ratio.toFixed(1)}x earnings difference!`;
   };
 
   const shareUrl = 'https://earningsexplorer.shop/compare';

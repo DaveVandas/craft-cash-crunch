@@ -101,10 +101,10 @@ const RealityCheckShareCard = ({
   const yearsToMatch = Math.round(celebrityAnnualEarnings / userSalary);
 
   const getShareText = () => {
-    const url = 'https://earningsexplorer.shop/calculator';
+    // Keep short to avoid truncation in messaging apps
     return brutalMode
-      ? `💀 Kick Me While I'm Down\n\n${brutalComparison.text}\n${brutalComparison.detail}\n\n${celebrityName} makes ${ratio.toLocaleString()}x what I make.\n\nCheck yours: ${url}`
-      : `💭 Reality Check\n\n${celebrityName} earns my yearly salary in just ${timeToEarnUserSalary}! 😱\n\nThey make ${ratio.toLocaleString()}x what I make.\n\nCheck your earnings: ${url}`;
+      ? `💀 ${celebrityName} makes ${ratio.toLocaleString()}x what I make. Brutal.`
+      : `😱 ${celebrityName} earns my salary in ${timeToEarnUserSalary}!`;
   };
 
 
