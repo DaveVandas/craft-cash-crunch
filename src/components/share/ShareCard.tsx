@@ -8,6 +8,7 @@ import { getSimilarCelebrities, nameToSlug } from '@/lib/similarCelebrities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DollarSign, Clock, TrendingUp, Zap, Flame, Sparkles, Info } from 'lucide-react';
+import ShareCardDecorations from '@/components/share/ShareCardDecorations';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useShareCard } from '@/hooks/useShareCard';
@@ -99,6 +100,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
         >
           {/* Fire Frame Effect */}
           <div className="absolute inset-0 border-4 border-orange-400/20 rounded-xl pointer-events-none" />
+          <ShareCardDecorations variant="orange" />
           
           {/* Top Banner */}
           <div 
@@ -213,6 +215,7 @@ const ShareCard = ({ celebrity }: ShareCardProps) => {
         >
           {/* Gold Frame Effect */}
           <div className="absolute inset-0 border-4 border-amber-400/20 rounded-xl pointer-events-none" />
+          <ShareCardDecorations variant="gold" />
           
           {/* Top Banner with Logo */}
           <div 
