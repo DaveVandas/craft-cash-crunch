@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Copy, Check, Crown, TrendingUp, Sparkles } from 'lucide-react';
+import { Download, Share2, Copy, Check, Crown, TrendingUp } from 'lucide-react';
+import TwitterQuickShare from '@/components/share/TwitterQuickShare';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
@@ -76,8 +77,6 @@ export function AffiliateShareCard({
       const blob = await generateCardImage();
       if (blob && navigator.share) {
         const file = new File([blob], `mogul-affiliate-${affiliateCode}.png`, { type: 'image/png' });
-        // Keep share text SHORT to avoid truncation in messaging apps.
-        // Use the OG-optimized URL so iMessage/SMS previews render reliably.
         await navigator.share({
           title: 'Wealth Perspective',
           text: `👑 Code: ${affiliateCode}`,
@@ -86,13 +85,19 @@ export function AffiliateShareCard({
         });
         toast.success('Shared successfully!');
       } else {
-        // Fallback to copying the OG link (best chance of a rich preview when pasted)
+        // Fallback: copy the share link
         await navigator.clipboard.writeText(referralShareUrl);
-        toast.success('Link copied to clipboard!');
+        toast.success('Link copied to clipboard! Paste it anywhere.');
       }
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
-        toast.error('Failed to share');
+        // If native share fails, copy link as fallback
+        try {
+          await navigator.clipboard.writeText(referralShareUrl);
+          toast.success('Link copied to clipboard!');
+        } catch {
+          toast.error('Could not share — please copy the link manually');
+        }
       }
     } finally {
       setIsGenerating(false);
@@ -312,14 +317,53 @@ export function AffiliateShareCard({
           title="Copy card to clipboard"
         >
           {isGenerating ? (
-            <>
-              <span className="animate-pulse">Generating...</span>
-            </>
+            <span className="animate-pulse text-xs">...</span>
           ) : copied ? (
             <Check className="w-4 h-4" />
           ) : (
             <Copy className="w-4 h-4" />
           )}
+        </Button>
+      </div>
+
+      {/* Social Share Buttons */}
+      <div className="flex gap-2 justify-center max-w-sm mx-auto">
+        <TwitterQuickShare
+          shareText={`👑 Join the mogul movement! Use code: ${affiliateCode}`}
+          shareUrl={referralShareUrl}
+          feature="affiliate"
+          context={{ affiliateCode }}
+          variant="compact"
+          className="flex-1"
+        />
+        <Button
+          size="sm"
+          className="flex-1 gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white"
+          onClick={() => {
+            window.open(
+              `https://wa.me/?text=${encodeURIComponent(`👑 Join the mogul movement! Code: ${affiliateCode}\n${referralShareUrl}`)}`,
+              '_blank',
+              'noopener,noreferrer'
+            );
+          }}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.75.75 0 00.917.918l4.458-1.495A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.34 0-4.508-.764-6.26-2.057l-.437-.331-3.286 1.1 1.1-3.286-.331-.437A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          WhatsApp
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1 gap-2"
+          onClick={() => {
+            window.open(
+              `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralShareUrl)}`,
+              '_blank',
+              'noopener,noreferrer'
+            );
+          }}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
         </Button>
       </div>
 
