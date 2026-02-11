@@ -1,35 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info } from 'lucide-react';
+import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info, ImageIcon, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuickPostCardProps {
   affiliateCode: string;
   displayName: string;
 }
 
-const SITE_URL = 'https://earningsexplorer.shop';
-
 interface ReadyPost {
   id: string;
   caption: string;
   hashtags: string;
-  /** Which OG page key to use for the share link */
   ogPage: string;
-  /** Where humans land after clicking */
   redirectPath: string;
   label: string;
   emoji: string;
 }
 
-/**
- * Build ready-to-go posts per platform.
- * Each post includes caption + hashtags + the affiliate's tracked link.
- */
 function getPosts(affiliateCode: string): Record<string, ReadyPost[]> {
   const refPath = `/ref/${affiliateCode}`;
 
@@ -162,7 +155,23 @@ function getPosts(affiliateCode: string): Record<string, ReadyPost[]> {
   };
 }
 
-/** Build the full shareable text (caption + hashtags + link) */
+/** Feature label map for AI background images */
+const IMAGE_LABELS: Record<string, string> = {
+  'home.png': '🏠 Home',
+  'quiz.png': '🧠 Quiz',
+  'calculator.png': '🧮 Calculator',
+  'mogul-markets.png': '📈 Markets',
+  'trades.png': '🔧 Trades',
+  'side-hustle.png': '🚀 Side Hustles',
+  'compare.png': '⚔️ Compare',
+  'affiliate.png': '📢 Affiliate',
+  'wealth-wisdom.png': '📖 Wisdom',
+  'wealth-facts.png': '🤯 Facts',
+  'mogul-academy.png': '🎓 Academy',
+  'debt-destroyer.png': '💥 Debt',
+  'celebrity-portfolios.png': '💼 Portfolios',
+};
+
 function buildFullText(post: ReadyPost, shareUrl: string): string {
   const parts = [post.caption];
   if (post.hashtags) parts.push(post.hashtags);
@@ -170,12 +179,10 @@ function buildFullText(post: ReadyPost, shareUrl: string): string {
   return parts.join('\n\n');
 }
 
-/** Build the share URL that shows rich previews on social */
 function buildShareUrl(post: ReadyPost): string {
   return getShareUrlWithRedirect(post.ogPage as any, post.redirectPath);
 }
 
-/** Open the platform's share intent in a new tab */
 function openShareIntent(platform: string, text: string, url: string) {
   let intentUrl = '';
   switch (platform) {
@@ -186,41 +193,181 @@ function openShareIntent(platform: string, text: string, url: string) {
       intentUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
       break;
     default:
-      // For TikTok/Instagram we can only copy — they don't have web share intents
       return false;
   }
   window.open(intentUrl, '_blank', 'noopener,noreferrer');
   return true;
 }
 
+/** Download an image by fetching it as a blob */
+async function downloadImage(url: string, filename: string) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Image picker component */
+function ImagePicker({
+  images,
+  selectedImage,
+  onSelect,
+}: {
+  images: { name: string; url: string }[];
+  selectedImage: string | null;
+  onSelect: (url: string | null) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full gap-2 justify-between"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span className="flex items-center gap-2">
+          <ImageIcon className="w-4 h-4" />
+          {selectedImage ? '✅ Image selected' : 'Attach an AI image (optional)'}
+        </span>
+        {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </Button>
+
+      {expanded && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
+          {/* No image option */}
+          <button
+            onClick={() => { onSelect(null); setExpanded(false); }}
+            className={`relative rounded-lg overflow-hidden border-2 p-3 text-center text-xs transition-all ${
+              !selectedImage ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/30'
+            }`}
+          >
+            <span className="text-muted-foreground">No image</span>
+          </button>
+          {images.map((img) => (
+            <button
+              key={img.name}
+              onClick={() => { onSelect(img.url); setExpanded(false); }}
+              className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-video ${
+                selectedImage === img.url ? 'border-primary ring-2 ring-primary/30' : 'border-border/50 hover:border-primary/30'
+              }`}
+            >
+              <img
+                src={img.url}
+                alt={img.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-background/80 text-[10px] px-1 py-0.5 truncate">
+                {IMAGE_LABELS[img.name] || img.name.replace('.png', '')}
+              </div>
+              {selectedImage === img.url && (
+                <div className="absolute top-1 right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                  <Check className="w-3 h-3 text-primary-foreground" />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<Record<string, string | null>>({});
+  const [aiImages, setAiImages] = useState<{ name: string; url: string }[]>([]);
+  const [posting, setPosting] = useState<string | null>(null);
   const posts = getPosts(affiliateCode);
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
-  const handlePost = (post: ReadyPost, platform: string) => {
+  // Fetch AI background images from storage
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const { data } = await supabase.storage.from('og-images').list('', {
+          sortBy: { column: 'name', order: 'asc' },
+        });
+        setAiImages(
+          (data || [])
+            .filter((f) => f.name.endsWith('.png'))
+            .map((f) => ({
+              name: f.name,
+              url: `${SUPABASE_URL}/storage/v1/object/public/og-images/${f.name}`,
+            }))
+        );
+      } catch {
+        // silently fail
+      }
+    };
+    fetchImages();
+  }, [SUPABASE_URL]);
+
+  const handlePost = async (post: ReadyPost, platform: string) => {
     const shareUrl = buildShareUrl(post);
     const fullText = buildFullText(post, shareUrl);
+    const selectedImage = selectedImages[post.id] || null;
 
-    // For Twitter & Facebook, open share intent directly
-    if (platform === 'twitter' || platform === 'facebook') {
-      const captionOnly = post.caption + (post.hashtags ? `\n\n${post.hashtags}` : '');
-      openShareIntent(platform, captionOnly, shareUrl);
-      toast.success('Opening share window! 🚀');
-      return;
+    setPosting(post.id);
+
+    try {
+      // If an image is selected, download it first
+      if (selectedImage) {
+        const imgName = selectedImage.split('/').pop() || 'wealth-perspective.png';
+        const downloaded = await downloadImage(selectedImage, `wealth-perspective-${imgName}`);
+        if (downloaded) {
+          toast.success('📸 Image saved! Attach it to your post.', { duration: 4000 });
+        }
+      }
+
+      // For Twitter & Facebook, open share intent
+      if (platform === 'twitter' || platform === 'facebook') {
+        const captionOnly = post.caption + (post.hashtags ? `\n\n${post.hashtags}` : '');
+        openShareIntent(platform, captionOnly, shareUrl);
+        if (selectedImage) {
+          toast.info('Attach the downloaded image to your tweet for maximum engagement! 🔥', { duration: 5000 });
+        }
+      } else {
+        // For TikTok & Instagram, copy to clipboard
+        await navigator.clipboard.writeText(fullText);
+        setCopiedId(post.id);
+        const platformName = platform === 'tiktok' ? 'TikTok' : 'Instagram';
+        toast.success(
+          selectedImage
+            ? `Copied! Open ${platformName}, attach the saved image, and paste your caption 📱`
+            : `Copied! Open ${platformName} and paste your caption 📱`,
+          { duration: 4000 }
+        );
+        setTimeout(() => setCopiedId(null), 3000);
+      }
+    } catch {
+      // Fallback: just copy text
+      try {
+        await navigator.clipboard.writeText(fullText);
+        setCopiedId(post.id);
+        toast.success('Caption + link copied! 📋');
+        setTimeout(() => setCopiedId(null), 3000);
+      } catch {
+        toast.error('Failed to copy');
+      }
+    } finally {
+      setPosting(null);
     }
-
-    // For TikTok & Instagram, copy to clipboard (no web share intents)
-    navigator.clipboard.writeText(fullText).then(() => {
-      setCopiedId(post.id);
-      toast.success(
-        platform === 'tiktok'
-          ? 'Copied! Open TikTok, create a video, and paste in your caption 📱'
-          : 'Copied! Open Instagram, create a post, and paste in your caption 📸',
-      );
-      setTimeout(() => setCopiedId(null), 3000);
-    }).catch(() => {
-      toast.error('Failed to copy');
-    });
   };
 
   const handleCopyOnly = (post: ReadyPost) => {
@@ -263,7 +410,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="space-y-1">
               <div className="text-2xl">1️⃣</div>
-              <p className="text-xs font-medium">Pick a post below</p>
+              <p className="text-xs font-medium">Pick a post & optionally attach an image</p>
             </div>
             <div className="space-y-1">
               <div className="text-2xl">2️⃣</div>
@@ -276,13 +423,15 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
           </div>
         </div>
 
-        {/* Platform Note for TikTok/Instagram */}
+        {/* Platform Note */}
         <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
           <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground">
             <strong>Twitter & Facebook</strong> open a share window automatically. 
             <strong> TikTok & Instagram</strong> copy the caption — paste it when creating your post. 
-            Your tracked link is always included!
+            {aiImages.length > 0 && (
+              <> Tap <strong>"Attach an AI image"</strong> to include a branded background!</>
+            )}
           </p>
         </div>
 
@@ -301,6 +450,8 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
             <TabsContent key={platform.key} value={platform.key} className="space-y-3">
               {(posts[platform.key] || []).map((post) => {
                 const isCopied = copiedId === post.id;
+                const isPosting = posting === post.id;
+                const selectedImage = selectedImages[post.id] || null;
                 return (
                   <div
                     key={post.id}
@@ -310,6 +461,12 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                     <div className="flex items-center gap-2 mb-2">
                       <span>{post.emoji}</span>
                       <Badge variant="outline" className="text-xs border-primary/30 text-primary">{post.label}</Badge>
+                      {selectedImage && (
+                        <Badge className="text-xs bg-green-500/20 text-green-400 border-green-500/30 gap-1">
+                          <ImageIcon className="w-3 h-3" />
+                          Image attached
+                        </Badge>
+                      )}
                     </div>
 
                     {/* Caption preview */}
@@ -319,13 +476,36 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                       <p className="text-xs text-primary/70 mb-3">{post.hashtags}</p>
                     )}
 
+                    {/* Selected image preview */}
+                    {selectedImage && (
+                      <div className="mb-3 rounded-lg overflow-hidden border border-border/50 max-w-xs">
+                        <img src={selectedImage} alt="Selected background" className="w-full h-auto" />
+                      </div>
+                    )}
+
+                    {/* Image picker */}
+                    {aiImages.length > 0 && (
+                      <div className="mb-3">
+                        <ImagePicker
+                          images={aiImages}
+                          selectedImage={selectedImage}
+                          onSelect={(url) =>
+                            setSelectedImages((prev) => ({ ...prev, [post.id]: url }))
+                          }
+                        />
+                      </div>
+                    )}
+
                     {/* Action buttons */}
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 gap-2"
                         onClick={() => handlePost(post, platform.key)}
+                        disabled={isPosting}
                       >
-                        {isCopied ? (
+                        {isPosting ? (
+                          <>Preparing...</>
+                        ) : isCopied ? (
                           <>
                             <Check className="w-4 h-4" />
                             {platform.hasIntent ? 'Posted!' : 'Copied!'}
@@ -337,7 +517,9 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                             ) : (
                               <Copy className="w-4 h-4" />
                             )}
-                            {platform.actionLabel}
+                            {selectedImage
+                              ? `${platform.hasIntent ? '📸 Post' : '📸 Copy'} with Image`
+                              : platform.actionLabel}
                           </>
                         )}
                       </Button>
@@ -366,7 +548,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
         {/* Tips */}
         <div className="p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
           <p className="text-xs text-muted-foreground text-center">
-            💡 <strong className="text-foreground">Pro tip:</strong> Post at peak hours (7-9am, 12-2pm, 7-10pm) for maximum reach. Images get 2-3x more engagement — save one from the Media Kit tab!
+            💡 <strong className="text-foreground">Pro tip:</strong> Posts with images get 2-3x more engagement! Attach an AI background and watch your referrals grow 🚀
           </p>
         </div>
       </CardContent>
