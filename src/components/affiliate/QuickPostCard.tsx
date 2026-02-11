@@ -822,70 +822,73 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                     )}
 
                     {/* Action buttons */}
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-2">
-                        <Button
-                          className="flex-1 gap-2"
-                          onClick={() => handlePost(post, platform.key)}
-                          disabled={isPosting}
-                        >
-                          {isPosting ? (
-                            <>Preparing...</>
-                          ) : isCopied ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              {platform.hasIntent ? 'Posted!' : 'Copied!'}
-                            </>
-                          ) : (
-                            <>
-                              {platform.hasIntent ? (
-                                <ExternalLink className="w-4 h-4" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                              {selectedImage
-                                ? `${platform.hasIntent ? '📸 Post' : '📸 Copy'} with Image`
-                                : platform.actionLabel}
-                            </>
-                          )}
-                        </Button>
-                        {platform.hasIntent && (
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleCopyOnly(post)}
-                            title="Copy caption + link to clipboard"
-                          >
-                            {copiedId === post.id ? (
-                              <Check className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <Copy className="w-4 h-4" />
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                      {/* Save Image + Caption composite button */}
-                      {selectedImage && (
-                        <Button
-                          variant="secondary"
-                          className="w-full gap-2"
-                          onClick={() => {
-                            const shareUrl = buildShareUrl(post);
-                            setCompositeModal({
-                              open: true,
-                              imageUrl: selectedImage,
-                              caption: post.caption,
-                              hashtags: post.hashtags,
-                              shareUrl,
-                              filename: `wealth-perspective-${post.id}.png`,
-                            });
-                          }}
-                        >
-                          <Settings2 className="w-4 h-4" />
-                          Save Image + Caption
-                        </Button>
-                      )}
-                    </div>
+                     <div className="flex flex-col gap-2">
+                       <div className="flex gap-2">
+                         <Button
+                           className="flex-1 gap-2"
+                           onClick={() => handlePost(post, platform.key)}
+                           disabled={isPosting}
+                         >
+                           {isPosting ? (
+                             <>Preparing...</>
+                           ) : isCopied ? (
+                             <>
+                               <Check className="w-4 h-4" />
+                               {platform.hasIntent ? 'Posted!' : 'Copied!'}
+                             </>
+                           ) : (
+                             <>
+                               {platform.hasIntent ? (
+                                 <ExternalLink className="w-4 h-4" />
+                               ) : (
+                                 <Copy className="w-4 h-4" />
+                               )}
+                               {selectedImage
+                                 ? `${platform.hasIntent ? '📸 Post' : '📸 Copy'} with Image`
+                                 : platform.actionLabel}
+                             </>
+                           )}
+                         </Button>
+                         {platform.hasIntent && (
+                           <Button
+                             variant="outline"
+                             size="icon"
+                             onClick={() => handleCopyOnly(post)}
+                             title="Copy caption + link to clipboard"
+                           >
+                             {copiedId === post.id ? (
+                               <Check className="w-4 h-4 text-green-500" />
+                             ) : (
+                               <Copy className="w-4 h-4" />
+                             )}
+                           </Button>
+                         )}
+                       </div>
+                       {/* Save Image + Caption composite button — always visible */}
+                       {aiImages.length > 0 && (
+                         <Button
+                           variant="secondary"
+                           className="w-full gap-2"
+                           onClick={() => {
+                             const shareUrl = buildShareUrl(post);
+                             const compositeImage = selectedImage || aiImages[0]?.url;
+                             if (compositeImage) {
+                               setCompositeModal({
+                                 open: true,
+                                 imageUrl: compositeImage,
+                                 caption: post.caption,
+                                 hashtags: post.hashtags,
+                                 shareUrl,
+                                 filename: `wealth-perspective-${post.id}.png`,
+                               });
+                             }
+                           }}
+                         >
+                           <Settings2 className="w-4 h-4" />
+                           {selectedImage ? 'Save Image + Caption' : '🎨 Create Image + Caption'}
+                         </Button>
+                       )}
+                     </div>
                   </div>
                 );
               })}
