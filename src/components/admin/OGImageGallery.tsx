@@ -223,6 +223,25 @@ const OGImageGallery = () => {
     toast.success('Image URL copied!');
   };
 
+  const handleDownloadImage = async (img: OGImage) => {
+    try {
+      const response = await fetch(img.url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `og-${img.name}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      toast.success('Image saved! 📥 Add your own text in any editor.');
+    } catch {
+      window.open(img.url, '_blank');
+      toast.info('Opened in new tab — right-click to save');
+    }
+  };
+
   const formatSize = (bytes: number) => {
     if (bytes === 0) return '—';
     return `${(bytes / 1024).toFixed(0)} KB`;
@@ -303,14 +322,22 @@ const OGImageGallery = () => {
                         loading="lazy"
                       />
                       {/* Overlay on hover */}
-                      <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 flex-wrap p-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleDownloadImage(img)}
+                          className="gap-1"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Save Photo
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => copyUrl(img.url)}
                         >
                           <Copy className="h-3.5 w-3.5 mr-1" />
-                          Copy URL
+                          URL
                         </Button>
                         <Button
                           size="sm"
@@ -324,6 +351,7 @@ const OGImageGallery = () => {
                         </Button>
                         <Button
                           size="sm"
+                          variant="secondary"
                           onClick={() => handleRegenerate(page)}
                           disabled={isRegenerating || regeneratingAll}
                         >

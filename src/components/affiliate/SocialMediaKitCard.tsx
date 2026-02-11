@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,11 @@ import {
   Check, 
   Download,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Palette,
 } from 'lucide-react';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SocialMediaKitCardProps {
   affiliateCode: string;
@@ -252,6 +254,118 @@ const SOCIAL_ASSETS: SocialAsset[] = [
   },
 ];
 
+const OG_FEATURE_LABELS: Record<string, { label: string; emoji: string }> = {
+  'home.png': { label: 'Home / Main', emoji: '🏠' },
+  'quiz.png': { label: 'Wealth Quiz', emoji: '🧠' },
+  'calculator.png': { label: 'Reality Check', emoji: '🧮' },
+  'mogul-markets.png': { label: 'Mogul Markets', emoji: '📈' },
+  'trades.png': { label: 'Trade Careers', emoji: '🔧' },
+  'side-hustle.png': { label: 'Side Hustles', emoji: '🚀' },
+  'compare.png': { label: 'Who Earns More?', emoji: '⚔️' },
+  'affiliate.png': { label: 'Affiliate Program', emoji: '📢' },
+  'wealth-wisdom.png': { label: 'Wealth Wisdom', emoji: '📖' },
+  'wealth-facts.png': { label: 'Wealth Facts', emoji: '🤯' },
+  'mogul-academy.png': { label: 'Mogul Academy', emoji: '🎓' },
+  'debt-destroyer.png': { label: 'Debt Destroyer', emoji: '💥' },
+  'celebrity-portfolios.png': { label: 'VIP Portfolios', emoji: '💼' },
+};
+
+function OGBackgroundsSection({ affiliateCode }: { affiliateCode: string }) {
+  const [images, setImages] = useState<{ name: string; url: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const { data } = await supabase.storage.from('og-images').list('', {
+          sortBy: { column: 'name', order: 'asc' },
+        });
+        setImages(
+          (data || [])
+            .filter((f) => f.name.endsWith('.png'))
+            .map((f) => ({
+              name: f.name,
+              url: `${SUPABASE_URL}/storage/v1/object/public/og-images/${f.name}`,
+            }))
+        );
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  const handleSavePhoto = async (img: { name: string; url: string }) => {
+    try {
+      const response = await fetch(img.url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `wealth-perspective-bg-${img.name}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      toast.success('Background saved! Add your own text in Canva or any editor 🎨');
+    } catch {
+      window.open(img.url, '_blank');
+      toast.info('Opened in new tab — right-click to save');
+    }
+  };
+
+  if (loading || images.length === 0) return null;
+
+  return (
+    <div className="mt-6 space-y-3">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+          <Palette className="w-3 h-3 mr-1" />
+          AI Backgrounds
+        </Badge>
+        <span className="text-xs text-muted-foreground">Save & add your own text for ads/posts</span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {images.map((img) => {
+          const meta = OG_FEATURE_LABELS[img.name];
+          return (
+            <div
+              key={img.name}
+              className="group relative rounded-lg border border-border overflow-hidden bg-card hover:border-primary/50 transition-colors cursor-pointer"
+              onClick={() => handleSavePhoto(img)}
+            >
+              <div className="aspect-[1.9/1] bg-muted relative">
+                <img
+                  src={img.url}
+                  alt={meta?.label || img.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-background/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button size="sm" className="gap-1">
+                    <Download className="h-3.5 w-3.5" />
+                    Save Photo
+                  </Button>
+                </div>
+              </div>
+              <div className="p-2 flex items-center gap-1.5">
+                <span className="text-sm">{meta?.emoji || '📄'}</span>
+                <span className="text-xs font-medium truncate">{meta?.label || img.name}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        💡 Save these backgrounds and overlay your own text, stats, or affiliate link in Canva, Photoshop, or any photo editor!
+      </p>
+    </div>
+  );
+}
+
 export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -487,6 +601,9 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
           ))}
         </Tabs>
 
+        {/* AI Background Images Section */}
+        <OGBackgroundsSection affiliateCode={affiliateCode} />
+
         <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-primary" />
@@ -494,6 +611,7 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
           </div>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li>• <strong className="text-foreground">Landing pages</strong> have OG-optimized URLs - they show rich previews when shared!</li>
+            <li>• <strong className="text-foreground">AI Backgrounds</strong> — save them and add your own text/stats in Canva or any photo editor!</li>
             <li>• Post at peak hours: <strong className="text-foreground">7-9am, 12-2pm, and 7-10pm</strong> in your timezone</li>
             <li>• Images get 2-3x more engagement than text-only posts! 📈</li>
           </ul>
