@@ -1,11 +1,11 @@
 // OG Share Edge Function - Serves dynamic OG tags for social media crawlers
-// Version: 2026-02-08-v5 (added mogul-academy)
+// Version: 2026-02-11-v6 (dynamic AI-generated images from storage)
 const SITE_URL = "https://earningsexplorer.shop";
 
 interface PageMeta {
   title: string;
   description: string;
-  image: string;
+  staticImage: string; // fallback static image
   path: string;
 }
 
@@ -13,103 +13,103 @@ const PAGE_META: Record<string, PageMeta> = {
   "home": {
     title: "Wealth Perspective",
     description: "Putting wealth into perspective, one mind-blowing comparison at a time! See how fast billionaires make money.",
-    image: "/og-image.png",
+    staticImage: "/og-image.png",
     path: "/",
   },
   "debt-destroyer": {
     title: "Debt Destroyer | Wealth Perspective",
     description: "Crush your debt with our calculator. See exactly how much interest you're paying and find your fastest path to freedom!",
-    image: "/og-debt-destroyer.png",
+    staticImage: "/og-debt-destroyer.png",
     path: "/debt-destroyer",
   },
   "quiz": {
     title: "Wealth Quiz | Wealth Perspective",
     description: "Test your wealth knowledge! Can you guess who earns more? Take the viral quiz that's blowing minds.",
-    image: "/og-quiz.png",
+    staticImage: "/og-quiz.png",
     path: "/quiz",
   },
   "calculator": {
     title: "Reality Check Calculator | Wealth Perspective",
     description: "Compare your salary to celebrity earnings. Get a reality check on how fast the rich really earn!",
-    image: "/og-calculator.png",
+    staticImage: "/og-calculator.png",
     path: "/calculator",
   },
   "mogul-markets": {
     title: "Mogul Markets | Wealth Perspective",
     description: "Paper trade like a mogul! Build your virtual portfolio and learn investing without the risk.",
-    image: "/og-mogul-markets.png",
+    staticImage: "/og-mogul-markets.png",
     path: "/mogul-markets",
   },
   "trades": {
     title: "Trade History | Wealth Perspective",
     description: "Track your paper trading journey. See your wins, losses, and learn from every trade.",
-    image: "/og-trades.png",
+    staticImage: "/og-trades.png",
     path: "/trades",
   },
   "celebrity-portfolios": {
     title: "VIP Portfolios | Wealth Perspective",
     description: "Mirror the trades of billionaires, politicians, and celebrities. See what the rich are investing in!",
-    image: "/og-celebrity-portfolios.png",
+    staticImage: "/og-celebrity-portfolios.png",
     path: "/celebrity-portfolios",
   },
   "side-hustle": {
     title: "Side Hustle Ideas | Wealth Perspective",
     description: "Discover lucrative side hustles matched to your skills. Start building wealth today!",
-    image: "/og-side-hustle.png",
+    staticImage: "/og-side-hustle.png",
     path: "/side-hustle",
   },
   "compare": {
     title: "Celebrity Comparison | Wealth Perspective",
     description: "Who earns more? Compare any two celebrities and see the shocking difference in their earnings!",
-    image: "/og-compare.png",
+    staticImage: "/og-compare.png",
     path: "/compare",
   },
   "affiliate": {
     title: "Get Paid to Share | Wealth Perspective",
     description: "Join the mogul movement and earn cash for every friend you bring. Share viral wealth content and get paid!",
-    image: "/og-affiliate.png",
+    staticImage: "/og-affiliate.png",
     path: "/become-affiliate",
   },
   "wealth-wisdom": {
     title: "Wealth Wisdom | Wealth Perspective",
     description: "Weekly rags-to-riches stories from billionaires who started with nothing. Get inspired by their journeys!",
-    image: "/og-wealth-wisdom.png",
+    staticImage: "/og-wealth-wisdom.png",
     path: "/wealth-wisdom",
   },
   "wealth-facts": {
     title: "Wealth Facts | Wealth Perspective",
     description: "Mind-blowing wealth facts that will change how you see money. Did you know billionaires earn your salary in seconds?",
-    image: "/og-wealth-facts.png",
+    staticImage: "/og-wealth-facts.png",
     path: "/",
   },
   "mogul-academy": {
     title: "Mogul Academy | Wealth Perspective",
     description: "Free financial education for everyone. Learn investing, compound interest, and wealth-building from beginner to pro level.",
-    image: "/og-mogul-academy.png",
+    staticImage: "/og-mogul-academy.png",
     path: "/mogul-academy",
   },
   "landing-a": {
     title: "Think Like The 1% | Wealth Perspective",
     description: "Ever wonder how fast billionaires make money? While you work 40 hours, Elon Musk makes what you'll earn in 10 lifetimes. See the truth.",
-    image: "/og-image.png",
+    staticImage: "/og-image.png",
     path: "/landing-a",
   },
   "landing-b": {
     title: "Your Wealth Reality Check | Wealth Perspective",
     description: "Compare your earnings to celebrities in real-time. The numbers will shock you. Are you ready for your reality check?",
-    image: "/og-image.png",
+    staticImage: "/og-image.png",
     path: "/landing-b",
   },
   "landing-c": {
     title: "Wealth Perspective | See Money Differently",
     description: "Putting wealth into perspective, one mind-blowing comparison at a time. See how fast the rich really earn.",
-    image: "/og-image.png",
+    staticImage: "/og-image.png",
     path: "/landing-c",
   },
   "landing-d": {
     title: "Get Paid to Share | Wealth Perspective",
     description: "One viral TikTok could pay you $39,000. Join the mogul movement and earn cash for every friend you bring!",
-    image: "/og-affiliate.png",
+    staticImage: "/og-affiliate.png",
     path: "/landing-d",
   },
 };
@@ -121,7 +121,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -132,17 +131,15 @@ Deno.serve(async (req: Request) => {
     const rawRedirect = url.searchParams.get("redirect");
     const userAgent = req.headers.get("user-agent") || "";
 
-    // Check if this is a social media crawler
     const isCrawler =
       /Twitterbot|facebookexternalhit|Facebot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Pinterest|Applebot/i.test(
         userAgent,
       );
 
-    // Get meta for the requested page, fallback to home
     const meta = PAGE_META[page] || {
       title: "Wealth Perspective",
       description: "Putting wealth into perspective, one mind blowing comparison at a time!",
-      image: "/og-image.png",
+      staticImage: "/og-image.png",
       path: "/",
     };
 
@@ -158,11 +155,27 @@ Deno.serve(async (req: Request) => {
       `[OG Share] Request for page: ${page}, redirect: ${redirectPath ?? "-"}, UA: ${userAgent.substring(0, 100)}`,
     );
 
-    const fullImageUrl = `${SITE_URL}${meta.image}`;
+    // Try AI-generated image from storage first, fall back to static
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+    const storageImageUrl = `${SUPABASE_URL}/storage/v1/object/public/og-images/${page}.png`;
+    const staticImageUrl = `${SITE_URL}${meta.staticImage}`;
+
+    // Check if AI-generated image exists in storage
+    let fullImageUrl = staticImageUrl;
+    try {
+      const checkResponse = await fetch(storageImageUrl, { method: "HEAD" });
+      if (checkResponse.ok) {
+        fullImageUrl = storageImageUrl;
+        console.log(`[OG Share] Using AI-generated image from storage for ${page}`);
+      } else {
+        console.log(`[OG Share] No AI image found for ${page}, using static fallback`);
+      }
+    } catch {
+      console.log(`[OG Share] Storage check failed for ${page}, using static fallback`);
+    }
+
     const canonicalUrl = `${SITE_URL}${redirectPath ?? meta.path}`;
 
-    // For crawlers, return full HTML with OG tags
-    // For regular users, redirect to the actual page
     if (!isCrawler) {
       console.log(`[OG Share] Redirecting user to: ${canonicalUrl}`);
       return new Response(null, {
@@ -174,7 +187,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    console.log(`[OG Share] Serving OG tags to crawler for: ${page}`);
+    console.log(`[OG Share] Serving OG tags to crawler for: ${page}, image: ${fullImageUrl}`);
 
     const html = `<!DOCTYPE html>
 <html lang="en">
