@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Share2, TrendingDown, Skull, Flame, Copy, MessageCircle, Image, Loader2 } from 'lucide-react';
+import ShareCardDecorations from '@/components/share/ShareCardDecorations';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -357,11 +358,12 @@ const RealityCheckShareCard = ({
             : 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
         }}
       >
-        <div className={`rounded-xl p-6 ${
+        <div className={`relative rounded-xl p-6 ${
           brutalMode 
             ? 'bg-gradient-to-br from-[#1a0505] via-[#1f0a0a] to-[#0a0a0a]'
             : 'bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a]'
         }`}>
+          <ShareCardDecorations variant={brutalMode ? 'red' : 'gold'} />
           {/* Header */}
           <div className="flex items-center justify-center gap-2 mb-6">
             {brutalMode ? (

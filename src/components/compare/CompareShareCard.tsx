@@ -4,6 +4,7 @@ import { formatCompactCurrency, formatCurrency, calculateEarningsBreakdown, calc
 import { getAvatarEmoji } from '@/lib/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Crown, Trophy, Equal, Flame } from 'lucide-react';
+import ShareCardDecorations from '@/components/share/ShareCardDecorations';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useShareCard } from '@/hooks/useShareCard';
@@ -127,7 +128,8 @@ const CompareShareCard = ({ person1, person2 }: CompareShareCardProps) => {
             : 'linear-gradient(135deg, #d4af37, #f5d779, #d4af37, #b8860b)',
         }}
       >
-        <div className="rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-5">
+        <div className="relative rounded-xl bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#1a1a1a] p-5">
+          <ShareCardDecorations variant={flexMode ? 'orange' : 'gold'} />
           {/* Header */}
           <div className="flex items-center justify-center gap-2 mb-4">
             {flexMode ? (

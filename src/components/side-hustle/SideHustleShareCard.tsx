@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/earnings';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { Rocket, TrendingUp, Target, Zap, Info } from 'lucide-react';
+import ShareCardDecorations from '@/components/share/ShareCardDecorations';
 import {
   Tooltip,
   TooltipContent,
@@ -93,6 +94,7 @@ const SideHustleShareCard = ({ hustle, className = '' }: SideHustleShareCardProp
       >
         {/* Frame Effect */}
         <div className="absolute inset-0 border-4 border-emerald-400/20 rounded-xl pointer-events-none" />
+        <ShareCardDecorations variant="emerald" />
         
         {/* Top Banner */}
         <div 
