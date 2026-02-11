@@ -218,6 +218,133 @@ async function downloadImage(url: string, filename: string) {
   }
 }
 
+/** Compose an image with caption text overlay and download it */
+async function generateCompositeImage(
+  imageUrl: string,
+  caption: string,
+  hashtags: string,
+  shareUrl: string,
+  filename: string,
+): Promise<boolean> {
+  try {
+    // Load the background image
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = imageUrl;
+    });
+
+    const canvas = document.createElement('canvas');
+    const W = Math.max(img.naturalWidth, 1200);
+    const H = Math.max(img.naturalHeight, 630);
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d')!;
+
+    // Draw background image scaled to fill
+    const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    const sw = img.naturalWidth * scale;
+    const sh = img.naturalHeight * scale;
+    ctx.drawImage(img, (W - sw) / 2, (H - sh) / 2, sw, sh);
+
+    // Dark overlay for text readability
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(0, 0, W, H);
+
+    // --- Draw caption text ---
+    const padding = W * 0.08;
+    const maxTextWidth = W - padding * 2;
+    const fontSize = Math.round(W * 0.038);
+    const lineHeight = fontSize * 1.45;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.textBaseline = 'top';
+
+    // Word-wrap the caption
+    const lines: string[] = [];
+    const paragraphs = caption.split('\n');
+    for (const para of paragraphs) {
+      if (para.trim() === '') {
+        lines.push('');
+        continue;
+      }
+      const words = para.split(' ');
+      let currentLine = '';
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+    }
+
+    // Add hashtags as a separate line
+    const hashtagFontSize = Math.round(fontSize * 0.7);
+    const urlFontSize = Math.round(fontSize * 0.6);
+
+    // Calculate total text height to center vertically
+    const captionHeight = lines.length * lineHeight;
+    const hashtagHeight = hashtags ? hashtagFontSize * 1.5 + 10 : 0;
+    const urlHeight = urlFontSize * 1.5 + 20;
+    const totalHeight = captionHeight + hashtagHeight + urlHeight;
+    let y = Math.max((H - totalHeight) / 2, padding);
+
+    // Draw caption lines
+    for (const line of lines) {
+      if (line === '') {
+        y += lineHeight * 0.5;
+        continue;
+      }
+      // Text shadow for extra readability
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillText(line, padding + 2, y + 2, maxTextWidth);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(line, padding, y, maxTextWidth);
+      y += lineHeight;
+    }
+
+    // Draw hashtags
+    if (hashtags) {
+      y += 10;
+      ctx.font = `${hashtagFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+      ctx.fillText(hashtags, padding, y, maxTextWidth);
+      y += hashtagFontSize * 1.5;
+    }
+
+    // Draw share URL at bottom
+    y += 20;
+    ctx.font = `${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText(`🔗 ${shareUrl}`, padding, y, maxTextWidth);
+
+    // Download the composite
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/png', 1.0)
+    );
+    if (!blob) return false;
+
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Image picker component */
 function ImagePicker({
   images,
@@ -497,44 +624,74 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                     )}
 
                     {/* Action buttons */}
-                    <div className="flex gap-2">
-                      <Button
-                        className="flex-1 gap-2"
-                        onClick={() => handlePost(post, platform.key)}
-                        disabled={isPosting}
-                      >
-                        {isPosting ? (
-                          <>Preparing...</>
-                        ) : isCopied ? (
-                          <>
-                            <Check className="w-4 h-4" />
-                            {platform.hasIntent ? 'Posted!' : 'Copied!'}
-                          </>
-                        ) : (
-                          <>
-                            {platform.hasIntent ? (
-                              <ExternalLink className="w-4 h-4" />
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <Button
+                          className="flex-1 gap-2"
+                          onClick={() => handlePost(post, platform.key)}
+                          disabled={isPosting}
+                        >
+                          {isPosting ? (
+                            <>Preparing...</>
+                          ) : isCopied ? (
+                            <>
+                              <Check className="w-4 h-4" />
+                              {platform.hasIntent ? 'Posted!' : 'Copied!'}
+                            </>
+                          ) : (
+                            <>
+                              {platform.hasIntent ? (
+                                <ExternalLink className="w-4 h-4" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                              {selectedImage
+                                ? `${platform.hasIntent ? '📸 Post' : '📸 Copy'} with Image`
+                                : platform.actionLabel}
+                            </>
+                          )}
+                        </Button>
+                        {platform.hasIntent && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleCopyOnly(post)}
+                            title="Copy caption + link to clipboard"
+                          >
+                            {copiedId === post.id ? (
+                              <Check className="w-4 h-4 text-green-500" />
                             ) : (
                               <Copy className="w-4 h-4" />
                             )}
-                            {selectedImage
-                              ? `${platform.hasIntent ? '📸 Post' : '📸 Copy'} with Image`
-                              : platform.actionLabel}
-                          </>
+                          </Button>
                         )}
-                      </Button>
-                      {platform.hasIntent && (
+                      </div>
+                      {/* Save Image + Caption composite button */}
+                      {selectedImage && (
                         <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleCopyOnly(post)}
-                          title="Copy caption + link to clipboard"
+                          variant="secondary"
+                          className="w-full gap-2"
+                          disabled={isPosting}
+                          onClick={async () => {
+                            setPosting(post.id);
+                            const shareUrl = buildShareUrl(post);
+                            const success = await generateCompositeImage(
+                              selectedImage,
+                              post.caption,
+                              post.hashtags,
+                              shareUrl,
+                              `wealth-perspective-${post.id}.png`,
+                            );
+                            setPosting(null);
+                            if (success) {
+                              toast.success('🎨 Image with caption saved! Upload it directly to any platform.');
+                            } else {
+                              toast.error('Failed to generate image. Try saving the image separately.');
+                            }
+                          }}
                         >
-                          {copiedId === post.id ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
+                          <Download className="w-4 h-4" />
+                          Save Image + Caption
                         </Button>
                       )}
                     </div>
