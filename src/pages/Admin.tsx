@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { 
   Shield, Users, CreditCard, Search, RefreshCw, ArrowLeft, 
   DollarSign, TrendingUp, Clock, Activity, Crown, Download, BarChart3,
-  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket, Share2, Image
+  Cpu, Zap, AlertTriangle, Megaphone, ExternalLink, FlaskConical, Link2, Rocket, Share2, Image, Sparkles
 } from 'lucide-react';
 import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
 import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
@@ -26,6 +26,7 @@ import { RevenueDashboard } from '@/components/admin/RevenueDashboard';
 import DeploymentGuide from '@/components/admin/DeploymentGuide';
 import StoryShareAnalytics from '@/components/admin/StoryShareAnalytics';
 import ShareAnalytics from '@/components/admin/ShareAnalytics';
+import OGImageGallery from '@/components/admin/OGImageGallery';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface AdminUser {
@@ -732,6 +733,10 @@ const Admin = () => {
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
+              <TabsTrigger value="og-images" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap px-2 sm:px-3">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">OG Images</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -1147,6 +1152,11 @@ const Admin = () => {
           {/* Share Analytics Tab (All Shares) */}
           <TabsContent value="share-analytics">
             <ShareAnalytics />
+          </TabsContent>
+
+          {/* OG Images & Marketing Tab */}
+          <TabsContent value="og-images">
+            <OGImageGallery />
           </TabsContent>
         </Tabs>
       </main>
