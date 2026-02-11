@@ -43,7 +43,7 @@ const MARKETING_LINKS = [
   {
     id: 'variant-a',
     label: 'Landing A - Luxury',
-    path: '/landing-a',
+    path: '/landing/a',
     description: '"Think Like The 1%" angle',
     icon: Crown,
     badge: null,
@@ -51,7 +51,7 @@ const MARKETING_LINKS = [
   {
     id: 'variant-b',
     label: 'Landing B - Wake Up',
-    path: '/landing-b',
+    path: '/landing/b',
     description: '"You\'re Just Uninformed" angle',
     icon: Flame,
     badge: 'High CTR',
@@ -59,7 +59,7 @@ const MARKETING_LINKS = [
   {
     id: 'variant-c',
     label: 'Landing C - Stats',
-    path: '/landing-c',
+    path: '/landing/c',
     description: '"42 Seconds" earnings hook',
     icon: Rocket,
     badge: null,
@@ -67,7 +67,7 @@ const MARKETING_LINKS = [
   {
     id: 'variant-d',
     label: 'Landing D - Affiliate',
-    path: '/landing-d',
+    path: '/landing/d',
     description: '"Get Paid to Share" for recruiters',
     icon: DollarSign,
     badge: 'Recruit',

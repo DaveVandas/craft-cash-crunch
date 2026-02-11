@@ -92,25 +92,25 @@ const PAGE_META: Record<string, PageMeta> = {
     title: "Think Like The 1% | Wealth Perspective",
     description: "Ever wonder how fast billionaires make money? While you work 40 hours, Elon Musk makes what you'll earn in 10 lifetimes. See the truth.",
     staticImage: "/og-image.png",
-    path: "/landing-a",
+    path: "/landing/a",
   },
   "landing-b": {
     title: "Your Wealth Reality Check | Wealth Perspective",
     description: "Compare your earnings to celebrities in real-time. The numbers will shock you. Are you ready for your reality check?",
     staticImage: "/og-image.png",
-    path: "/landing-b",
+    path: "/landing/b",
   },
   "landing-c": {
     title: "Wealth Perspective | See Money Differently",
     description: "Putting wealth into perspective, one mind-blowing comparison at a time. See how fast the rich really earn.",
     staticImage: "/og-image.png",
-    path: "/landing-c",
+    path: "/landing/c",
   },
   "landing-d": {
     title: "Get Paid to Share | Wealth Perspective",
     description: "One viral TikTok could pay you $39,000. Join the mogul movement and earn cash for every friend you bring!",
     staticImage: "/og-affiliate.png",
-    path: "/landing-d",
+    path: "/landing/d",
   },
 };
 
