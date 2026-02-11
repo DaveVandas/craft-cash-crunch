@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info, ImageIcon, ChevronDown, ChevronUp, Download, MessageSquare } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info, ImageIcon, ChevronDown, ChevronUp, Download, MessageSquare, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { supabase } from '@/integrations/supabase/client';
@@ -253,16 +256,20 @@ async function downloadImage(url: string, filename: string) {
   }
 }
 
-/** Compose an image with caption text overlay and download it */
-async function generateCompositeImage(
+interface CompositeOptions {
+  fontSizeMultiplier: number; // 0.5 to 2.0 (1.0 = default)
+  verticalPosition: number;  // 0 to 100 (50 = center)
+}
+
+/** Render composite image to a canvas and return it */
+async function renderComposite(
   imageUrl: string,
   caption: string,
   hashtags: string,
   shareUrl: string,
-  filename: string,
-): Promise<boolean> {
+  options: CompositeOptions = { fontSizeMultiplier: 1.0, verticalPosition: 50 },
+): Promise<HTMLCanvasElement | null> {
   try {
-    // Load the background image
     const img = new Image();
     img.crossOrigin = 'anonymous';
     await new Promise<void>((resolve, reject) => {
@@ -284,28 +291,26 @@ async function generateCompositeImage(
     const sh = img.naturalHeight * scale;
     ctx.drawImage(img, (W - sw) / 2, (H - sh) / 2, sw, sh);
 
-    // Dark overlay for text readability
+    // Dark overlay
     ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
     ctx.fillRect(0, 0, W, H);
 
-    // --- Draw caption text ---
+    // Text sizing
+    const baseFontSize = Math.round(W * 0.038);
+    const fontSize = Math.round(baseFontSize * options.fontSizeMultiplier);
+    const lineHeight = fontSize * 1.45;
     const padding = W * 0.08;
     const maxTextWidth = W - padding * 2;
-    const fontSize = Math.round(W * 0.038);
-    const lineHeight = fontSize * 1.45;
 
     ctx.fillStyle = '#ffffff';
     ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.textBaseline = 'top';
 
-    // Word-wrap the caption
+    // Word-wrap
     const lines: string[] = [];
     const paragraphs = caption.split('\n');
     for (const para of paragraphs) {
-      if (para.trim() === '') {
-        lines.push('');
-        continue;
-      }
+      if (para.trim() === '') { lines.push(''); continue; }
       const words = para.split(' ');
       let currentLine = '';
       for (const word of words) {
@@ -320,24 +325,20 @@ async function generateCompositeImage(
       if (currentLine) lines.push(currentLine);
     }
 
-    // Add hashtags as a separate line
     const hashtagFontSize = Math.round(fontSize * 0.7);
     const urlFontSize = Math.round(fontSize * 0.6);
-
-    // Calculate total text height to center vertically
     const captionHeight = lines.length * lineHeight;
     const hashtagHeight = hashtags ? hashtagFontSize * 1.5 + 10 : 0;
     const urlHeight = urlFontSize * 1.5 + 20;
     const totalHeight = captionHeight + hashtagHeight + urlHeight;
-    let y = Math.max((H - totalHeight) / 2, padding);
 
-    // Draw caption lines
+    // Vertical position: 0=top, 50=center, 100=bottom
+    const availableSpace = H - totalHeight - padding * 2;
+    let y = padding + (availableSpace * options.verticalPosition / 100);
+
+    // Draw caption
     for (const line of lines) {
-      if (line === '') {
-        y += lineHeight * 0.5;
-        continue;
-      }
-      // Text shadow for extra readability
+      if (line === '') { y += lineHeight * 0.5; continue; }
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.fillText(line, padding + 2, y + 2, maxTextWidth);
       ctx.fillStyle = '#ffffff';
@@ -345,7 +346,7 @@ async function generateCompositeImage(
       y += lineHeight;
     }
 
-    // Draw hashtags
+    // Hashtags
     if (hashtags) {
       y += 10;
       ctx.font = `${hashtagFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
@@ -354,18 +355,25 @@ async function generateCompositeImage(
       y += hashtagFontSize * 1.5;
     }
 
-    // Draw share URL at bottom
+    // URL
     y += 20;
     ctx.font = `${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.fillText(`🔗 ${shareUrl}`, padding, y, maxTextWidth);
 
-    // Download the composite
+    return canvas;
+  } catch {
+    return null;
+  }
+}
+
+/** Download a canvas as PNG */
+async function downloadCanvas(canvas: HTMLCanvasElement, filename: string): Promise<boolean> {
+  try {
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, 'image/png', 1.0)
     );
     if (!blob) return false;
-
     const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = blobUrl;
@@ -378,6 +386,150 @@ async function generateCompositeImage(
   } catch {
     return false;
   }
+}
+
+/** Composite preview modal with customization controls */
+function CompositePreviewModal({
+  open,
+  onOpenChange,
+  imageUrl,
+  caption,
+  hashtags,
+  shareUrl,
+  filename,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  imageUrl: string;
+  caption: string;
+  hashtags: string;
+  shareUrl: string;
+  filename: string;
+}) {
+  const previewRef = useRef<HTMLCanvasElement>(null);
+  const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1.0);
+  const [verticalPosition, setVerticalPosition] = useState(50);
+  const [saving, setSaving] = useState(false);
+
+  const updatePreview = useCallback(async () => {
+    if (!open) return;
+    const canvas = await renderComposite(imageUrl, caption, hashtags, shareUrl, {
+      fontSizeMultiplier,
+      verticalPosition,
+    });
+    if (canvas && previewRef.current) {
+      const previewCtx = previewRef.current.getContext('2d')!;
+      previewRef.current.width = canvas.width;
+      previewRef.current.height = canvas.height;
+      previewCtx.drawImage(canvas, 0, 0);
+    }
+  }, [open, imageUrl, caption, hashtags, shareUrl, fontSizeMultiplier, verticalPosition]);
+
+  useEffect(() => {
+    updatePreview();
+  }, [updatePreview]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const canvas = await renderComposite(imageUrl, caption, hashtags, shareUrl, {
+      fontSizeMultiplier,
+      verticalPosition,
+    });
+    if (canvas) {
+      const success = await downloadCanvas(canvas, filename);
+      if (success) {
+        toast.success('🎨 Image with caption saved! Upload it directly to any platform.');
+        onOpenChange(false);
+      } else {
+        toast.error('Failed to save image.');
+      }
+    } else {
+      toast.error('Failed to generate image.');
+    }
+    setSaving(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Settings2 className="w-5 h-5 text-primary" />
+            Customize Image + Caption
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5">
+          {/* Live preview */}
+          <div className="rounded-lg overflow-hidden border border-border/50 bg-muted/30">
+            <canvas
+              ref={previewRef}
+              className="w-full h-auto"
+              style={{ display: 'block' }}
+            />
+          </div>
+
+          {/* Controls */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Font Size</Label>
+                <span className="text-xs text-muted-foreground font-mono">
+                  {Math.round(fontSizeMultiplier * 100)}%
+                </span>
+              </div>
+              <Slider
+                value={[fontSizeMultiplier]}
+                onValueChange={([v]) => setFontSizeMultiplier(v)}
+                min={0.5}
+                max={2.0}
+                step={0.05}
+                className="w-full"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>Small</span>
+                <span>Default</span>
+                <span>Large</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Text Position</Label>
+                <span className="text-xs text-muted-foreground font-mono">
+                  {verticalPosition <= 25 ? 'Top' : verticalPosition >= 75 ? 'Bottom' : 'Center'}
+                </span>
+              </div>
+              <Slider
+                value={[verticalPosition]}
+                onValueChange={([v]) => setVerticalPosition(v)}
+                min={0}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>Top</span>
+                <span>Center</span>
+                <span>Bottom</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button className="flex-1 gap-2" onClick={handleSave} disabled={saving}>
+              <Download className="w-4 h-4" />
+              {saving ? 'Saving...' : 'Save Image'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 /** Image picker component */
@@ -455,6 +607,14 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
   const [selectedImages, setSelectedImages] = useState<Record<string, string | null>>({});
   const [aiImages, setAiImages] = useState<{ name: string; url: string }[]>([]);
   const [posting, setPosting] = useState<string | null>(null);
+  const [compositeModal, setCompositeModal] = useState<{
+    open: boolean;
+    imageUrl: string;
+    caption: string;
+    hashtags: string;
+    shareUrl: string;
+    filename: string;
+  } | null>(null);
   const posts = getPosts(affiliateCode);
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -709,26 +869,19 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
                         <Button
                           variant="secondary"
                           className="w-full gap-2"
-                          disabled={isPosting}
-                          onClick={async () => {
-                            setPosting(post.id);
+                          onClick={() => {
                             const shareUrl = buildShareUrl(post);
-                            const success = await generateCompositeImage(
-                              selectedImage,
-                              post.caption,
-                              post.hashtags,
+                            setCompositeModal({
+                              open: true,
+                              imageUrl: selectedImage,
+                              caption: post.caption,
+                              hashtags: post.hashtags,
                               shareUrl,
-                              `wealth-perspective-${post.id}.png`,
-                            );
-                            setPosting(null);
-                            if (success) {
-                              toast.success('🎨 Image with caption saved! Upload it directly to any platform.');
-                            } else {
-                              toast.error('Failed to generate image. Try saving the image separately.');
-                            }
+                              filename: `wealth-perspective-${post.id}.png`,
+                            });
                           }}
                         >
-                          <Download className="w-4 h-4" />
+                          <Settings2 className="w-4 h-4" />
                           Save Image + Caption
                         </Button>
                       )}
@@ -747,6 +900,21 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
           </p>
         </div>
       </CardContent>
+
+      {/* Composite preview modal */}
+      {compositeModal && (
+        <CompositePreviewModal
+          open={compositeModal.open}
+          onOpenChange={(open) => {
+            if (!open) setCompositeModal(null);
+          }}
+          imageUrl={compositeModal.imageUrl}
+          caption={compositeModal.caption}
+          hashtags={compositeModal.hashtags}
+          shareUrl={compositeModal.shareUrl}
+          filename={compositeModal.filename}
+        />
+      )}
     </Card>
   );
 }
