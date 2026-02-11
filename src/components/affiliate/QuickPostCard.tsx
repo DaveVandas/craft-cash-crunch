@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info, ImageIcon, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { Copy, Check, ExternalLink, Rocket, Lightbulb, Info, ImageIcon, ChevronDown, ChevronUp, Download, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { supabase } from '@/integrations/supabase/client';
@@ -152,6 +152,35 @@ function getPosts(affiliateCode: string): Record<string, ReadyPost[]> {
         emoji: '📊',
       },
     ],
+    sms: [
+      {
+        id: 'sms-1',
+        caption: `Check this out — this app shows how fast Elon Musk makes YOUR salary. It's insane 🤯`,
+        hashtags: '',
+        ogPage: 'home',
+        redirectPath: refPath,
+        label: 'Quick Text',
+        emoji: '💬',
+      },
+      {
+        id: 'sms-2',
+        caption: `You gotta try this — it compares your salary to celebrities in real time. Humbling 😅`,
+        hashtags: '',
+        ogPage: 'calculator',
+        redirectPath: `/calculator?ref=${affiliateCode}`,
+        label: 'Reality Check',
+        emoji: '📊',
+      },
+      {
+        id: 'sms-3',
+        caption: `Can you beat my score on this celebrity earnings quiz? I got 8/10 🧠`,
+        hashtags: '',
+        ogPage: 'quiz',
+        redirectPath: `/quiz?ref=${affiliateCode}`,
+        label: 'Quiz Challenge',
+        emoji: '🧠',
+      },
+    ],
   };
 }
 
@@ -192,6 +221,12 @@ function openShareIntent(platform: string, text: string, url: string) {
     case 'facebook':
       intentUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
       break;
+    case 'sms': {
+      const body = `${text}\n\n${url}`;
+      // Use sms: URI — works on iOS and Android
+      intentUrl = `sms:?&body=${encodeURIComponent(body)}`;
+      break;
+    }
     default:
       return false;
   }
@@ -462,12 +497,14 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
         }
       }
 
-      // For Twitter & Facebook, open share intent
-      if (platform === 'twitter' || platform === 'facebook') {
+      // For Twitter, Facebook & SMS, open share intent
+      if (platform === 'twitter' || platform === 'facebook' || platform === 'sms') {
         const captionOnly = post.caption + (post.hashtags ? `\n\n${post.hashtags}` : '');
         openShareIntent(platform, captionOnly, shareUrl);
-        if (selectedImage) {
-          toast.info('Attach the downloaded image to your tweet for maximum engagement! 🔥', { duration: 5000 });
+        if (platform === 'sms') {
+          toast.success('Opening your messaging app! 💬');
+        } else if (selectedImage) {
+          toast.info('Attach the downloaded image to your post for maximum engagement! 🔥', { duration: 5000 });
         }
       } else {
         // For TikTok & Instagram, copy to clipboard
@@ -514,6 +551,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
     { key: 'tiktok', icon: '📱', label: 'TikTok', actionLabel: 'Copy for TikTok', hasIntent: false },
     { key: 'instagram', icon: '📸', label: 'Instagram', actionLabel: 'Copy for Instagram', hasIntent: false },
     { key: 'facebook', icon: '📘', label: 'Facebook', actionLabel: 'Post on Facebook', hasIntent: true },
+    { key: 'sms', icon: '💬', label: 'SMS', actionLabel: 'Send via Text', hasIntent: true },
   ];
 
   return (
@@ -564,7 +602,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
 
         {/* Platform Tabs */}
         <Tabs defaultValue="twitter" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             {platformConfig.map((p) => (
               <TabsTrigger key={p.key} value={p.key} className="gap-1.5">
                 <span className="text-base">{p.icon}</span>
