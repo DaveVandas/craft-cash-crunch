@@ -12,10 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
-import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
-import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
 import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
+import { QuickPostCard } from '@/components/affiliate/QuickPostCard';
 import { 
   DollarSign, 
   Users, 
@@ -25,11 +24,11 @@ import {
   Sparkles,
   Rocket,
   Target,
-  MessageSquare,
   FileText,
   ExternalLink,
   Mail,
-  Image
+  Image,
+  Send
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -499,23 +498,19 @@ export default function AffiliateDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="media-kit" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+        <Tabs defaultValue="quick-post" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="quick-post" className="gap-2">
+              <Send className="w-4 h-4" />
+              <span className="hidden sm:inline">Quick Post</span>
+            </TabsTrigger>
             <TabsTrigger value="media-kit" className="gap-2">
               <Image className="w-4 h-4" />
               <span className="hidden sm:inline">Media Kit</span>
             </TabsTrigger>
             <TabsTrigger value="share" className="gap-2">
               <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">Card</span>
-            </TabsTrigger>
-            <TabsTrigger value="captions" className="gap-2">
-              <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">Captions</span>
-            </TabsTrigger>
-            <TabsTrigger value="links" className="gap-2">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Links</span>
+              <span className="hidden sm:inline">QR Card</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <Target className="w-4 h-4" />
@@ -528,6 +523,13 @@ export default function AffiliateDashboard() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="quick-post">
+            <QuickPostCard 
+              affiliateCode={affiliate.affiliate_code}
+              displayName={affiliate.display_name}
+            />
+          </TabsContent>
+
           <TabsContent value="media-kit">
             <SocialMediaKitCard affiliateCode={affiliate.affiliate_code} />
           </TabsContent>
@@ -537,10 +539,10 @@ export default function AffiliateDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
-                  Your Shareable Mogul Card
+                  Your Shareable QR Card
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Download or share this card with your audience. The QR code links directly to your referral!
+                  Download or share this card. The QR code links directly to your referral page!
                 </p>
               </CardHeader>
               <CardContent>
@@ -552,17 +554,6 @@ export default function AffiliateDashboard() {
                 />
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="captions">
-            <SocialCaptionsCard 
-              affiliateCode={affiliate.affiliate_code}
-              displayName={affiliate.display_name}
-            />
-          </TabsContent>
-
-          <TabsContent value="links">
-            <MarketingLinksCard affiliateCode={affiliate.affiliate_code} />
           </TabsContent>
 
           <TabsContent value="analytics">

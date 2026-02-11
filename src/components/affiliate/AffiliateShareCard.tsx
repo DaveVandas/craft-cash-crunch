@@ -367,16 +367,10 @@ export function AffiliateShareCard({
         </Button>
       </div>
 
-      {/* Link preview */}
-      <div className="max-w-sm mx-auto p-3 bg-muted/50 rounded-lg space-y-2">
-        <div>
-          <p className="text-xs text-muted-foreground mb-1">Social share link (best for Twitter/Facebook):</p>
-          <p className="text-sm font-mono text-foreground break-all">{referralShareUrl}</p>
-        </div>
-        <div className="pt-2 border-t border-border/50">
-          <p className="text-xs text-muted-foreground mb-1">Redirects to:</p>
-          <p className="text-sm font-mono text-foreground break-all">{referralDestinationUrl}</p>
-        </div>
+      {/* Simple link display */}
+      <div className="max-w-sm mx-auto p-3 bg-muted/50 rounded-lg text-center">
+        <p className="text-xs text-muted-foreground mb-1">Your referral page:</p>
+        <p className="text-sm font-medium text-primary">{referralDestinationUrl}</p>
       </div>
     </div>
   );
