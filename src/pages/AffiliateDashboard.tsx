@@ -501,7 +501,7 @@ export default function AffiliateDashboard() {
         </div>
 
         <Tabs defaultValue="quick-post" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex w-full overflow-x-auto justify-start gap-1">
             <TabsTrigger value="quick-post" className="gap-2">
               <Send className="w-4 h-4" />
               <span className="hidden sm:inline">Quick Post</span>
