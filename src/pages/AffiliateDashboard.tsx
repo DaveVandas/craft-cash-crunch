@@ -15,6 +15,7 @@ import { AffiliateShareCard } from '@/components/affiliate/AffiliateShareCard';
 import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytics';
 import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
 import { QuickPostCard } from '@/components/affiliate/QuickPostCard';
+import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
 import { 
   DollarSign, 
   Users, 
@@ -28,7 +29,8 @@ import {
   ExternalLink,
   Mail,
   Image,
-  Send
+  Send,
+  Link2
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -499,10 +501,14 @@ export default function AffiliateDashboard() {
         </div>
 
         <Tabs defaultValue="quick-post" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="quick-post" className="gap-2">
               <Send className="w-4 h-4" />
               <span className="hidden sm:inline">Quick Post</span>
+            </TabsTrigger>
+            <TabsTrigger value="links" className="gap-2">
+              <Link2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Links</span>
             </TabsTrigger>
             <TabsTrigger value="media-kit" className="gap-2">
               <Image className="w-4 h-4" />
@@ -528,6 +534,10 @@ export default function AffiliateDashboard() {
               affiliateCode={affiliate.affiliate_code}
               displayName={affiliate.display_name}
             />
+          </TabsContent>
+
+          <TabsContent value="links">
+            <MarketingLinksCard affiliateCode={affiliate.affiliate_code} />
           </TabsContent>
 
           <TabsContent value="media-kit">
