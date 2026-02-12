@@ -240,7 +240,7 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
           <div className="flex-1 border-t border-border/50 min-h-0">
             {previewLink && (
               <iframe
-                src={getDirectUrl(previewLink)}
+                src={previewLink.useCodeInPath ? `/ref/${affiliateCode}` : `${previewLink.path}?ref=${affiliateCode}`}
                 className="w-full h-full rounded-b-lg"
                 title={`Preview: ${previewLink.label}`}
               />
