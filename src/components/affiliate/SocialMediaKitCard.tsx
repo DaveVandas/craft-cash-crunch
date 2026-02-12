@@ -32,12 +32,16 @@ interface SocialAsset {
     instagram: string;
     tiktok: string;
     facebook: string;
+    linkedin: string;
+    reddit: string;
   };
   tags: {
     twitter: string[];
     instagram: string[];
     tiktok: string[];
     facebook: string[];
+    linkedin: string[];
+    reddit: string[];
   };
   path: string;
   /** If set, use OG share URL with this page key */
@@ -46,7 +50,7 @@ interface SocialAsset {
 }
 
 const SOCIAL_ASSETS: SocialAsset[] = [
-  // === LANDING PAGES (for recruiting/sharing) ===
+  // === LANDING PAGES ===
   {
     id: 'landing-a',
     ogImage: '/og-image.png',
@@ -57,12 +61,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Ever wonder how the rich REALLY think? 🧠💰\n\nThis app shows you how fast billionaires make YOUR yearly salary...\n\nElon makes it in 0.3 seconds. I'm still processing this 😭\n\nLink in bio to see for yourself ⬆️`,
       tiktok: `POV: You just learned Elon Musk makes your yearly salary in 0.3 seconds...\n\nThis app shows you how the 1% REALLY live 👑\n\nI'm not okay.`,
       facebook: `Just found this eye-opening app that shows how fast billionaires make money compared to the rest of us.\n\nElon Musk earns the average salary in less than a second! Really puts things in perspective.`,
+      linkedin: `Fascinating visualization of income disparity.\n\nThis tool calculates how quickly top earners make the average person's annual salary — Elon Musk does it in 0.3 seconds.\n\nWhether motivating or sobering, it certainly reframes how we think about compensation.`,
+      reddit: `This app shows how fast billionaires earn your salary — Elon Musk makes the average annual salary in 0.3 seconds`,
     },
     tags: {
       twitter: ['#Wealth', '#Billionaire', '#Mindset'],
       instagram: ['#wealthmindset', '#billionaire', '#motivation', '#rich', '#perspective', '#mindblown'],
       tiktok: ['#fyp', '#billionaire', '#wealth', '#mindblown', '#viral', '#rich'],
       facebook: ['wealth', 'perspective', 'billionaire', 'mindset'],
+      linkedin: ['#WealthPerspective', '#Compensation', '#Leadership'],
+      reddit: [],
     },
     path: '/landing/a',
     ogPageKey: 'landing-a',
@@ -78,12 +86,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Ready for your REALITY CHECK? 📊💰\n\nThis app lets you compare your earnings to celebrities in real-time.\n\nI compared my salary to Taylor Swift's and... let's just say I need a moment 😭\n\nLink in bio ⬆️`,
       tiktok: `This app just gave me a reality check I didn't ask for 😭\n\nYou can compare your salary to ANY celebrity in real-time...\n\nTaylor Swift makes my yearly salary in 47 seconds 💀`,
       facebook: `Just got a "reality check" from this app that compares your earnings to celebrities in real-time.\n\nIt's humbling but also strangely motivating! Really makes you think about wealth differently.`,
+      linkedin: `Just used a salary benchmarking tool that compares your compensation to celebrity earnings in real-time.\n\nA surprisingly effective way to visualize income inequality — and a great conversation starter about pay transparency.`,
+      reddit: `I used this "Reality Check" calculator to compare my salary to celebrity earnings and the results are humbling`,
     },
     tags: {
       twitter: ['#RealityCheck', '#Salary', '#Wealth'],
       instagram: ['#realitycheck', '#salary', '#celebrity', '#wealth', '#motivation', '#hustle'],
       tiktok: ['#fyp', '#realitycheck', '#salary', '#viral', '#celebrity', '#humbled'],
       facebook: ['reality check', 'salary', 'wealth', 'comparison'],
+      linkedin: ['#SalaryTransparency', '#CareerGrowth', '#Finance'],
+      reddit: [],
     },
     path: '/landing/b',
     ogPageKey: 'landing-b',
@@ -99,12 +111,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `See money differently 💎✨\n\nThis app puts wealth into perspective with mind-blowing comparisons.\n\nOnce you see how fast billionaires earn, you'll never think about money the same way!\n\nLink in bio ⬆️`,
       tiktok: `This app just changed how I see money forever 🤯\n\nWealth comparisons that will blow your mind...\n\nYou're not ready for this 💀`,
       facebook: `Found this fascinating app that puts wealth into perspective with eye-opening comparisons.\n\nReally interesting way to visualize the wealth gap and understand how the ultra-rich earn!`,
+      linkedin: `Interesting tool that reframes how we think about wealth and compensation.\n\nVisualizes the earnings gap through real-time comparisons — useful for anyone interested in financial literacy and economic understanding.`,
+      reddit: `This app puts wealth into perspective with mind-blowing real-time comparisons`,
     },
     tags: {
       twitter: ['#Wealth', '#Money', '#Perspective'],
       instagram: ['#wealth', '#money', '#perspective', '#mindblown', '#rich', '#motivation'],
       tiktok: ['#fyp', '#money', '#wealth', '#perspective', '#viral', '#mindblown'],
       facebook: ['wealth', 'perspective', 'money', 'interesting'],
+      linkedin: ['#FinancialLiteracy', '#WealthGap', '#Economics'],
+      reddit: [],
     },
     path: '/landing/c',
     ogPageKey: 'landing-c',
@@ -120,18 +136,22 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `One viral post could pay you THOUSANDS 💰🔥\n\nI just joined this affiliate program that pays you for every person who signs up through your link.\n\nTop affiliates are making $39K+ from single viral posts!\n\nLink in bio to join ⬆️`,
       tiktok: `One viral TikTok = $39,000? 💰\n\nThis affiliate program pays you $1-2 for EVERY signup.\n\nDo the math on a viral video... 🤯`,
       facebook: `Just discovered this affiliate program where you get paid for sharing!\n\nTop affiliates are earning thousands from viral posts. It's a pretty cool way to earn passive income just by sharing content you'd share anyway.`,
+      linkedin: `Looking for a low-barrier side income opportunity?\n\nThis referral program pays $1-2 per signup — no complicated funnels, just share and earn. Worth exploring if you have an engaged audience.`,
+      reddit: `This affiliate program pays $1-2 for every signup through your link — no complicated funnels`,
     },
     tags: {
       twitter: ['#Affiliate', '#PassiveIncome', '#SideHustle'],
       instagram: ['#affiliate', '#passiveincome', '#sidehustle', '#makemoney', '#viral', '#income'],
       tiktok: ['#fyp', '#affiliate', '#passiveincome', '#sidehustle', '#viral', '#moneytok'],
       facebook: ['affiliate', 'passive income', 'side hustle', 'earn money'],
+      linkedin: ['#SideIncome', '#Entrepreneurship', '#PassiveIncome'],
+      reddit: [],
     },
     path: '/landing/d',
     ogPageKey: 'landing-d',
     category: 'landing',
   },
-  // === FEATURES (for promoting specific tools) ===
+  // === FEATURES ===
   {
     id: 'home',
     ogImage: '/og-image.png',
@@ -142,12 +162,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `The wealth gap visualized in the most shocking way... 📊\n\nThis app shows you how long it takes YOU to earn what billionaires make in SECONDS.\n\nI spent an hour comparing my salary to celebrities and now I'm equally motivated and terrified 😭💪\n\nLink in bio to see your reality check! ⬆️`,
       tiktok: `POV: You just discovered how much billionaires make while you're sleeping... and now you can't unsleep 😭💀\n\nThis app literally shows you what celebrities earn PER SECOND. I'm shook.`,
       facebook: `Just found this eye-opening app that puts wealth into perspective! 👀\n\nYou can see how fast celebrities and billionaires earn money compared to your salary. It's wild - Elon Musk earns the average salary in less than a second!\n\nDefinitely worth checking out if you want a reality check 💰`,
+      linkedin: `Came across a tool that visualizes the scale of wealth inequality in a way that really resonates.\n\nIt calculates real-time earnings comparisons between your salary and public figures. A thought-provoking look at compensation at scale.`,
+      reddit: `This app shows how fast billionaires make YOUR yearly salary in real-time — Elon does it in 0.3 seconds`,
     },
     tags: {
       twitter: ['#Wealth', '#Money', '#Billionaire'],
       instagram: ['#wealthgap', '#motivation', '#financialfreedom', '#hustle', '#grind', '#mindset'],
       tiktok: ['#fyp', '#moneytok', '#celebrity', '#wealth', '#mindblown', '#viral'],
       facebook: ['wealth', 'money', 'perspective', 'billionaire'],
+      linkedin: ['#WealthGap', '#Compensation', '#FinancialLiteracy'],
+      reddit: [],
     },
     path: '/',
     category: 'feature',
@@ -162,12 +186,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Test your wealth IQ! 🧠💰\n\nI just took this quiz that makes you guess who earns more between celebrities... and I was WRONG on most of them!\n\nThink you can beat my score? Try it and find out! 🔥\n\nLink in bio ⬆️`,
       tiktok: `I got 8/10 on this celebrity earnings quiz and my brain is broken 🤯\n\nNo way Drake earns more than... wait, WHAT?!\n\nTry it and drop your score in the comments 👇`,
       facebook: `Just took this fun quiz that tests how well you know celebrity earnings! 🌟\n\nI thought I knew who made more money... I was so wrong! 😅\n\nCan you beat my score? Give it a try!`,
+      linkedin: `Took an interesting quiz that tests your knowledge of celebrity earnings.\n\nSurprisingly hard — most of us have significant blind spots about public-figure compensation. A fun way to build financial awareness.`,
+      reddit: `Can you beat 8/10 on this celebrity earnings quiz? It's harder than you'd think`,
     },
     tags: {
       twitter: ['#Quiz', '#Celebrity', '#WealthQuiz'],
       instagram: ['#quiz', '#celebrity', '#money', '#challenge', '#viral', '#fyp'],
       tiktok: ['#fyp', '#quiz', '#celebrity', '#money', '#viral', '#mindblown'],
       facebook: ['quiz', 'fun', 'celebrity', 'game'],
+      linkedin: ['#FinancialLiteracy', '#Quiz', '#Learning'],
+      reddit: [],
     },
     path: '/quiz',
     category: 'feature',
@@ -182,12 +210,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Reality Check Time! ⏰💰\n\nI just used this calculator to compare my salary to celebrities...\n\nTaylor Swift earns my YEARLY salary in 47 seconds. FORTY SEVEN SECONDS.\n\nBrb, rethinking all my life choices 😅\n\nLink in bio to get YOUR reality check ⬆️`,
       tiktok: `This app just told me Jeff Bezos makes my rent in 0.3 seconds...\n\nAnyway, who else needs a new career path? 😅👑\n\nTry this Reality Check calculator and prepare to be humbled 💀`,
       facebook: `Just tried this "Reality Check" calculator that compares your salary to celebrity earnings...\n\nLet's just say it was humbling! 😅 Cristiano Ronaldo earns my monthly salary in seconds.\n\nIt's actually pretty motivating though - shows you what's possible!`,
+      linkedin: `Used a salary benchmarking calculator that compares your compensation to celebrity earnings in real-time.\n\nA powerful way to visualize the scale of different income levels and spark meaningful conversations about compensation.`,
+      reddit: `This "Reality Check" calculator compares your salary to celebrity earnings in real-time — the results are eye-opening`,
     },
     tags: {
       twitter: ['#RealityCheck', '#Salary', '#Celebrity'],
       instagram: ['#realitycheck', '#salary', '#celebrity', '#motivation', '#wealth', '#hustle'],
       tiktok: ['#fyp', '#realitycheck', '#salary', '#celebrity', '#viral', '#relatable'],
       facebook: ['reality check', 'salary', 'comparison', 'motivation'],
+      linkedin: ['#SalaryBenchmark', '#Compensation', '#Finance'],
+      reddit: [],
     },
     path: '/calculator',
     category: 'feature',
@@ -202,12 +234,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Learning to invest without risking real money! 📈💸\n\nFound this paper trading game where you start with $100k virtual cash and build your portfolio like real investors.\n\nUp 47% this week and it's giving me SO much confidence for when I go real!\n\nLink in bio to start your mogul journey ⬆️`,
       tiktok: `I'm up 47% on my paper trading portfolio and it costs $0 to play 📈\n\nMogul Markets lets you practice investing with fake money before you risk the real thing.\n\nThis is how you actually learn 🔥`,
       facebook: `Been using this paper trading game to practice investing - no real money at risk!\n\nYou start with $100,000 virtual cash and can buy real stocks at real prices. It's been amazing for building confidence before I invest real money.\n\nUp 47% this week! 📈`,
+      linkedin: `Found an excellent paper trading platform for building investment skills.\n\nStart with $100K virtual cash, trade real stocks at real prices, and learn portfolio management without financial risk. Great for developing investment intuition.`,
+      reddit: `This paper trading game lets you practice investing with $100K virtual cash at real stock prices`,
     },
     tags: {
       twitter: ['#Investing', '#Stocks', '#PaperTrading'],
       instagram: ['#investing', '#stocks', '#papertrading', '#finance', '#mogul', '#wealth'],
       tiktok: ['#fyp', '#investing', '#stocks', '#money', '#finance', '#beginner'],
       facebook: ['investing', 'stocks', 'learning', 'finance'],
+      linkedin: ['#Investing', '#PaperTrading', '#FinancialEducation'],
+      reddit: [],
     },
     path: '/mogul-markets',
     category: 'feature',
@@ -222,12 +258,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Looking for a side hustle that actually fits YOUR skills? 💼💰\n\nThis tool matches you with money-making ideas based on what you're already good at.\n\nNo more random suggestions - just opportunities that make sense for YOU.\n\nLink in bio to find your perfect side hustle ⬆️`,
       tiktok: `This site just told me I could make $2K/month with skills I ALREADY HAVE 🤯\n\nIt matches you with side hustles based on your actual abilities.\n\nWhy is nobody talking about this??`,
       facebook: `Stumbled across this tool that matches you with side hustle ideas based on your existing skills!\n\nReally helpful if you're looking for ways to earn extra income but don't know where to start. It's like a career counselor for side gigs! 💼`,
+      linkedin: `Useful resource for exploring supplemental income opportunities.\n\nMatches side hustles to your existing skills and experience, with realistic earning estimates. Worth a look if you're considering diversifying your income streams.`,
+      reddit: `This tool matches you with side hustles based on your existing skills — found out I could make $2K/month`,
     },
     tags: {
       twitter: ['#SideHustle', '#PassiveIncome', '#Money'],
       instagram: ['#sidehustle', '#passiveincome', '#makemoney', '#entrepreneur', '#skills', '#income'],
       tiktok: ['#fyp', '#sidehustle', '#money', '#passiveincome', '#moneytok', '#viral'],
       facebook: ['side hustle', 'extra income', 'skills', 'money'],
+      linkedin: ['#SideHustle', '#IncomeStreams', '#CareerDevelopment'],
+      reddit: [],
     },
     path: '/side-hustle',
     category: 'feature',
@@ -242,12 +282,16 @@ const SOCIAL_ASSETS: SocialAsset[] = [
       instagram: `Want to get PAID to share cool stuff? 💸👑\n\nI just joined this affiliate program that pays you for every person who signs up through your link.\n\nIt's literally the easiest side income - just share content you'd share anyway!\n\nLink in bio to become an affiliate ⬆️`,
       tiktok: `Get paid $1-2 every time someone signs up through your link 💰\n\nNo products to sell, no complicated funnels. Just share and earn.\n\nThis is how I'm building passive income on the side 👑`,
       facebook: `Just started as an affiliate for Wealth Perspective and it's surprisingly easy!\n\nYou share links, people sign up, you get paid. Simple as that.\n\nIf you're looking for a low-effort way to earn some extra money, this might be worth checking out!`,
+      linkedin: `Interesting referral opportunity worth exploring.\n\nThis program pays $1-2 per signup through your link — straightforward, no product management or complex funnels required. Good fit for anyone with an engaged professional network.`,
+      reddit: `This affiliate program pays $1-2 for every signup through your link — no products to sell, just sharing`,
     },
     tags: {
       twitter: ['#AffiliateMarketing', '#PassiveIncome', '#SideHustle'],
       instagram: ['#affiliate', '#passiveincome', '#sidehustle', '#makemoney', '#entrepreneur', '#income'],
       tiktok: ['#fyp', '#affiliate', '#passiveincome', '#sidehustle', '#moneytok', '#viral'],
       facebook: ['affiliate', 'passive income', 'side hustle', 'earn money'],
+      linkedin: ['#Referral', '#SideIncome', '#Networking'],
+      reddit: [],
     },
     path: '/become-affiliate',
     category: 'feature',
@@ -528,10 +572,12 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
   };
 
   const platformTabs = [
-    { key: 'twitter' as const, label: '𝕏', fullLabel: 'Twitter/X' },
-    { key: 'instagram' as const, label: '📸', fullLabel: 'Instagram' },
-    { key: 'tiktok' as const, label: '🎵', fullLabel: 'TikTok' },
-    { key: 'facebook' as const, label: '📘', fullLabel: 'Facebook' },
+    { key: 'twitter' as const, label: '𝕏', fullLabel: 'Twitter/X', shortLabel: '𝕏' },
+    { key: 'facebook' as const, label: '📘', fullLabel: 'Facebook', shortLabel: 'FB' },
+    { key: 'linkedin' as const, label: '💼', fullLabel: 'LinkedIn', shortLabel: 'In' },
+    { key: 'instagram' as const, label: '📸', fullLabel: 'Instagram', shortLabel: 'IG' },
+    { key: 'tiktok' as const, label: '🎵', fullLabel: 'TikTok', shortLabel: 'TT' },
+    { key: 'reddit' as const, label: '🔶', fullLabel: 'Reddit', shortLabel: 'Red' },
   ];
 
   const landingAssets = SOCIAL_ASSETS.filter(a => a.category === 'landing');
@@ -554,11 +600,12 @@ export function SocialMediaKitCard({ affiliateCode }: SocialMediaKitCardProps) {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="twitter" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="flex w-full overflow-x-auto gap-1 p-1">
             {platformTabs.map((tab) => (
-              <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
-                <span className="text-lg">{tab.label}</span>
-                <span className="hidden sm:inline text-xs">{tab.fullLabel}</span>
+              <TabsTrigger key={tab.key} value={tab.key} className="flex-col gap-0.5 px-2 py-1.5 min-w-0 flex-1">
+                <span className="text-base leading-none">{tab.label}</span>
+                <span className="text-[10px] leading-none sm:hidden font-medium">{tab.shortLabel}</span>
+                <span className="hidden sm:inline text-[10px] leading-none">{tab.fullLabel}</span>
               </TabsTrigger>
             ))}
           </TabsList>
