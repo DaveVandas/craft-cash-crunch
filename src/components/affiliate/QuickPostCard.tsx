@@ -780,13 +780,13 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
   };
 
   const platformConfig = [
-    { key: 'twitter', icon: '𝕏', label: 'Twitter / X', actionLabel: 'Post on 𝕏', hasIntent: true },
-    { key: 'facebook', icon: '📘', label: 'Facebook', actionLabel: 'Post on Facebook', hasIntent: true },
-    { key: 'linkedin', icon: '💼', label: 'LinkedIn', actionLabel: 'Post on LinkedIn', hasIntent: true },
-    { key: 'instagram', icon: '📸', label: 'Instagram', actionLabel: 'Copy for Instagram', hasIntent: false },
-    { key: 'tiktok', icon: '📱', label: 'TikTok', actionLabel: 'Copy for TikTok', hasIntent: false },
-    { key: 'reddit', icon: '🔶', label: 'Reddit', actionLabel: 'Post on Reddit', hasIntent: true },
-    { key: 'sms', icon: '💬', label: 'SMS', actionLabel: 'Send via Text', hasIntent: true },
+    { key: 'twitter', icon: '𝕏', label: 'Twitter / X', shortLabel: '𝕏', actionLabel: 'Post on 𝕏', hasIntent: true },
+    { key: 'facebook', icon: '📘', label: 'Facebook', shortLabel: 'FB', actionLabel: 'Post on Facebook', hasIntent: true },
+    { key: 'linkedin', icon: '💼', label: 'LinkedIn', shortLabel: 'In', actionLabel: 'Post on LinkedIn', hasIntent: true },
+    { key: 'instagram', icon: '📸', label: 'Instagram', shortLabel: 'IG', actionLabel: 'Copy for Instagram', hasIntent: false },
+    { key: 'tiktok', icon: '📱', label: 'TikTok', shortLabel: 'TT', actionLabel: 'Copy for TikTok', hasIntent: false },
+    { key: 'reddit', icon: '🔶', label: 'Reddit', shortLabel: 'Red', actionLabel: 'Post on Reddit', hasIntent: true },
+    { key: 'sms', icon: '💬', label: 'SMS', shortLabel: 'SMS', actionLabel: 'Send via Text', hasIntent: true },
   ];
 
   return (
@@ -837,11 +837,12 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
 
         {/* Platform Tabs */}
         <Tabs defaultValue="twitter" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7">
+          <TabsList className="flex w-full overflow-x-auto gap-1 p-1">
             {platformConfig.map((p) => (
-              <TabsTrigger key={p.key} value={p.key} className="gap-1.5">
-                <span className="text-base">{p.icon}</span>
-                <span className="hidden sm:inline text-xs">{p.label}</span>
+              <TabsTrigger key={p.key} value={p.key} className="flex-col gap-0.5 px-2 py-1.5 min-w-0 flex-1">
+                <span className="text-base leading-none">{p.icon}</span>
+                <span className="text-[10px] leading-none sm:hidden font-medium">{p.shortLabel}</span>
+                <span className="hidden sm:inline text-[10px] leading-none">{p.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
