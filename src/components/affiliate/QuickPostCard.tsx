@@ -193,6 +193,35 @@ function getPosts(affiliateCode: string): Record<string, ReadyPost[]> {
         emoji: '🧠',
       },
     ],
+    linkedin: [
+      {
+        id: 'li-1',
+        caption: `Fascinating tool that visualizes wealth disparity in real time.\n\nIt calculates how quickly top earners make the average person's annual salary — Elon Musk does it in 0.3 seconds.\n\nWhether you find it motivating or sobering, it certainly puts compensation into perspective.`,
+        hashtags: '#WealthPerspective #Compensation #Leadership',
+        ogPage: 'home',
+        redirectPath: refPath,
+        label: 'Thought Leadership',
+        emoji: '💼',
+      },
+      {
+        id: 'li-2',
+        caption: `Just used a "Reality Check" calculator that benchmarks your salary against celebrity earnings in real time.\n\nIt's a surprisingly effective way to visualize the scale of income inequality — and a great conversation starter about compensation transparency.`,
+        hashtags: '#SalaryTransparency #CareerGrowth #Finance',
+        ogPage: 'calculator',
+        redirectPath: `/calculator?ref=${affiliateCode}`,
+        label: 'Salary Benchmark',
+        emoji: '📊',
+      },
+      {
+        id: 'li-3',
+        caption: `Looking for a low-barrier side income opportunity?\n\nThis referral program pays $1-2 per signup — no complicated funnels, just share and earn. Worth exploring if you have an engaged audience.`,
+        hashtags: '#SideIncome #Entrepreneurship #PassiveIncome',
+        ogPage: 'landing-d',
+        redirectPath: `/landing/d?ref=${affiliateCode}`,
+        label: 'Opportunity Share',
+        emoji: '🤝',
+      },
+    ],
     sms: [
       {
         id: 'sms-1',
@@ -264,6 +293,9 @@ function openShareIntent(platform: string, text: string, url: string) {
       break;
     case 'reddit':
       intentUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text.substring(0, 300))}`;
+      break;
+    case 'linkedin':
+      intentUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
       break;
     case 'sms': {
       const body = `${text}\n\n${url}`;
@@ -750,6 +782,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
   const platformConfig = [
     { key: 'twitter', icon: '𝕏', label: 'Twitter / X', actionLabel: 'Post on 𝕏', hasIntent: true },
     { key: 'facebook', icon: '📘', label: 'Facebook', actionLabel: 'Post on Facebook', hasIntent: true },
+    { key: 'linkedin', icon: '💼', label: 'LinkedIn', actionLabel: 'Post on LinkedIn', hasIntent: true },
     { key: 'instagram', icon: '📸', label: 'Instagram', actionLabel: 'Copy for Instagram', hasIntent: false },
     { key: 'tiktok', icon: '📱', label: 'TikTok', actionLabel: 'Copy for TikTok', hasIntent: false },
     { key: 'reddit', icon: '🔶', label: 'Reddit', actionLabel: 'Post on Reddit', hasIntent: true },
@@ -804,7 +837,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
 
         {/* Platform Tabs */}
         <Tabs defaultValue="twitter" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7">
             {platformConfig.map((p) => (
               <TabsTrigger key={p.key} value={p.key} className="gap-1.5">
                 <span className="text-base">{p.icon}</span>
