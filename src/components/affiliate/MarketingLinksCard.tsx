@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { 
@@ -13,7 +14,8 @@ import {
   Rocket, 
   DollarSign,
   ExternalLink,
-  Home
+  Home,
+  Eye
 } from 'lucide-react';
 
 interface MarketingLinksCardProps {
@@ -76,6 +78,7 @@ const MARKETING_LINKS = [
 
 export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [previewLink, setPreviewLink] = useState<typeof MARKETING_LINKS[0] | null>(null);
 
   const getDirectUrl = (link: typeof MARKETING_LINKS[0]) => {
     if (link.useCodeInPath) {
@@ -85,7 +88,6 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
   };
 
   const getFullUrl = (link: typeof MARKETING_LINKS[0]) => {
-    // Use OG-share for reliable social previews, but keep the branded URL as the redirect target.
     const directUrl = getDirectUrl(link);
     const redirectPath = directUrl.replace(BASE_URL, '') || '/';
     return getShareUrlWithRedirect('home', redirectPath);
@@ -159,7 +161,17 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
+                  onClick={() => setPreviewLink(link)}
+                  title="Preview"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
                   onClick={() => handleOpen(link)}
+                  title="Open in new tab"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
@@ -168,6 +180,7 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
                   size="sm"
                   className={`h-8 w-8 p-0 ${isCopied ? 'text-green-500' : ''}`}
                   onClick={() => handleCopy(link)}
+                  title="Copy link"
                 >
                   {isCopied ? (
                     <Check className="h-3.5 w-3.5" />
@@ -186,6 +199,55 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
           </p>
         </div>
       </CardContent>
+
+      {/* Preview Dialog */}
+      <Dialog open={!!previewLink} onOpenChange={(open) => !open && setPreviewLink(null)}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col">
+          <DialogHeader className="p-4 pb-2 flex-row items-center justify-between space-y-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <DialogTitle className="text-sm font-medium truncate">
+                {previewLink?.label}
+              </DialogTitle>
+              {previewLink?.badge && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 flex-shrink-0">
+                  {previewLink.badge}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => previewLink && handleCopy(previewLink)}
+              >
+                {copiedId === previewLink?.id ? (
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => previewLink && handleOpen(previewLink)}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 border-t border-border/50 min-h-0">
+            {previewLink && (
+              <iframe
+                src={getDirectUrl(previewLink)}
+                className="w-full h-full rounded-b-lg"
+                title={`Preview: ${previewLink.label}`}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
