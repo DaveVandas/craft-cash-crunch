@@ -154,6 +154,44 @@ function getPosts(affiliateCode: string): Record<string, ReadyPost[]> {
         label: 'Reality Check',
         emoji: '📊',
       },
+      {
+        id: 'fb-3',
+        caption: `Want to earn money just by sharing links? 💰\n\nThis program pays $1-2 for every signup. Super easy side income for anyone with a social media presence.`,
+        hashtags: '',
+        ogPage: 'landing-d',
+        redirectPath: `/landing/d?ref=${affiliateCode}`,
+        label: 'Recruit Affiliates',
+        emoji: '💰',
+      },
+    ],
+    reddit: [
+      {
+        id: 'rd-1',
+        caption: `This app shows how fast billionaires earn your salary — Elon Musk makes the average annual salary in 0.3 seconds`,
+        hashtags: '',
+        ogPage: 'home',
+        redirectPath: refPath,
+        label: 'General Share',
+        emoji: '🌟',
+      },
+      {
+        id: 'rd-2',
+        caption: `I used this "Reality Check" calculator to compare my salary to celebrity earnings and the results are humbling`,
+        hashtags: '',
+        ogPage: 'calculator',
+        redirectPath: `/calculator?ref=${affiliateCode}`,
+        label: 'Reality Check',
+        emoji: '📊',
+      },
+      {
+        id: 'rd-3',
+        caption: `Can you beat 8/10 on this celebrity earnings quiz? It's harder than you'd think`,
+        hashtags: '',
+        ogPage: 'quiz',
+        redirectPath: `/quiz?ref=${affiliateCode}`,
+        label: 'Quiz Challenge',
+        emoji: '🧠',
+      },
     ],
     sms: [
       {
@@ -223,6 +261,9 @@ function openShareIntent(platform: string, text: string, url: string) {
       break;
     case 'facebook':
       intentUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+      break;
+    case 'reddit':
+      intentUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text.substring(0, 300))}`;
       break;
     case 'sms': {
       const body = `${text}\n\n${url}`;
@@ -708,9 +749,10 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
 
   const platformConfig = [
     { key: 'twitter', icon: '𝕏', label: 'Twitter / X', actionLabel: 'Post on 𝕏', hasIntent: true },
-    { key: 'tiktok', icon: '📱', label: 'TikTok', actionLabel: 'Copy for TikTok', hasIntent: false },
-    { key: 'instagram', icon: '📸', label: 'Instagram', actionLabel: 'Copy for Instagram', hasIntent: false },
     { key: 'facebook', icon: '📘', label: 'Facebook', actionLabel: 'Post on Facebook', hasIntent: true },
+    { key: 'instagram', icon: '📸', label: 'Instagram', actionLabel: 'Copy for Instagram', hasIntent: false },
+    { key: 'tiktok', icon: '📱', label: 'TikTok', actionLabel: 'Copy for TikTok', hasIntent: false },
+    { key: 'reddit', icon: '🔶', label: 'Reddit', actionLabel: 'Post on Reddit', hasIntent: true },
     { key: 'sms', icon: '💬', label: 'SMS', actionLabel: 'Send via Text', hasIntent: true },
   ];
 
@@ -762,7 +804,7 @@ export function QuickPostCard({ affiliateCode, displayName }: QuickPostCardProps
 
         {/* Platform Tabs */}
         <Tabs defaultValue="twitter" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
             {platformConfig.map((p) => (
               <TabsTrigger key={p.key} value={p.key} className="gap-1.5">
                 <span className="text-base">{p.icon}</span>
