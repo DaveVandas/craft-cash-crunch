@@ -502,30 +502,29 @@ export default function AffiliateDashboard() {
 
         <Tabs defaultValue="quick-post" className="space-y-6">
           <TabsList className="flex w-full overflow-x-auto justify-start gap-1">
-            <TabsTrigger value="quick-post" className="gap-2">
-              <Send className="w-4 h-4" />
-              <span className="hidden sm:inline">Quick Post</span>
+            <TabsTrigger value="quick-post" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              Quick Post
             </TabsTrigger>
-            <TabsTrigger value="links" className="gap-2">
-              <Link2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Links</span>
+            <TabsTrigger value="links" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              Links
             </TabsTrigger>
-            <TabsTrigger value="media-kit" className="gap-2">
-              <Image className="w-4 h-4" />
-              <span className="hidden sm:inline">Media Kit</span>
+            <TabsTrigger value="media-kit" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Image className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              Media Kit
             </TabsTrigger>
-            <TabsTrigger value="share" className="gap-2">
-              <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">QR Card</span>
+            <TabsTrigger value="share" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              QR Card
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <Target className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
+            <TabsTrigger value="analytics" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              Stats
             </TabsTrigger>
-            <TabsTrigger value="referrals" className="gap-2">
-              <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">{referrals.length}</span>
-              <span className="sm:hidden">{referrals.length}</span>
+            <TabsTrigger value="referrals" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              {referrals.length}
             </TabsTrigger>
           </TabsList>
 
