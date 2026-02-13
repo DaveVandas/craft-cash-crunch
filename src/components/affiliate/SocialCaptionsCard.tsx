@@ -24,45 +24,64 @@ export function SocialCaptionsCard({ affiliateCode, displayName }: SocialCaption
   const referralUrl = `${window.location.origin}/ref/${affiliateCode}`;
 
   const handleCopy = async (caption: Caption) => {
-    const fullText = `${caption.text}\n\n${caption.tags.join(' ')}\n\n🔗 ${referralUrl}`;
+    // Build clean, social-ready text with proper line breaks
+    const lines = [
+      caption.text.trim(),
+      '',
+      caption.tags.join(' '),
+      '',
+      `🔗 ${referralUrl}`
+    ];
+    const fullText = lines.join('\n');
     try {
       await navigator.clipboard.writeText(fullText);
       setCopiedId(caption.id);
       toast.success('Caption copied! Paste it in your post 📋');
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      toast.error('Failed to copy');
+      // Fallback for clipboard API failure
+      const textarea = document.createElement('textarea');
+      textarea.value = fullText;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopiedId(caption.id);
+      toast.success('Caption copied! Paste it in your post 📋');
+      setTimeout(() => setCopiedId(null), 2000);
     }
   };
 
   const tiktokCaptions: Caption[] = [
     {
       id: 'tt1',
-      text: `POV: You just discovered how much Ronaldo makes while you're sleeping... and now you can't unsleep 😭💀\n\nThis app literally shows you what celebrities earn PER SECOND. I'm shook.`,
+      text: `POV: You just discovered how much Ronaldo makes while you're sleeping... and now you can't unsleep 😭💀 This app literally shows you what celebrities earn PER SECOND. I'm shook.`,
       tags: ['#fyp', '#moneytok', '#celebrity', '#wealth', '#mindblown', '#viral'],
       style: 'viral',
     },
     {
       id: 'tt2',
-      text: `The way I gasped when I saw how long it takes me to earn what Taylor Swift makes in 1 MINUTE... 📉\n\nDownload this app and prepare to question everything`,
+      text: `The way I gasped when I saw how long it takes me to earn what Taylor Swift makes in 1 MINUTE... 📉 Download this app and prepare to question everything`,
       tags: ['#fyp', '#financetok', '#taylorswift', '#wealthy', '#millionaire'],
       style: 'curious',
     },
     {
       id: 'tt3',
-      text: `Plot twist: There's an app that shows you could buy 47 Teslas with what Elon makes in a DAY 🚗\n\nI'm using this as motivation to build my empire fr`,
+      text: `Plot twist: There's an app that shows you could buy 47 Teslas with what Elon makes in a DAY 🚗 I'm using this as motivation to build my empire fr`,
       tags: ['#fyp', '#elonmusk', '#motivation', '#hustle', '#entrepreneur', '#mogul'],
       style: 'flex',
     },
     {
       id: 'tt4',
-      text: `Okay but why did nobody tell me about this app sooner??\n\nYou can literally compare your salary to any billionaire and see how fast they make YOUR yearly income 🤯`,
+      text: `Okay but why did nobody tell me about this app sooner?? You can literally compare your salary to any billionaire and see how fast they make YOUR yearly income 🤯`,
       tags: ['#fyp', '#moneytok', '#billionaire', '#wealthy', '#finance', '#musthave'],
       style: 'viral',
     },
     {
       id: 'tt5',
-      text: `This app just told me Jeff Bezos makes my rent in 0.3 seconds...\n\nAnyway, who else needs a new career path? 😅👑`,
+      text: `This app just told me Jeff Bezos makes my rent in 0.3 seconds... Anyway, who else needs a new career path? 😅👑`,
       tags: ['#fyp', '#jeffbezos', '#amazon', '#wealth', '#comedy', '#relatable'],
       style: 'curious',
     },
@@ -71,25 +90,25 @@ export function SocialCaptionsCard({ affiliateCode, displayName }: SocialCaption
   const instagramCaptions: Caption[] = [
     {
       id: 'ig1',
-      text: `Every mogul started somewhere. 👑\n\nI just discovered this app that shows exactly how much celebrities and billionaires earn in real-time. Watching their earnings tick up by the SECOND hits different.\n\nUse it as motivation to build YOUR empire. Link in bio ⬆️`,
+      text: `Every mogul started somewhere. 👑 I just discovered this app that shows exactly how much celebrities and billionaires earn in real-time. Watching their earnings tick up by the SECOND hits different. Use it as motivation to build YOUR empire. Link in bio ⬆️`,
       tags: ['#mogullife', '#wealth', '#motivation', '#entrepreneur', '#millionairemindset', '#success'],
       style: 'flex',
     },
     {
       id: 'ig2',
-      text: `The wealth gap visualized in the most shocking way... 📊\n\nThis app compares your earnings to billionaires and shows you could work for 847 YEARS to make what they earn in a day.\n\nNot posting this to make you sad — posting this to light a fire 🔥`,
+      text: `The wealth gap visualized in the most shocking way... 📊 This app compares your earnings to billionaires and shows you could work for 847 YEARS to make what they earn in a day. Not posting this to make you sad — posting this to light a fire 🔥`,
       tags: ['#wealthgap', '#motivation', '#financialfreedom', '#hustle', '#grind', '#mindset'],
       style: 'educational',
     },
     {
       id: 'ig3',
-      text: `Mindset shift: Instead of being jealous of billionaires, study them. 📚\n\nThis app breaks down celebrity earnings in a way that actually makes you think differently about money.\n\nKnowledge is power. Use code ${affiliateCode} 👑`,
+      text: `Mindset shift: Instead of being jealous of billionaires, study them. 📚 This app breaks down celebrity earnings in a way that actually makes you think differently about money. Knowledge is power. Use code ${affiliateCode} 👑`,
       tags: ['#mogulmindset', '#wealthy', '#success', '#entrepreneur', '#billionaire', '#growth'],
       style: 'educational',
     },
     {
       id: 'ig4',
-      text: `Just spent an hour on this app comparing my salary to celebrities and now I'm equally motivated and terrified 😭💪\n\nSeriously though, seeing wealth visualized like this changes your perspective on what's possible.`,
+      text: `Just spent an hour on this app comparing my salary to celebrities and now I'm equally motivated and terrified 😭💪 Seriously though, seeing wealth visualized like this changes your perspective on what's possible.`,
       tags: ['#realtalk', '#wealthperspective', '#motivation', '#financetips', '#mogul'],
       style: 'curious',
     },
@@ -98,31 +117,31 @@ export function SocialCaptionsCard({ affiliateCode, displayName }: SocialCaption
   const twitterCaptions: Caption[] = [
     {
       id: 'tw1',
-      text: `Just found out Cristiano Ronaldo earns my monthly salary every 4.2 seconds.\n\nThis app is brutal but I can't stop using it 💀`,
+      text: `Just found out Cristiano Ronaldo earns my monthly salary every 4.2 seconds. This app is brutal but I can't stop using it 💀`,
       tags: ['#Wealth', '#CelebrityEarnings'],
       style: 'viral',
     },
     {
       id: 'tw2',
-      text: `There's an app that shows you celebrity earnings in real-time.\n\nWatching Elon's net worth tick up $47,000 while I eat breakfast was... humbling.\n\nBut also? Motivating. 👑`,
+      text: `There's an app that shows you celebrity earnings in real-time. Watching Elon's net worth tick up $47,000 while I eat breakfast was... humbling. But also? Motivating. 👑`,
       tags: ['#Mogul', '#Motivation'],
       style: 'flex',
     },
     {
       id: 'tw3',
-      text: `The best $0 I ever spent was downloading this app.\n\nIt literally changed how I think about money, time, and building wealth.\n\nIf you're not checking this out, you're sleeping 💤`,
+      text: `The best $0 I ever spent was downloading this app. It literally changed how I think about money, time, and building wealth. If you're not checking this out, you're sleeping 💤`,
       tags: ['#WealthPerspective', '#Finance'],
       style: 'curious',
     },
     {
       id: 'tw4',
-      text: `Mogul tip: Don't hate the game, study it.\n\nThis app shows exactly how the ultra-wealthy earn. Use it as your blueprint.\n\n${referralUrl}`,
+      text: `Mogul tip: Don't hate the game, study it. This app shows exactly how the ultra-wealthy earn. Use it as your blueprint.`,
       tags: ['#MogulMindset', '#Success'],
       style: 'educational',
     },
     {
       id: 'tw5',
-      text: `Taylor Swift earns $1M+ per day.\n\nI earn... significantly less.\n\nBut this app reminded me that comparison is the thief of joy AND the fuel for hustle. Choose wisely 🔥`,
+      text: `Taylor Swift earns $1M+ per day. I earn... significantly less. But this app reminded me that comparison is the thief of joy AND the fuel for hustle. Choose wisely 🔥`,
       tags: ['#Hustle', '#Wealth'],
       style: 'flex',
     },
