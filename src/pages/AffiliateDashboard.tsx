@@ -16,6 +16,7 @@ import { LandingPageAnalytics } from '@/components/affiliate/LandingPageAnalytic
 import { SocialMediaKitCard } from '@/components/affiliate/SocialMediaKitCard';
 import { QuickPostCard } from '@/components/affiliate/QuickPostCard';
 import { MarketingLinksCard } from '@/components/affiliate/MarketingLinksCard';
+import { SocialCaptionsCard } from '@/components/affiliate/SocialCaptionsCard';
 import { 
   DollarSign, 
   Users, 
@@ -510,6 +511,10 @@ export default function AffiliateDashboard() {
               <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               Links
             </TabsTrigger>
+            <TabsTrigger value="captions" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              Captions
+            </TabsTrigger>
             <TabsTrigger value="media-kit" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap">
               <Image className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               Media Kit
@@ -537,6 +542,13 @@ export default function AffiliateDashboard() {
 
           <TabsContent value="links">
             <MarketingLinksCard affiliateCode={affiliate.affiliate_code} />
+          </TabsContent>
+
+          <TabsContent value="captions">
+            <SocialCaptionsCard 
+              affiliateCode={affiliate.affiliate_code}
+              displayName={affiliate.display_name}
+            />
           </TabsContent>
 
           <TabsContent value="media-kit">
