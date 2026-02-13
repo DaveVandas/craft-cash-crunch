@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { getShareUrlWithRedirect } from '@/lib/shareUrls';
 import { 
@@ -15,14 +16,35 @@ import {
   DollarSign,
   ExternalLink,
   Home,
-  Eye
+  Eye,
+  ImageIcon,
+  RefreshCw
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MarketingLinksCardProps {
   affiliateCode: string;
 }
 
 const BASE_URL = 'https://earningsexplorer.shop';
+
+// Map link IDs to og-share page keys
+const OG_PAGE_MAP: Record<string, string> = {
+  'home': 'home',
+  'ref': 'home',
+  'variant-a': 'landing-a',
+  'variant-b': 'landing-b',
+  'variant-c': 'landing-c',
+  'variant-d': 'landing-d',
+};
+
+const OG_META: Record<string, { title: string; description: string }> = {
+  'home': { title: 'Wealth Perspective', description: 'Putting wealth into perspective, one mind-blowing comparison at a time!' },
+  'landing-a': { title: 'Think Like The 1% | Wealth Perspective', description: 'While you work 40 hours, Elon Musk makes what you\'ll earn in 10 lifetimes.' },
+  'landing-b': { title: 'Your Wealth Reality Check | Wealth Perspective', description: 'Compare your salary to any celebrity in real-time. The numbers will shock you.' },
+  'landing-c': { title: 'See Money Differently | Wealth Perspective', description: 'Watch billionaire earnings tick up by the second. Mind-blowing wealth comparisons.' },
+  'landing-d': { title: 'One TikTok Could Pay You $39,000 | Wealth Perspective', description: 'Join the mogul movement. Share viral wealth content and earn cash for every friend who signs up.' },
+};
 
 const MARKETING_LINKS = [
   {
@@ -79,6 +101,9 @@ const MARKETING_LINKS = [
 export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [previewLink, setPreviewLink] = useState<typeof MARKETING_LINKS[0] | null>(null);
+  const [previewTab, setPreviewTab] = useState<string>('page');
+  const [ogImageTimestamp, setOgImageTimestamp] = useState<number>(Date.now());
+  const [regenerating, setRegenerating] = useState<string | null>(null);
 
   const getDirectUrl = (link: typeof MARKETING_LINKS[0]) => {
     if (link.useCodeInPath) {
@@ -91,6 +116,41 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
     const directUrl = getDirectUrl(link);
     const redirectPath = directUrl.replace(BASE_URL, '') || '/';
     return getShareUrlWithRedirect('home', redirectPath);
+  };
+
+  const getOgImageUrl = (linkId: string) => {
+    const pageKey = OG_PAGE_MAP[linkId] || 'home';
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    return `${supabaseUrl}/storage/v1/object/public/og-images/${pageKey}.png?t=${ogImageTimestamp}`;
+  };
+
+  const handleRegenerate = async (linkId: string) => {
+    const pageKey = OG_PAGE_MAP[linkId] || 'home';
+    setRegenerating(linkId);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-og-image', {
+        body: null,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      // Use fetch directly since we need query params
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(
+        `${supabaseUrl}/functions/v1/generate-og-image?page=${pageKey}&force=true`,
+        { headers: { 'Authorization': `Bearer ${anonKey}`, 'apikey': anonKey } }
+      );
+      if (res.ok) {
+        setOgImageTimestamp(Date.now());
+        toast.success('New OG image generated! 🎨');
+      } else {
+        toast.error('Failed to regenerate image');
+      }
+    } catch {
+      toast.error('Failed to regenerate image');
+    } finally {
+      setRegenerating(null);
+    }
   };
 
   const handleCopy = async (link: typeof MARKETING_LINKS[0]) => {
@@ -161,7 +221,7 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
-                  onClick={() => setPreviewLink(link)}
+                  onClick={() => { setPreviewLink(link); setPreviewTab('page'); }}
                   title="Preview"
                 >
                   <Eye className="h-3.5 w-3.5" />
@@ -237,13 +297,78 @@ export function MarketingLinksCard({ affiliateCode }: MarketingLinksCardProps) {
               </Button>
             </div>
           </DialogHeader>
-          <div className="flex-1 border-t border-border/50 min-h-0">
-            {previewLink && (
+
+          {/* Tab switcher: Page Preview vs Social Card */}
+          <div className="px-4 pb-2">
+            <Tabs value={previewTab} onValueChange={setPreviewTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="page" className="gap-1.5 text-xs">
+                  <Eye className="w-3.5 h-3.5" />
+                  Page Preview
+                </TabsTrigger>
+                <TabsTrigger value="og" className="gap-1.5 text-xs">
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  Social Card Preview
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="flex-1 border-t border-border/50 min-h-0 overflow-auto">
+            {previewTab === 'page' && previewLink && (
               <iframe
                 src={previewLink.useCodeInPath ? `/ref/${affiliateCode}` : `${previewLink.path}?ref=${affiliateCode}`}
                 className="w-full h-full rounded-b-lg"
                 title={`Preview: ${previewLink.label}`}
               />
+            )}
+            {previewTab === 'og' && previewLink && (
+              <div className="p-4 space-y-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  This is what people see when your link is shared on Twitter, Facebook, LinkedIn, etc.
+                </p>
+
+                {/* Mock social card */}
+                <div className="max-w-lg mx-auto rounded-xl border border-border/50 overflow-hidden bg-card">
+                  <div className="aspect-[1.91/1] bg-muted relative">
+                    <img
+                      src={getOgImageUrl(previewLink.id)}
+                      alt="OG preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/og-image.png';
+                      }}
+                    />
+                  </div>
+                  <div className="p-3 space-y-1">
+                    <p className="text-xs text-muted-foreground">earningsexplorer.shop</p>
+                    <p className="font-semibold text-sm line-clamp-2">
+                      {OG_META[OG_PAGE_MAP[previewLink.id] || 'home']?.title || 'Wealth Perspective'}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {OG_META[OG_PAGE_MAP[previewLink.id] || 'home']?.description || ''}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Regenerate button */}
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => handleRegenerate(previewLink.id)}
+                    disabled={regenerating === previewLink.id}
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${regenerating === previewLink.id ? 'animate-spin' : ''}`} />
+                    {regenerating === previewLink.id ? 'Generating...' : 'Regenerate Image'}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  ⚠️ Social platforms cache cards. After regenerating, it may take a few hours for Twitter/Facebook to show the new image.
+                </p>
+              </div>
             )}
           </div>
         </DialogContent>
