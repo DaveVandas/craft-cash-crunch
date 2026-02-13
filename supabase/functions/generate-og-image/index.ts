@@ -63,6 +63,22 @@ const FEATURE_PROMPTS: Record<string, { label: string; theme: string }> = {
     label: "VIP PORTFOLIOS",
     theme: "A luxurious dark background with golden briefcase, VIP badge, and celebrity silhouettes. Exclusive access with premium gold aesthetic.",
   },
+  "landing-a": {
+    label: "THINK LIKE THE 1%",
+    theme: "A premium dark website screenshot aesthetic showing a luxury app interface with gold accents, wealth statistics dashboard, and billionaire silhouette. Modern dark UI with glowing gold data visualizations and earnings tickers. Sleek tech-luxury crossover design.",
+  },
+  "landing-b": {
+    label: "YOUR WEALTH REALITY CHECK",
+    theme: "A premium dark website screenshot aesthetic showing a salary comparison tool with dramatic gold numbers, split-screen comparison between average person and celebrity. Modern dark app UI with gold highlights and shocking wealth gap visualization.",
+  },
+  "landing-c": {
+    label: "SEE MONEY DIFFERENTLY",
+    theme: "A premium dark website screenshot aesthetic showing a wealth perspective app with real-time earnings counters, gold ticker displays, and celebrity earnings cards. Modern dark UI with ambient gold glow and luxury data presentation.",
+  },
+  "landing-d": {
+    label: "GET PAID TO SHARE",
+    theme: "A premium dark website screenshot aesthetic showing an affiliate earnings dashboard with gold commission counters, referral tracking, and viral growth charts. Modern dark app UI with gold accents showing money being earned.",
+  },
 };
 
 Deno.serve(async (req: Request) => {
