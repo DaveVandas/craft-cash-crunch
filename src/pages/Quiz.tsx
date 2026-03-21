@@ -266,7 +266,10 @@ const Quiz = () => {
   };
 
   const handleAnswer = (answer: string) => {
-    if (selectedAnswer) return;
+    // Use ref for synchronous guard - state check alone has a race condition
+    // where two rapid clicks both see selectedAnswer as null before re-render
+    if (answerLockedRef.current || selectedAnswer) return;
+    answerLockedRef.current = true;
 
     setSelectedAnswer(answer);
     const correctAnswer = getCorrectAnswer(shuffledQuestions[currentQuestion]);
