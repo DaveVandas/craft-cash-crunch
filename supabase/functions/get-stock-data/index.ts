@@ -29,7 +29,7 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     // Include x-session-id so guest users can access stock search/batch without auth.
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-id',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-id, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
   };
 }
 
