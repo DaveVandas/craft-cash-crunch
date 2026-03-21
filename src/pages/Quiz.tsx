@@ -168,6 +168,8 @@ const Quiz = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
   const [showStreakMessage, setShowStreakMessage] = useState(false);
+  // Ref-based guard to prevent double-click race condition
+  const answerLockedRef = useRef(false);
   const [usedFallback, setUsedFallback] = useState(false);
   const resultsCardRef = useRef<HTMLDivElement>(null);
 
@@ -255,6 +257,7 @@ const Quiz = () => {
     setTotalPoints(0);
     setSelectedAnswer(null);
     setIsCorrect(null);
+    answerLockedRef.current = false;
     setGameState('playing');
   };
 
@@ -264,7 +267,10 @@ const Quiz = () => {
   };
 
   const handleAnswer = (answer: string) => {
-    if (selectedAnswer) return;
+    // Use ref for synchronous guard - state check alone has a race condition
+    // where two rapid clicks both see selectedAnswer as null before re-render
+    if (answerLockedRef.current || selectedAnswer) return;
+    answerLockedRef.current = true;
 
     setSelectedAnswer(answer);
     const correctAnswer = getCorrectAnswer(shuffledQuestions[currentQuestion]);
@@ -304,6 +310,9 @@ const Quiz = () => {
     const delay = correct ? 2000 : 3500;
     
     setTimeout(() => {
+      // Unlock for next question
+      answerLockedRef.current = false;
+      
       if (currentQuestion < shuffledQuestions.length - 1) {
         // Reset selection state BEFORE changing question
         setSelectedAnswer(null);
