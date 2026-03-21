@@ -449,8 +449,19 @@ Return JSON: {"winner": "name of richer person", "netWorth1": number for ${celeb
           if (!jsonMatch) continue;
           
           const parsed = JSON.parse(jsonMatch[0]);
-          const winner = parsed.winner;
-          const loser = winner === celeb1.name ? celeb2.name : celeb1.name;
+          // Use the celeb names from our pool (not the AI response) to ensure
+          // correctAnswer exactly matches an option string
+          const winnerName = parsed.winner?.trim();
+          const matchedWinner = [celeb1.name, celeb2.name].find(
+            name => name.toLowerCase() === winnerName?.toLowerCase()
+          );
+          
+          if (!matchedWinner) {
+            console.log(`Winner name mismatch: API returned "${winnerName}", expected "${celeb1.name}" or "${celeb2.name}"`);
+            continue;
+          }
+          
+          const loser = matchedWinner === celeb1.name ? celeb2.name : celeb1.name;
           
           questions.push({
             questionType: 'net_worth_comparison',
@@ -460,9 +471,9 @@ Return JSON: {"winner": "name of richer person", "netWorth1": number for ${celeb
             emoji: celeb1.emoji,
             emoji2: celeb2.emoji,
             category: 'Net Worth Battle',
-            correctAnswer: winner,
+            correctAnswer: matchedWinner,
             options: shuffleArray([celeb1.name, celeb2.name, 'About the same', 'Too close to call']),
-            explanation: `${winner} is worth ${formatMoney(Math.max(parsed.netWorth1, parsed.netWorth2))} - ${parsed.difference} than ${loser}.`,
+            explanation: `${matchedWinner} is worth ${formatMoney(Math.max(parsed.netWorth1, parsed.netWorth2))} - ${parsed.difference} than ${loser}.`,
             educationalFact: parsed.educationalFact || 'Diversified income streams are key to building massive wealth.',
           });
           
