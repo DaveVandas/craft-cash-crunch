@@ -42,7 +42,7 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
 
   // Intro animation sequence
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     
     timers.push(setTimeout(() => setIntroPhase(1), 100)); // Person 1 slides in
     timers.push(setTimeout(() => setIntroPhase(2), 400)); // Person 2 slides in
