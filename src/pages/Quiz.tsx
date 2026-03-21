@@ -309,6 +309,9 @@ const Quiz = () => {
     const delay = correct ? 2000 : 3500;
     
     setTimeout(() => {
+      // Unlock for next question
+      answerLockedRef.current = false;
+      
       if (currentQuestion < shuffledQuestions.length - 1) {
         // Reset selection state BEFORE changing question
         setSelectedAnswer(null);
