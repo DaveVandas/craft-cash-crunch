@@ -168,6 +168,8 @@ const Quiz = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
   const [showStreakMessage, setShowStreakMessage] = useState(false);
+  // Ref-based guard to prevent double-click race condition
+  const answerLockedRef = useRef(false);
   const [usedFallback, setUsedFallback] = useState(false);
   const resultsCardRef = useRef<HTMLDivElement>(null);
 
