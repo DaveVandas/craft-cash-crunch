@@ -257,6 +257,7 @@ const Quiz = () => {
     setTotalPoints(0);
     setSelectedAnswer(null);
     setIsCorrect(null);
+    answerLockedRef.current = false;
     setGameState('playing');
   };
 
