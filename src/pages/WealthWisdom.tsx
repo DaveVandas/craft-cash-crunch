@@ -4,8 +4,6 @@ import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -14,8 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { 
   Sparkles, 
   BookOpen, 
