@@ -75,7 +75,7 @@ const INDEX_ETFS = [
   { ticker: 'VTI', name: 'Vanguard Total Stock Market', sector: 'Index Fund' },
 ];
 
-async function fetchStockDataFromPerplexity(query: string): Promise<{
+async function fetchStockDataFromAI(query: string): Promise<{
   ticker: string;
   name: string;
   price: number;
@@ -88,28 +88,28 @@ async function fetchStockDataFromPerplexity(query: string): Promise<{
   volume: string;
   peRatio: number | null;
 } | null> {
-  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
   
-  if (!PERPLEXITY_API_KEY) {
-    console.log('PERPLEXITY_API_KEY not configured');
+  if (!LOVABLE_API_KEY) {
+    console.log('LOVABLE_API_KEY not configured');
     return null;
   }
 
   try {
-    console.log(`Fetching stock data from Perplexity for: ${query}`);
+    console.log(`Fetching stock data via Lovable AI for: ${query}`);
     
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a stock market data assistant. Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object. Always use the most recent real-time stock price data available.' 
+            content: 'You are a stock market data assistant. Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object. Use your best knowledge of current stock prices.' 
           },
           { 
             role: 'user', 
@@ -129,24 +129,23 @@ async function fetchStockDataFromPerplexity(query: string): Promise<{
 Return ONLY the JSON object, no other text.`
           }
         ],
-        search_recency_filter: 'day',
       }),
     });
 
     if (!response.ok) {
-      console.error('Perplexity API error:', response.status, await response.text());
+      console.error('Lovable AI API error:', response.status, await response.text());
       return null;
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
     
-    console.log(`Perplexity raw response: ${content.substring(0, 500)}`);
+    console.log(`Lovable AI response: ${content.substring(0, 500)}`);
     
     // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.log('Could not parse JSON from Perplexity response');
+      console.log('Could not parse JSON from AI response');
       return null;
     }
     
@@ -166,7 +165,7 @@ Return ONLY the JSON object, no other text.`
       peRatio: parsed.peRatio ? Number(parsed.peRatio) : null,
     };
   } catch (error) {
-    console.error('Perplexity fetch error:', error);
+    console.error('AI fetch error:', error);
     return null;
   }
 }
@@ -265,7 +264,7 @@ serve(async (req) => {
     
     if (action === 'search' && query) {
       // Search for a specific stock
-      const stockData = await fetchStockDataFromPerplexity(query);
+      const stockData = await fetchStockDataFromAI(query);
       
       if (!stockData) {
         return jsonResponse(
@@ -289,7 +288,7 @@ serve(async (req) => {
       const limitedTickers = tickers.slice(0, 10);
       
       for (const ticker of limitedTickers) {
-        const stockData = await fetchStockDataFromPerplexity(ticker);
+        const stockData = await fetchStockDataFromAI(ticker);
         if (stockData) {
           results[ticker] = stockData;
         }
