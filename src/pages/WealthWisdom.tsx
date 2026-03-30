@@ -55,11 +55,6 @@ const quickWisdom = [
 const BASE_SUBSCRIBER_COUNT = 8245;
 
 const WealthWisdom = () => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  const [subscriberCount, setSubscriberCount] = useState(BASE_SUBSCRIBER_COUNT);
   const [showArchive, setShowArchive] = useState(false);
   const [expandedArchiveStory, setExpandedArchiveStory] = useState<number | null>(null);
   
@@ -67,18 +62,6 @@ const WealthWisdom = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const fetchCount = async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_subscriber_count');
-        if (!error && data !== null) {
-          setSubscriberCount(BASE_SUBSCRIBER_COUNT + data);
-        }
-      } catch {
-        // Keep base count on error
-      }
-    };
-    fetchCount();
   }, []);
   
   const handleSubscribe = async (e: React.FormEvent) => {
