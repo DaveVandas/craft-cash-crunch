@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, Sparkles, ArrowLeft, CheckCircle, Gift, Users } from 'lucide-react';
+import { PageLoader } from '@/components/ui/page-loader';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
