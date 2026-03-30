@@ -10,6 +10,7 @@ import { FeaturedCelebrityProvider } from "@/contexts/FeaturedCelebrityContext";
 import ProfileSetupGuard from "@/components/onboarding/ProfileSetupGuard";
 import UpdateNotification from "@/components/pwa/UpdateNotification";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
+import { PaperTradingDisclaimerSplash } from "@/components/disclaimer/PaperTradingDisclaimerSplash";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
