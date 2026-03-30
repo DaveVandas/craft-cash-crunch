@@ -264,7 +264,7 @@ serve(async (req) => {
     
     if (action === 'search' && query) {
       // Search for a specific stock
-      const stockData = await fetchStockDataFromAI(query);
+      const stockData = await fetchStockDataFromPerplexity(query);
       
       if (!stockData) {
         return jsonResponse(
@@ -288,7 +288,7 @@ serve(async (req) => {
       const limitedTickers = tickers.slice(0, 10);
       
       for (const ticker of limitedTickers) {
-        const stockData = await fetchStockDataFromAI(ticker);
+        const stockData = await fetchStockDataFromPerplexity(ticker);
         if (stockData) {
           results[ticker] = stockData;
         }
