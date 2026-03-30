@@ -125,110 +125,145 @@ const MogulAcademy = () => {
         {/* Current Lesson */}
         <section className="py-12 md:py-16">
           <div className="container">
-            <div className="flex items-center gap-2 mb-6">
-              <BookOpen className="h-6 w-6 text-emerald-400" />
-              <h2 className="font-serif text-2xl font-bold">Today's Lesson</h2>
-              <Badge variant="outline" className="ml-auto">
-                <Lightbulb className="h-3 w-3 mr-1 text-amber-500" />
-                {lesson.level}
-              </Badge>
-            </div>
-            
-            <Card className="border-emerald-500/30 bg-gradient-to-br from-card via-card to-emerald-500/5 overflow-hidden">
-              <CardHeader className="pb-4">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {lesson.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
+            {loading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-64 w-full rounded-xl" />
+              </div>
+            ) : displayLesson ? (
+              <>
+                <div className="flex items-center gap-2 mb-6">
+                  <BookOpen className="h-6 w-6 text-emerald-400" />
+                  <h2 className="font-serif text-2xl font-bold">
+                    {selectedLesson ? selectedLesson.title : "Today's Lesson"}
+                  </h2>
+                  {selectedLesson && (
+                    <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setSelectedLesson(null)}>
+                      ← Back to Today's
+                    </Button>
+                  )}
+                  {!selectedLesson && (
+                    <Badge variant="outline" className="ml-auto">
+                      <Lightbulb className="h-3 w-3 mr-1 text-amber-500" />
+                      {displayLesson.level}
                     </Badge>
-                  ))}
+                  )}
                 </div>
-                <div className="text-6xl mb-4">{lesson.emoji}</div>
-                <CardTitle className="font-serif text-2xl md:text-3xl leading-tight">
-                  {lesson.title}
-                </CardTitle>
-                <p className="text-lg text-muted-foreground">{lesson.subtitle}</p>
-              </CardHeader>
-              
-              <CardContent className="space-y-6">
-                <p className="text-lg font-medium text-emerald-400/90 border-l-4 border-emerald-500 pl-4">
-                  {lesson.intro}
-                </p>
                 
-                <div className="prose prose-invert max-w-none">
-                  {lesson.content.split('\n\n').map((paragraph, i) => (
-                    <p key={i} className="text-muted-foreground leading-relaxed mb-4">
-                      {paragraph.startsWith('**') ? (
-                        <span className="font-semibold text-foreground text-lg block mt-6 mb-2">
-                          {paragraph.replace(/\*\*/g, '')}
-                        </span>
-                      ) : (
-                        paragraph
-                      )}
+                <Card className="border-emerald-500/30 bg-gradient-to-br from-card via-card to-emerald-500/5 overflow-hidden">
+                  <CardHeader className="pb-4">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {displayLesson.tags.map((tag: string) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="text-6xl mb-4">{displayLesson.emoji}</div>
+                    <CardTitle className="font-serif text-2xl md:text-3xl leading-tight">
+                      {displayLesson.title}
+                    </CardTitle>
+                    <p className="text-lg text-muted-foreground">{displayLesson.subtitle}</p>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-6">
+                    <p className="text-lg font-medium text-emerald-400/90 border-l-4 border-emerald-500 pl-4">
+                      {displayLesson.intro}
                     </p>
-                  ))}
-                </div>
-                
-                <Separator className="my-8" />
-                
-                {/* Key Points */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    Key Takeaways
-                  </h3>
-                  <div className="grid gap-3">
-                    {lesson.keyPoints.map((point, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                        <ChevronRight className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
-                        <p className="text-foreground/90">{point}</p>
+                    
+                    <div className="prose prose-invert max-w-none">
+                      {displayLesson.content.split('\n\n').map((paragraph: string, i: number) => (
+                        <p key={i} className="text-muted-foreground leading-relaxed mb-4">
+                          {paragraph.startsWith('**') ? (
+                            <span className="font-semibold text-foreground text-lg block mt-6 mb-2">
+                              {paragraph.replace(/\*\*/g, '')}
+                            </span>
+                          ) : (
+                            paragraph
+                          )}
+                        </p>
+                      ))}
+                    </div>
+                    
+                    <Separator className="my-8" />
+                    
+                    {/* Key Points */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <Target className="h-5 w-5 text-primary" />
+                        Key Takeaways
+                      </h3>
+                      <div className="grid gap-3">
+                        {displayLesson.key_points.map((point: string, i: number) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                            <ChevronRight className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                            <p className="text-foreground/90">{point}</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Case Study */}
-                <div className="relative p-6 bg-gradient-to-r from-primary/10 to-emerald-500/10 rounded-lg mt-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="h-5 w-5 text-amber-500" />
-                    <h4 className="font-semibold">Real Story: {lesson.caseStudy.title}</h4>
-                  </div>
-                  <p className="text-muted-foreground">{lesson.caseStudy.text}</p>
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                    
+                    {/* Case Study */}
+                    {displayLesson.case_study_title && (
+                      <div className="relative p-6 bg-gradient-to-r from-primary/10 to-emerald-500/10 rounded-lg mt-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Star className="h-5 w-5 text-amber-500" />
+                          <h4 className="font-semibold">Real Story: {displayLesson.case_study_title}</h4>
+                        </div>
+                        <p className="text-muted-foreground">{displayLesson.case_study_text}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <p className="text-muted-foreground text-center py-12">No lessons available yet. Check back soon!</p>
+            )}
           </div>
         </section>
         
         {/* Lesson Archive */}
-        <section className="py-12 bg-gradient-to-b from-transparent to-emerald-500/5">
-          <div className="container">
-            <div className="flex items-center gap-2 mb-6">
-              <BarChart3 className="h-6 w-6 text-primary" />
-              <h2 className="font-serif text-2xl font-bold">All Lessons</h2>
+        {allLessons.length > 0 && (
+          <section className="py-12 bg-gradient-to-b from-transparent to-emerald-500/5">
+            <div className="container">
+              <div className="flex items-center gap-2 mb-6">
+                <BarChart3 className="h-6 w-6 text-primary" />
+                <h2 className="font-serif text-2xl font-bold">All Lessons ({allLessons.length})</h2>
+              </div>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {allLessons.map((l) => (
+                  <Card
+                    key={l.id}
+                    className={`border-border/50 hover:border-emerald-500/50 transition-colors cursor-pointer group ${
+                      displayLesson?.id === l.id ? 'border-emerald-500 bg-emerald-500/5' : ''
+                    }`}
+                    onClick={() => setSelectedLesson(l)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-3xl mb-2">{l.emoji}</div>
+                      <Badge variant="outline" className="text-xs mb-2">
+                        {l.level}
+                      </Badge>
+                      <h3 className="font-semibold text-sm group-hover:text-emerald-400 transition-colors">
+                        {l.title}
+                      </h3>
+                      {displayLesson?.id === l.id && (
+                        <Badge className="mt-2 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                          {selectedLesson?.id === l.id ? 'Viewing' : "Today's Lesson"}
+                        </Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              <p className="text-center text-muted-foreground mt-6">
+                New AI-generated lessons added automatically every 4 days! 🤖
+              </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {allLessons.map((l) => (
-                <Card key={l.id} className="border-border/50 hover:border-emerald-500/50 transition-colors cursor-pointer group">
-                  <CardContent className="p-4">
-                    <div className="text-3xl mb-2">{l.emoji}</div>
-                    <Badge variant="outline" className="text-xs mb-2">
-                      {l.level}
-                    </Badge>
-                    <h3 className="font-semibold text-sm group-hover:text-emerald-400 transition-colors">
-                      {l.title}
-                    </h3>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <p className="text-center text-muted-foreground mt-6">
-              More lessons coming every 4 days. Subscribe to stay updated!
-            </p>
-          </div>
-        </section>
+          </section>
+        )}
         
         {/* CTA Section */}
         <section className="py-12">
