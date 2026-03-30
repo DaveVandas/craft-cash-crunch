@@ -1004,7 +1004,6 @@ export type Database = {
           created_by: string | null
           expires_at: string | null
           id: string | null
-          recipient_name: string | null
           status: string | null
         }
         Insert: {
@@ -1014,7 +1013,6 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string | null
-          recipient_name?: string | null
           status?: string | null
         }
         Update: {
@@ -1024,7 +1022,6 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string | null
-          recipient_name?: string | null
           status?: string | null
         }
         Relationships: []
