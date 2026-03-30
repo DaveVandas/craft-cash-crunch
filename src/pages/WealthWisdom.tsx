@@ -5,7 +5,6 @@ import MobileNav from '@/components/layout/MobileNav';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -14,8 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Sparkles, 
   BookOpen, 
@@ -55,11 +54,6 @@ const quickWisdom = [
 const BASE_SUBSCRIBER_COUNT = 8245;
 
 const WealthWisdom = () => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  const [subscriberCount, setSubscriberCount] = useState(BASE_SUBSCRIBER_COUNT);
   const [showArchive, setShowArchive] = useState(false);
   const [expandedArchiveStory, setExpandedArchiveStory] = useState<number | null>(null);
   
@@ -67,58 +61,9 @@ const WealthWisdom = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const fetchCount = async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_subscriber_count');
-        if (!error && data !== null) {
-          setSubscriberCount(BASE_SUBSCRIBER_COUNT + data);
-        }
-      } catch {
-        // Keep base count on error
-      }
-    };
-    fetchCount();
   }, []);
-  
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const { error } = await supabase
-        .from('email_subscribers')
-        .insert({ 
-          email: email.toLowerCase().trim(),
-          name: name.trim() || null,
-          source: 'wealth_wisdom_blog'
-        });
-      
-      if (error) {
-        if (error.code === '23505') {
-          toast.info("You're already subscribed! 🎉");
-        } else {
-          throw error;
-        }
-      } else {
-        toast.success("Welcome to the winners circle! 🏆", {
-          description: "You'll receive our weekly wealth wisdom soon."
-        });
-        setSubscribed(true);
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
+
 
   const SITE_URL = "https://earningsexplorer.shop";
   
@@ -238,48 +183,7 @@ const WealthWisdom = () => {
           </div>
         </section>
         
-        {/* Email Signup Banner */}
-        <section className="py-8 bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 border-y border-primary/20">
-          <div className="container">
-            {subscribed ? (
-              <div className="text-center py-4">
-                <div className="text-4xl mb-2">🎉</div>
-                <h3 className="font-semibold text-xl">You're In!</h3>
-                <p className="text-muted-foreground">Check your inbox for weekly wealth wisdom.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="max-w-xl mx-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Get Weekly Wealth Wisdom</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Input
-                    type="text"
-                    placeholder="Your name (optional)"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-background/50"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-background/50"
-                  />
-                  <Button type="submit" disabled={loading} className="whitespace-nowrap">
-                    {loading ? 'Joining...' : 'Join Free'}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Join {subscriberCount.toLocaleString()} moguls-in-training. Unsubscribe anytime.
-                </p>
-              </form>
-            )}
-          </div>
-        </section>
+        {/* Email signup section - coming soon once email infrastructure is set up */}
         
         {/* Featured Story */}
         <section className="py-12 md:py-16">
