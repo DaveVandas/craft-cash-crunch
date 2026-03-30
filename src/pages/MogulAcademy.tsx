@@ -443,56 +443,12 @@ const getAllLessons = () => {
 };
 
 const MogulAcademy = () => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  
   const lesson = getLessonOfTheWeek();
   const allLessons = getAllLessons();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const { error } = await supabase
-        .from('email_subscribers')
-        .insert({ 
-          email: email.toLowerCase().trim(),
-          name: name.trim() || null,
-          source: 'mogul_academy'
-        });
-      
-      if (error) {
-        if (error.code === '23505') {
-          toast.info("You're already enrolled! 🎓");
-        } else {
-          throw error;
-        }
-      } else {
-        toast.success("Welcome to Mogul Academy! 🎓", {
-          description: "You'll receive new lessons every 4 days."
-        });
-        setSubscribed(true);
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
   
   return (
     <div className="min-h-screen flex flex-col bg-background">
