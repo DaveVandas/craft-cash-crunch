@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, GitCompareArrows, Brain, HardHat, Skull, ChevronRight } from 'lucide-react';
+import { Calculator, GitCompareArrows, Brain, HardHat, Skull, GraduationCap, ChevronRight } from 'lucide-react';
 
 const actions = [
   {
@@ -27,12 +27,20 @@ const actions = [
     gradient: 'from-amber-500/20 to-orange-500/10',
   },
   {
+    icon: GraduationCap,
+    title: 'Mogul Academy',
+    description: 'Free investing lessons — explained simply',
+    href: '/mogul-academy',
+    emoji: '📚',
+    gradient: 'from-emerald-500/20 to-green-500/10',
+  },
+  {
     icon: HardHat,
     title: 'Trades vs Degree',
     description: 'Compare skilled trades to college grads',
     href: '/trades',
     emoji: '🔧',
-    gradient: 'from-emerald-500/20 to-teal-500/10',
+    gradient: 'from-teal-500/20 to-cyan-500/10',
   },
   {
     icon: Skull,

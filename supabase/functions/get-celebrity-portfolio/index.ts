@@ -146,8 +146,8 @@ async function fetchPortfolioFromPerplexity(figureName: string, figureData?: any
             content: `You are a financial data researcher specializing in public portfolio disclosures. ${searchContext}
             
 CRITICAL: Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object.
-If you cannot find verified stock holdings data, return the topHoldings array as empty [].
-Only include holdings you can verify from official sources - do not make up or guess holdings.` 
+Always include the most recent known holdings even if the filing is several months old — do NOT return an empty array just because the data is from a prior quarter.
+Only include holdings from real official sources.` 
           },
           { 
             role: 'user', 
@@ -177,10 +177,11 @@ Return a JSON object with EXACTLY this structure:
 }
 
 IMPORTANT:
-- Only include stocks you can VERIFY from official filings
-- For politicians: Look for trades from the last 6 months
-- For 13F filers: Use their most recent quarterly filing
-- If no verified data exists, return an empty topHoldings array []
+- Include their MOST RECENT known stock holdings from official filings, even if from a prior quarter or year
+- For politicians: Include their most recent STOCK Act disclosed trades
+- For 13F filers: Use their most recent quarterly 13F filing
+- For tech executives: Include their known insider holdings from Form 4
+- Always try to return at least their top 5-10 known holdings
 - Include the actual filing/disclosure date in reportDate`
           }
         ],
