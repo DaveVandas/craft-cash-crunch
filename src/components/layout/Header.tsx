@@ -279,6 +279,10 @@ const Header = () => {
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5">
+                    <DeleteAccountDialog />
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>

@@ -58,6 +58,7 @@ const App = () => (
                 <Sonner />
                 <UpdateNotification />
                 <InstallPrompt />
+                <PaperTradingDisclaimerSplash />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
