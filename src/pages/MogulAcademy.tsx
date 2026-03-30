@@ -10,7 +10,6 @@ import { Link } from 'react-router-dom';
 import { 
   GraduationCap,
   BookOpen,
-  Mail,
   TrendingUp,
   Quote,
   Star,
