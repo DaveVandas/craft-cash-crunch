@@ -533,48 +533,7 @@ const MogulAcademy = () => {
           </div>
         </section>
         
-        {/* Email Signup Banner */}
-        <section className="py-8 bg-gradient-to-r from-emerald-500/10 via-primary/10 to-emerald-500/10 border-y border-emerald-500/20">
-          <div className="container">
-            {subscribed ? (
-              <div className="text-center py-4">
-                <div className="text-4xl mb-2">🎓</div>
-                <h3 className="font-semibold text-xl">You're Enrolled!</h3>
-                <p className="text-muted-foreground">New lessons drop every 4 days.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="max-w-xl mx-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <Mail className="h-5 w-5 text-emerald-400" />
-                  <span className="font-semibold">Get New Lessons In Your Inbox</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Input
-                    type="text"
-                    placeholder="Your name (optional)"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-background/50"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-background/50"
-                  />
-                  <Button type="submit" disabled={loading} className="whitespace-nowrap bg-emerald-600 hover:bg-emerald-700">
-                    {loading ? 'Enrolling...' : 'Enroll Free'}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Join future moguls. Unsubscribe anytime.
-                </p>
-              </form>
-            )}
-          </div>
-        </section>
+        {/* Email signup section - coming soon once email infrastructure is set up */}
         
         {/* Current Lesson */}
         <section className="py-12 md:py-16">
