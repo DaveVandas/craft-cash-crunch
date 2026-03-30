@@ -1062,6 +1062,10 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: boolean
       }
+      set_referral_code: {
+        Args: { p_code: string; p_source_variant?: string }
+        Returns: undefined
+      }
       track_share: {
         Args: {
           p_context?: Json
