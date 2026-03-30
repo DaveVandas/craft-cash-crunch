@@ -100,16 +100,15 @@ interface CelebrityPortfolio {
   dataSource?: string;
 }
 
-async function fetchPortfolioFromPerplexity(figureName: string, figureData?: any): Promise<CelebrityPortfolio | null> {
-  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+async function fetchPortfolioFromAI(figureName: string, figureData?: any): Promise<CelebrityPortfolio | null> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
   
-  if (!PERPLEXITY_API_KEY) {
-    console.log('PERPLEXITY_API_KEY not configured');
+  if (!LOVABLE_API_KEY) {
+    console.log('LOVABLE_API_KEY not configured');
     return null;
   }
 
-  // Determine the best search strategy based on figure type
-  const isPolitician = figureData?.category === 'politician' || figureName.toLowerCase().includes('senator') || figureName.toLowerCase().includes('representative');
+  const isPolitician = figureData?.category === 'politician';
   const isInvestor = figureData?.category === 'investor';
   const isTech = figureData?.category === 'tech';
   
@@ -117,51 +116,45 @@ async function fetchPortfolioFromPerplexity(figureName: string, figureData?: any
   let dataSourceHint = '';
   
   if (isPolitician) {
-    searchContext = `Search Congressional stock disclosures, Capitol Trades, House/Senate financial disclosure databases, and Quiver Quantitative for STOCK Act filings.`;
-    dataSourceHint = 'STOCK Act Disclosure via Capitol Trades or House/Senate disclosure';
+    searchContext = `Focus on Congressional stock disclosures and STOCK Act filings.`;
+    dataSourceHint = 'STOCK Act Disclosure';
   } else if (isInvestor) {
-    searchContext = `Search SEC EDGAR database for 13F filings, Whale Wisdom, and Dataroma for hedge fund portfolio holdings.`;
-    dataSourceHint = 'SEC 13F Filing via EDGAR';
+    searchContext = `Focus on SEC 13F filings and hedge fund portfolio holdings.`;
+    dataSourceHint = 'SEC 13F Filing';
   } else if (isTech) {
-    searchContext = `Search SEC EDGAR for Form 4 insider transaction filings and company proxy statements.`;
-    dataSourceHint = 'SEC Form 4 Insider Transaction';
+    searchContext = `Focus on SEC Form 4 insider transaction filings.`;
+    dataSourceHint = 'SEC Form 4';
   } else {
-    searchContext = `Search public investment records, SEC filings, and verified news sources for portfolio information.`;
+    searchContext = `Focus on public investment records and verified sources.`;
     dataSourceHint = 'Public Records';
   }
 
   try {
-    console.log(`Fetching portfolio data from Perplexity for: ${figureName} (${figureData?.category || 'unknown'})`);
+    console.log(`Fetching portfolio via Lovable AI for: ${figureName}`);
     
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro', // Use sonar-pro for better accuracy
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
-            content: `You are a financial data researcher specializing in public portfolio disclosures. ${searchContext}
-            
-CRITICAL: Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation. Just the raw JSON object.
-If you cannot find verified stock holdings data, return the topHoldings array as empty [].
-Only include holdings you can verify from official sources - do not make up or guess holdings.` 
+            content: `You are a financial data researcher. ${searchContext} Return ONLY valid JSON with no markdown formatting, no code blocks. If you cannot find verified holdings, return topHoldings as empty [].` 
           },
           { 
             role: 'user', 
             content: `Find the most recent publicly disclosed stock portfolio holdings for "${figureName}".
-
-${searchContext}
 
 Return a JSON object with EXACTLY this structure:
 {
   "name": "${figureName}",
   "title": "their current position/title",
   "category": "${figureData?.category || 'investor'}",
-  "portfolioSummary": "1-2 sentence summary of their investment style or recent notable trades",
+  "portfolioSummary": "1-2 sentence summary of their investment style",
   "topHoldings": [
     {
       "ticker": "AAPL",
@@ -177,40 +170,30 @@ Return a JSON object with EXACTLY this structure:
   "dataSource": "${dataSourceHint}"
 }
 
-IMPORTANT:
-- Only include stocks you can VERIFY from official filings
-- For politicians: Look for trades from the last 6 months
-- For 13F filers: Use their most recent quarterly filing
-- If no verified data exists, return an empty topHoldings array []
-- Include the actual filing/disclosure date in reportDate`
+Only include stocks you can verify from known public filings. If unsure, return empty topHoldings [].`
           }
         ],
-        search_recency_filter: 'month',
-        temperature: 0.1, // Low temperature for more factual responses
       }),
     });
 
     if (!response.ok) {
-      console.error('Perplexity API error:', response.status, await response.text());
+      console.error('Lovable AI error:', response.status, await response.text());
       return null;
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
-    const citations = data.citations || [];
     
-    console.log(`Perplexity response for ${figureName}: ${content.length} chars, ${citations.length} citations`);
+    console.log(`AI response for ${figureName}: ${content.length} chars`);
     
-    // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.log('Could not parse JSON from Perplexity response');
+      console.log('Could not parse JSON from AI response');
       return null;
     }
     
     const parsed = JSON.parse(jsonMatch[0]);
     
-    // Filter out any holdings without valid tickers
     const validHoldings = Array.isArray(parsed.topHoldings) 
       ? parsed.topHoldings
           .filter((h: any) => h.ticker && typeof h.ticker === 'string' && h.ticker.length > 0 && h.ticker.length <= 5)
@@ -224,12 +207,6 @@ IMPORTANT:
           }))
       : [];
     
-    // Add citation info to data source
-    let dataSourceWithCitations = parsed.dataSource ? String(parsed.dataSource) : figureData?.dataSource;
-    if (citations.length > 0) {
-      dataSourceWithCitations += ` via ${citations[0].split('/')[2] || 'verified sources'}`;
-    }
-    
     return {
       name: String(parsed.name || figureName),
       title: String(parsed.title || figureData?.title || 'Public Figure'),
@@ -238,45 +215,45 @@ IMPORTANT:
       topHoldings: validHoldings,
       totalValue: parsed.totalValue ? String(parsed.totalValue) : undefined,
       lastUpdated: parsed.lastUpdated ? String(parsed.lastUpdated) : undefined,
-      dataSource: dataSourceWithCitations,
+      dataSource: parsed.dataSource ? String(parsed.dataSource) : figureData?.dataSource,
     };
   } catch (error) {
-    console.error('Perplexity fetch error:', error);
+    console.error('AI fetch error:', error);
     return null;
   }
 }
 
 // AI-powered discovery of new VIP figures - focus on those with VERIFIED public data
 async function discoverNewFigures(category: string): Promise<Array<{name: string; title: string; category: string; verified: boolean; dataSource: string}>> {
-  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
   
-  if (!PERPLEXITY_API_KEY) {
+  if (!LOVABLE_API_KEY) {
     return [];
   }
 
   const categoryPrompts: Record<string, string> = {
-    politician: 'Find 5 U.S. Congress members who have made stock trades in the last 3 months according to Capitol Trades or House/Senate financial disclosures. Focus on those with the MOST RECENT and ACTIVE trading.',
-    investor: 'Find 5 hedge fund managers or institutional investors who filed 13F reports with the SEC in the last quarter showing notable portfolio changes. Use SEC EDGAR data.',
-    celebrity: 'Find 5 celebrities or athletes who are known venture capital investors with publicly tracked investments through firms like A-Grade, Serena Ventures, or similar.',
-    tech: 'Find 5 tech company CEOs or executives who have made notable insider stock transactions (Form 4 filings) in the last 3 months according to SEC EDGAR.',
-    international: 'Find 5 international billionaires or fund managers with publicly disclosed holdings through regulatory filings in their countries.',
+    politician: 'Find 5 U.S. Congress members who are known active stock traders based on STOCK Act disclosures.',
+    investor: 'Find 5 hedge fund managers or institutional investors known for their 13F filings with the SEC.',
+    celebrity: 'Find 5 celebrities or athletes who are known venture capital investors.',
+    tech: 'Find 5 tech company CEOs or executives known for notable insider stock transactions.',
+    international: 'Find 5 international billionaires or fund managers with publicly disclosed holdings.',
   };
 
   const prompt = categoryPrompts[category] || categoryPrompts.investor;
 
   try {
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown formatting, no code blocks. Just the raw JSON array. Only include people with VERIFIED, PUBLICLY AVAILABLE portfolio data from official sources.' 
+            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown. Just the raw JSON array.' 
           },
           { 
             role: 'user', 
@@ -286,20 +263,16 @@ Return a JSON array of objects, each with:
 - name: full name (string)
 - title: their current position/title (string)  
 - category: "${category}" (string)
-- verified: true if they have official regulatory filings, false otherwise (boolean)
-- dataSource: where their data comes from, e.g. "SEC 13F Filing", "STOCK Act Disclosure", "SEC Form 4" (string)
+- verified: true if they have official regulatory filings (boolean)
+- dataSource: where their data comes from (string)
 
-ONLY include people whose portfolio data you can actually find from official sources.`
+Only include real people with known portfolio data.`
           }
         ],
-        search_recency_filter: 'week',
-        temperature: 0.1,
       }),
     });
 
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) return [];
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -415,7 +388,7 @@ serve(async (req) => {
       // Find figure data if in our list
       const figureData = FEATURED_FIGURES.find(f => f.name.toLowerCase() === name.toLowerCase());
       
-      const portfolio = await fetchPortfolioFromPerplexity(name, figureData);
+      const portfolio = await fetchPortfolioFromAI(name, figureData);
       
       if (!portfolio) {
         return jsonResponse({
