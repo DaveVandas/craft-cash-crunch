@@ -1,0 +1,1 @@
+UPDATE public.academy_lessons SET lesson_number = 9 WHERE title = 'Decoding the Squiggly Lines (How to Read a Stock Chart Like a Pro)';
