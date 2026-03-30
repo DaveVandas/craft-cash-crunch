@@ -157,13 +157,10 @@ const Auth = () => {
           const sourceVariant = localStorage.getItem(AFFILIATE_VARIANT_KEY) || 'direct';
           
           // Update the user's user_access with the referral code and source variant
-          await supabase
-            .from('user_access')
-            .update({ 
-              referred_by_code: affiliateCode.toUpperCase(),
-              source_variant: sourceVariant
-            })
-            .eq('user_id', data.user.id);
+          await supabase.rpc('set_referral_code', {
+            p_code: affiliateCode.toUpperCase(),
+            p_source_variant: sourceVariant
+          });
 
           // Find the affiliate and create a referral record
           const { data: affiliateData } = await supabase
