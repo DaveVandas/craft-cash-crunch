@@ -225,35 +225,35 @@ Only include stocks you can verify from known public filings. If unsure, return 
 
 // AI-powered discovery of new VIP figures - focus on those with VERIFIED public data
 async function discoverNewFigures(category: string): Promise<Array<{name: string; title: string; category: string; verified: boolean; dataSource: string}>> {
-  const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
   
-  if (!PERPLEXITY_API_KEY) {
+  if (!LOVABLE_API_KEY) {
     return [];
   }
 
   const categoryPrompts: Record<string, string> = {
-    politician: 'Find 5 U.S. Congress members who have made stock trades in the last 3 months according to Capitol Trades or House/Senate financial disclosures. Focus on those with the MOST RECENT and ACTIVE trading.',
-    investor: 'Find 5 hedge fund managers or institutional investors who filed 13F reports with the SEC in the last quarter showing notable portfolio changes. Use SEC EDGAR data.',
-    celebrity: 'Find 5 celebrities or athletes who are known venture capital investors with publicly tracked investments through firms like A-Grade, Serena Ventures, or similar.',
-    tech: 'Find 5 tech company CEOs or executives who have made notable insider stock transactions (Form 4 filings) in the last 3 months according to SEC EDGAR.',
-    international: 'Find 5 international billionaires or fund managers with publicly disclosed holdings through regulatory filings in their countries.',
+    politician: 'Find 5 U.S. Congress members who are known active stock traders based on STOCK Act disclosures.',
+    investor: 'Find 5 hedge fund managers or institutional investors known for their 13F filings with the SEC.',
+    celebrity: 'Find 5 celebrities or athletes who are known venture capital investors.',
+    tech: 'Find 5 tech company CEOs or executives known for notable insider stock transactions.',
+    international: 'Find 5 international billionaires or fund managers with publicly disclosed holdings.',
   };
 
   const prompt = categoryPrompts[category] || categoryPrompts.investor;
 
   try {
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown formatting, no code blocks. Just the raw JSON array. Only include people with VERIFIED, PUBLICLY AVAILABLE portfolio data from official sources.' 
+            content: 'You are a financial research assistant. Return ONLY valid JSON with no markdown. Just the raw JSON array.' 
           },
           { 
             role: 'user', 
@@ -263,20 +263,16 @@ Return a JSON array of objects, each with:
 - name: full name (string)
 - title: their current position/title (string)  
 - category: "${category}" (string)
-- verified: true if they have official regulatory filings, false otherwise (boolean)
-- dataSource: where their data comes from, e.g. "SEC 13F Filing", "STOCK Act Disclosure", "SEC Form 4" (string)
+- verified: true if they have official regulatory filings (boolean)
+- dataSource: where their data comes from (string)
 
-ONLY include people whose portfolio data you can actually find from official sources.`
+Only include real people with known portfolio data.`
           }
         ],
-        search_recency_filter: 'week',
-        temperature: 0.1,
       }),
     });
 
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) return [];
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
@@ -392,7 +388,7 @@ serve(async (req) => {
       // Find figure data if in our list
       const figureData = FEATURED_FIGURES.find(f => f.name.toLowerCase() === name.toLowerCase());
       
-      const portfolio = await fetchPortfolioFromPerplexity(name, figureData);
+      const portfolio = await fetchPortfolioFromAI(name, figureData);
       
       if (!portfolio) {
         return jsonResponse({
