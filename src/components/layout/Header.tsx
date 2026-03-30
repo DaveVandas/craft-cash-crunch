@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
