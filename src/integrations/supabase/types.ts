@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_lessons: {
+        Row: {
+          case_study_text: string | null
+          case_study_title: string | null
+          content: string
+          created_at: string
+          emoji: string
+          id: string
+          intro: string
+          is_published: boolean
+          key_points: Json
+          lesson_number: number
+          level: string
+          published_at: string
+          subtitle: string
+          tags: Json
+          title: string
+        }
+        Insert: {
+          case_study_text?: string | null
+          case_study_title?: string | null
+          content: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          intro: string
+          is_published?: boolean
+          key_points?: Json
+          lesson_number: number
+          level?: string
+          published_at?: string
+          subtitle: string
+          tags?: Json
+          title: string
+        }
+        Update: {
+          case_study_text?: string | null
+          case_study_title?: string | null
+          content?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          intro?: string
+          is_published?: boolean
+          key_points?: Json
+          lesson_number?: number
+          level?: string
+          published_at?: string
+          subtitle?: string
+          tags?: Json
+          title?: string
+        }
+        Relationships: []
+      }
       affiliate_payouts: {
         Row: {
           affiliate_id: string
