@@ -61,45 +61,8 @@ const WealthWisdom = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const { error } = await supabase
-        .from('email_subscribers')
-        .insert({ 
-          email: email.toLowerCase().trim(),
-          name: name.trim() || null,
-          source: 'wealth_wisdom_blog'
-        });
-      
-      if (error) {
-        if (error.code === '23505') {
-          toast.info("You're already subscribed! 🎉");
-        } else {
-          throw error;
-        }
-      } else {
-        toast.success("Welcome to the winners circle! 🏆", {
-          description: "You'll receive our weekly wealth wisdom soon."
-        });
-        setSubscribed(true);
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
+
 
   const SITE_URL = "https://earningsexplorer.shop";
   
