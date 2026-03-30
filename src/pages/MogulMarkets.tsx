@@ -388,9 +388,14 @@ const MogulMarkets = () => {
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container py-10 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary mb-4" />
-            <p className="text-lg text-muted-foreground">Initializing trading console...</p>
+          <div className="text-center space-y-4">
+            <div className="relative inline-flex">
+              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+              <div className="relative p-4 rounded-full bg-primary/10 border border-primary/20">
+                <Crown className="h-8 w-8 text-primary animate-pulse" />
+              </div>
+            </div>
+            <p className="text-muted-foreground text-sm animate-pulse">Initializing trading console...</p>
           </div>
         </main>
         <Footer />

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DeleteAccountDialog } from '@/components/account/DeleteAccountDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -278,6 +279,10 @@ const Header = () => {
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5">
+                    <DeleteAccountDialog />
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
