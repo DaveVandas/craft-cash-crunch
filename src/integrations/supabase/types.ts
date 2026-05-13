@@ -701,6 +701,7 @@ export type Database = {
           id: string
           portfolio_id: string
           price_paid: number
+          revenuecat_transaction_id: string | null
           stripe_payment_intent_id: string | null
         }
         Insert: {
@@ -709,6 +710,7 @@ export type Database = {
           id?: string
           portfolio_id: string
           price_paid: number
+          revenuecat_transaction_id?: string | null
           stripe_payment_intent_id?: string | null
         }
         Update: {
@@ -717,6 +719,7 @@ export type Database = {
           id?: string
           portfolio_id?: string
           price_paid?: number
+          revenuecat_transaction_id?: string | null
           stripe_payment_intent_id?: string | null
         }
         Relationships: [
@@ -864,6 +867,7 @@ export type Database = {
           has_lifetime_access: boolean
           id: string
           referred_by_code: string | null
+          revenuecat_transaction_id: string | null
           search_count: number
           source_variant: string | null
           stripe_customer_id: string | null
@@ -878,6 +882,7 @@ export type Database = {
           has_lifetime_access?: boolean
           id?: string
           referred_by_code?: string | null
+          revenuecat_transaction_id?: string | null
           search_count?: number
           source_variant?: string | null
           stripe_customer_id?: string | null
@@ -892,6 +897,7 @@ export type Database = {
           has_lifetime_access?: boolean
           id?: string
           referred_by_code?: string | null
+          revenuecat_transaction_id?: string | null
           search_count?: number
           source_variant?: string | null
           stripe_customer_id?: string | null
