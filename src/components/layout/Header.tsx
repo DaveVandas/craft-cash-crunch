@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2 } from 'lucide-react';
+import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
 import FavoritesDropdown from '@/components/favorites/FavoritesDropdown';
@@ -275,6 +275,20 @@ const Header = () => {
                     <ThemeToggleMenuItem />
                   </div>
                   <DropdownMenuSeparator />
+                  {usePricing().isNativeApp && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        import('sonner').then(({ toast }) =>
+                          toast.info('Restore Purchases coming soon', {
+                            description: 'This will sync prior App Store / Play Store purchases.',
+                          })
+                        );
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Restore Purchases
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
