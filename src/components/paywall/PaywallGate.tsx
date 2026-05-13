@@ -1,9 +1,10 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Crown, Lock, Sparkles, Loader2 } from 'lucide-react';
+import { Crown, Lock, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePricing } from '@/hooks/usePricing';
+import { toast } from 'sonner';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
@@ -21,7 +22,7 @@ interface PaywallGateProps {
 
 const PaywallGate = ({ children }: PaywallGateProps) => {
   const { user, accessInfo, initiatePayment, loading, paymentLoading } = useAuth();
-  const { regularPrice, canUseStripe } = usePricing();
+  const { regularPrice, isNativeApp } = usePricing();
   
   // Check if user should be blocked
   const anonSearchCount = getAnonSearchCount();
@@ -84,8 +85,8 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
 
           {/* CTA Buttons */}
           {user ? (
-            canUseStripe ? (
-              <Button 
+            <>
+              <Button
                 onClick={initiatePayment}
                 disabled={paymentLoading}
                 size="lg"
@@ -98,19 +99,22 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
                 )}
                 {paymentLoading ? 'Processing...' : `Get Lifetime Access - ${regularPrice}`}
               </Button>
-            ) : (
-              <Button 
-                onClick={() => {
-                  // TODO: Implement IAP when ready
-                  console.log('Native IAP not yet implemented');
-                }}
-                size="lg"
-                className="w-full text-base md:text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 shadow-gold"
-              >
-                <Crown className="mr-2 h-5 w-5" />
-                Get Lifetime Access - {regularPrice}
-              </Button>
-            )
+              {isNativeApp && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-muted-foreground"
+                  onClick={() =>
+                    toast.info('Restore Purchases coming soon', {
+                      description: 'This will sync any prior App Store / Play Store purchase to this account.',
+                    })
+                  }
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Restore Purchases
+                </Button>
+              )}
+            </>
           ) : (
             <div className="space-y-3">
               <Button 

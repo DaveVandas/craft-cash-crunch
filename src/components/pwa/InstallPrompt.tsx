@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Capacitor } from '@capacitor/core';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -13,7 +14,11 @@ const InstallPrompt = () => {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
+  // Never show the "install our PWA" prompt inside the native iOS/Android shell.
+  const isNative = Capacitor.isNativePlatform();
+
   useEffect(() => {
+    if (isNative) return;
     // Check if already installed (standalone mode)
     const standalone = window.matchMedia('(display-mode: standalone)').matches 
       || (window.navigator as any).standalone === true;
@@ -66,7 +71,9 @@ const InstallPrompt = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
-  }, []);
+  }, [isNative]);
+
+  if (isNative) return null;
 
   const handleInstall = async () => {
     if (deferredPrompt) {
