@@ -1,15 +1,20 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// Enable hot-reload from the sandbox preview ONLY when CAP_DEV is set.
+// For App Store / Play Store builds, leave CAP_DEV unset so the bundled
+// `dist/` is shipped (Apple rejects apps that load remote web content).
+const isDev = process.env.CAP_DEV === '1';
+
 const config: CapacitorConfig = {
   appId: 'com.northspan.wealthperspective',
   appName: 'Wealth Perspective',
   webDir: 'dist',
-  server: {
-    // For development - enables hot reload from the sandbox preview
-    // Comment out or remove for production builds
-    url: 'https://earningsexplorer.shop',
-    cleartext: true,
-  },
+  ...(isDev && {
+    server: {
+      url: 'https://earningsexplorer.shop',
+      cleartext: true,
+    },
+  }),
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',

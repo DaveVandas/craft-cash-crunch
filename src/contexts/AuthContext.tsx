@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getPaymentMethod } from '@/lib/pricing';
 
 interface AccessInfo {
   hasAccess: boolean;
@@ -147,7 +148,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const initiatePayment = async () => {
     if (paymentLoading) return; // Prevent double-clicks
-    
+
+    // Native (iOS/Android) builds MUST use in-app purchase per Apple/Google policy.
+    // RevenueCat IAP is not yet wired — show a friendly message instead of opening Stripe.
+    const method = getPaymentMethod();
+    if (method !== 'stripe') {
+      toast.info('In-app purchase coming soon', {
+        description: 'Lifetime access via the App Store will unlock here shortly.',
+      });
+      return;
+    }
+
     setPaymentLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-payment');

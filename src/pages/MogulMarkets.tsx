@@ -117,7 +117,16 @@ const MogulMarkets = () => {
 
   const handleBuyCash = async () => {
     if (!portfolio) return;
-    
+
+    // Native builds must use in-app purchase, not Stripe.
+    const { getPaymentMethod } = await import('@/lib/pricing');
+    if (getPaymentMethod() !== 'stripe') {
+      toast.info('In-app purchase coming soon', {
+        description: 'Mogul Cash via the App Store will unlock here shortly.',
+      });
+      return;
+    }
+
     setIsBuyingCash(true);
     try {
       const { data, error } = await supabase.functions.invoke('buy-mogul-cash', {

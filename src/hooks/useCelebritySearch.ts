@@ -4,7 +4,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { getFallbackCelebrity } from '@/lib/fallbackCelebrities';
-import { getCurrentRegularPrice } from '@/lib/pricing';
+import { getCurrentRegularPrice, getPaymentMethod } from '@/lib/pricing';
+
+// Open the upgrade flow appropriately for the current platform.
+// Native (iOS/Android) builds must NOT link out to Stripe — Apple/Google reject this.
+const startUpgradeFlow = async () => {
+  if (getPaymentMethod() !== 'stripe') {
+    toast.info('In-app purchase coming soon', {
+      description: 'Lifetime access via the App Store will unlock here shortly.',
+    });
+    return;
+  }
+  const { data: paymentData } = await supabase.functions.invoke('create-payment');
+  if (paymentData?.url) window.open(paymentData.url, '_blank');
+};
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
@@ -77,10 +90,7 @@ export const useCelebritySearch = () => {
             description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
             duration: 8000,
           });
@@ -92,10 +102,7 @@ export const useCelebritySearch = () => {
             description: `Unlock unlimited access for just ${price}`,
             action: {
               label: 'Upgrade',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
           });
           setError(data.error);
@@ -163,10 +170,7 @@ export const useCelebritySearch = () => {
             description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
             duration: 8000,
           });

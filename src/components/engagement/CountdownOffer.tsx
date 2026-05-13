@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Clock, Zap, Sparkles } from 'lucide-react';
 import { usePricing } from '@/hooks/usePricing';
+import { toast } from 'sonner';
 
 interface CountdownOfferProps {
   open: boolean;
@@ -62,15 +63,13 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
     onOpenChange(false);
     if (!user) {
       navigate('/auth');
-    } else if (canUseStripe) {
-      try {
-        await initiatePayment();
-      } catch (err) {
-        console.error('Payment error:', err);
-      }
-    } else {
-      // TODO: Implement IAP when ready
-      console.log('Native IAP not yet implemented');
+      return;
+    }
+    try {
+      await initiatePayment();
+    } catch (err) {
+      console.error('Payment error:', err);
+      toast.error('Could not start purchase');
     }
   };
 
@@ -137,10 +136,6 @@ const CountdownOffer = ({ open, onOpenChange }: CountdownOfferProps) => {
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {isExpired ? 'Offer Expired' : `Claim ${discountPrice} Deal`}
-          </Button>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            <Clock className="mr-2 h-4 w-4" />
-            I'll pay full price later
           </Button>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             <Clock className="mr-2 h-4 w-4" />
