@@ -63,7 +63,7 @@ const Header = () => {
   const { user, accessInfo, signOut, initiatePayment, paymentLoading } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const { profile } = useUserProfile();
-  const { regularPrice } = usePricing();
+  const { regularPrice, isNativeApp } = usePricing();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -275,7 +275,7 @@ const Header = () => {
                     <ThemeToggleMenuItem />
                   </div>
                   <DropdownMenuSeparator />
-                  {usePricing().isNativeApp && (
+                  {isNativeApp && (
                     <DropdownMenuItem
                       onClick={() => {
                         import('sonner').then(({ toast }) =>
