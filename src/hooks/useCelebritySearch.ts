@@ -90,10 +90,7 @@ export const useCelebritySearch = () => {
             description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
             duration: 8000,
           });
@@ -105,10 +102,7 @@ export const useCelebritySearch = () => {
             description: `Unlock unlimited access for just ${price}`,
             action: {
               label: 'Upgrade',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
           });
           setError(data.error);
@@ -176,10 +170,7 @@ export const useCelebritySearch = () => {
             description: `${price} once. Unlimited access. No subscriptions. Real mogul energy.`,
             action: {
               label: 'Unlock Lifetime Access',
-              onClick: async () => {
-                const { data: paymentData } = await supabase.functions.invoke('create-payment');
-                if (paymentData?.url) window.open(paymentData.url, '_blank');
-              },
+              onClick: startUpgradeFlow,
             },
             duration: 8000,
           });
