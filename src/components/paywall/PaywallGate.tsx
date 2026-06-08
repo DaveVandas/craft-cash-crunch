@@ -21,7 +21,7 @@ interface PaywallGateProps {
 }
 
 const PaywallGate = ({ children }: PaywallGateProps) => {
-  const { user, accessInfo, initiatePayment, loading, paymentLoading } = useAuth();
+  const { user, accessInfo, initiatePayment, loading, paymentLoading, restorePurchases } = useAuth();
   const { regularPrice, isNativeApp } = usePricing();
   
   // Check if user should be blocked
@@ -104,11 +104,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
                   variant="ghost"
                   size="sm"
                   className="w-full text-muted-foreground"
-                  onClick={() =>
-                    toast.info('Restore Purchases coming soon', {
-                      description: 'This will sync any prior App Store / Play Store purchase to this account.',
-                    })
-                  }
+                  onClick={restorePurchases}
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Restore Purchases

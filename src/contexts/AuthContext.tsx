@@ -3,6 +3,13 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getPaymentMethod } from '@/lib/pricing';
+import {
+  initIAP,
+  purchaseLifetimeAccess,
+  restorePurchases as restoreIAPPurchases,
+  syncEntitlementToBackend,
+  isNativePlatform,
+} from '@/lib/iap';
 
 interface AccessInfo {
   hasAccess: boolean;
@@ -24,6 +31,7 @@ interface AuthContextType {
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   refreshAccess: () => Promise<void>;
   initiatePayment: () => Promise<void>;
+  restorePurchases: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -83,6 +91,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Defer access check to avoid deadlock
         if (session) {
           setTimeout(() => refreshAccess(), 0);
+          if (isNativePlatform()) {
+            setTimeout(() => {
+              initIAP(session.user.id).catch((e) =>
+                console.warn('[IAP] init failed', e),
+              );
+            }, 0);
+          }
         } else {
           setAccessInfo(null);
         }
@@ -149,13 +164,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const initiatePayment = async () => {
     if (paymentLoading) return; // Prevent double-clicks
 
-    // Native (iOS/Android) builds MUST use in-app purchase per Apple/Google policy.
-    // RevenueCat IAP is not yet wired — show a friendly message instead of opening Stripe.
     const method = getPaymentMethod();
+
+    // Native (iOS/Android) builds MUST use in-app purchase per Apple/Google policy.
     if (method !== 'stripe') {
-      toast.info('In-app purchase coming soon', {
-        description: 'Lifetime access via the App Store will unlock here shortly.',
-      });
+      if (!user) {
+        toast.error('Please sign in first to purchase lifetime access.');
+        return;
+      }
+      setPaymentLoading(true);
+      try {
+        const ok = await purchaseLifetimeAccess(user.id);
+        if (ok) {
+          await syncEntitlementToBackend();
+          await refreshAccess();
+          toast.success('🎉 Lifetime access unlocked!');
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Purchase failed';
+        // RevenueCat returns userCancelled for user-initiated cancellations
+        if (!/cancel/i.test(message)) {
+          toast.error('Purchase could not be completed', { description: message });
+        }
+      } finally {
+        setPaymentLoading(false);
+      }
       return;
     }
 
@@ -194,6 +227,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const restorePurchases = async () => {
+    if (!isNativePlatform()) {
+      toast.info('Restore is only available in the mobile app.');
+      return;
+    }
+    if (!user) {
+      toast.error('Please sign in to restore your purchase.');
+      return;
+    }
+    try {
+      const restored = await restoreIAPPurchases(user.id);
+      if (restored) {
+        await syncEntitlementToBackend();
+        await refreshAccess();
+        toast.success('Purchase restored — lifetime access is active!');
+      } else {
+        toast.info('No previous purchase found on this account.');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Restore failed';
+      toast.error('Restore failed', { description: message });
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -209,6 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatePassword,
         refreshAccess,
         initiatePayment,
+        restorePurchases,
       }}
     >
       {children}
