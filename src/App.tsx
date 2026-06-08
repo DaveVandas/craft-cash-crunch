@@ -42,6 +42,7 @@ import BetaInvite from "./pages/BetaInvite";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import AffiliateReferral from "./pages/AffiliateReferral";
+import StoreScreenshots from "./pages/StoreScreenshots";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => (
                     <Route path="/become-affiliate" element={<BecomeAffiliate />} />
                     <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
                     <Route path="/ref/:code" element={<AffiliateReferral />} />
+                    <Route path="/store-screenshots" element={<StoreScreenshots />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>
