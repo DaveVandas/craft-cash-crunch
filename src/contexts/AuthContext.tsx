@@ -91,6 +91,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Defer access check to avoid deadlock
         if (session) {
           setTimeout(() => refreshAccess(), 0);
+          if (isNativePlatform()) {
+            setTimeout(() => {
+              initIAP(session.user.id).catch((e) =>
+                console.warn('[IAP] init failed', e),
+              );
+            }, 0);
+          }
         } else {
           setAccessInfo(null);
         }
