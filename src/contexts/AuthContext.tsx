@@ -3,6 +3,13 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getPaymentMethod } from '@/lib/pricing';
+import {
+  initIAP,
+  purchaseLifetimeAccess,
+  restorePurchases as restoreIAPPurchases,
+  syncEntitlementToBackend,
+  isNativePlatform,
+} from '@/lib/iap';
 
 interface AccessInfo {
   hasAccess: boolean;
@@ -24,6 +31,7 @@ interface AuthContextType {
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   refreshAccess: () => Promise<void>;
   initiatePayment: () => Promise<void>;
+  restorePurchases: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
