@@ -157,6 +157,10 @@ export default function StoreScreenshots() {
    * a fixed off-screen host so it does not affect layout.
    */
   async function capturePng(s: Screenshot): Promise<Blob> {
+    if (s.id === '07-lifetime') {
+      return captureLifetimePng(dims);
+    }
+
     const host = captureHostRef.current!;
     const node = document.createElement('div');
     node.style.width = `${dims.w}px`;
