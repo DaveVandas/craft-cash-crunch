@@ -1,77 +1,53 @@
-# Real App Screenshots in iPhone Bezels
+# Polish store screenshots
 
-Rebuild `/store-screenshots` so each of the 6 marketing frames showcases a **real screenshot of the live app** inside a clean iPhone-style bezel, on the existing gold-gradient background with headline + sub-caption + brand footer.
+Four targeted fixes to `/store-screenshots`. No new components, no scope creep.
 
-## What changes
+## 1. Dynamic Island covers "Wealth Perspective" header
 
-### 1. Capture 6 real app screens
-Use `browser--view_preview` at iPhone viewport (390 × 844) on these routes, then `browser--screenshot` each:
+The bezel's Dynamic Island sits over the app's top nav, hiding the "Wealth Perspective" wordmark on every screen.
 
-| # | Frame | Route captured |
-|---|---|---|
-| 1 | Real-time celeb earnings | `/profile/elon-musk` (ticker mid-tick) |
-| 2 | Reality Check | `/calculator` with $65,000 entered → result |
-| 3 | Compare head-to-head | `/compare` with Bezos vs Oprah loaded |
-| 4 | Trade Like a Mogul | `/mogul-markets` portfolio view |
-| 5 | VIP Portfolios | `/celebrity-portfolios` |
-| 6 | Wealth IQ Quiz | `/quiz` mid-question with streak |
+Fix in `PhoneBezel.tsx`:
+- Shrink the Dynamic Island (~22% of width instead of 34%, ~6% tall instead of 8.5%) so it reads as a notch, not a black bar across the header
+- Add ~40px of top padding inside the inner screen so the app's header clears the island
+- Keep the titanium ring and corner radii unchanged
 
-Each PNG gets uploaded via `lovable-assets` CLI → `.asset.json` pointers stored in `src/assets/store-screens/`.
+## 2. Money rain overlaps Elon's photo and earnings in screenshot #1
 
-### 2. New `<PhoneBezel>` component
-A pure-CSS iPhone 15 Pro frame:
-- Thin (~14 px scaled) titanium-gray border
-- 60 px outer corner radius, 48 px inner
-- Pill-shaped Dynamic Island centered at top
-- Subtle inner highlight + outer drop shadow (gold-tinted to match brand)
-- Accepts `src` prop, renders the screenshot inside cropped to the inner frame
+Recapture `/profile/elon-musk` with the money-rain effect disabled (or scroll just past it) so the hero photo, name, and annual-earnings number are fully readable. The captured PNG (`01-earnings.png.asset.json`) gets replaced.
 
-### 3. Replace the 6 illustrated bodies
-In `StoreScreenshots.tsx`, swap each `body` JSX for `<PhoneBezel src={…} />`. Keep:
-- Gold gradient backgrounds + ambient glow
-- Headlines and sub-captions (already approved copy)
-- "Wealth Perspective" footer brand mark
-- 1290×2796 (iPhone) and 1080×1920 (Android) export dimensions
-- Existing 1/3-scale preview grid
+Implementation: navigate via `browser--view_preview`, append `?norain=1` style query OR scroll the page down ~120px so the ticker section — not the falling emoji — fills the frame, then re-screenshot and re-upload via `lovable-assets`.
 
-The 7th "Lifetime Access" frame keeps its illustrated treatment (no app screen to show — it's a pricing card).
+## 3. "vandasdave" → "You" on the Compare frame
 
-## Technical details
+Screenshot #3 (`/compare`) currently shows the logged-in username "vandasdave" on the left side. Recapture with the salary/you side relabeled. Two options, will use whichever the live `/compare` page supports cleanly:
+- Sign out before capture so the left card shows the generic "You" placeholder
+- Or capture with a celebrity-vs-celebrity matchup (Bezos vs Oprah) where neither side shows the username
 
-```text
-┌─ Gold gradient card 1290×2796 ──┐
-│  Headline (7xl black white)     │
-│  Sub-caption (3xl white/70)     │
-│                                 │
-│      ┌──────────────────┐       │
-│      │ ▔▔▔ Island ▔▔▔   │       │ ← PhoneBezel
-│      │                  │       │   ~900px wide
-│      │   real app PNG   │       │   ~1900px tall
-│      │   (390×844 src)  │       │   centered
-│      │                  │       │
-│      └──────────────────┘       │
-│                                 │
-│  [icon] Wealth Perspective      │
-└─────────────────────────────────┘
-```
+Replace `03-compare.png.asset.json` with the new capture.
 
-Bezel implementation: nested divs — outer `bg-zinc-800` ring, inner `bg-black` mask, `<img>` filling inner, absolutely-positioned Dynamic Island pill. No external assets needed for the frame itself.
+## 4. HD clarity
+
+Current captures are 390×844 (1× viewport) then upscaled into a 900px-wide bezel — they look soft. Recapture all 6 screens at 2× device pixel ratio:
+
+- `browser--set_viewport_size` to 390×844
+- Use `browser--screenshot` (which honors DPR); if needed, take full-page then crop
+- Target output: 780×1688 PNG, which renders crisp inside the 900px bezel at retina export resolution (1290×2796 marketing frame)
+
+All 6 `.asset.json` pointers get replaced with the higher-resolution PNGs.
 
 ## Files touched
 
-- **new** `src/components/marketing/PhoneBezel.tsx`
-- **new** `src/assets/store-screens/01-earnings.png.asset.json` … `06-quiz.png.asset.json` (6 files, uploaded via CLI)
-- **edit** `src/pages/StoreScreenshots.tsx` — replace 6 `body` blocks with `<PhoneBezel>` calls
+- **edit** `src/components/marketing/PhoneBezel.tsx` — smaller island, inner top padding
+- **replace** all 6 files in `src/assets/store-screens/*.asset.json` — re-captured at higher resolution, with money rain off (#1) and "You" label fixed (#3)
+- No change to `StoreScreenshots.tsx` structure
 
 ## Workflow
 
-1. Build `PhoneBezel` component first
-2. Capture all 6 screens via browser tool, save to `/tmp/`, upload each via `lovable-assets create`
-3. Wire pointers into `StoreScreenshots.tsx`
-4. Verify visually in preview at both iPhone and Android sizes
+1. Edit `PhoneBezel` first so re-captures are framed correctly
+2. Re-capture all 6 screens in sequence at 390×844, retina
+3. Upload each via `lovable-assets create` and overwrite the pointer JSONs
+4. Verify visually at both iPhone 6.7" and Android sizes in the preview
 
-## Notes
+## Note on auth
 
-- If a screen requires login (e.g. `/mogul-markets`) and the session isn't authenticated in the browser tool, I'll pause and ask you to sign in in the preview first.
-- The 7th Lifetime Access frame stays illustrated since it's a pricing/value summary, not a UI showcase.
-- Capture instructions in the footer get updated to reflect the new "Capture node screenshot" target.
+If `/mogul-markets`, `/celebrity-portfolios`, or `/compare` show login walls in the browser session, I'll pause and ask you to sign in (or sign out, for fix #3) in the preview before continuing.

@@ -16,8 +16,8 @@ export function PhoneBezel({ src, alt = '', width = 900 }: PhoneBezelProps) {
   const bezel = Math.max(14, Math.round(width * 0.018));
   const outerRadius = Math.round(width * 0.13);
   const innerRadius = outerRadius - bezel;
-  const islandW = Math.round(width * 0.34);
-  const islandH = Math.round(width * 0.085);
+  const islandW = Math.round(width * 0.22);
+  const islandH = Math.round(width * 0.06);
   const islandTop = Math.round(bezel + width * 0.025);
 
   return (
