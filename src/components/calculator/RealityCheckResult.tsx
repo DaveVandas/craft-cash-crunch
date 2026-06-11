@@ -100,7 +100,7 @@ const RealityCheckResult = ({
                 </span>
               </div>
               <p className="text-sm font-medium text-emerald-400 mt-2">
-                {profile?.display_name || user?.email?.split('@')[0] || 'You'}
+                You
               </p>
               <p className="text-xs text-muted-foreground">
                 {formatCompactCurrency(userSalary)}/yr
