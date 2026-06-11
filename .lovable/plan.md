@@ -1,85 +1,77 @@
-# Create iOS IAP Products & Wire Up RevenueCat Offerings
+# Real App Screenshots in iPhone Bezels
 
-Both Apple keys are now connected. Next we need to (1) create the two purchasable products in App Store Connect, (2) attach them to an Entitlement + Offering in RevenueCat, and (3) drop the real RevenueCat SDK keys into the app code. Until step 3 is done, native builds will log `[IAP] RevenueCat API key not configured` and purchases won't fire.
+Rebuild `/store-screenshots` so each of the 6 marketing frames showcases a **real screenshot of the live app** inside a clean iPhone-style bezel, on the existing gold-gradient background with headline + sub-caption + brand footer.
 
-The two products we need (already referenced everywhere in the codebase):
+## What changes
 
-| Product ID | Type | Price | Purpose |
-|---|---|---|---|
-| `wealth_perspective_lifetime` | Non-Consumable | $9.99 USD | Unlocks lifetime access (Entitlement: `lifetime`) |
-| `wealth_perspective_mogul_cash` | Consumable | $4.99 USD | Adds $20,000 virtual paper-trading cash |
+### 1. Capture 6 real app screens
+Use `browser--view_preview` at iPhone viewport (390 × 844) on these routes, then `browser--screenshot` each:
 
----
+| # | Frame | Route captured |
+|---|---|---|
+| 1 | Real-time celeb earnings | `/profile/elon-musk` (ticker mid-tick) |
+| 2 | Reality Check | `/calculator` with $65,000 entered → result |
+| 3 | Compare head-to-head | `/compare` with Bezos vs Oprah loaded |
+| 4 | Trade Like a Mogul | `/mogul-markets` portfolio view |
+| 5 | VIP Portfolios | `/celebrity-portfolios` |
+| 6 | Wealth IQ Quiz | `/quiz` mid-question with streak |
 
-## Step 1 — Create the two products in App Store Connect
+Each PNG gets uploaded via `lovable-assets` CLI → `.asset.json` pointers stored in `src/assets/store-screens/`.
 
-In App Store Connect → your app → **Monetization → In-App Purchases → +**
+### 2. New `<PhoneBezel>` component
+A pure-CSS iPhone 15 Pro frame:
+- Thin (~14 px scaled) titanium-gray border
+- 60 px outer corner radius, 48 px inner
+- Pill-shaped Dynamic Island centered at top
+- Subtle inner highlight + outer drop shadow (gold-tinted to match brand)
+- Accepts `src` prop, renders the screenshot inside cropped to the inner frame
 
-**Product A — Lifetime Access**
-- Type: **Non-Consumable**
-- Reference Name: `Wealth Perspective Lifetime`
-- Product ID: `wealth_perspective_lifetime` (must match exactly)
-- Price: **$9.99 USD** (Tier 10)
-- Localization (English, U.S.):
-  - Display Name: `Lifetime Access`
-  - Description: `Unlock unlimited celebrity earnings lookups, Reality Check, Compare Mode, Debt Destroyer, Mogul Markets, and every premium feature — forever. One payment, no subscriptions.`
-- Review Screenshot: 1284×2778 paywall screenshot (we already generate these on `/store-screenshots`)
-- Review Notes: `Non-consumable lifetime unlock. Tap "Get Lifetime Access" on the paywall to trigger the purchase sheet.`
+### 3. Replace the 6 illustrated bodies
+In `StoreScreenshots.tsx`, swap each `body` JSX for `<PhoneBezel src={…} />`. Keep:
+- Gold gradient backgrounds + ambient glow
+- Headlines and sub-captions (already approved copy)
+- "Wealth Perspective" footer brand mark
+- 1290×2796 (iPhone) and 1080×1920 (Android) export dimensions
+- Existing 1/3-scale preview grid
 
-**Product B — Mogul Cash**
-- Type: **Consumable**
-- Reference Name: `Mogul Cash $20,000`
-- Product ID: `wealth_perspective_mogul_cash`
-- Price: **$4.99 USD** (Tier 5)
-- Localization:
-  - Display Name: `$20,000 Mogul Cash`
-  - Description: `Add $20,000 of virtual paper-trading cash to your Mogul Markets portfolio. For simulated trading only — no real money or securities involved.`
-- Review Screenshot: Mogul Markets "Buy Cash" modal
-- Review Notes: `Consumable virtual currency for paper trading simulation only. Not real money, not redeemable, not a security.`
+The 7th "Lifetime Access" frame keeps its illustrated treatment (no app screen to show — it's a pricing card).
 
-Save each product → status will become **Ready to Submit**. They go live for sandbox testing immediately; they only need to be attached to a build at the time you submit the app for review.
+## Technical details
 
-## Step 2 — Wire products into RevenueCat
-
-In the RevenueCat dashboard for your iOS app:
-
-1. **Products** → Import / + New → add both product IDs exactly as above.
-2. **Entitlements** → + New → identifier `lifetime` → attach product `wealth_perspective_lifetime`. (The Mogul Cash consumable does NOT get an entitlement — it's tracked per-purchase via the webhook.)
-3. **Offerings** → create one called `default` (or mark an existing one as current) with two Packages:
-   - Package: `$rc_lifetime` → product `wealth_perspective_lifetime`
-   - Package: `mogul_cash` (custom identifier) → product `wealth_perspective_mogul_cash`
-4. Mark the offering as **Current**.
-5. **Project Settings → API Keys** → copy the iOS **public** SDK key (starts with `appl_`).
-
-## Step 3 — Drop the SDK key into the app
-
-Replace the placeholder in `src/lib/iap.ts`:
-
-```ts
-const REVENUECAT_IOS_API_KEY = 'appl_REPLACE_ME';   // ← paste real key
+```text
+┌─ Gold gradient card 1290×2796 ──┐
+│  Headline (7xl black white)     │
+│  Sub-caption (3xl white/70)     │
+│                                 │
+│      ┌──────────────────┐       │
+│      │ ▔▔▔ Island ▔▔▔   │       │ ← PhoneBezel
+│      │                  │       │   ~900px wide
+│      │   real app PNG   │       │   ~1900px tall
+│      │   (390×844 src)  │       │   centered
+│      │                  │       │
+│      └──────────────────┘       │
+│                                 │
+│  [icon] Wealth Perspective      │
+└─────────────────────────────────┘
 ```
 
-Android key stays `goog_REPLACE_ME` for now since we're not shipping Play yet. (We could also move both to env vars, but since these are public SDK keys safe to ship in the bundle, inline is fine and matches the file's existing comment.)
+Bezel implementation: nested divs — outer `bg-zinc-800` ring, inner `bg-black` mask, `<img>` filling inner, absolutely-positioned Dynamic Island pill. No external assets needed for the frame itself.
 
-## Step 4 — Confirm the webhook is set
+## Files touched
 
-In RevenueCat → **Project Settings → Integrations → Webhooks**, confirm:
-- URL: `https://gzhrgnoowzhifpbnnevp.supabase.co/functions/v1/verify-iap`
-- Authorization header value matches the `REVENUECAT_WEBHOOK_SECRET` secret already configured in Lovable Cloud.
+- **new** `src/components/marketing/PhoneBezel.tsx`
+- **new** `src/assets/store-screens/01-earnings.png.asset.json` … `06-quiz.png.asset.json` (6 files, uploaded via CLI)
+- **edit** `src/pages/StoreScreenshots.tsx` — replace 6 `body` blocks with `<PhoneBezel>` calls
 
-This is what actually grants `has_lifetime_access = true` and credits Mogul Cash after a successful purchase — the client-side `syncEntitlementToBackend()` call is just a hint.
+## Workflow
 
-## Step 5 — Sandbox test
+1. Build `PhoneBezel` component first
+2. Capture all 6 screens via browser tool, save to `/tmp/`, upload each via `lovable-assets create`
+3. Wire pointers into `StoreScreenshots.tsx`
+4. Verify visually in preview at both iPhone and Android sizes
 
-1. In App Store Connect → **Users and Access → Sandbox Testers** → create a test Apple ID (use an email you don't already have on an Apple account).
-2. On a real iOS device, sign out of the App Store, build the app via Xcode, launch it, hit the paywall → "Get Lifetime Access" → sign in with the sandbox tester when prompted → complete purchase ($0 in sandbox).
-3. Verify: paywall disappears, RevenueCat dashboard shows the transaction under the test user, and `user_access.has_lifetime_access` flips to `true` in the database.
-4. Repeat for Mogul Cash → verify `trading_portfolios.cash_balance` increases by 20,000.
+## Notes
 
----
-
-## What I'll do in build mode
-
-The only code change is **Step 3**: paste the real `appl_…` key into `src/lib/iap.ts` once you have it. Everything else (Steps 1, 2, 4, 5) happens in the Apple and RevenueCat dashboards — I'll walk you through each screen but those clicks are yours.
-
-When you're ready, share the iOS SDK key from RevenueCat → Project Settings → API Keys, and I'll wire it in.
+- If a screen requires login (e.g. `/mogul-markets`) and the session isn't authenticated in the browser tool, I'll pause and ask you to sign in in the preview first.
+- The 7th Lifetime Access frame stays illustrated since it's a pricing/value summary, not a UI showcase.
+- Capture instructions in the footer get updated to reflect the new "Capture node screenshot" target.
