@@ -133,10 +133,94 @@ const screenshots: Screenshot[] = [
 
 export default function StoreScreenshots() {
   const [size, setSize] = useState<DeviceSize>('iphone-67');
+  const [busy, setBusy] = useState<string | null>(null);
+  const captureHostRef = useRef<HTMLDivElement>(null);
   const dims = SIZES[size];
-  // Display at 1/3 scale so we can see all frames on screen; capture the
-  // rendered DOM at full resolution via DevTools.
+  // Display at 1/3 scale so we can see all frames on screen.
   const scale = 0.33;
+
+  /**
+   * Render a single frame at full resolution off-screen, capture it with
+   * html2canvas, and return the PNG blob. The capture node is mounted into
+   * a fixed off-screen host so it does not affect layout.
+   */
+  async function capturePng(s: Screenshot): Promise<Blob> {
+    const host = captureHostRef.current!;
+    const node = document.createElement('div');
+    node.style.width = `${dims.w}px`;
+    node.style.height = `${dims.h}px`;
+    host.appendChild(node);
+
+    // Render React tree synchronously via createRoot
+    const { createRoot } = await import('react-dom/client');
+    const root = createRoot(node);
+    root.render(
+      <div className={`relative overflow-hidden bg-gradient-to-br ${s.accent}`} style={{ width: dims.w, height: dims.h }}>
+        <ScreenshotFrame s={s} w={dims.w} h={dims.h} />
+      </div>
+    );
+
+    // Wait a tick for images/fonts to settle
+    await new Promise((r) => setTimeout(r, 400));
+    await (document as any).fonts?.ready;
+
+    const canvas = await html2canvas(node, {
+      scale: 1,
+      useCORS: true,
+      backgroundColor: null,
+      width: dims.w,
+      height: dims.h,
+      windowWidth: dims.w,
+      windowHeight: dims.h,
+    });
+
+    root.unmount();
+    host.removeChild(node);
+
+    return await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
+  }
+
+  function fileName(s: Screenshot) {
+    return `wealth-perspective_${size}_${s.id}.png`;
+  }
+
+  async function downloadOne(s: Screenshot) {
+    try {
+      setBusy(s.id);
+      const blob = await capturePng(s);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName(s);
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function downloadAll() {
+    try {
+      setBusy('__all__');
+      const zip = new JSZip();
+      for (const s of screenshots) {
+        setBusy(`zip:${s.id}`);
+        const blob = await capturePng(s);
+        zip.file(fileName(s), blob);
+      }
+      const out = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(out);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `wealth-perspective_${size}_screenshots.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const anyBusy = busy !== null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-8">
@@ -144,23 +228,45 @@ export default function StoreScreenshots() {
         <header className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold">Store Screenshots</h1>
-            <p className="text-zinc-400 text-sm">App Store & Google Play marketing frames with real in-app screenshots inside iPhone bezels.</p>
+            <p className="text-zinc-400 text-sm">App Store & Google Play marketing frames. Download as full-resolution PNG (Apple's preferred format).</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {(Object.keys(SIZES) as DeviceSize[]).map((s) => (
-              <Button key={s} variant={s === size ? 'default' : 'outline'} onClick={() => setSize(s)}>
+              <Button key={s} variant={s === size ? 'default' : 'outline'} onClick={() => setSize(s)} disabled={anyBusy}>
                 {SIZES[s].label}
               </Button>
             ))}
+            <Button onClick={downloadAll} disabled={anyBusy} className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+              {busy?.startsWith('zip') || busy === '__all__' ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Zipping…</>
+              ) : (
+                <><Download className="h-4 w-4 mr-2" /> Download all (.zip)</>
+              )}
+            </Button>
           </div>
         </header>
 
-        <div className="text-zinc-500 text-xs">Capture target: {dims.w} × {dims.h}px. In DevTools, right-click the element with <code>data-screenshot-inner</code> → "Capture node screenshot".</div>
+        <div className="text-zinc-500 text-xs">Capture target: {dims.w} × {dims.h}px · PNG, lossless. Files are named like <code>wealth-perspective_{size}_01-earnings.png</code> so they sort correctly in App Store Connect.</div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-4">
           {screenshots.map((s) => (
             <div key={s.id} className="space-y-2">
-              <div className="text-xs text-zinc-400 font-mono">{s.id}.png</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-zinc-400 font-mono">{s.id}.png</div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => downloadOne(s)}
+                  disabled={anyBusy}
+                  className="h-7 px-3 text-xs"
+                >
+                  {busy === s.id ? (
+                    <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Rendering…</>
+                  ) : (
+                    <><Download className="h-3 w-3 mr-1" /> PNG</>
+                  )}
+                </Button>
+              </div>
               <Card
                 data-screenshot={s.id}
                 className={`relative overflow-hidden rounded-[60px] border-0 bg-gradient-to-br ${s.accent}`}
@@ -181,18 +287,26 @@ export default function StoreScreenshots() {
         </div>
 
         <div className="pt-12 border-t border-zinc-800 text-sm text-zinc-400 space-y-2">
-          <p className="font-semibold text-white">Export instructions</p>
-          <ol className="list-decimal list-inside space-y-1">
-            <li>Open DevTools (Cmd/Ctrl+Shift+I) and right-click a screenshot card.</li>
-            <li>Choose "Capture node screenshot" on the inner full-resolution layer (data-screenshot-inner).</li>
-            <li>Repeat for each frame in both iPhone 6.7" and Android sizes.</li>
-            <li>Upload to App Store Connect (Screenshots → 6.7") and Play Console (Phone screenshots).</li>
-          </ol>
+          <p className="font-semibold text-white">How downloads work</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Click <strong>PNG</strong> on any card to download just that frame at full {dims.w}×{dims.h} resolution.</li>
+            <li>Click <strong>Download all (.zip)</strong> to grab every frame for the selected device size in one bundle.</li>
+            <li>Format is PNG (lossless) — Apple and Google both accept PNG or JPEG, but PNG preserves the gold gradients and crisp text.</li>
+            <li>Switch the device toggle to re-export at Android (1080×1920) resolution.</li>
+          </ul>
         </div>
       </div>
+
+      {/* off-screen host where full-resolution captures are rendered */}
+      <div
+        ref={captureHostRef}
+        aria-hidden
+        style={{ position: 'fixed', left: -99999, top: 0, pointerEvents: 'none' }}
+      />
     </div>
   );
 }
+
 
 function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
   return (
