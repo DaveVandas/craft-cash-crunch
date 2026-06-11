@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import JSZip from 'jszip';
+import { Download, Loader2 } from 'lucide-react';
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Crown, TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infinity as InfinityIcon, Zap } from 'lucide-react';
