@@ -209,7 +209,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
           {s.screen ? (
             <PhoneBezel src={s.screen} alt={s.caption} width={760} />
           ) : (
-            <div className="w-full max-w-[900px] flex items-center">{s.body}</div>
+            <div className="w-full h-full flex items-center justify-center">{s.body}</div>
           )}
         </div>
 
