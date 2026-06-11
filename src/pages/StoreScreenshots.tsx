@@ -95,13 +95,13 @@ const screenshots: Screenshot[] = [
         {/* premium price medallion */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-300/40 to-yellow-600/20 blur-3xl rounded-full scale-150" />
-          <div className="relative rounded-[64px] border-2 border-amber-300/40 bg-gradient-to-br from-amber-500/15 via-yellow-500/5 to-amber-700/15 px-20 py-12 shadow-[0_0_120px_rgba(245,191,66,0.35)]">
-            <Crown className="h-24 w-24 mx-auto text-amber-300 drop-shadow-[0_0_30px_rgba(245,191,66,0.7)]" />
-            <div className="mt-4 text-6xl font-black tracking-wide text-amber-200/90 uppercase">Lifetime Access</div>
-            <div className="mt-2 text-[11rem] leading-none font-black bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent">
+          <div className="relative rounded-[64px] border-2 border-amber-300/40 px-20 py-12" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(180,120,20,0.12))', boxShadow: '0 0 120px rgba(245,191,66,0.35)' }}>
+            <Crown className="h-24 w-24 mx-auto text-amber-300" style={{ filter: 'drop-shadow(0 0 30px rgba(245,191,66,0.7))' }} />
+            <div className="mt-4 text-6xl font-black tracking-wide uppercase" style={{ color: '#fde68a' }}>Lifetime Access</div>
+            <div className="mt-2 text-[11rem] leading-none font-black" style={{ color: '#fbbf24', textShadow: '0 0 40px rgba(251,191,36,0.5)' }}>
               $9.99
             </div>
-            <div className="mt-3 text-3xl text-white/80 italic">one payment · yours forever</div>
+            <div className="mt-3 text-3xl italic" style={{ color: 'rgba(255,255,255,0.85)' }}>one payment · yours forever</div>
           </div>
         </div>
 
