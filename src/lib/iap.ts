@@ -26,7 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // === PUBLIC SDK KEYS — safe to ship in client bundles ===
 // Replace with the keys from RevenueCat → Project Settings → API keys.
-const REVENUECAT_IOS_API_KEY = 'appl_REPLACE_ME';
+const REVENUECAT_IOS_API_KEY = 'appl_ubRRjRROoIVixzVclDghLfoBKGK';
 const REVENUECAT_ANDROID_API_KEY = 'goog_REPLACE_ME';
 
 export const ENTITLEMENT_ID = 'lifetime';
