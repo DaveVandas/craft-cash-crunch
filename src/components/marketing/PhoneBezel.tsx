@@ -45,17 +45,7 @@ export function PhoneBezel({ src, alt = '', width = 900 }: PhoneBezelProps) {
           className="block w-full h-full object-cover object-top"
           draggable={false}
         />
-        {/* Dynamic Island */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 bg-black z-10"
-          style={{
-            top: islandTop - bezel,
-            width: islandW,
-            height: islandH,
-            borderRadius: islandH / 2,
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-          }}
-        />
+        {/* Dynamic Island removed for marketing clarity so app headers stay readable */}
         {/* subtle glare */}
         <div
           className="absolute inset-0 pointer-events-none"
