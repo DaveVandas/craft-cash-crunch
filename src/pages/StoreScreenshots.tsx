@@ -691,6 +691,9 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
   if (s.id === '07-lifetime') {
     return <LifetimeCanvasPreview w={w} h={h} />;
   }
+  if (s.id === '08-mogul-cash') {
+    return <MogulCashCanvasPreview w={w} h={h} />;
+  }
 
   return (
     <div
