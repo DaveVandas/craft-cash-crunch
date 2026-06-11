@@ -520,6 +520,9 @@ export default function StoreScreenshots() {
     if (s.id === '07-lifetime') {
       return captureLifetimePng(dims);
     }
+    if (s.id === '08-mogul-cash') {
+      return captureMogulCashPng(dims);
+    }
 
     const host = captureHostRef.current!;
     const node = document.createElement('div');
