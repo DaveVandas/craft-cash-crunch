@@ -201,7 +201,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      {isBillionaire && <MoneyRain intensity="light" />}
+      {isBillionaire && typeof window !== 'undefined' && !new URLSearchParams(window.location.search).has('norain') && <MoneyRain intensity="light" />}
       <main className="flex-1 pb-24 md:pb-0 animate-fade-in">
         <PaywallGate>
           <>
