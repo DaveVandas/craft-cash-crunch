@@ -91,7 +91,13 @@ const screenshots: Screenshot[] = [
     subCaption: 'One payment. No subscriptions. Ever.',
     accent: 'from-amber-400 to-yellow-600',
     body: <LifetimeOfferGraphic />,
-
+  },
+  {
+    id: '08-mogul-cash',
+    caption: 'Stack the Deck. Trade Bigger.',
+    subCaption: 'Add $20,000 in virtual paper cash',
+    accent: 'from-emerald-500 via-amber-400 to-yellow-600',
+    body: null,
   },
 ];
 
