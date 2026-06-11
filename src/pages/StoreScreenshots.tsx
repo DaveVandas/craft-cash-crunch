@@ -91,7 +91,13 @@ const screenshots: Screenshot[] = [
     subCaption: 'One payment. No subscriptions. Ever.',
     accent: 'from-amber-400 to-yellow-600',
     body: <LifetimeOfferGraphic />,
-
+  },
+  {
+    id: '08-mogul-cash',
+    caption: 'Stack the Deck. Trade Bigger.',
+    subCaption: 'Add $20,000 in virtual paper cash',
+    accent: 'from-emerald-500 via-amber-400 to-yellow-600',
+    body: null,
   },
 ];
 
@@ -310,6 +316,193 @@ async function captureLifetimePng(dims: { w: number; h: number }): Promise<Blob>
   return await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!), 'image/png'));
 }
 
+function MogulCashCanvasPreview({ w, h }: { w: number; h: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let mounted = true;
+
+    captureMogulCashPng({ w, h }).then((blob) => {
+      if (!mounted) return;
+      objectUrl = URL.createObjectURL(blob);
+      setSrc(objectUrl);
+    });
+
+    return () => {
+      mounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [w, h]);
+
+  return src ? <img src={src} alt="Mogul Cash screenshot" width={w} height={h} /> : <div className="h-full w-full bg-zinc-950" />;
+}
+
+async function captureMogulCashPng(dims: { w: number; h: number }): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  canvas.width = dims.w;
+  canvas.height = dims.h;
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  const drawRoundRect = (x: number, y: number, width: number, height: number, radius: number) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+
+  const fit = dims.w / 1290;
+
+  // Background
+  ctx.fillStyle = '#09090b';
+  ctx.fillRect(0, 0, dims.w, dims.h);
+
+  // Emerald glow top-left (money vibes)
+  let glow = ctx.createRadialGradient(dims.w * 0.2, 80 * fit, 0, dims.w * 0.2, 80 * fit, 720 * fit);
+  glow.addColorStop(0, 'rgba(16,185,129,0.30)');
+  glow.addColorStop(1, 'rgba(16,185,129,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(dims.w * 0.2, 80 * fit, 720 * fit, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Gold glow bottom-right
+  glow = ctx.createRadialGradient(dims.w * 0.78, dims.h * 0.82, 0, dims.w * 0.78, dims.h * 0.82, 640 * fit);
+  glow.addColorStop(0, 'rgba(251,191,36,0.32)');
+  glow.addColorStop(1, 'rgba(251,191,36,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(dims.w * 0.78, dims.h * 0.82, 640 * fit, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Header
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${72 * fit}px Arial, sans-serif`;
+  ctx.fillText('Stack the Deck.', dims.w / 2, 360 * fit);
+  ctx.fillText('Trade Bigger.', dims.w / 2, 450 * fit);
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = `400 ${30 * fit}px Arial, sans-serif`;
+  ctx.fillText('Top up your Mogul Markets bankroll', dims.w / 2, 510 * fit);
+
+  // Hero card
+  const cardW = 980 * fit;
+  const cardH = 720 * fit;
+  const cardX = (dims.w - cardW) / 2;
+  const cardY = 660 * fit;
+  drawRoundRect(cardX, cardY, cardW, cardH, 48 * fit);
+  ctx.fillStyle = '#100d05';
+  ctx.fill();
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 3 * fit;
+  ctx.stroke();
+
+  // "MOGUL CASH PACK" eyebrow
+  ctx.fillStyle = '#34d399';
+  ctx.font = `900 ${42 * fit}px Arial, sans-serif`;
+  ctx.fillText('MOGUL CASH PACK', dims.w / 2, cardY + 110 * fit);
+
+  // Big +$20,000
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = `900 ${188 * fit}px Arial, sans-serif`;
+  ctx.fillText('+$20,000', dims.w / 2, cardY + 290 * fit);
+
+  // subtitle
+  ctx.fillStyle = '#fde68a';
+  ctx.font = `700 ${36 * fit}px Arial, sans-serif`;
+  ctx.fillText('virtual paper-trading cash', dims.w / 2, cardY + 350 * fit);
+
+  // divider
+  ctx.strokeStyle = 'rgba(251,191,36,0.35)';
+  ctx.lineWidth = 2 * fit;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 120 * fit, cardY + 430 * fit);
+  ctx.lineTo(cardX + cardW - 120 * fit, cardY + 430 * fit);
+  ctx.stroke();
+
+  // Price
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `400 ${32 * fit}px Arial, sans-serif`;
+  ctx.fillText('just', dims.w / 2 - 170 * fit, cardY + 560 * fit);
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = `900 ${130 * fit}px Arial, sans-serif`;
+  ctx.fillText('$4.99', dims.w / 2 + 30 * fit, cardY + 580 * fit);
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = `500 ${28 * fit}px Arial, sans-serif`;
+  ctx.fillText('one-time · in-app purchase', dims.w / 2, cardY + 650 * fit);
+
+  // Benefit chips
+  const benefits = [
+    ['✦', 'Instantly added to your portfolio'],
+    ['↗', 'Trade real-ticker stocks risk-free'],
+    ['◉', 'Simulation only — no real money'],
+  ];
+  const chipW = 1000 * fit;
+  const chipH = 96 * fit;
+  const chipX = (dims.w - chipW) / 2;
+  const chipsY = cardY + cardH + 60 * fit;
+  benefits.forEach(([icon, label], i) => {
+    const y = chipsY + i * (chipH + 18 * fit);
+    drawRoundRect(chipX, y, chipW, chipH, 14 * fit);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(252,211,77,0.28)';
+    ctx.lineWidth = 1.5 * fit;
+    ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#34d399';
+    ctx.font = `700 ${36 * fit}px Arial, sans-serif`;
+    ctx.fillText(icon, chipX + 36 * fit, y + 62 * fit);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${32 * fit}px Arial, sans-serif`;
+    ctx.fillText(label, chipX + 100 * fit, y + 60 * fit);
+    ctx.textAlign = 'center';
+  });
+
+  // Footer brand
+  try {
+    const icon = await loadImage(appIcon);
+    const iconSize = 80 * fit;
+    const footerY = dims.h - 154 * fit;
+    const totalW = 80 * fit + 24 * fit + 260 * fit;
+    const iconX = (dims.w - totalW) / 2;
+    drawRoundRect(iconX, footerY, iconSize, iconSize, 14 * fit);
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(icon, iconX, footerY, iconSize, iconSize);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${30 * fit}px Arial, sans-serif`;
+    ctx.fillText('Wealth Perspective', iconX + iconSize + 24 * fit, footerY + 51 * fit);
+  } catch {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${30 * fit}px Arial, sans-serif`;
+    ctx.fillText('Wealth Perspective', dims.w / 2, dims.h - 96 * fit);
+  }
+
+  return await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!), 'image/png'));
+}
+
 export default function StoreScreenshots() {
   const [size, setSize] = useState<DeviceSize>('iphone-67');
   const [busy, setBusy] = useState<string | null>(null);
@@ -326,6 +519,9 @@ export default function StoreScreenshots() {
   async function capturePng(s: Screenshot): Promise<Blob> {
     if (s.id === '07-lifetime') {
       return captureLifetimePng(dims);
+    }
+    if (s.id === '08-mogul-cash') {
+      return captureMogulCashPng(dims);
     }
 
     const host = captureHostRef.current!;
@@ -494,6 +690,9 @@ export default function StoreScreenshots() {
 function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
   if (s.id === '07-lifetime') {
     return <LifetimeCanvasPreview w={w} h={h} />;
+  }
+  if (s.id === '08-mogul-cash') {
+    return <MogulCashCanvasPreview w={w} h={h} />;
   }
 
   return (
