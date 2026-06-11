@@ -1,55 +1,70 @@
-## Resize screenshots + add 3 testimonial graphics
+# Apple Reviewer Demo Account
 
-### 1. Resize to Apple-required dimensions
+Create a permanent demo account that Apple's App Review team can use to sign in and test every paywalled feature without paying.
 
-The current iPhone size on `/store-screenshots` is `1290×2796`, which App Store Connect's 6.5" upload slot rejects. Change it to **1284×2778** (one of the 4 accepted sizes — visually identical, just 6px narrower / 18px shorter). All existing screenshots and the canvas-rendered Lifetime + Mogul Cash graphics scale via a `fit = w / 1290` ratio, so they will re-render correctly at the new size with no layout breakage.
+## Credentials (to give Apple)
 
-Edit in `src/pages/StoreScreenshots.tsx`:
+- **Email:** `appreview@northspan.com`
+- **Password:** `WealthReview2026!`
 
-```ts
-'iphone-67': { w: 1284, h: 2778, label: 'iPhone 6.5"/6.7" (1284×2778)' }
+(Strong enough to satisfy Apple's reviewer-account requirements; no real PII; under our control.)
+
+## What gets created
+
+A single migration that:
+
+1. Creates the auth user `appreview@northspan.com` with the password above, email pre-confirmed (so no email-verification step blocks Apple).
+2. Lets the existing `handle_new_user` trigger auto-create the `user_access` row, then flips `has_lifetime_access = true` for that user.
+3. Creates a matching `profiles` row (handled by `handle_new_user_profile` trigger automatically — no extra work).
+4. Idempotent: if the account already exists, just ensures `has_lifetime_access = true` and re-confirms the email. Safe to re-run.
+
+## Why this works
+
+- Account is a real Supabase auth user, so it goes through normal sign-in (no special bypass code path needed in the app — less risk of a reviewer hitting an edge case).
+- `user_access.has_lifetime_access = true` unlocks every paywalled feature via the existing `PaywallGate` logic — no app code changes required.
+- Email pre-confirmed so reviewers don't have to check an inbox.
+- Lives forever — reviewers for v1.1, v1.2, etc. can reuse the same login.
+
+## Technical details
+
+Single migration calling `supabase.auth.admin`–equivalent SQL:
+
+```sql
+-- Insert into auth.users with crypted password and confirmed email
+-- (uses Supabase's standard auth schema; password hashed via crypt + bcrypt)
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, created_at, updated_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(), 'authenticated', 'authenticated',
+  'appreview@northspan.com',
+  crypt('WealthReview2026!', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"display_name":"App Reviewer"}'::jsonb,
+  false
+)
+ON CONFLICT (email) DO UPDATE
+SET email_confirmed_at = COALESCE(auth.users.email_confirmed_at, now()),
+    encrypted_password = crypt('WealthReview2026!', gen_salt('bf'));
+
+-- Triggers auto-create user_access + profiles rows.
+-- Then grant lifetime:
+UPDATE public.user_access
+SET has_lifetime_access = true, updated_at = now()
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'appreview@northspan.com');
 ```
 
-### 2. Add 3 testimonial graphics (slots 09, 10, 11)
+No edge function changes, no client code changes, no RLS changes.
 
-Three new entries in the `screenshots` array, each rendered with the same gold-gradient frame, app-icon footer, and headline/sub-caption styling already used by the existing 8 frames — so the testimonial cards drop into the install sheet feeling like one continuous brand story.
+## Out of scope
 
-Each card shows:
+- Bypassing the paywall in code for a special email — not needed; the entitlement flag does the work.
+- Test IAP purchases — Apple uses sandbox accounts they create themselves for that; our demo account just needs unlocked access.
+- Drafting the App Review Information copy — that's the next step after this lands.
 
-- ⭐⭐⭐⭐⭐ five-star row (gold, large)
-- A short, punchy headline quote (e.g. "Finally gets it.")
-- 2–3 line review body (entertaining, on-brand voice)
-- Reviewer name + city + "Verified Lifetime Member" badge
-- Same gold-bordered card-on-black aesthetic as the Lifetime panel
+## Files touched
 
-Proposed copy (App Store guidelines allow stylized testimonials as marketing content — keep them realistic, no fake "Apple Editor" branding):
-
-**Testimonial 1 — "Reality Check Hit Different"**
-> "I plugged in my salary expecting a chuckle. I got therapy. Brutal Mode should come with a hug."
-> — Marcus T., Austin TX
-
-**Testimonial 2 — "Bezos Earned My Rent in 4 Seconds"**
-> "Watching the earnings ticker on a billionaire is somehow more entertaining than Netflix. And weirdly educational."
-> — Priya S., Brooklyn NY
-
-**Testimonial 3 — "Paper Trading Made Me Brave"**
-> "Mirrored a VIP portfolio with $100k of pretend money. Lost beautifully. Learned everything. Now I actually understand the market."
-> — Jordan K., Denver CO
-
-Each renders as a new `Screenshot` entry with a `body: <TestimonialGraphic .../>` component. One reusable React component takes `{ stars, quote, byline }` props.
-
-### 3. Render approach
-
-Add a new `TestimonialGraphic` component near `LifetimeOfferGraphic` in the same file. Uses the same outer wrapper, gold border, and black background so the rendering pipeline (html2canvas capture / ZIP download) requires zero changes.
-
-### Files touched
-
-- `src/pages/StoreScreenshots.tsx` — change `SIZES`, add `TestimonialGraphic`, add 3 entries to the `screenshots` array.
-
-### What you'll do after
-
-Recapture all 11 frames from `/store-screenshots` at the new 1284×2778 size and upload the strongest 10 (Apple's max) to App Store Connect. I recommend keeping all 6 product screens + Lifetime + 3 testimonials = 10 exact.
-
-### Out of scope
-
-Actual App Preview videos. Those require screen-recording from a real iPhone with Xcode — handled later on the Mac, not here.
+- One new migration file (created by the migration tool).
