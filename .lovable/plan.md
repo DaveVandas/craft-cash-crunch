@@ -1,22 +1,67 @@
-## Current state
+## Goal
 
-The `/store-screenshots` page has no download button. The instructions tell you to open DevTools → right-click → "Capture node screenshot," which exports a PNG (not JPEG). That's tedious for 7 frames × 2 device sizes = 14 captures.
+Add an 8th store-screenshot frame dedicated to the **Mogul Cash $20,000 pack** so the App Store IAP listing has its own catchy image (separate from the Lifetime paywall).
 
-## Format question
+## Concept — "Stack the Deck"
 
-Apple's App Store and Google Play both **require PNG or JPEG** for screenshots, but **PNG is strongly preferred** (lossless, no compression artifacts on gradients/text). I'll keep PNG as the default — JPEG would visibly degrade the gold gradients and white type.
+A bold, gold-on-black hero card that reads like a money drop:
 
-## Plan
+```
+   UPGRADE YOUR BANKROLL
+   Mogul Cash · Trade Bigger
 
-1. **Add a "Download PNG" button** under each frame on `/store-screenshots`.
-2. **Render at full resolution for capture.** Use `html2canvas` (already installed) on a hidden full-size version of the frame (1290×2796 for iPhone, 1080×1920 for Android) so output matches store requirements exactly — no upscaling, no scale-transform blur.
-3. **Filename convention:** `wealth-perspective_iphone-67_01-earnings.png` so they sort correctly when you drag the whole folder into App Store Connect.
-4. **Add a "Download All" button** at the top that zips and downloads all 7 frames for the currently selected device size in one click. (Uses `jszip` — small add, ~30KB.)
-5. Keep the on-screen scaled preview exactly as it is today.
+   ┌────────────────────────────┐
+   │                            │
+   │        +$20,000            │   ← huge gold numerals
+   │     virtual paper cash     │
+   │                            │
+   │   ─────────────────────    │
+   │         just $4.99         │   ← price chip
+   │     one-time · in-app      │
+   └────────────────────────────┘
 
-## Technical notes
+   💵💵💵  (subtle cash-stack motif)
 
-- `html2canvas` with `{ scale: 1, useCORS: true, backgroundColor: null }` against the unscaled DOM node.
-- Render the unscaled capture node off-screen (`position: fixed; left: -99999px`) only while capturing, then remove — avoids layout shift and keeps the preview grid intact.
-- One file touched: `src/pages/StoreScreenshots.tsx`. Add `jszip` via `bun add jszip`.
-- No changes to `PhoneBezel.tsx` or the asset pipeline.
+   ✦ Instantly added to your portfolio
+   ✦ Trade real-ticker stocks risk-free
+   ✦ Simulation only — no real money
+
+   [ Wealth Perspective logo ]
+```
+
+Same gold/amber luxury treatment as the Lifetime frame (radial glow, `#fbbf24` border, `#100d05` card, `#fde68a` heading) so the two IAP screenshots feel like a matched set without being identical.
+
+## Implementation
+
+All work in `src/pages/StoreScreenshots.tsx` only — copy-only/UI change, no backend.
+
+1. **New screenshot entry** `08-mogul-cash` added to the `screenshots` array, after the Lifetime frame:
+   - caption: `"Stack the Deck. Trade Bigger."`
+   - subCaption: `"Add $20,000 in virtual paper cash"`
+   - accent: `from-emerald-500 via-amber-400 to-yellow-600`
+   - body: `<MogulCashOfferGraphic />` (on-screen preview component)
+
+2. **New `MogulCashOfferGraphic`** — mirrors `LifetimeOfferGraphic`'s structure (hero card + 3 benefit chips) using the same Tailwind classes so the on-screen preview matches the export.
+
+3. **New `captureMogulCashPng(dims)`** — built the same way as `captureLifetimePng`, since canvas export is what fixed the Lifetime download issue. Draws:
+   - Dark `#09090b` background + two radial gold glows
+   - Header: "UPGRADE YOUR BANKROLL" + tagline
+   - Hero card (gold-bordered, dark fill): `+$20,000`, "virtual paper cash", divider, `$4.99`, "one-time · in-app purchase"
+   - 3 benefit chips (instant credit / risk-free trading / simulation-only disclaimer)
+   - Footer with app icon + "Wealth Perspective"
+
+4. **`MogulCashCanvasPreview`** — same pattern as `LifetimeCanvasPreview` so the on-page preview renders from the canvas (guarantees download matches what you see).
+
+5. **`capturePng` switch** — extend the existing `if (s.id === '07-lifetime')` short-circuit to also route `08-mogul-cash` to `captureMogulCashPng(dims)`.
+
+6. **Preview renderer** — wherever `LifetimeCanvasPreview` is rendered for frame 7, render `MogulCashCanvasPreview` for frame 8.
+
+## Output
+
+After implementing, the `/store-screenshots` page will show a new 8th tile, downloadable at both 1290×2796 (iPhone) and 1080×1920 (Android), ready to upload as the screenshot for IAP Product B (Mogul Cash).
+
+## Out of scope
+
+- No changes to Stripe/IAP product config
+- No changes to the Lifetime frame
+- No new assets uploaded (all rendered procedurally on canvas, matching the Lifetime approach)
