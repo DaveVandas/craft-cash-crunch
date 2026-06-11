@@ -99,7 +99,92 @@ const screenshots: Screenshot[] = [
     accent: 'from-emerald-500 via-amber-400 to-yellow-600',
     body: null,
   },
+  {
+    id: '09-review-reality-check',
+    caption: '"Reality Check Hit Different"',
+    subCaption: 'What members are saying',
+    accent: 'from-amber-400 via-yellow-500 to-amber-600',
+    body: (
+      <TestimonialGraphic
+        quote={'"I plugged in my salary expecting a chuckle. I got therapy. Brutal Mode should come with a hug."'}
+        name="Marcus T."
+        city="Austin, TX"
+      />
+    ),
+  },
+  {
+    id: '10-review-ticker',
+    caption: '"Bezos Earned My Rent in 4 Seconds"',
+    subCaption: 'What members are saying',
+    accent: 'from-rose-500 via-amber-400 to-yellow-600',
+    body: (
+      <TestimonialGraphic
+        quote={'"Watching the earnings ticker on a billionaire is somehow more entertaining than Netflix. And weirdly educational."'}
+        name="Priya S."
+        city="Brooklyn, NY"
+      />
+    ),
+  },
+  {
+    id: '11-review-paper-trading',
+    caption: '"Paper Trading Made Me Brave"',
+    subCaption: 'What members are saying',
+    accent: 'from-emerald-500 via-amber-400 to-yellow-600',
+    body: (
+      <TestimonialGraphic
+        quote={'"Mirrored a VIP portfolio with $100k of pretend money. Lost beautifully. Learned everything. Now I actually understand the market."'}
+        name="Jordan K."
+        city="Denver, CO"
+      />
+    ),
+  },
 ];
+
+function TestimonialGraphic({ quote, name, city }: { quote: string; name: string; city: string }) {
+  return (
+    <div className="w-full max-w-[1100px] mx-auto text-center">
+      <div
+        style={{
+          borderRadius: 48,
+          padding: '72px 68px 78px',
+          background: '#100d05',
+          border: '3px solid #fbbf24',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: 110, lineHeight: '110px', letterSpacing: '0.15em', color: '#fbbf24', marginBottom: 40 }}>
+          ★★★★★
+        </div>
+        <div style={{ fontSize: 46, lineHeight: '64px', fontWeight: 700, color: '#f8fafc', marginBottom: 48, fontStyle: 'italic' }}>
+          {quote}
+        </div>
+        <div style={{ height: 2, background: 'rgba(251,191,36,0.35)', margin: '0 80px 36px' }} />
+        <div style={{ fontSize: 36, lineHeight: '44px', fontWeight: 900, color: '#fde68a', marginBottom: 10 }}>
+          {name}
+        </div>
+        <div style={{ fontSize: 28, lineHeight: '36px', fontWeight: 500, color: 'rgba(255,255,255,0.7)', marginBottom: 28 }}>
+          {city}
+        </div>
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '10px 22px',
+            borderRadius: 999,
+            border: '1.5px solid rgba(251,191,36,0.5)',
+            background: 'rgba(251,191,36,0.08)',
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: '#fcd34d',
+          }}
+        >
+          ✦ Verified Lifetime Member
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function LifetimeOfferGraphic() {
   const benefits = [
