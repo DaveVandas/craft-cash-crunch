@@ -5,7 +5,7 @@ import { Download, Loader2 } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infinity as InfinityIcon, Zap } from 'lucide-react';
+import { TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infinity as InfinityIcon, Zap, BookOpen } from 'lucide-react';
 
 import appIcon from '@/assets/app-icon.png';
 import { PhoneBezel } from '@/components/marketing/PhoneBezel';
@@ -90,56 +90,58 @@ const screenshots: Screenshot[] = [
     caption: 'Unlock Everything Forever',
     subCaption: 'One payment. No subscriptions. Ever.',
     accent: 'from-amber-400 to-yellow-600',
-    body: (
-      <div className="w-full max-w-[1100px] mx-auto flex flex-col items-center justify-center gap-12 text-center">
-        {/* premium price medallion — flat layout, padding-based spacing for html2canvas safety */}
-        <div
-          style={{
-            borderRadius: 64,
-            padding: '80px 96px',
-            background: 'linear-gradient(135deg, #1a1407 0%, #2a1f08 100%)',
-            border: '3px solid #fbbf24',
-            boxShadow: '0 0 80px rgba(251,191,36,0.45), inset 0 0 40px rgba(251,191,36,0.1)',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: 130, lineHeight: '130px', paddingBottom: 24 }}>👑</div>
-          <div style={{ fontSize: 72, lineHeight: '80px', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fde68a', paddingBottom: 36 }}>
-            Lifetime Access
-          </div>
-          <div style={{ fontSize: 220, lineHeight: '220px', fontWeight: 900, color: '#fbbf24', paddingBottom: 36, textShadow: '0 4px 30px rgba(251,191,36,0.55)' }}>
-            $9.99
-          </div>
-          <div style={{ fontSize: 36, lineHeight: '44px', fontStyle: 'italic', color: '#ffffff', opacity: 0.85 }}>
-            one payment · yours forever
-          </div>
-        </div>
-
-        {/* feature list — bigger, more features */}
-        <div className="grid grid-cols-2 gap-5 text-[2rem] text-white w-full">
-          {[
-            { Icon: DollarSign, text: 'Unlimited celebrity searches' },
-            { Icon: Zap, text: 'Real-time mogul earnings ticker' },
-            { Icon: BarChart3, text: 'Reality Check salary showdowns' },
-            { Icon: Users, text: 'Mogul vs Mogul comparisons' },
-            { Icon: TrendingUp, text: 'Paper-trade real stocks risk-free' },
-            { Icon: Trophy, text: 'Mirror billionaire portfolios' },
-            { Icon: Brain, text: 'Daily Wealth IQ quiz & streaks' },
-            { Icon: Crown, text: 'Mogul Academy premium lessons' },
-            { Icon: Sparkles, text: 'No ads. No subscriptions. Ever.' },
-            { Icon: InfinityIcon, text: 'All future updates included' },
-          ].map(({ Icon, text }) => (
-            <div key={text} className="flex items-center gap-5 rounded-2xl border border-amber-300/25 bg-black/40 px-7 py-5 backdrop-blur-sm text-left">
-              <Icon className="h-10 w-10 text-amber-300 shrink-0 drop-shadow-[0_0_10px_rgba(245,191,66,0.5)]" />
-              <span className="font-bold leading-tight">{text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
+    body: <LifetimeOfferGraphic />,
 
   },
 ];
+
+function LifetimeOfferGraphic() {
+  const benefits = [
+    { Icon: DollarSign, text: 'Unlimited celebrity searches' },
+    { Icon: Zap, text: 'Real-time mogul earnings ticker' },
+    { Icon: BarChart3, text: 'Reality Check salary showdowns' },
+    { Icon: Users, text: 'Mogul vs Mogul comparisons' },
+    { Icon: TrendingUp, text: 'Paper-trade real stocks risk-free' },
+    { Icon: Trophy, text: 'Mirror billionaire portfolios' },
+    { Icon: Brain, text: 'Daily Wealth IQ quiz & streaks' },
+    { Icon: BookOpen, text: 'Mogul Academy premium lessons' },
+    { Icon: Sparkles, text: 'No ads. No subscriptions. Ever.' },
+    { Icon: InfinityIcon, text: 'All future updates included' },
+  ];
+
+  return (
+    <div className="w-full max-w-[1100px] mx-auto text-center">
+      <div
+        style={{
+          borderRadius: 48,
+          padding: '62px 80px 68px',
+          background: '#100d05',
+          border: '3px solid #fbbf24',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: 74, lineHeight: '90px', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fde68a', marginBottom: 34 }}>
+          Lifetime Access
+        </div>
+        <div style={{ fontSize: 196, lineHeight: '196px', fontWeight: 900, color: '#fbbf24', marginBottom: 30 }}>
+          $9.99
+        </div>
+        <div style={{ fontSize: 38, lineHeight: '48px', fontWeight: 700, color: '#f8fafc' }}>
+          one payment · yours forever
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 text-[2rem] text-white w-full mt-12">
+        {benefits.map(({ Icon, text }) => (
+          <div key={text} className="flex items-center gap-5 rounded-2xl border border-amber-300/25 bg-black/50 px-7 py-5 text-left">
+            <Icon className="h-10 w-10 text-amber-300 shrink-0" />
+            <span className="font-bold leading-tight">{text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function StoreScreenshots() {
   const [size, setSize] = useState<DeviceSize>('iphone-67');
