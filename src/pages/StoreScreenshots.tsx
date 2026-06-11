@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, TrendingUp, DollarSign, Sparkles } from 'lucide-react';
+import { Crown, TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infinity as InfinityIcon, Zap } from 'lucide-react';
+
 import appIcon from '@/assets/app-icon.png';
 import { PhoneBezel } from '@/components/marketing/PhoneBezel';
 import earningsAsset from '@/assets/store-screens/01-earnings.png.asset.json';
