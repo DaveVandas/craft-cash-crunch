@@ -27,7 +27,7 @@ import quizAsset from '@/assets/store-screens/06-quiz.png.asset.json';
 type DeviceSize = 'iphone-67' | 'android';
 
 const SIZES: Record<DeviceSize, { w: number; h: number; label: string }> = {
-  'iphone-67': { w: 1290, h: 2796, label: 'iPhone 6.7" (1290×2796)' },
+  'iphone-67': { w: 1284, h: 2778, label: 'iPhone 6.5"/6.7" (1284×2778)' },
   android: { w: 1080, h: 1920, label: 'Android Phone (1080×1920)' },
 };
 
