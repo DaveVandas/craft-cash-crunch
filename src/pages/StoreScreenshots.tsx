@@ -93,15 +93,27 @@ const screenshots: Screenshot[] = [
     body: (
       <div className="w-full max-w-[1100px] mx-auto flex flex-col items-center justify-center gap-12 text-center">
         {/* premium price medallion */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-300/40 to-yellow-600/20 blur-3xl rounded-full scale-150" />
-          <div className="relative rounded-[64px] border-2 border-amber-300/40 px-20 py-12" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(180,120,20,0.12))', boxShadow: '0 0 120px rgba(245,191,66,0.35)' }}>
-            <Crown className="h-24 w-24 mx-auto text-amber-300" style={{ filter: 'drop-shadow(0 0 30px rgba(245,191,66,0.7))' }} />
-            <div className="mt-4 text-6xl font-black tracking-wide uppercase" style={{ color: '#fde68a' }}>Lifetime Access</div>
-            <div className="mt-2 text-[11rem] leading-none font-black" style={{ color: '#fbbf24', textShadow: '0 0 40px rgba(251,191,36,0.5)' }}>
-              $9.99
-            </div>
-            <div className="mt-3 text-3xl italic" style={{ color: 'rgba(255,255,255,0.85)' }}>one payment · yours forever</div>
+        <div
+          className="relative rounded-[64px] px-24 py-16"
+          style={{
+            background: 'linear-gradient(135deg, #1a1407 0%, #2a1f08 100%)',
+            border: '3px solid #fbbf24',
+            boxShadow: '0 0 80px rgba(251,191,36,0.45), inset 0 0 40px rgba(251,191,36,0.1)',
+          }}
+        >
+          {/* Crown rendered as inline SVG so html2canvas always paints it */}
+          <svg viewBox="0 0 24 24" width="120" height="120" style={{ display: 'block', margin: '0 auto', color: '#fcd34d' }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+            <path d="M5 21h14" />
+          </svg>
+          <div style={{ marginTop: 32, fontSize: 72, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fde68a', lineHeight: 1 }}>
+            Lifetime Access
+          </div>
+          <div style={{ marginTop: 40, fontSize: 220, fontWeight: 900, color: '#fbbf24', lineHeight: 1, textShadow: '0 4px 30px rgba(251,191,36,0.55)' }}>
+            $9.99
+          </div>
+          <div style={{ marginTop: 32, fontSize: 36, fontStyle: 'italic', color: '#ffffff', opacity: 0.85 }}>
+            one payment · yours forever
           </div>
         </div>
 
