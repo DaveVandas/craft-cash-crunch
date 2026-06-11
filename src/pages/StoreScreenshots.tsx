@@ -177,25 +177,25 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
       <div className={`absolute -bottom-40 right-0 w-[80%] h-[40%] bg-gradient-to-br ${s.accent} opacity-20 blur-3xl rounded-full`} />
 
       <div className="relative h-full flex flex-col p-24">
-        {/* caption block */}
-        <div className="space-y-4 text-center">
+        {/* caption block — fixed height so the phone bezel below sits at the same y on every frame */}
+        <div className="text-center flex flex-col justify-center" style={{ height: 480 }}>
           <h2 className="text-7xl font-black leading-tight text-white tracking-tight">
             {s.caption}
           </h2>
-          <p className="text-3xl text-white/70 leading-snug">{s.subCaption}</p>
+          <p className="text-3xl text-white/70 leading-snug mt-4">{s.subCaption}</p>
         </div>
 
-        {/* body */}
-        <div className="flex-1 flex items-center justify-center mt-12">
+        {/* body — phone bezel anchored to a fixed slot so size + position match across all frames */}
+        <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
             <PhoneBezel src={s.screen} alt={s.caption} width={760} />
           ) : (
-            <div className="w-full max-w-[900px]">{s.body}</div>
+            <div className="w-full max-w-[900px] flex items-center">{s.body}</div>
           )}
         </div>
 
-        {/* footer brand mark */}
-        <div className="flex items-center justify-center gap-4 pt-12">
+        {/* footer brand mark — fixed height too */}
+        <div className="flex items-center justify-center gap-4" style={{ height: 140 }}>
           <img src={appIcon} alt="" width={80} height={80} className="rounded-2xl" />
           <div className="text-3xl font-bold text-white">Wealth Perspective</div>
         </div>
