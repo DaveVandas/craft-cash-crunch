@@ -86,14 +86,33 @@ const screenshots: Screenshot[] = [
     subCaption: 'One payment. No subscriptions. Ever.',
     accent: 'from-amber-400 to-yellow-600',
     body: (
-      <div className="space-y-6 text-center">
-        <Crown className="h-24 w-24 mx-auto text-amber-300" />
-        <div className="text-6xl font-black text-white">Lifetime Access</div>
-        <div className="text-8xl font-black bg-gradient-to-r from-amber-300 to-yellow-500 bg-clip-text text-transparent">$9.99</div>
-        <div className="space-y-3 text-2xl text-white/80 pt-4">
-          <div className="flex items-center justify-center gap-2"><DollarSign className="h-6 w-6 text-amber-300" /> Unlimited celebrity searches</div>
-          <div className="flex items-center justify-center gap-2"><TrendingUp className="h-6 w-6 text-amber-300" /> All premium features</div>
-          <div className="flex items-center justify-center gap-2"><Sparkles className="h-6 w-6 text-amber-300" /> No ads, ever</div>
+      <div className="w-full max-w-[1000px] mx-auto flex flex-col items-center justify-center gap-10 text-center">
+        {/* premium price medallion */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-300/40 to-yellow-600/20 blur-3xl rounded-full scale-150" />
+          <div className="relative rounded-[64px] border-2 border-amber-300/40 bg-gradient-to-br from-amber-500/15 via-yellow-500/5 to-amber-700/15 p-16 shadow-[0_0_120px_rgba(245,191,66,0.35)]">
+            <Crown className="h-28 w-28 mx-auto text-amber-300 drop-shadow-[0_0_30px_rgba(245,191,66,0.7)]" />
+            <div className="mt-6 text-5xl font-black tracking-wide text-amber-200/90 uppercase">Lifetime Access</div>
+            <div className="mt-4 text-[10rem] leading-none font-black bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent">
+              $9.99
+            </div>
+            <div className="mt-2 text-2xl text-white/70 italic">one payment · yours forever</div>
+          </div>
+        </div>
+
+        {/* feature list */}
+        <div className="grid grid-cols-1 gap-5 text-2xl text-white">
+          {[
+            { Icon: DollarSign, text: 'Unlimited celebrity searches' },
+            { Icon: TrendingUp, text: 'Every premium feature unlocked' },
+            { Icon: Sparkles, text: 'No ads. No subscriptions. Ever.' },
+            { Icon: Crown, text: 'Future updates included free' },
+          ].map(({ Icon, text }) => (
+            <div key={text} className="flex items-center justify-center gap-4 rounded-2xl border border-amber-300/20 bg-black/30 px-8 py-4 backdrop-blur-sm">
+              <Icon className="h-7 w-7 text-amber-300 shrink-0" />
+              <span className="font-semibold">{text}</span>
+            </div>
+          ))}
         </div>
       </div>
     ),
