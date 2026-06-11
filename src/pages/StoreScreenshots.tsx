@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { Download, Loader2 } from 'lucide-react';
@@ -141,6 +141,28 @@ function LifetimeOfferGraphic() {
       </div>
     </div>
   );
+}
+
+function LifetimeCanvasPreview({ w, h }: { w: number; h: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let mounted = true;
+
+    captureLifetimePng({ w, h }).then((blob) => {
+      if (!mounted) return;
+      objectUrl = URL.createObjectURL(blob);
+      setSrc(objectUrl);
+    });
+
+    return () => {
+      mounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [w, h]);
+
+  return src ? <img src={src} alt="Lifetime Access screenshot" width={w} height={h} /> : <div className="h-full w-full bg-zinc-950" />;
 }
 
 async function captureLifetimePng(dims: { w: number; h: number }): Promise<Blob> {
@@ -470,6 +492,10 @@ export default function StoreScreenshots() {
 
 
 function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
+  if (s.id === '07-lifetime') {
+    return <LifetimeCanvasPreview w={w} h={h} />;
+  }
+
   return (
     <div
       data-screenshot-inner={s.id}
