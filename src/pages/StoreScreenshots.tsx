@@ -143,6 +143,151 @@ function LifetimeOfferGraphic() {
   );
 }
 
+async function captureLifetimePng(dims: { w: number; h: number }): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  canvas.width = dims.w;
+  canvas.height = dims.h;
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  const drawRoundRect = (x: number, y: number, width: number, height: number, radius: number) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+
+  const fit = dims.w / 1290;
+  const pad = 96 * fit;
+  ctx.fillStyle = '#09090b';
+  ctx.fillRect(0, 0, dims.w, dims.h);
+
+  let glow = ctx.createRadialGradient(dims.w / 2, -60 * fit, 0, dims.w / 2, -60 * fit, 780 * fit);
+  glow.addColorStop(0, 'rgba(251,191,36,0.34)');
+  glow.addColorStop(1, 'rgba(251,191,36,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(dims.w / 2, -60 * fit, 780 * fit, 0, Math.PI * 2);
+  ctx.fill();
+
+  glow = ctx.createRadialGradient(dims.w * 0.72, dims.h * 0.86, 0, dims.w * 0.72, dims.h * 0.86, 560 * fit);
+  glow.addColorStop(0, 'rgba(251,191,36,0.22)');
+  glow.addColorStop(1, 'rgba(251,191,36,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(dims.w * 0.72, dims.h * 0.86, 560 * fit, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${72 * fit}px Arial, sans-serif`;
+  ctx.fillText('Unlock Everything Forever', dims.w / 2, 375 * fit);
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = `400 ${30 * fit}px Arial, sans-serif`;
+  ctx.fillText('One payment. No subscriptions. Ever.', dims.w / 2, 426 * fit);
+
+  const cardW = 900 * fit;
+  const cardH = 420 * fit;
+  const cardX = (dims.w - cardW) / 2;
+  const cardY = 780 * fit;
+  drawRoundRect(cardX, cardY, cardW, cardH, 48 * fit);
+  ctx.fillStyle = '#100d05';
+  ctx.fill();
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 3 * fit;
+  ctx.stroke();
+
+  ctx.fillStyle = '#fde68a';
+  ctx.font = `900 ${74 * fit}px Arial, sans-serif`;
+  ctx.fillText('LIFETIME ACCESS', dims.w / 2, cardY + 128 * fit);
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = `900 ${196 * fit}px Arial, sans-serif`;
+  ctx.fillText('$9.99', dims.w / 2, cardY + 315 * fit);
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = `700 ${38 * fit}px Arial, sans-serif`;
+  ctx.fillText('one payment · yours forever', dims.w / 2, cardY + 375 * fit);
+
+  const benefits = [
+    ['$', 'Unlimited celebrity\nsearches'],
+    ['⚡', 'Real-time mogul earnings\nticker'],
+    ['▥', 'Reality Check salary\nshowdowns'],
+    ['◉', 'Mogul vs Mogul\ncomparisons'],
+    ['↗', 'Paper-trade real stocks\nrisk-free'],
+    ['♜', 'Mirror billionaire portfolios'],
+    ['✺', 'Daily Wealth IQ quiz &\nstreaks'],
+    ['▣', 'Mogul Academy premium\nlessons'],
+    ['✦', 'No ads. No subscriptions.\nEver.'],
+    ['∞', 'All future updates\nincluded'],
+  ];
+  const gap = 20 * fit;
+  const boxW = (1100 * fit - gap) / 2;
+  const boxH = 88 * fit;
+  const gridX = (dims.w - 1100 * fit) / 2;
+  const gridY = cardY + cardH + 50 * fit;
+  benefits.forEach(([icon, label], index) => {
+    const col = index % 2;
+    const row = Math.floor(index / 2);
+    const x = gridX + col * (boxW + gap);
+    const y = gridY + row * (boxH + 20 * fit);
+    drawRoundRect(x, y, boxW, boxH, 12 * fit);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(252,211,77,0.28)';
+    ctx.lineWidth = 1.5 * fit;
+    ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#fcd34d';
+    ctx.font = `700 ${30 * fit}px Arial, sans-serif`;
+    ctx.fillText(icon, x + 28 * fit, y + 55 * fit);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 ${28 * fit}px Arial, sans-serif`;
+    label.split('\n').forEach((line, lineIndex) => {
+      ctx.fillText(line, x + 82 * fit, y + (38 + lineIndex * 32) * fit);
+    });
+  });
+
+  try {
+    const icon = await loadImage(appIcon);
+    const iconSize = 80 * fit;
+    const footerY = dims.h - 154 * fit;
+    const totalW = 80 * fit + 24 * fit + 260 * fit;
+    const iconX = (dims.w - totalW) / 2;
+    drawRoundRect(iconX, footerY, iconSize, iconSize, 14 * fit);
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(icon, iconX, footerY, iconSize, iconSize);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${30 * fit}px Arial, sans-serif`;
+    ctx.fillText('Wealth Perspective', iconX + iconSize + 24 * fit, footerY + 51 * fit);
+  } catch {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${30 * fit}px Arial, sans-serif`;
+    ctx.fillText('Wealth Perspective', dims.w / 2, dims.h - 96 * fit);
+  }
+
+  return await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!), 'image/png'));
+}
+
 export default function StoreScreenshots() {
   const [size, setSize] = useState<DeviceSize>('iphone-67');
   const [busy, setBusy] = useState<string | null>(null);
