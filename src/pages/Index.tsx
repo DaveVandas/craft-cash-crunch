@@ -18,8 +18,10 @@ import MogulMarketsPreview from '@/components/home/MogulMarketsPreview';
 import HeroSpotlight from '@/components/home/HeroSpotlight';
 import { DownloadAppSection } from '@/components/home/DownloadAppSection';
 import { useAffiliateAttribution } from '@/hooks/useAffiliateAttribution';
+import { useProfileSetupStatus } from '@/components/onboarding/ProfileSetupGuard';
 
 const Index = () => {
+  const { canStartOnboardingTour } = useProfileSetupStatus();
   // Track affiliate referral from ?ref=CODE query param
   useAffiliateAttribution();
   // Scroll to top immediately on any navigation to this page (including back)
@@ -45,7 +47,7 @@ const Index = () => {
         path="/"
       />
       <Header />
-      <OnboardingTour />
+      <OnboardingTour enabled={canStartOnboardingTour} />
       <ExitIntentPopup />
       <SocialProofNotifications />
 

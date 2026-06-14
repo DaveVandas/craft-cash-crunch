@@ -1,7 +1,19 @@
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import ProfileSetupModal from '@/components/onboarding/ProfileSetupModal';
+
+interface ProfileSetupContextValue {
+  canStartOnboardingTour: boolean;
+  isProfileSetupOpen: boolean;
+}
+
+const ProfileSetupContext = createContext<ProfileSetupContextValue>({
+  canStartOnboardingTour: true,
+  isProfileSetupOpen: false,
+});
+
+export const useProfileSetupStatus = () => useContext(ProfileSetupContext);
 
 interface ProfileSetupGuardProps {
   children: React.ReactNode;
@@ -12,17 +24,24 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   const { profile, loading: profileLoading } = useUserProfile();
   const [showSetup, setShowSetup] = useState(false);
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
+  const hasDisplayName = Boolean(profile?.display_name?.trim());
 
   useEffect(() => {
-    // Only show setup modal if:
-    // 1. User is logged in
-    // 2. Profile is loaded
-    // 3. Profile has no display_name set
-    // 4. User hasn't completed setup in this session
-    if (!authLoading && !profileLoading && user && profile && !profile.display_name && !hasCompletedSetup) {
-      setShowSetup(true);
+    if (authLoading || profileLoading || !user) {
+      setShowSetup(false);
+      return;
     }
-  }, [user, profile, authLoading, profileLoading, hasCompletedSetup]);
+
+    setShowSetup(!hasDisplayName && !hasCompletedSetup);
+  }, [user, authLoading, profileLoading, hasDisplayName, hasCompletedSetup]);
+
+  const contextValue = useMemo(
+    () => ({
+      canStartOnboardingTour: Boolean(user && !authLoading && !profileLoading && !showSetup && (hasDisplayName || hasCompletedSetup)),
+      isProfileSetupOpen: showSetup,
+    }),
+    [user, authLoading, profileLoading, showSetup, hasDisplayName, hasCompletedSetup]
+  );
 
   const handleSetupComplete = () => {
     setShowSetup(false);
@@ -30,10 +49,10 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   };
 
   return (
-    <>
+    <ProfileSetupContext.Provider value={contextValue}>
       {children}
       <ProfileSetupModal open={showSetup} onComplete={handleSetupComplete} />
-    </>
+    </ProfileSetupContext.Provider>
   );
 };
 

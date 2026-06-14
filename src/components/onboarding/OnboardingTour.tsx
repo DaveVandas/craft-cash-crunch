@@ -1,66 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { driver, DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 const TOUR_COMPLETED_KEY = 'onboarding_tour_completed';
+const OPEN_DIALOG_SELECTOR = '[role="dialog"][data-state="open"], [data-radix-dialog-content]';
 
-const OnboardingTour = () => {
+interface OnboardingTourProps {
+  enabled?: boolean;
+}
+
+const OnboardingTour = ({ enabled = true }: OnboardingTourProps) => {
   const { user } = useAuth();
   const [shouldRunTour, setShouldRunTour] = useState(false);
-  const [setupReady, setSetupReady] = useState(false);
+  const driverRef = useRef<ReturnType<typeof driver> | null>(null);
+  const suppressCompletionRef = useRef(false);
 
-  // Determine whether profile setup is complete. We re-check on mount and
-  // whenever the ProfileSetupModal dispatches the 'profile-setup-complete' event,
-  // because useUserProfile state is per-instance and won't update here.
   useEffect(() => {
-    if (!user) {
-      setSetupReady(false);
+    if (!enabled) {
+      setShouldRunTour(false);
       return;
     }
-
-    let cancelled = false;
-
-    const checkProfile = async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('display_name')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      if (data?.display_name) {
-        setSetupReady(true);
-      }
-    };
-
-    checkProfile();
-
-    const onComplete = () => setSetupReady(true);
-    window.addEventListener('profile-setup-complete', onComplete);
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener('profile-setup-complete', onComplete);
-    };
-  }, [user]);
-
-  useEffect(() => {
-    if (!user || !setupReady) return;
+    if (!user) return;
+    if (shouldRunTour) return;
 
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${user.id}`);
     if (tourCompleted) return;
 
-    // Small delay to let the profile modal fully close and DOM settle
-    const timer = setTimeout(() => {
+    // Wait until every modal/dialog has cleared, then start the tour by itself.
+    const tryStartTour = () => {
+      if (document.querySelector(OPEN_DIALOG_SELECTOR)) return;
       setShouldRunTour(true);
-    }, 600);
+    };
 
-    return () => clearTimeout(timer);
-  }, [user, setupReady]);
+    const timer = setTimeout(tryStartTour, 600);
+    const interval = setInterval(tryStartTour, 500);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [user, enabled, shouldRunTour]);
 
   useEffect(() => {
-    if (!shouldRunTour || !user) return;
+    if (!enabled || !shouldRunTour || !user) return;
+    if (document.querySelector(OPEN_DIALOG_SELECTOR)) {
+      setShouldRunTour(false);
+      return;
+    }
 
     const steps: DriveStep[] = [
       {
@@ -118,18 +105,28 @@ const OnboardingTour = () => {
       steps,
       onDestroyStarted: () => {
         if (user) {
-          localStorage.setItem(`${TOUR_COMPLETED_KEY}_${user.id}`, 'true');
+          if (!suppressCompletionRef.current) {
+            localStorage.setItem(`${TOUR_COMPLETED_KEY}_${user.id}`, 'true');
+          }
+          suppressCompletionRef.current = false;
         }
+        driverRef.current = null;
+        setShouldRunTour(false);
         driverObj.destroy();
       },
     });
 
+    driverRef.current = driverObj;
     driverObj.drive();
 
     return () => {
-      driverObj.destroy();
+      if (driverRef.current === driverObj) {
+        suppressCompletionRef.current = true;
+        driverObj.destroy();
+        driverRef.current = null;
+      }
     };
-  }, [shouldRunTour, user]);
+  }, [enabled, shouldRunTour, user]);
 
   return null;
 };
