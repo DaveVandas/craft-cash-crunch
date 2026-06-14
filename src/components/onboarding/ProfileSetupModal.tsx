@@ -63,6 +63,8 @@ const ProfileSetupModal = ({ open, onComplete }: ProfileSetupModalProps) => {
       }
 
       toast.success('Profile set up successfully!');
+      // Notify other components (e.g. OnboardingTour) that setup is complete
+      window.dispatchEvent(new CustomEvent('profile-setup-complete'));
       onComplete();
     } catch (error) {
       console.error('Profile setup error:', error);
