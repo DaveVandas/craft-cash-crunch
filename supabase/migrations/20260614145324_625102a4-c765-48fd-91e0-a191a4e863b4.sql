@@ -1,0 +1,1 @@
+UPDATE public.profiles SET display_name = NULL, avatar_url = NULL WHERE id = (SELECT id FROM auth.users WHERE email = 'appreview@northspan.com');
