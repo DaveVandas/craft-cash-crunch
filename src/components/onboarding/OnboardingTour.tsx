@@ -2,27 +2,32 @@ import { useEffect, useState } from 'react';
 import { driver, DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 const TOUR_COMPLETED_KEY = 'onboarding_tour_completed';
 
 const OnboardingTour = () => {
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile();
   const [shouldRunTour, setShouldRunTour] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+    // Gate the tour behind profile setup — only run after a display_name is saved.
+    if (profileLoading) return;
+    if (!profile?.display_name) return;
 
     // Check if tour was already completed
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${user.id}`);
     if (tourCompleted) return;
 
-    // Small delay to ensure DOM is ready
+    // Small delay to let the profile modal fully close and DOM settle
     const timer = setTimeout(() => {
       setShouldRunTour(true);
-    }, 1500);
+    }, 600);
 
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, profile?.display_name, profileLoading]);
 
   useEffect(() => {
     if (!shouldRunTour || !user) return;
