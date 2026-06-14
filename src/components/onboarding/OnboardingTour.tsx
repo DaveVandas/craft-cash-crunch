@@ -4,6 +4,7 @@ import 'driver.js/dist/driver.css';
 import { useAuth } from '@/contexts/AuthContext';
 
 const TOUR_COMPLETED_KEY = 'onboarding_tour_completed';
+const OPEN_DIALOG_SELECTOR = '[role="dialog"][data-state="open"], [data-radix-dialog-content]';
 
 interface OnboardingTourProps {
   enabled?: boolean;
@@ -27,6 +28,7 @@ const OnboardingTour = ({ enabled = true }: OnboardingTourProps) => {
 
     // Small delay to let the profile modal fully close and DOM settle
     const timer = setTimeout(() => {
+      if (document.querySelector(OPEN_DIALOG_SELECTOR)) return;
       setShouldRunTour(true);
     }, 600);
 
@@ -35,6 +37,10 @@ const OnboardingTour = ({ enabled = true }: OnboardingTourProps) => {
 
   useEffect(() => {
     if (!enabled || !shouldRunTour || !user) return;
+    if (document.querySelector(OPEN_DIALOG_SELECTOR)) {
+      setShouldRunTour(false);
+      return;
+    }
 
     const steps: DriveStep[] = [
       {
