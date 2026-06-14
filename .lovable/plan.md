@@ -1,70 +1,49 @@
-# Apple Reviewer Demo Account
+# Fix Apple Reviewer Demo Account Login
 
-Create a permanent demo account that Apple's App Review team can use to sign in and test every paywalled feature without paying.
+## What's wrong
 
-## Credentials (to give Apple)
+The account `appreview@northspan.com` exists and has `email_confirmed_at` set, but login fails with HTTP 500. Auth logs show the exact cause:
 
-- **Email:** `appreview@northspan.com`
-- **Password:** `WealthReview2026!`
+> `error finding user: sql: Scan error on column index 3, name "confirmation_token": converting NULL to string is unsupported`
 
-(Strong enough to satisfy Apple's reviewer-account requirements; no real PII; under our control.)
+This is a well-known Supabase/GoTrue quirk: when a user is inserted directly into `auth.users` via SQL, several token columns end up as `NULL`, but GoTrue's Go code expects empty strings (`''`) and crashes when it tries to scan `NULL` into a string. The original seed migration didn't set these columns, so they defaulted to `NULL`.
 
-## What gets created
+Confirmed in the DB right now for this user:
+- `confirmation_token` = NULL ← the one crashing login
+- `recovery_token` = NULL
+- `email_change` = NULL
+- `email_change_token_new` = NULL
 
-A single migration that:
+## The fix
 
-1. Creates the auth user `appreview@northspan.com` with the password above, email pre-confirmed (so no email-verification step blocks Apple).
-2. Lets the existing `handle_new_user` trigger auto-create the `user_access` row, then flips `has_lifetime_access = true` for that user.
-3. Creates a matching `profiles` row (handled by `handle_new_user_profile` trigger automatically — no extra work).
-4. Idempotent: if the account already exists, just ensures `has_lifetime_access = true` and re-confirms the email. Safe to re-run.
-
-## Why this works
-
-- Account is a real Supabase auth user, so it goes through normal sign-in (no special bypass code path needed in the app — less risk of a reviewer hitting an edge case).
-- `user_access.has_lifetime_access = true` unlocks every paywalled feature via the existing `PaywallGate` logic — no app code changes required.
-- Email pre-confirmed so reviewers don't have to check an inbox.
-- Lives forever — reviewers for v1.1, v1.2, etc. can reuse the same login.
-
-## Technical details
-
-Single migration calling `supabase.auth.admin`–equivalent SQL:
+One tiny migration that updates ONLY this demo user's token columns to `''`:
 
 ```sql
--- Insert into auth.users with crypted password and confirmed email
--- (uses Supabase's standard auth schema; password hashed via crypt + bcrypt)
-INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at, created_at, updated_at,
-  raw_app_meta_data, raw_user_meta_data, is_super_admin
-) VALUES (
-  '00000000-0000-0000-0000-000000000000',
-  gen_random_uuid(), 'authenticated', 'authenticated',
-  'appreview@northspan.com',
-  crypt('WealthReview2026!', gen_salt('bf')),
-  now(), now(), now(),
-  '{"provider":"email","providers":["email"]}'::jsonb,
-  '{"display_name":"App Reviewer"}'::jsonb,
-  false
-)
-ON CONFLICT (email) DO UPDATE
-SET email_confirmed_at = COALESCE(auth.users.email_confirmed_at, now()),
-    encrypted_password = crypt('WealthReview2026!', gen_salt('bf'));
-
--- Triggers auto-create user_access + profiles rows.
--- Then grant lifetime:
-UPDATE public.user_access
-SET has_lifetime_access = true, updated_at = now()
-WHERE user_id = (SELECT id FROM auth.users WHERE email = 'appreview@northspan.com');
+UPDATE auth.users
+SET confirmation_token = '',
+    recovery_token = '',
+    email_change = '',
+    email_change_token_new = '',
+    email_change_token_current = COALESCE(email_change_token_current, ''),
+    reauthentication_token = COALESCE(reauthentication_token, '')
+WHERE email = 'appreview@northspan.com';
 ```
 
-No edge function changes, no client code changes, no RLS changes.
+Scoped to the single reviewer account — no other users touched, no schema changes, no RLS changes.
 
-## Out of scope
+## Also: patch the original seed migration pattern
 
-- Bypassing the paywall in code for a special email — not needed; the entitlement flag does the work.
-- Test IAP purchases — Apple uses sandbox accounts they create themselves for that; our demo account just needs unlocked access.
-- Drafting the App Review Information copy — that's the next step after this lands.
+Update the seed migration file so if anyone ever re-runs it (or we create a second reviewer account), it inserts those token columns as `''` from the start and this bug never recurs.
+
+## After the migration
+
+You'll be able to sign in with:
+- **Username:** `appreview@northspan.com`
+- **Password:** `WealthReview2026!`
+
+and the existing `has_lifetime_access = true` flag will unlock every paywalled feature for Apple's reviewer.
 
 ## Files touched
 
-- One new migration file (created by the migration tool).
+- One new migration (the UPDATE above)
+- Edit to the existing seed migration file to add empty-string token defaults for future safety
