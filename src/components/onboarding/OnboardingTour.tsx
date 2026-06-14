@@ -2,22 +2,52 @@ import { useEffect, useState } from 'react';
 import { driver, DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { supabase } from '@/integrations/supabase/client';
 
 const TOUR_COMPLETED_KEY = 'onboarding_tour_completed';
 
 const OnboardingTour = () => {
   const { user } = useAuth();
-  const { profile, loading: profileLoading } = useUserProfile();
   const [shouldRunTour, setShouldRunTour] = useState(false);
+  const [setupReady, setSetupReady] = useState(false);
+
+  // Determine whether profile setup is complete. We re-check on mount and
+  // whenever the ProfileSetupModal dispatches the 'profile-setup-complete' event,
+  // because useUserProfile state is per-instance and won't update here.
+  useEffect(() => {
+    if (!user) {
+      setSetupReady(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const checkProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data?.display_name) {
+        setSetupReady(true);
+      }
+    };
+
+    checkProfile();
+
+    const onComplete = () => setSetupReady(true);
+    window.addEventListener('profile-setup-complete', onComplete);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('profile-setup-complete', onComplete);
+    };
+  }, [user]);
 
   useEffect(() => {
-    if (!user) return;
-    // Gate the tour behind profile setup — only run after a display_name is saved.
-    if (profileLoading) return;
-    if (!profile?.display_name) return;
+    if (!user || !setupReady) return;
 
-    // Check if tour was already completed
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${user.id}`);
     if (tourCompleted) return;
 
@@ -27,7 +57,7 @@ const OnboardingTour = () => {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [user, profile?.display_name, profileLoading]);
+  }, [user, setupReady]);
 
   useEffect(() => {
     if (!shouldRunTour || !user) return;
@@ -87,7 +117,6 @@ const OnboardingTour = () => {
       popoverClass: 'onboarding-popover',
       steps,
       onDestroyStarted: () => {
-        // Mark tour as completed
         if (user) {
           localStorage.setItem(`${TOUR_COMPLETED_KEY}_${user.id}`, 'true');
         }
