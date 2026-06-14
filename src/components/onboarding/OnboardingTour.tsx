@@ -22,18 +22,25 @@ const OnboardingTour = ({ enabled = true }: OnboardingTourProps) => {
       return;
     }
     if (!user) return;
+    if (shouldRunTour) return;
 
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${user.id}`);
     if (tourCompleted) return;
 
-    // Small delay to let the profile modal fully close and DOM settle
-    const timer = setTimeout(() => {
+    // Wait until every modal/dialog has cleared, then start the tour by itself.
+    const tryStartTour = () => {
       if (document.querySelector(OPEN_DIALOG_SELECTOR)) return;
       setShouldRunTour(true);
-    }, 600);
+    };
 
-    return () => clearTimeout(timer);
-  }, [user, enabled]);
+    const timer = setTimeout(tryStartTour, 600);
+    const interval = setInterval(tryStartTour, 500);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [user, enabled, shouldRunTour]);
 
   useEffect(() => {
     if (!enabled || !shouldRunTour || !user) return;
