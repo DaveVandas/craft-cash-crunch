@@ -24,11 +24,12 @@ import quizAsset from '@/assets/store-screens/06-quiz.png.asset.json';
  * the element with data-screenshot-inner.
  */
 
-type DeviceSize = 'iphone-67' | 'android';
+type DeviceSize = 'iphone-67' | 'android' | 'ipad-13';
 
-const SIZES: Record<DeviceSize, { w: number; h: number; label: string }> = {
-  'iphone-67': { w: 1284, h: 2778, label: 'iPhone 6.5"/6.7" (1284×2778)' },
-  android: { w: 1080, h: 1920, label: 'Android Phone (1080×1920)' },
+const SIZES: Record<DeviceSize, { w: number; h: number; label: string; previewScale: number }> = {
+  'iphone-67': { w: 1284, h: 2778, label: 'iPhone 6.5"/6.7" (1284×2778)', previewScale: 0.33 },
+  android: { w: 1080, h: 1920, label: 'Android Phone (1080×1920)', previewScale: 0.33 },
+  'ipad-13': { w: 2048, h: 2732, label: 'iPad 13" (2048×2732)', previewScale: 0.22 },
 };
 
 interface Screenshot {
@@ -593,8 +594,8 @@ export default function StoreScreenshots() {
   const [busy, setBusy] = useState<string | null>(null);
   const captureHostRef = useRef<HTMLDivElement>(null);
   const dims = SIZES[size];
-  // Display at 1/3 scale so we can see all frames on screen.
-  const scale = 0.33;
+  // Display at preview scale so we can see all frames on screen.
+  const scale = dims.previewScale;
 
   /**
    * Render a single frame at full resolution off-screen, capture it with
@@ -780,6 +781,12 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
     return <MogulCashCanvasPreview w={w} h={h} />;
   }
 
+  // Compute a phone-bezel width that fits the available vertical space.
+  const captionH = 480;
+  const footerH = 140;
+  const availableH = h - captionH - footerH - 96; // 96 = padding top/bottom inside body
+  const bezelWidth = Math.min(760, Math.round((availableH * 9) / 19.5));
+
   return (
     <div
       data-screenshot-inner={s.id}
@@ -804,7 +811,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
         {/* body — phone bezel anchored to a fixed slot so size + position match across all frames */}
         <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
-            <PhoneBezel src={s.screen} alt={s.caption} width={760} />
+            <PhoneBezel src={s.screen} alt={s.caption} width={bezelWidth} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">{s.body}</div>
           )}
