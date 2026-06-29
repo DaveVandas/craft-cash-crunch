@@ -16,6 +16,21 @@ import compareAsset from '@/assets/store-screens/03-compare.png.asset.json';
 import marketsAsset from '@/assets/store-screens/04-mogul-markets.png.asset.json';
 import portfoliosAsset from '@/assets/store-screens/05-vip-portfolios.png.asset.json';
 import quizAsset from '@/assets/store-screens/06-quiz.png.asset.json';
+import ipadEarnings from '@/assets/store-screens-ipad/01-earnings.png';
+import ipadReality from '@/assets/store-screens-ipad/02-reality-check.png';
+import ipadCompare from '@/assets/store-screens-ipad/03-compare.png';
+import ipadMarkets from '@/assets/store-screens-ipad/04-mogul-markets.png';
+import ipadPortfolios from '@/assets/store-screens-ipad/05-vip-portfolios.png';
+import ipadQuiz from '@/assets/store-screens-ipad/06-quiz.png';
+
+const IPAD_SCREENS: Record<string, string> = {
+  '01-earnings': ipadEarnings,
+  '02-reality-check': ipadReality,
+  '03-compare': ipadCompare,
+  '04-mogul-markets': ipadMarkets,
+  '05-vip-portfolios': ipadPortfolios,
+  '06-quiz': ipadQuiz,
+};
 
 /**
  * Marketing screenshots for App Store and Google Play store listings.
@@ -817,7 +832,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
         <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
             isTablet ? (
-              <TabletBezel src={s.screen} alt={s.caption} width={tabletBezelWidth} />
+              <TabletBezel src={IPAD_SCREENS[s.id] ?? s.screen} alt={s.caption} width={tabletBezelWidth} />
             ) : (
               <PhoneBezel src={s.screen} alt={s.caption} width={phoneBezelWidth} />
             )
