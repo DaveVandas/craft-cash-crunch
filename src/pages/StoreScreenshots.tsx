@@ -9,6 +9,7 @@ import { TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infi
 
 import appIcon from '@/assets/app-icon.png';
 import { PhoneBezel } from '@/components/marketing/PhoneBezel';
+import { TabletBezel } from '@/components/marketing/TabletBezel';
 import earningsAsset from '@/assets/store-screens/01-earnings.png.asset.json';
 import realityAsset from '@/assets/store-screens/02-reality-check.png.asset.json';
 import compareAsset from '@/assets/store-screens/03-compare.png.asset.json';
