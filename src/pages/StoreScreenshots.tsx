@@ -781,6 +781,12 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
     return <MogulCashCanvasPreview w={w} h={h} />;
   }
 
+  // Compute a phone-bezel width that fits the available vertical space.
+  const captionH = 480;
+  const footerH = 140;
+  const availableH = h - captionH - footerH - 96; // 96 = padding top/bottom inside body
+  const bezelWidth = Math.min(760, Math.round((availableH * 9) / 19.5));
+
   return (
     <div
       data-screenshot-inner={s.id}
@@ -805,7 +811,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
         {/* body — phone bezel anchored to a fixed slot so size + position match across all frames */}
         <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
-            <PhoneBezel src={s.screen} alt={s.caption} width={760} />
+            <PhoneBezel src={s.screen} alt={s.caption} width={bezelWidth} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">{s.body}</div>
           )}
