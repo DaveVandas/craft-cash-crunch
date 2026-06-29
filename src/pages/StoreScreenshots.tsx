@@ -832,7 +832,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
         <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
             isTablet ? (
-              <TabletBezel src={s.screen} alt={s.caption} width={tabletBezelWidth} />
+              <TabletBezel src={IPAD_SCREENS[s.id] ?? s.screen} alt={s.caption} width={tabletBezelWidth} />
             ) : (
               <PhoneBezel src={s.screen} alt={s.caption} width={phoneBezelWidth} />
             )
