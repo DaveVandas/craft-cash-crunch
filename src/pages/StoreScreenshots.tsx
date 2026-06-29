@@ -9,6 +9,7 @@ import { TrendingUp, DollarSign, Sparkles, Trophy, Brain, BarChart3, Users, Infi
 
 import appIcon from '@/assets/app-icon.png';
 import { PhoneBezel } from '@/components/marketing/PhoneBezel';
+import { TabletBezel } from '@/components/marketing/TabletBezel';
 import earningsAsset from '@/assets/store-screens/01-earnings.png.asset.json';
 import realityAsset from '@/assets/store-screens/02-reality-check.png.asset.json';
 import compareAsset from '@/assets/store-screens/03-compare.png.asset.json';
@@ -781,11 +782,15 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
     return <MogulCashCanvasPreview w={w} h={h} />;
   }
 
-  // Compute a phone-bezel width that fits the available vertical space.
+  // Detect iPad canvas (2048×2732) to render a tablet bezel instead of phone.
+  const isTablet = w === 2048 && h === 2732;
+
+  // Compute a bezel width that fits the available vertical space.
   const captionH = 480;
   const footerH = 140;
   const availableH = h - captionH - footerH - 96; // 96 = padding top/bottom inside body
-  const bezelWidth = Math.min(760, Math.round((availableH * 9) / 19.5));
+  const phoneBezelWidth = Math.min(760, Math.round((availableH * 9) / 19.5));
+  const tabletBezelWidth = Math.min(1500, Math.round((availableH * 2048) / 2732));
 
   return (
     <div
@@ -800,7 +805,7 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
       <div className={`absolute -bottom-40 right-0 w-[80%] h-[40%] bg-gradient-to-br ${s.accent} opacity-20 blur-3xl rounded-full`} />
 
       <div className="relative h-full flex flex-col p-24">
-        {/* caption block — fixed height so the phone bezel below sits at the same y on every frame */}
+        {/* caption block — fixed height so the bezel below sits at the same y on every frame */}
         <div className="text-center flex flex-col justify-center" style={{ height: 480 }}>
           <h2 className="text-7xl font-black leading-tight text-white tracking-tight">
             {s.caption}
@@ -808,14 +813,19 @@ function ScreenshotFrame({ s, w, h }: { s: Screenshot; w: number; h: number }) {
           <p className="text-3xl text-white/70 leading-snug mt-4">{s.subCaption}</p>
         </div>
 
-        {/* body — phone bezel anchored to a fixed slot so size + position match across all frames */}
+        {/* body — device bezel anchored to a fixed slot */}
         <div className="flex-1 flex items-start justify-center">
           {s.screen ? (
-            <PhoneBezel src={s.screen} alt={s.caption} width={bezelWidth} />
+            isTablet ? (
+              <TabletBezel src={s.screen} alt={s.caption} width={tabletBezelWidth} />
+            ) : (
+              <PhoneBezel src={s.screen} alt={s.caption} width={phoneBezelWidth} />
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center">{s.body}</div>
           )}
         </div>
+
 
         {/* footer brand mark — fixed height too */}
         <div className="flex items-center justify-center gap-4" style={{ height: 140 }}>
