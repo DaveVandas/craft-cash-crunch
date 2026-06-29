@@ -45,7 +45,7 @@ type DeviceSize = 'iphone-67' | 'android' | 'ipad-13';
 const SIZES: Record<DeviceSize, { w: number; h: number; label: string; previewScale: number }> = {
   'iphone-67': { w: 1284, h: 2778, label: 'iPhone 6.5"/6.7" (1284×2778)', previewScale: 0.33 },
   android: { w: 1080, h: 1920, label: 'Android Phone (1080×1920)', previewScale: 0.33 },
-  'ipad-13': { w: 1284, h: 2778, label: 'iPad 13" (1284×2778)', previewScale: 0.33 },
+  'ipad-13': { w: 2048, h: 2732, label: 'iPad 13" (2048×2732)', previewScale: 0.22 },
 };
 
 interface Screenshot {
