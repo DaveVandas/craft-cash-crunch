@@ -594,8 +594,8 @@ export default function StoreScreenshots() {
   const [busy, setBusy] = useState<string | null>(null);
   const captureHostRef = useRef<HTMLDivElement>(null);
   const dims = SIZES[size];
-  // Display at 1/3 scale so we can see all frames on screen.
-  const scale = 0.33;
+  // Display at preview scale so we can see all frames on screen.
+  const scale = dims.previewScale;
 
   /**
    * Render a single frame at full resolution off-screen, capture it with
