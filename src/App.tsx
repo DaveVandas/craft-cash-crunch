@@ -25,6 +25,7 @@ import Admin from "./pages/Admin";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import DeleteAccount from "./pages/DeleteAccount";
 import Quiz from "./pages/Quiz";
 import Referral from "./pages/Referral";
 import SideHustle from "./pages/SideHustle";
@@ -76,6 +77,7 @@ const App = () => (
                     <Route path="/about" element={<About />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/delete-account" element={<DeleteAccount />} />
                     <Route path="/quiz" element={<Quiz />} />
                     <Route path="/referral" element={<Referral />} />
                     <Route path="/side-hustle" element={<SideHustle />} />
