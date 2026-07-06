@@ -14,6 +14,9 @@ import { PageLoader } from '@/components/ui/page-loader';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
+import { Capacitor } from '@capacitor/core';
+
+const IS_NATIVE_APP = Capacitor.isNativePlatform();
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
 import { usePricing } from '@/hooks/usePricing';
 
@@ -355,15 +358,19 @@ const Auth = () => {
               )
             ) : (
               <>
-                <SocialAuthButtons />
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or with email</span>
-                  </div>
-                </div>
+                {!IS_NATIVE_APP && (
+                  <>
+                    <SocialAuthButtons />
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or with email</span>
+                      </div>
+                    </div>
+                  </>
+                )}
                 <Tabs defaultValue="signin" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-6">
                     <TabsTrigger value="signin">Sign In</TabsTrigger>
