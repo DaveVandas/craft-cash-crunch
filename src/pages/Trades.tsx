@@ -347,7 +347,10 @@ const Trades = () => {
                     return (
                       <button
                         key={trade.name}
-                        onClick={() => handleTradeSelect(trade)}
+                        onClick={() => {
+                          import('@/lib/nativeFeatures').then(({ haptic }) => haptic('selection'));
+                          handleTradeSelect(trade);
+                        }}
                         className={`p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] ${
                           selectedTrade.name === trade.name 
                             ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
