@@ -275,7 +275,10 @@ const Quiz = () => {
     setSelectedAnswer(answer);
     const correctAnswer = getCorrectAnswer(shuffledQuestions[currentQuestion]);
     const correct = answer === correctAnswer;
-    
+
+    // Native haptic feedback — success or error tap.
+    import('@/lib/nativeFeatures').then(({ haptic }) => haptic(correct ? 'success' : 'error'));
+
     // IMPORTANT: Set isCorrect state so UI displays correctly
     setIsCorrect(correct);
     

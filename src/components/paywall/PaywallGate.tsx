@@ -5,6 +5,7 @@ import { Crown, Lock, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePricing } from '@/hooks/usePricing';
 import { toast } from 'sonner';
+import { haptic } from '@/lib/nativeFeatures';
 
 const ANON_SEARCH_KEY = 'wealth_perspective_anon_searches';
 
@@ -87,7 +88,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
           {user ? (
             <>
               <Button
-                onClick={initiatePayment}
+                onClick={() => { haptic('medium'); initiatePayment(); }}
                 disabled={paymentLoading}
                 size="lg"
                 className="w-full text-base md:text-lg bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 shadow-gold"
@@ -104,7 +105,7 @@ const PaywallGate = ({ children }: PaywallGateProps) => {
                   variant="ghost"
                   size="sm"
                   className="w-full text-muted-foreground"
-                  onClick={restorePurchases}
+                  onClick={() => { haptic('light'); restorePurchases(); }}
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Restore Purchases
