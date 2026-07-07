@@ -1,19 +1,24 @@
 /**
- * Mobile-friendly share utilities
- * Uses native share sheet on mobile for Instagram/TikTok instead of just copying to clipboard
+ * Mobile-friendly share utilities.
+ * Prefers the true native share sheet (Capacitor) on iOS/Android,
+ * then Web Share API on mobile browsers, then clipboard fallback.
  */
 
-// Detect if running in a mobile browser
+import { nativeShare, isNative, haptic } from './nativeFeatures';
+
+// Detect if running in a mobile browser (used for web-only fallbacks).
 export const isMobile = (): boolean => {
+  if (isNative()) return true;
   if (typeof navigator === 'undefined') return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
     ((navigator as unknown as { userAgentData?: { mobile?: boolean } }).userAgentData?.mobile ?? false);
 };
 
 /**
- * Handle sharing for platforms without direct web share APIs (Instagram, TikTok)
- * On mobile: Opens the native share sheet where user can select the app
- * On desktop: Falls back to copying text to clipboard
+ * Handle sharing for platforms without direct web share APIs (Instagram, TikTok).
+ * - Native app: opens the real iOS/Android share sheet via Capacitor.
+ * - Mobile web: opens Web Share API.
+ * - Desktop / unsupported: copies to clipboard.
  */
 export const handleMobileAppShare = async (
   shareText: string,
@@ -22,25 +27,25 @@ export const handleMobileAppShare = async (
   onCopyFallback: () => Promise<void>,
   toastMessage: { success: string; description: string }
 ): Promise<boolean> => {
-  // On mobile, try native share sheet first
-  if (isMobile() && navigator.share) {
+  // 1) True native share sheet (iOS/Android via Capacitor).
+  if (isNative()) {
+    haptic('light');
+    const ok = await nativeShare({ title, text: shareText, url: shareUrl });
+    if (ok) return true;
+  }
+
+  // 2) Web Share API on mobile browsers.
+  if (isMobile() && typeof navigator !== 'undefined' && navigator.share) {
     try {
-      await navigator.share({
-        title,
-        text: shareText,
-        url: shareUrl,
-      });
-      return true; // User shared successfully or cancelled
+      await navigator.share({ title, text: shareText, url: shareUrl });
+      return true;
     } catch (err) {
-      // AbortError means user cancelled - that's fine
-      if ((err as Error).name === 'AbortError') {
-        return true;
-      }
-      // Other errors - fall through to copy
+      if ((err as Error).name === 'AbortError') return true;
+      // fall through to copy
     }
   }
-  
-  // Desktop or mobile share failed - copy to clipboard
+
+  // 3) Desktop / unsupported — copy to clipboard.
   await onCopyFallback();
   return false;
 };

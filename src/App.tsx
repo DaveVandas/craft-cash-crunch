@@ -11,6 +11,7 @@ import ProfileSetupGuard from "@/components/onboarding/ProfileSetupGuard";
 import UpdateNotification from "@/components/pwa/UpdateNotification";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import { PaperTradingDisclaimerSplash } from "@/components/disclaimer/PaperTradingDisclaimerSplash";
+import NativeBootstrap from "@/components/native/NativeBootstrap";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
@@ -61,6 +62,7 @@ const App = () => (
                 <UpdateNotification />
                 <InstallPrompt />
                 <PaperTradingDisclaimerSplash />
+                <NativeBootstrap />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
