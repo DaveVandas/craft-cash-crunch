@@ -413,6 +413,33 @@ export type Database = {
         }
         Relationships: []
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_subscribers: {
         Row: {
           email: string
