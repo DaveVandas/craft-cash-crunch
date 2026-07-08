@@ -108,6 +108,31 @@ export async function restorePurchases(userId: string): Promise<boolean> {
   return hasLifetimeEntitlement(customerInfo);
 }
 
+/**
+ * Purchase the Mogul Cash consumable ($20,000 in virtual paper cash).
+ * Returns true if the store transaction completed successfully. The
+ * backend `verify-iap` webhook is the source of truth for crediting cash.
+ */
+export async function purchaseMogulCash(userId: string): Promise<boolean> {
+  if (!isNativePlatform()) {
+    throw new Error('IAP is only available on iOS and Android builds.');
+  }
+
+  await initIAP(userId);
+
+  const offerings = await Purchases.getOfferings();
+  const mogulPackage = offerings.current?.availablePackages.find(
+    (p) => p.product.identifier === MOGUL_CASH_PRODUCT_ID,
+  );
+
+  if (!mogulPackage) {
+    throw new Error('Mogul Cash is not available in the store yet.');
+  }
+
+  await Purchases.purchasePackage({ aPackage: mogulPackage });
+  return true;
+}
+
 function hasLifetimeEntitlement(info: CustomerInfo): boolean {
   return Boolean(info.entitlements.active[ENTITLEMENT_ID]);
 }
