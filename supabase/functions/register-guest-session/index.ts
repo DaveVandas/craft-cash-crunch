@@ -82,7 +82,40 @@ serve(async (req) => {
 
     // Insert or update session with sliding expiry
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-    
+
+    // Reuse existing token when the client presents a valid one, otherwise mint a new one.
+    // This binds the session to a server-issued secret, preventing x-session-id spoofing.
+    const presentedToken = req.headers.get('x-session-token') || '';
+    let tokenToReturn = '';
+    let tokenHash = '';
+
+    const { data: existing } = await supabaseAdmin
+      .from('guest_sessions')
+      .select('token_hash')
+      .eq('session_id', sessionId)
+      .maybeSingle();
+
+    const sha256Hex = async (s: string): Promise<string> => {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    if (presentedToken && existing?.token_hash) {
+      const presentedHash = await sha256Hex(presentedToken);
+      if (presentedHash === existing.token_hash) {
+        tokenToReturn = presentedToken;
+        tokenHash = existing.token_hash;
+      }
+    }
+
+    if (!tokenToReturn) {
+      // Mint a fresh 32-byte token (rotates when no valid token is presented).
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      tokenToReturn = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      tokenHash = await sha256Hex(tokenToReturn);
+    }
+
     const { error } = await supabaseAdmin
       .from('guest_sessions')
       .upsert({
@@ -91,6 +124,7 @@ serve(async (req) => {
         last_activity_at: new Date().toISOString(),
         ip_hash: ipHash,
         user_agent_hash: userAgentHash,
+        token_hash: tokenHash,
       }, {
         onConflict: 'session_id',
         ignoreDuplicates: false,
@@ -104,11 +138,12 @@ serve(async (req) => {
     console.log(`Guest session registered: ${sessionId.substring(0, 20)}...`);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         expiresAt: expiresAt.toISOString(),
+        sessionToken: tokenToReturn,
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }

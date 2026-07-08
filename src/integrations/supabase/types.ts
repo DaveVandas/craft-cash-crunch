@@ -499,6 +499,7 @@ export type Database = {
           ip_hash: string | null
           last_activity_at: string
           session_id: string
+          token_hash: string | null
           user_agent_hash: string | null
         }
         Insert: {
@@ -508,6 +509,7 @@ export type Database = {
           ip_hash?: string | null
           last_activity_at?: string
           session_id: string
+          token_hash?: string | null
           user_agent_hash?: string | null
         }
         Update: {
@@ -517,6 +519,7 @@ export type Database = {
           ip_hash?: string | null
           last_activity_at?: string
           session_id?: string
+          token_hash?: string | null
           user_agent_hash?: string | null
         }
         Relationships: []
