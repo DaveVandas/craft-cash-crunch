@@ -46,43 +46,70 @@ function setSessionExpiry(): void {
  */
 function clearSession(): void {
   localStorage.removeItem(GUEST_SESSION_KEY);
+  localStorage.removeItem(GUEST_SESSION_TOKEN_KEY);
   localStorage.removeItem(GUEST_SESSION_EXPIRY_KEY);
   localStorage.removeItem(GUEST_SESSION_REGISTERED_KEY);
 }
 
+export function getGuestSessionToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(GUEST_SESSION_TOKEN_KEY);
+}
+
 /**
- * Register session with server for server-side tracking and expiry validation
- * This is required for RLS policies to work properly
+ * Register session with server for server-side tracking and expiry validation.
+ * Returns a server-issued secret token that authorizes access to this session's data.
+ * The token is stored locally and sent as the `x-session-token` header on every request.
  */
 async function registerSessionWithServer(sessionId: string): Promise<boolean> {
-  // Check if already registered in this browser session
   const registeredSession = localStorage.getItem(GUEST_SESSION_REGISTERED_KEY);
-  if (registeredSession === sessionId) {
-    return true; // Already registered
+  const existingToken = localStorage.getItem(GUEST_SESSION_TOKEN_KEY);
+  if (registeredSession === sessionId && existingToken) {
+    return true; // Already registered with a valid token
   }
-  
+
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_PUBLISHABLE_KEY,
+      'x-session-id': sessionId,
+    };
+    // Present existing token so the server can re-issue the SAME token instead of rotating it.
+    if (existingToken) headers['x-session-token'] = existingToken;
+
     const response = await fetch(`${SUPABASE_URL}/functions/v1/register-guest-session`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_PUBLISHABLE_KEY,
-        'x-session-id': sessionId,
-      },
+      headers,
       body: JSON.stringify({ sessionId }),
     });
-    
+
     if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      if (data?.sessionToken) {
+        localStorage.setItem(GUEST_SESSION_TOKEN_KEY, data.sessionToken);
+      }
       localStorage.setItem(GUEST_SESSION_REGISTERED_KEY, sessionId);
       return true;
     }
-    
+
     console.error('Failed to register guest session:', await response.text());
     return false;
   } catch (error) {
     console.error('Error registering guest session:', error);
     return false;
   }
+}
+
+/**
+ * Ensures a guest session exists AND is registered with the server (token issued).
+ * Await this before making guest-scoped queries to avoid RLS races on first load.
+ */
+export async function ensureGuestSessionReady(): Promise<{ sessionId: string; token: string | null }> {
+  const sessionId = getOrCreateGuestSession();
+  if (!getGuestSessionToken()) {
+    await registerSessionWithServer(sessionId);
+  }
+  return { sessionId, token: getGuestSessionToken() };
 }
 
 export function getGuestSessionId(): string | null {
