@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "97V3AR3HKS.com.northspan.wealthperspective",
+        "paths": [
+          "/auth/callback",
+          "/auth/*"
+        ]
+      }
+    ]
+  }
+}
