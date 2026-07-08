@@ -82,7 +82,42 @@ serve(async (req) => {
 
     // Insert or update session with sliding expiry
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-    
+
+    // Reuse existing token when the client presents a valid one, otherwise mint a new one.
+    // This binds the session to a server-issued secret, preventing x-session-id spoofing.
+    const presentedToken = req.headers.get('x-session-token') || '';
+    let tokenToReturn = '';
+    let tokenHash = '';
+
+    const { data: existing } = await supabaseAdmin
+      .from('guest_sessions')
+      .select('token_hash')
+      .eq('session_id', sessionId)
+      .maybeSingle();
+
+    if (presentedToken && existing?.token_hash) {
+      const presentedHash = await hashString(presentedToken).then(async () => {
+        // full sha256 hex (not the shortened privacy hash)
+        const enc = new TextEncoder().encode(presentedToken);
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      });
+      if (presentedHash === existing.token_hash) {
+        tokenToReturn = presentedToken;
+        tokenHash = existing.token_hash;
+      }
+    }
+
+    if (!tokenToReturn) {
+      // Mint a fresh 32-byte token (rotates on unauthenticated re-register).
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      tokenToReturn = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      const enc = new TextEncoder().encode(tokenToReturn);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      tokenHash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     const { error } = await supabaseAdmin
       .from('guest_sessions')
       .upsert({
@@ -91,6 +126,7 @@ serve(async (req) => {
         last_activity_at: new Date().toISOString(),
         ip_hash: ipHash,
         user_agent_hash: userAgentHash,
+        token_hash: tokenHash,
       }, {
         onConflict: 'session_id',
         ignoreDuplicates: false,
