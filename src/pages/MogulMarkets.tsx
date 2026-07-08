@@ -121,9 +121,25 @@ const MogulMarkets = () => {
     // Native builds must use in-app purchase, not Stripe.
     const { getPaymentMethod } = await import('@/lib/pricing');
     if (getPaymentMethod() !== 'stripe') {
-      toast.info('In-app purchase coming soon', {
-        description: 'Mogul Cash via the App Store will unlock here shortly.',
-      });
+      if (!user) {
+        toast.error('Please sign in to purchase Mogul Cash.');
+        return;
+      }
+      setIsBuyingCash(true);
+      try {
+        const { purchaseMogulCash, syncEntitlementToBackend } = await import('@/lib/iap');
+        await purchaseMogulCash(user.id);
+        await syncEntitlementToBackend();
+        await fetchPortfolio();
+        toast.success('💰 Mogul Cash added to your portfolio!');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Purchase failed';
+        if (!/cancel/i.test(msg)) {
+          toast.error('Purchase could not be completed', { description: msg });
+        }
+      } finally {
+        setIsBuyingCash(false);
+      }
       return;
     }
 

@@ -28,8 +28,16 @@ const SocialAuthButtons = () => {
   const handleOAuth = async (provider: 'apple' | 'google') => {
     setBusy(provider);
     try {
+      // On native (iOS/Android), Apple requires an HTTPS Universal Link as the
+      // OAuth redirect target — a custom-scheme (capacitor://) redirect is
+      // rejected. We send users to our production HTTPS origin; the Universal
+      // Link config on iOS bounces control back into the app, and
+      // NativeBootstrap consumes the tokens on appUrlOpen.
+      const redirectUri = IS_NATIVE_APP
+        ? 'https://earningsexplorer.shop/auth/callback'
+        : window.location.origin;
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: redirectUri,
       });
       if (result.error) {
         toast.error(`Could not sign in with ${provider === 'apple' ? 'Apple' : 'Google'}`);

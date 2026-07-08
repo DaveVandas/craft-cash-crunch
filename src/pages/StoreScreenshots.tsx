@@ -112,7 +112,7 @@ const screenshots: Screenshot[] = [
   {
     id: '08-mogul-cash',
     caption: 'Stack the Deck. Trade Bigger.',
-    subCaption: 'Add $20,000 in virtual paper cash',
+    subCaption: 'Boost your virtual paper cash and trade bolder',
     accent: 'from-emerald-500 via-amber-400 to-yellow-600',
     body: null,
   },
@@ -196,7 +196,7 @@ function TestimonialGraphic({ quote, name, city }: { quote: string; name: string
             color: '#fcd34d',
           }}
         >
-          ✦ Verified Lifetime Member
+          ✦ Verified Reviewer
         </div>
       </div>
     </div>
@@ -231,11 +231,11 @@ function LifetimeOfferGraphic() {
         <div style={{ fontSize: 74, lineHeight: '90px', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fde68a', marginBottom: 34 }}>
           Lifetime Access
         </div>
-        <div style={{ fontSize: 196, lineHeight: '196px', fontWeight: 900, color: '#fbbf24', marginBottom: 30 }}>
-          $9.99
+        <div style={{ fontSize: 120, lineHeight: '128px', fontWeight: 900, color: '#fbbf24', marginBottom: 20 }}>
+          One&nbsp;Payment
         </div>
         <div style={{ fontSize: 38, lineHeight: '48px', fontWeight: 700, color: '#f8fafc' }}>
-          one payment · yours forever
+          Yours forever · no subscriptions
         </div>
       </div>
 

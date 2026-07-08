@@ -18,6 +18,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
+    scheme: 'wealthperspective',
   },
   android: {
     allowMixedContent: true,

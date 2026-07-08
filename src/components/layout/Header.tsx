@@ -60,7 +60,7 @@ const ThemeToggleMenuItem = () => {
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, accessInfo, signOut, initiatePayment, paymentLoading } = useAuth();
+  const { user, accessInfo, signOut, initiatePayment, paymentLoading, restorePurchases } = useAuth();
   const { enabled: soundEnabled, toggle: toggleSound } = useSound();
   const { profile } = useUserProfile();
   const { regularPrice, isNativeApp } = usePricing();
@@ -276,15 +276,7 @@ const Header = () => {
                   </div>
                   <DropdownMenuSeparator />
                   {isNativeApp && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        import('sonner').then(({ toast }) =>
-                          toast.info('Restore Purchases coming soon', {
-                            description: 'This will sync prior App Store / Play Store purchases.',
-                          })
-                        );
-                      }}
-                    >
+                    <DropdownMenuItem onClick={() => restorePurchases()}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Restore Purchases
                     </DropdownMenuItem>

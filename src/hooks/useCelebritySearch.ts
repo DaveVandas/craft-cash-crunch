@@ -8,11 +8,11 @@ import { getCurrentRegularPrice, getPaymentMethod } from '@/lib/pricing';
 
 // Open the upgrade flow appropriately for the current platform.
 // Native (iOS/Android) builds must NOT link out to Stripe — Apple/Google reject this.
+// For native, route the user to the paywall UI which triggers the native IAP sheet.
 const startUpgradeFlow = async () => {
   if (getPaymentMethod() !== 'stripe') {
-    toast.info('In-app purchase coming soon', {
-      description: 'Lifetime access via the App Store will unlock here shortly.',
-    });
+    // Route to the user's profile/paywall where the native IAP Buy button lives.
+    window.location.href = '/auth';
     return;
   }
   const { data: paymentData } = await supabase.functions.invoke('create-payment');
