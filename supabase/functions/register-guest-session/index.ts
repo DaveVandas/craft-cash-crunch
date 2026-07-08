@@ -140,11 +140,12 @@ serve(async (req) => {
     console.log(`Guest session registered: ${sessionId.substring(0, 20)}...`);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         expiresAt: expiresAt.toISOString(),
+        sessionToken: tokenToReturn,
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
