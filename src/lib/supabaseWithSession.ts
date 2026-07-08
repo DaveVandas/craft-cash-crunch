@@ -172,7 +172,15 @@ export function getOrCreateGuestSession(): string {
  */
 export function createSupabaseWithSession(sessionId?: string | null) {
   const effectiveSessionId = sessionId ?? getGuestSessionId();
-  
+  const effectiveToken = effectiveSessionId ? getGuestSessionToken() : null;
+
+  const buildSessionHeaders = (): Record<string, string> => {
+    const h: Record<string, string> = {};
+    if (effectiveSessionId) h['x-session-id'] = effectiveSessionId;
+    if (effectiveToken) h['x-session-token'] = effectiveToken;
+    return h;
+  };
+
   const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: localStorage,
@@ -180,17 +188,15 @@ export function createSupabaseWithSession(sessionId?: string | null) {
       autoRefreshToken: true,
     },
     global: {
-      headers: effectiveSessionId ? {
-        'x-session-id': effectiveSessionId,
-      } : {},
+      headers: buildSessionHeaders(),
     },
   });
 
-  // Monkey-patch functions.invoke to always include session header
+  // Monkey-patch functions.invoke to always include session headers
   const originalInvoke = client.functions.invoke.bind(client.functions);
   client.functions.invoke = async (functionName: string, options?: { body?: unknown; headers?: Record<string, string> }) => {
     const mergedHeaders = {
-      ...(effectiveSessionId ? { 'x-session-id': effectiveSessionId } : {}),
+      ...buildSessionHeaders(),
       ...options?.headers,
     };
     return originalInvoke(functionName, {
