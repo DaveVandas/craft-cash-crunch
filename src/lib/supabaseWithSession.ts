@@ -12,6 +12,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const GUEST_SESSION_KEY = 'mogul_markets_session';
+const GUEST_SESSION_TOKEN_KEY = 'mogul_markets_session_token';
 const GUEST_SESSION_EXPIRY_KEY = 'mogul_markets_session_expiry';
 const GUEST_SESSION_REGISTERED_KEY = 'mogul_markets_session_registered';
 const SESSION_EXPIRY_DAYS = 30; // Extended to 30 days to prevent data loss
