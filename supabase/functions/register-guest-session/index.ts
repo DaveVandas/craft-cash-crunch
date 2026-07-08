@@ -95,13 +95,13 @@ serve(async (req) => {
       .eq('session_id', sessionId)
       .maybeSingle();
 
+    const sha256Hex = async (s: string): Promise<string> => {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
     if (presentedToken && existing?.token_hash) {
-      const presentedHash = await hashString(presentedToken).then(async () => {
-        // full sha256 hex (not the shortened privacy hash)
-        const enc = new TextEncoder().encode(presentedToken);
-        const buf = await crypto.subtle.digest('SHA-256', enc);
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      });
+      const presentedHash = await sha256Hex(presentedToken);
       if (presentedHash === existing.token_hash) {
         tokenToReturn = presentedToken;
         tokenHash = existing.token_hash;
