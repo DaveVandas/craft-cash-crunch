@@ -109,13 +109,11 @@ serve(async (req) => {
     }
 
     if (!tokenToReturn) {
-      // Mint a fresh 32-byte token (rotates on unauthenticated re-register).
+      // Mint a fresh 32-byte token (rotates when no valid token is presented).
       const tokenBytes = new Uint8Array(32);
       crypto.getRandomValues(tokenBytes);
       tokenToReturn = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-      const enc = new TextEncoder().encode(tokenToReturn);
-      const buf = await crypto.subtle.digest('SHA-256', enc);
-      tokenHash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      tokenHash = await sha256Hex(tokenToReturn);
     }
 
     const { error } = await supabaseAdmin
