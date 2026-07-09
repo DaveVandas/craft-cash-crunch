@@ -1,73 +1,60 @@
-## Remaining Apple Rejection Fixes (Items 1, 4, 5, 6)
+Step 1 (publish) is done. Here's the rest:
 
-Tackling the four open items in one pass. Each is scoped, low-risk, and independent.
+## Step 2: Verify AASA is live
 
----
+Run in your terminal:
 
-### 1. OAuth deep-linking for native iOS
+```bash
+curl -I https://earningsexplorer.shop/.well-known/apple-app-site-association
+```
 
-**Problem:** `SocialAuthButtons` in `src/pages/Auth.tsx` uses `window.location.origin` as `redirect_uri`. Inside the Capacitor shell that resolves to `capacitor://localhost`, which the OAuth broker won't allow back to — sign-in with Apple/Google stalls in the in-app browser.
+Expect `HTTP/2 200` with no redirect. Then confirm the body is valid JSON:
 
-**Fix:**
-- Add a custom URL scheme + Universal Link to `capacitor.config.ts` (`ios.scheme` + `App.appUrlOpen` listener).
-- Install `@capacitor/app` if not already present; add a listener in `NativeBootstrap` that catches the OAuth callback URL and forwards the tokens to Supabase (`supabase.auth.setSession` / exchange code).
-- In `Auth.tsx`, when `Capacitor.isNativePlatform()`, pass `redirect_uri: 'https://earningsexplorer.shop/auth/callback'` (a real https URL is required for Apple) and rely on Universal Links to bounce back into the app.
-- Confirm Site URL + Redirect URLs in Cloud auth settings include the universal link + custom scheme.
-- Apple sign-in on native should prefer the native Sign in with Apple flow when available; keep Google via the web OAuth broker.
+```bash
+curl -s https://earningsexplorer.shop/.well-known/apple-app-site-association | jq .
+```
 
----
+You should see the `applinks` object with `97V3AR3HKS.com.northspan.wealthperspective` and the `/auth/*` paths.
 
-### 4. Audit for beta / incomplete features in production
+Optional: Apple's CDN validator — https://app-site-association.cdn-apple.com/a/v1/earningsexplorer.shop (may take a few minutes to populate after first publish).
 
-Sweep the app for anything a reviewer could flag as unfinished:
-- Grep for `TODO`, `FIXME`, `Coming soon`, `Beta`, `WIP`, `placeholder` across `src/`.
-- Review `BetaInvite`, `BetaManagement`, `BetaFeedbackModal`, `AffiliateManagement`, `Admin` — hide admin/beta-only routes from unauthenticated/native builds via a `IS_NATIVE_APP` guard where needed.
-- Verify all footer/nav links resolve to a real page (no dead links).
-- Ensure any dev-only debug UI (`OGImageGallery`, `DeploymentGuide`, `StoreScreenshots`, `Admin` sub-pages) is gated behind admin role or hidden in production builds.
-- Produce a short punch-list of anything that must be removed vs. gated, then apply the changes.
+## Step 3: Add redirect URLs in Lovable Cloud
 
----
+Open the backend and add both URLs to the auth redirect allow-list so the OAuth callback works from the native app:
 
-### 5. Remove pricing from screenshots + regenerate
+- `https://earningsexplorer.shop/auth/callback`
+- `wealthperspective://auth/callback` (custom scheme from `capacitor.config.ts`)
 
-**Problem:** `StoreScreenshots.tsx` frame `07-lifetime` (`LifetimeOfferGraphic`) hard-codes **`$9.99`** and slide `08-mogul-cash` implies a paid consumable. Apple wants no price text in marketing screenshots (prices come from ASC).
+<presentation-actions>
+<presentation-open-backend>View Backend</presentation-open-backend>
+</presentation-actions>
 
-**Fix:**
-- Replace the giant `$9.99` block with a value-forward callout: "One payment. Yours forever." + benefits grid (already present).
-- Rework `08-mogul-cash` slide caption/subCaption to remove "add $20,000" purchase framing — pivot to "Stack virtual paper cash. Trade bigger." with no dollar/consumable reference.
-- Remove "Verified Lifetime Member" badge from testimonial slides (implies purchase tier). Swap to neutral "Verified Reviewer".
-- Regenerate the six iPhone + six iPad PNGs via the existing capture flow (`StoreScreenshots` page, "Download all" button) and re-upload the updated assets under `src/assets/store-screens/` (asset.json pointers via `lovable-assets`).
+Navigate to: Users → Authentication Settings → URL Configuration → Redirect URLs.
 
----
+## Step 4: Sync and archive in Xcode
 
-### 6. Verify IAP wiring vs App Store Connect
+On your Mac, from the repo root:
 
-**Sanity checks on `src/lib/iap.ts` + `supabase/functions/verify-iap`:**
-- Confirm product IDs match ASC exactly:
-  - `wealth_perspective_lifetime` (non-consumable)
-  - `wealth_perspective_mogul_cash` (consumable, $20,000 credit)
-- Confirm entitlement id `lifetime` matches RevenueCat dashboard.
-- Confirm iOS API key `appl_ubRRjRROoIVixzVclDghLfoBKGK` is the correct project key (user to visually confirm — I can't read the RC dashboard).
-- Confirm `REVENUECAT_WEBHOOK_SECRET` is set as a Supabase secret and the RC webhook points to `https://gzhrgnoowzhifpbnnevp.supabase.co/functions/v1/verify-iap`.
-- Ensure "Restore Purchases" button is visible on every paywall surface (Apple requirement) — audit `PaywallGate`.
-- Add explicit consumable handling verification: after purchase, `Purchases.purchasePackage` for Mogul Cash must call `syncEntitlementToBackend()` too (currently only lifetime does).
+```bash
+git pull
+npm install
+npm run build
+npx cap sync ios
+npx cap open ios
+```
 
----
+In Xcode:
+1. Select the `App` target → Signing & Capabilities → confirm Team = `97V3AR3HKS` and Bundle ID = `com.northspan.wealthperspective`.
+2. Confirm the **Associated Domains** capability includes `applinks:earningsexplorer.shop`.
+3. Set the scheme to `Any iOS Device (arm64)`.
+4. Product → Archive → Distribute App → App Store Connect.
 
-### Technical details
+## After archiving
 
-- Files to touch: `capacitor.config.ts`, `src/components/native/NativeBootstrap.tsx` (add deep-link listener), `src/pages/Auth.tsx`, `src/pages/StoreScreenshots.tsx`, `src/contexts/AuthContext.tsx` (Mogul Cash restore sync), `src/components/paywall/PaywallGate.tsx` (Restore button audit).
-- New dep (only if missing): `@capacitor/app`.
-- Deliverable for #5: regenerated PNG zip (iPhone 6.7" + iPad 13") for you to drop into ASC.
-- Deliverable for #6: a checklist you can tick off in RC/ASC dashboards.
+Once the build is processed in App Store Connect, test the Universal Link end-to-end: sign in via Google on the device, confirm the redirect opens the app (not Safari) and the session hydrates via `NativeBootstrap`.
 
----
+## Technical notes
 
-### Suggested execution order
-
-1. Screenshots (#5) — quickest visible win, unblocks ASC upload.
-2. Beta audit (#4) — surface anything else that needs a fix before shipping.
-3. IAP verify (#6) — mostly configuration confirmation + one code tweak.
-4. OAuth deep-link (#1) — largest change; test on device after archive.
-
-Ready to switch to build mode and start with #5, or would you rather I begin with a different item?
+- The `apple-app-site-association` file at `public/.well-known/` ships with the static build, and Lovable hosting serves `.well-known/*` without a redirect and with `Content-Type: application/json` — no extra config needed.
+- `NativeBootstrap.tsx` already handles both PKCE (`?code=`) and implicit (`#access_token=`) callbacks from `appUrlOpen`, so no code changes are required for Step 4.
+- If the AASA fetch fails from Apple's CDN, the most common cause is a redirect (e.g. `http → https`) — the `curl -I` in Step 2 catches this.
