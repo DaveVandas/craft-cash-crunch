@@ -12,6 +12,7 @@ import UpdateNotification from "@/components/pwa/UpdateNotification";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import { PaperTradingDisclaimerSplash } from "@/components/disclaimer/PaperTradingDisclaimerSplash";
 import NativeBootstrap from "@/components/native/NativeBootstrap";
+import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Calculator from "./pages/Calculator";
@@ -49,6 +50,10 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Hide non-shipping / marketing / invite-only routes on the native iOS build
+// so App Review reviewers only see fully functional features (Guideline 2.2).
+const isNative = Capacitor.isNativePlatform();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
@@ -75,7 +80,7 @@ const App = () => (
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
-                    <Route path="/admin" element={<Admin />} />
+                    {!isNative && <Route path="/admin" element={<Admin />} />}
                     <Route path="/about" element={<About />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
@@ -89,15 +94,15 @@ const App = () => (
                     <Route path="/mogul-academy" element={<MogulAcademy />} />
                     <Route path="/debt-destroyer" element={<DebtDestroyer />} />
                     <Route path="/celebrity-portfolios" element={<CelebrityPortfolios />} />
-                    <Route path="/landing/a" element={<LandingVariantA />} />
-                    <Route path="/landing/b" element={<LandingVariantB />} />
-                    <Route path="/landing/c" element={<LandingVariantC />} />
-                    <Route path="/landing/d" element={<LandingVariantD />} />
-                    <Route path="/beta" element={<BetaInvite />} />
-                    <Route path="/become-affiliate" element={<BecomeAffiliate />} />
-                    <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />
-                    <Route path="/ref/:code" element={<AffiliateReferral />} />
-                    <Route path="/store-screenshots" element={<StoreScreenshots />} />
+                    {!isNative && <Route path="/landing/a" element={<LandingVariantA />} />}
+                    {!isNative && <Route path="/landing/b" element={<LandingVariantB />} />}
+                    {!isNative && <Route path="/landing/c" element={<LandingVariantC />} />}
+                    {!isNative && <Route path="/landing/d" element={<LandingVariantD />} />}
+                    {!isNative && <Route path="/beta" element={<BetaInvite />} />}
+                    {!isNative && <Route path="/become-affiliate" element={<BecomeAffiliate />} />}
+                    {!isNative && <Route path="/affiliate-dashboard" element={<AffiliateDashboard />} />}
+                    {!isNative && <Route path="/ref/:code" element={<AffiliateReferral />} />}
+                    {!isNative && <Route path="/store-screenshots" element={<StoreScreenshots />} />}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>
