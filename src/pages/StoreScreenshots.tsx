@@ -348,11 +348,11 @@ async function captureLifetimePng(dims: { w: number; h: number }): Promise<Blob>
   ctx.font = `900 ${74 * fit}px Arial, sans-serif`;
   ctx.fillText('LIFETIME ACCESS', dims.w / 2, cardY + 128 * fit);
   ctx.fillStyle = '#fbbf24';
-  ctx.font = `900 ${196 * fit}px Arial, sans-serif`;
-  ctx.fillText('$9.99', dims.w / 2, cardY + 315 * fit);
+  ctx.font = `900 ${168 * fit}px Arial, sans-serif`;
+  ctx.fillText('ONE PAYMENT', dims.w / 2, cardY + 300 * fit);
   ctx.fillStyle = '#f8fafc';
   ctx.font = `700 ${38 * fit}px Arial, sans-serif`;
-  ctx.fillText('one payment · yours forever', dims.w / 2, cardY + 375 * fit);
+  ctx.fillText('Yours forever · no subscriptions', dims.w / 2, cardY + 375 * fit);
 
   const benefits = [
     ['$', 'Unlimited celebrity\nsearches'],
@@ -540,13 +540,10 @@ async function captureMogulCashPng(dims: { w: number; h: number }): Promise<Blob
   ctx.lineTo(cardX + cardW - 120 * fit, cardY + 430 * fit);
   ctx.stroke();
 
-  // Price
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `400 ${32 * fit}px Arial, sans-serif`;
-  ctx.fillText('just', dims.w / 2 - 170 * fit, cardY + 560 * fit);
+  // Value line (price removed for App Store 2.3.7 compliance)
   ctx.fillStyle = '#fbbf24';
-  ctx.font = `900 ${130 * fit}px Arial, sans-serif`;
-  ctx.fillText('$4.99', dims.w / 2 + 30 * fit, cardY + 580 * fit);
+  ctx.font = `900 ${96 * fit}px Arial, sans-serif`;
+  ctx.fillText('TRADE BIGGER', dims.w / 2, cardY + 560 * fit);
   ctx.fillStyle = 'rgba(255,255,255,0.72)';
   ctx.font = `500 ${28 * fit}px Arial, sans-serif`;
   ctx.fillText('one-time · in-app purchase', dims.w / 2, cardY + 650 * fit);
