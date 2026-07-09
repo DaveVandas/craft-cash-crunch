@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { Capacitor } from '@capacitor/core';
 import { HowWeCalculateModal } from '@/components/info/HowWeCalculateModal';
 
 // Social media icons
@@ -139,10 +140,14 @@ const Footer = () => {
               📚 Blog
             </Link>
             <span className="text-border hidden md:inline">•</span>
-            <Link to="/become-affiliate" className="text-primary hover:text-primary/80 transition-colors font-medium">
-              💰 Affiliate
-            </Link>
-            <span className="text-border hidden md:inline">•</span>
+            {!Capacitor.isNativePlatform() && (
+              <>
+                <Link to="/become-affiliate" className="text-primary hover:text-primary/80 transition-colors font-medium">
+                  💰 Affiliate
+                </Link>
+                <span className="text-border hidden md:inline">•</span>
+              </>
+            )}
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
               About
             </Link>
