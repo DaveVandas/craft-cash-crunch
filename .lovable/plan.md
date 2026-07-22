@@ -1,86 +1,139 @@
-## Plan of Attack — Remaining Apple Rejection Items (#4, #5, #6)
+## What is happening
 
-Goal: clear the last three App Review blockers before re-archiving and re-submitting to App Store Connect.
+Your Signing & Capabilities page looks mostly correct, but the archive is failing before packaging because Xcode is trying to read a specific `.mobileprovision` file from your Mac that does not exist anymore.
 
----
+This is not an App Store Connect metadata problem and not an app-code problem. It is a local Xcode signing/profile cache or Release build signing setting problem.
 
-### Item 4 — Guideline 2.2 (Beta Testing / non-functional features)
+The key clues from your screenshot:
 
-Reviewers see routes or UI that aren't meant for the public 1.0 build. We'll hide them on native builds without deleting the web functionality.
+- Archive destination is correct: `Any iOS Device (arm64)`
+- Team is correct: `NORTHSPAN INDUSTRIES, LLC`
+- Bundle ID is correct: `com.northspan.wealthperspective`
+- Automatic signing is checked
+- But the build error is still: `Build input file cannot be found ... .mobileprovision`
+- Under the Release signing view, Xcode appears to show an `Apple Development` certificate, which is suspicious for an App Store archive. Release/archive should normally resolve to an Apple distribution signing setup.
 
-- Add a small helper `isNative()` gate (already exists in `src/lib/nativeFeatures.ts`) and use it to conditionally hide these on iOS:
-  - `/beta` — BetaInvite route (invite-only, looks broken to a reviewer without a code)
-  - `/admin` — Admin dashboard route
-  - `/become-affiliate`, `/affiliate-dashboard` — affiliate program (100-slot waitlist, reads as unfinished)
-  - `/store-screenshots` — internal marketing tool
-  - `/landing/a|b|c|d` — A/B marketing landing pages
-- In `App.tsx`, wrap those `<Route>`s in a `!isNative &&` guard so on the iOS build they resolve to `NotFound`.
-- Audit visible entry points that link to those routes (Header, Footer, MobileNav, Admin links) and hide the links on native.
-- Remove/hide any "Coming Soon" chips or disabled tiles on the More panel and Home page for the native build.
-- Verify `BetaFeedbackModal` never auto-opens for a plain reviewer account.
+## Plan to fix it
 
-Deliverable: reviewer signing in with `appreview@northspan.com` sees only shipping features — no admin, beta, affiliate, or marketing routes.
+### 1. Stop retrying Archive for the moment
 
----
+Do not keep archiving yet. Each retry is using the same broken signing/profile resolution.
 
-### Item 5 — Guideline 2.1(b) (IAP products not found in binary)
+### 2. Confirm whether Release is using the wrong signing identity
 
-Two independent fixes:
+In Xcode:
 
-1. **Product ID alignment**
-   - Confirm both product IDs in `src/lib/iap.ts` exactly match App Store Connect:
-     - `wealth_perspective_lifetime` (non-consumable)
-     - `wealth_perspective_mogul_cash` (consumable)
-   - Confirm both products are attached to the app record in ASC and in **Ready to Submit** state, and that the current build (Build 1) has them selected under **In-App Purchases and Subscriptions → Add to this version**.
+1. Click the blue `App` project icon.
+2. Select the `App` target.
+3. Open `Build Settings`.
+4. Make sure the filter is set to `All`, not `Basic`.
+5. Search for:
 
-2. **RevenueCat / StoreKit wiring**
-   - Fill in the real Android key (`goog_...`) in `src/lib/iap.ts` (currently `goog_REPLACE_ME`).
-   - Ensure the iOS `REVENUECAT_IOS_API_KEY` matches what's in the RevenueCat dashboard for the same bundle ID `com.northspan.wealthperspective`.
-   - In RevenueCat, confirm the Offering named `default` contains both products so `Purchases.getOfferings()` returns them.
-   - Add a StoreKit Configuration file in Xcode (`Products.storekit`) mirroring the two product IDs so the reviewer/tester sees the sheet even before Apple finishes propagating.
-   - Add a small "Restore Purchases" button on the paywall (Apple requires it for any non-consumable). We'll expose `restorePurchases()` from `src/lib/iap.ts` on `PaywallGate`.
+```txt
+Code Signing Identity
+```
 
-Deliverable: tapping "Unlock Lifetime" in the native build opens the real StoreKit sheet, and Restore works.
+Check the `Release` row.
 
----
+Expected:
 
-### Item 6 — Guideline 2.3.7 (Screenshots mention price)
+```txt
+Apple Distribution
+```
 
-Current ASC screenshots include:
-- Lifetime graphic: **"$9.99"**, **"one payment · yours forever"** (`captureLifetimePng` in `StoreScreenshots.tsx`)
-- Testimonial cards referencing dollar amounts inside quotes (e.g., "$100k of pretend money", "in 4 seconds") — the money-in-quotes ones are OK (they're user testimonial context, not price claims), but we'll double-check.
+If it says:
 
-Fixes in `src/pages/StoreScreenshots.tsx`:
-- Replace the "$9.99" mega-price with a non-price hero line, e.g. **"One Payment"** / **"Yours Forever"** with subline "No subscriptions. Ever." — remove any dollar figure.
-- Update the `LifetimeOfferGraphic` React preview to match (used for iPad export).
-- Keep the 10 feature bullets; just strip the price.
-- Regenerate the iPhone 6.5"/6.7", 5.5" (if used), and iPad 13" versions from `/store-screenshots`, then re-upload to ASC replacing screenshot #7 (Lifetime).
-- Scan the other 10 screenshots visually and swap any that show a price ticker/badge.
+```txt
+Apple Development
+```
 
-Deliverable: no screenshot contains a dollar amount tied to app pricing.
+change the `Release` value to:
 
----
+```txt
+Apple Distribution
+```
 
-### Sequencing
+Then search for:
 
-1. Ship code changes for #4 (route/link guards) and #6 (screenshot canvas edits) in one build.
-2. Ship code changes for #5 (Android key, restore button, StoreKit file scaffolding) in the same commit if possible.
-3. On your Mac: `git pull && npm i && npm run build && npx cap sync ios && npx cap open ios`.
-4. Regenerate screenshots at `/store-screenshots` in a desktop browser, download the zip, re-upload the Lifetime frame in ASC.
-5. In ASC → App Review → confirm both IAPs are attached to Build 1.
-6. Bump build number in Xcode (Build 2), Archive → Upload → Submit for Review with a short "Response to Reviewer" note listing each guideline and what changed.
+```txt
+Provisioning Profile
+```
 
----
+Expected for Release:
 
-### Technical notes (details, skip if not needed)
+```txt
+Automatic
+```
 
-- Native-only route gating pattern:
-  ```tsx
-  import { isNative } from '@/lib/nativeFeatures';
-  const native = isNative();
-  // ...
-  {!native && <Route path="/admin" element={<Admin />} />}
-  ```
-- Restore button placement: `src/components/paywall/PaywallGate.tsx`, secondary button under primary CTA, only rendered when `isNativePlatform()`.
-- StoreKit config file (`ios/App/App/Products.storekit`) is scaffolded via Xcode: File → New → File → StoreKit Configuration File, then in the scheme's Run → Options → StoreKit Configuration select it. Product IDs must match `LIFETIME_PRODUCT_ID` and `MOGUL_CASH_PRODUCT_ID`.
-- No database migrations, no edge function changes, no design-token changes.
+Then search for:
+
+```txt
+Provisioning Profile Specifier
+```
+
+Expected for Release:
+
+```txt
+blank / empty
+```
+
+If there is a profile name or UUID there, clear it.
+
+### 3. Force Xcode to download/recreate signing profiles
+
+In Xcode:
+
+1. Open `Xcode → Settings...`
+2. Go to `Accounts`.
+3. Select the Apple ID.
+4. Select `NORTHSPAN INDUSTRIES, LLC`.
+5. Click `Download Manual Profiles` if available.
+6. Close Settings.
+
+Then return to the project:
+
+1. `Signing & Capabilities`
+2. Uncheck `Automatically manage signing`
+3. Wait a few seconds
+4. Re-check `Automatically manage signing`
+5. Confirm Team remains `NORTHSPAN INDUSTRIES, LLC`
+
+### 4. Clean after the signing correction
+
+After the signing values are corrected:
+
+1. `Product → Clean Build Folder`
+2. Quit Xcode completely
+3. Reopen `App.xcworkspace`
+4. Confirm destination is `Any iOS Device (arm64)`
+5. Try `Product → Archive`
+
+### 5. If it still fails, remove the exact missing profile reference from the local project file
+
+If the same error returns, the next step is not another cache cleanup. We need the exact full missing `.mobileprovision` path/UUID from the error and then remove every remaining reference to it.
+
+In Terminal, from the iOS app folder, run a search like this:
+
+```bash
+grep -R "mobileprovision\|PROVISIONING_PROFILE\|CODE_SIGN_IDENTITY" App.xcodeproj/project.pbxproj
+```
+
+Then remove only the stale `.mobileprovision` reference or incorrect Release signing value.
+
+### 6. Last-resort local Xcode reset
+
+If Xcode still insists on the missing profile after the project file is clean:
+
+1. Remove the Apple account from `Xcode → Settings → Accounts`
+2. Quit Xcode
+3. Reopen Xcode
+4. Add the Apple account again
+5. Re-select the Northspan team
+6. Let Xcode recreate the managed profile
+7. Archive again
+
+## What I think is most likely
+
+The most likely issue is that the Release archive build is still resolving to a missing local managed provisioning profile, and possibly using an `Apple Development` signing identity instead of the correct distribution signing setup for archive.
+
+The next thing I would check first is the `Build Settings → Code Signing Identity → Release` value.
