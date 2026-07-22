@@ -1,139 +1,174 @@
-## What is happening
+## What the screenshot confirms
 
-Your Signing & Capabilities page looks mostly correct, but the archive is failing before packaging because Xcode is trying to read a specific `.mobileprovision` file from your Mac that does not exist anymore.
+The current archive failure is no longer primarily showing the old provisioning-profile UUID problem. The visible errors are now package/framework resolution errors:
 
-This is not an App Store Connect metadata problem and not an app-code problem. It is a local Xcode signing/profile cache or Release build signing setting problem.
+- `Missing package product 'Capacitor'`
+- `Missing package product 'Cordova'`
+- `Missing package product 'RevenueCat'`
+- `Missing package product 'RevenueCatPurchasesCapacitor'`
+- Multiple `There is no XCFramework found at ... DerivedData ...` errors
 
-The key clues from your screenshot:
+That points to Xcode not having valid local package/build artifacts for the native iOS dependencies. The signing page in your screenshot looks mostly clean, so we should stop changing signing settings until package resolution is confirmed.
 
-- Archive destination is correct: `Any iOS Device (arm64)`
-- Team is correct: `NORTHSPAN INDUSTRIES, LLC`
-- Bundle ID is correct: `com.northspan.wealthperspective`
-- Automatic signing is checked
-- But the build error is still: `Build input file cannot be found ... .mobileprovision`
-- Under the Release signing view, Xcode appears to show an `Apple Development` certificate, which is suspicious for an App Store archive. Release/archive should normally resolve to an Apple distribution signing setup.
+## Possible culprits, ordered from low-risk / most likely
 
-## Plan to fix it
+1. **Xcode package cache was cleared and packages were not fully re-resolved**
+   - This fits the `DerivedData` / `XCFramework not found` errors.
+   - Deleting DerivedData can expose this if Xcode does not re-download/rebuild package artifacts cleanly.
 
-### 1. Stop retrying Archive for the moment
+2. **Wrong Xcode entry file is open**
+   - Opening `App.xcodeproj` instead of `App.xcworkspace` can break Capacitor/CocoaPods/package linkage.
+   - We need to confirm the exact file open before doing anything else.
 
-Do not keep archiving yet. Each retry is using the same broken signing/profile resolution.
+3. **Swift Package Manager dependencies are present but stuck in a bad resolved state**
+   - Xcode may show package products as missing even though the project references are still there.
+   - This can usually be fixed from Xcode menus before touching Terminal.
 
-### 2. Confirm whether Release is using the wrong signing identity
+4. **The project file still has valid package references, but Xcode’s local workspace metadata is corrupted**
+   - This is possible after repeated cache/profile cleanup.
+   - We should only reset workspace metadata if Xcode package resolution evidence points there.
 
-In Xcode:
+5. **The earlier manual cleanup removed or damaged a required local project reference**
+   - Less likely, but possible.
+   - We should verify with direct evidence before changing code or restoring backups.
 
-1. Click the blue `App` project icon.
-2. Select the `App` target.
-3. Open `Build Settings`.
-4. Make sure the filter is set to `All`, not `Basic`.
-5. Search for:
+6. **Signing is still a secondary issue**
+   - The screenshot shows signing is not the main current blocker.
+   - We should not keep toggling certificates/profiles while package products are missing.
 
-```txt
-Code Signing Identity
+## Rules for the fix from here
+
+- No broad Terminal cleanup unless we have a matching error source.
+- No more signing changes until package errors are resolved.
+- One change at a time.
+- After every change, record:
+  - what changed
+  - why it changed
+  - how to undo it
+  - whether the error changed
+- If an archive fails, compare the **first build error**, not the full red list. The first error usually causes the rest.
+
+## Step 1: Confirm the current state without changing anything
+
+In Xcode, confirm these items first:
+
+1. **Confirm the file open**
+   - Xcode title/path should be the workspace:
+     ```text
+     ios/App/App.xcworkspace
+     ```
+   - If it is `App.xcodeproj`, stop and reopen `App.xcworkspace`.
+
+2. **Check package status**
+   - In Xcode top menu:
+     ```text
+     File → Packages
+     ```
+   - Look for whether options like **Resolve Package Versions**, **Reset Package Caches**, or package errors are visible.
+   - Do not click reset yet.
+
+3. **Open the Report navigator**
+   - Left sidebar, click the report/build log icon.
+   - Open the failed archive log.
+   - Identify the **first error in chronological order**.
+   - We need to know whether the first error is `Missing package product`, `No XCFramework found`, or something else.
+
+4. **Check package dependency list**
+   - In the Project navigator, look for **Package Dependencies**.
+   - Confirm whether `Capacitor`, `Cordova`, `RevenueCat`, or `RevenueCatPurchasesCapacitor` appear red/missing.
+
+## Step 2: Lowest-risk Xcode-only recovery
+
+Only if Step 1 confirms package/product errors:
+
+1. In Xcode:
+   ```text
+   File → Packages → Resolve Package Versions
+   ```
+
+2. Wait for resolution to complete.
+
+3. Then run:
+   ```text
+   Product → Clean Build Folder
+   ```
+
+4. Try archive again.
+
+Expected result:
+- If packages were simply unresolved, the missing `Capacitor`, `Cordova`, and `RevenueCat` errors should disappear.
+
+Undo needed:
+- None. Resolving packages does not change app code.
+
+## Step 3: If package errors remain, reset only package cache
+
+Only if Step 2 fails with the same package errors:
+
+1. In Xcode:
+   ```text
+   File → Packages → Reset Package Caches
+   ```
+
+2. Then:
+   ```text
+   File → Packages → Resolve Package Versions
+   ```
+
+3. Clean build folder.
+
+4. Archive again.
+
+Expected result:
+- Xcode re-downloads/rebuilds the missing package artifacts.
+
+Undo needed:
+- None usually. This resets Xcode’s package cache, not app code.
+
+## Step 4: If still failing, collect hard evidence before changing anything
+
+Before any Terminal command or project-file edit, collect these three screenshots/details:
+
+1. The **first error** in the failed archive report log.
+2. The **Package Dependencies** list showing whether anything is red/missing.
+3. The exact top-window/project path showing whether `App.xcworkspace` is open.
+
+With that data, we decide between:
+
+- re-running dependency install/sync,
+- restoring the backed-up Xcode project file,
+- repairing package references,
+- or isolating a specific dependency like RevenueCat.
+
+## Step 5: Controlled change tracking if Terminal is required
+
+If we reach Terminal, use a strict change log:
+
+```text
+Change #:
+Reason:
+Command/menu action:
+Expected result:
+Undo path:
+Result:
+Next decision:
 ```
 
-Check the `Release` row.
+No multi-command cleanup bundles. One action, one verification.
 
-Expected:
+## Current best next move
 
-```txt
-Apple Distribution
-```
+Do **not** change signing again right now.
 
-If it says:
+Start with Xcode-only confirmation:
 
-```txt
-Apple Development
-```
+1. Confirm you opened `App.xcworkspace`.
+2. Open the failed archive report and find the first error.
+3. If the first error is package-related, run:
+   ```text
+   File → Packages → Resolve Package Versions
+   ```
+4. Clean Build Folder.
+5. Archive again.
 
-change the `Release` value to:
-
-```txt
-Apple Distribution
-```
-
-Then search for:
-
-```txt
-Provisioning Profile
-```
-
-Expected for Release:
-
-```txt
-Automatic
-```
-
-Then search for:
-
-```txt
-Provisioning Profile Specifier
-```
-
-Expected for Release:
-
-```txt
-blank / empty
-```
-
-If there is a profile name or UUID there, clear it.
-
-### 3. Force Xcode to download/recreate signing profiles
-
-In Xcode:
-
-1. Open `Xcode → Settings...`
-2. Go to `Accounts`.
-3. Select the Apple ID.
-4. Select `NORTHSPAN INDUSTRIES, LLC`.
-5. Click `Download Manual Profiles` if available.
-6. Close Settings.
-
-Then return to the project:
-
-1. `Signing & Capabilities`
-2. Uncheck `Automatically manage signing`
-3. Wait a few seconds
-4. Re-check `Automatically manage signing`
-5. Confirm Team remains `NORTHSPAN INDUSTRIES, LLC`
-
-### 4. Clean after the signing correction
-
-After the signing values are corrected:
-
-1. `Product → Clean Build Folder`
-2. Quit Xcode completely
-3. Reopen `App.xcworkspace`
-4. Confirm destination is `Any iOS Device (arm64)`
-5. Try `Product → Archive`
-
-### 5. If it still fails, remove the exact missing profile reference from the local project file
-
-If the same error returns, the next step is not another cache cleanup. We need the exact full missing `.mobileprovision` path/UUID from the error and then remove every remaining reference to it.
-
-In Terminal, from the iOS app folder, run a search like this:
-
-```bash
-grep -R "mobileprovision\|PROVISIONING_PROFILE\|CODE_SIGN_IDENTITY" App.xcodeproj/project.pbxproj
-```
-
-Then remove only the stale `.mobileprovision` reference or incorrect Release signing value.
-
-### 6. Last-resort local Xcode reset
-
-If Xcode still insists on the missing profile after the project file is clean:
-
-1. Remove the Apple account from `Xcode → Settings → Accounts`
-2. Quit Xcode
-3. Reopen Xcode
-4. Add the Apple account again
-5. Re-select the Northspan team
-6. Let Xcode recreate the managed profile
-7. Archive again
-
-## What I think is most likely
-
-The most likely issue is that the Release archive build is still resolving to a missing local managed provisioning profile, and possibly using an `Apple Development` signing identity instead of the correct distribution signing setup for archive.
-
-The next thing I would check first is the `Build Settings → Code Signing Identity → Release` value.
+If that fails, we move to package cache reset, not signing changes.
