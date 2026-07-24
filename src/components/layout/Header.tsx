@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
@@ -232,19 +233,19 @@ const Header = () => {
                     )}
                   </div>
                   <DropdownMenuSeparator />
-                  {isAdmin && (
+                  {isAdmin && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="h-4 w-4 mr-2" />
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  {isAffiliate && (
+                  {isAffiliate && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => navigate('/affiliate-dashboard')}>
                       <QrCode className="h-4 w-4 mr-2" />
                       Affiliate Dashboard
                     </DropdownMenuItem>
                   )}
-                  {isBetaUser && (
+                  {isBetaUser && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => setFeedbackModalOpen(true)}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Give Feedback
