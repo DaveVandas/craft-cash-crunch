@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { Search, LogIn, LogOut, Crown, User, Volume2, VolumeX, Gem, Shield, Heart, Sparkles, MessageSquare, TrendingUp, QrCode, Loader2, Sun, Moon, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import InviteFriendsModal from '@/components/invite/InviteFriendsModal';
