@@ -1,174 +1,75 @@
-## What the screenshot confirms
 
-The current archive failure is no longer primarily showing the old provisioning-profile UUID problem. The visible errors are now package/framework resolution errors:
+# Apple Resubmission Plan — Round 2
 
-- `Missing package product 'Capacitor'`
-- `Missing package product 'Cordova'`
-- `Missing package product 'RevenueCat'`
-- `Missing package product 'RevenueCatPurchasesCapacitor'`
-- Multiple `There is no XCFramework found at ... DerivedData ...` errors
+Tackling all four rejection items plus the polish issues you flagged. Keep everything in one sequenced list so nothing gets dropped.
 
-That points to Xcode not having valid local package/build artifacts for the native iOS dependencies. The signing page in your screenshot looks mostly clean, so we should stop changing signing settings until package resolution is confirmed.
+---
 
-## Possible culprits, ordered from low-risk / most likely
+## 1. Guideline 2.1(a) — Login 404 bug (BLOCKER)
 
-1. **Xcode package cache was cleared and packages were not fully re-resolved**
-   - This fits the `DerivedData` / `XCFramework not found` errors.
-   - Deleting DerivedData can expose this if Xcode does not re-download/rebuild package artifacts cleanly.
+**Root cause:** Native OAuth (Apple/Google) sends the reviewer to `https://earningsexplorer.shop/auth/callback` via Universal Link. That path doesn't exist in the router (only `/auth`), so the site returns the SPA NotFound page — Apple sees a "404".
 
-2. **Wrong Xcode entry file is open**
-   - Opening `App.xcodeproj` instead of `App.xcworkspace` can break Capacitor/CocoaPods/package linkage.
-   - We need to confirm the exact file open before doing anything else.
+**Fix:**
+- Add a real `/auth/callback` route that renders a small handler page. It waits for the Supabase session (populated either by the web hash tokens or by `NativeBootstrap` on device), then redirects to `/`.
+- Keep the Universal Link path working (AASA file already lists `/auth/callback` and `/auth/*`).
+- Add a graceful loading state so if the reviewer opens the URL in Safari it also resolves cleanly instead of 404.
 
-3. **Swift Package Manager dependencies are present but stuck in a bad resolved state**
-   - Xcode may show package products as missing even though the project references are still there.
-   - This can usually be fixed from Xcode menus before touching Terminal.
+## 2. Guideline 4.2 — Minimum functionality (BLOCKER)
 
-4. **The project file still has valid package references, but Xcode’s local workspace metadata is corrupted**
-   - This is possible after repeated cache/profile cleanup.
-   - We should only reset workspace metadata if Xcode package resolution evidence points there.
+Apple explicitly said push + share are not enough. Adding four native-only capabilities:
 
-5. **The earlier manual cleanup removed or damaged a required local project reference**
-   - Less likely, but possible.
-   - We should verify with direct evidence before changing code or restoring backups.
+- **Biometric login (Face ID / Touch ID)** — install `capacitor-native-biometric`; after first successful password/OAuth login on native, offer "Enable Face ID". On subsequent launches show a Face ID prompt on the Auth screen to unlock the stored session.
+- **Native Share Sheet** — replace web `navigator.share` fallbacks in celebrity/result share flows with `@capacitor/share` when `Capacitor.isNativePlatform()`.
+- **Haptic feedback** — install `@capacitor/haptics`; fire light/medium/success/error haptics on: trade execute, favorite toggle, quiz answer submit, search result tap, sign-in success.
+- **Home Screen Widget (iOS)** — scaffold a WidgetKit extension in the iOS project showing "Today's Celebrity Spotlight" (name + daily earning rate). Instructions to add the target in Xcode included in the plan doc; the widget reads a shared App Group value the app writes on each spotlight refresh.
 
-6. **Signing is still a secondary issue**
-   - The screenshot shows signing is not the main current blocker.
-   - We should not keep toggling certificates/profiles while package products are missing.
+## 3. Guideline 2.3.7 — Pricing in screenshots (BLOCKER)
 
-## Rules for the fix from here
+- Remove screenshot slide 07 (`LifetimeOfferGraphic` + `LifetimeCanvasPreview`) entirely from `StoreScreenshots.tsx`.
+- Also scrub any leftover "one-time", "no subscriptions", "risk-free", "+$20,000", "LIFETIME ACCESS" strings from remaining slides.
+- You then regenerate the 6 remaining screenshots and re-upload them to App Store Connect.
 
-- No broad Terminal cleanup unless we have a matching error source.
-- No more signing changes until package errors are resolved.
-- One change at a time.
-- After every change, record:
-  - what changed
-  - why it changed
-  - how to undo it
-  - whether the error changed
-- If an archive fails, compare the **first build error**, not the full red list. The first error usually causes the rest.
+## 4. Guideline 2.2 — Beta / incomplete features (BLOCKER)
 
-## Step 1: Confirm the current state without changing anything
+Audit and cleanup on native builds:
 
-In Xcode, confirm these items first:
+- Hide the Beta Feedback modal trigger in `Header.tsx` on native (`Capacitor.isNativePlatform()`).
+- Hide "Invite Friends" affiliate CTA on native if it references beta perks.
+- Confirm Admin, Landing variants, Beta, Become-Affiliate, Affiliate-Dashboard, Store-Screenshots routes are already gated (they are) and also remove any nav links pointing at them from mobile menus / footer on native.
+- Sweep `Header.tsx`, `Footer.tsx`, `MobileNav.tsx`, `Index.tsx` for links to those routes and wrap in `!isNative`.
 
-1. **Confirm the file open**
-   - Xcode title/path should be the workspace:
-     ```text
-     ios/App/App.xcworkspace
-     ```
-   - If it is `App.xcodeproj`, stop and reopen `App.xcworkspace`.
+---
 
-2. **Check package status**
-   - In Xcode top menu:
-     ```text
-     File → Packages
-     ```
-   - Look for whether options like **Resolve Package Versions**, **Reset Package Caches**, or package errors are visible.
-   - Do not click reset yet.
+## 5. Polish / low-hanging fruit
 
-3. **Open the Report navigator**
-   - Left sidebar, click the report/build log icon.
-   - Open the failed archive log.
-   - Identify the **first error in chronological order**.
-   - We need to know whether the first error is `Missing package product`, `No XCFramework found`, or something else.
+- **Overlapping text on iPhone 17 Pro Max** (Quiz + general lookup pages):
+  - Audit Quiz question card, answer buttons, streak/timer badges, and profile hero on `Profile.tsx` for fixed widths / absolute positioning that collides at 402pt-wide safe area.
+  - Convert offenders to flex/grid with `min-w-0`, `truncate`, `flex-wrap`, and responsive font sizes.
+- **Inconsistent earnings when searching the same person twice:**
+  - `get-celebrity-data` already runs Gemini at `temperature: 0`, but different prompt runs still drift because the AI recomputes net worth each call.
+  - Fix: cache the AI response per celebrity in the existing `celebrities` table (or a `celebrity_earnings_cache` table) keyed by normalized name, with a TTL (e.g. 24h). Second lookup returns cached row, guaranteeing identical numbers within the window. Falls back to fresh AI call after TTL.
 
-4. **Check package dependency list**
-   - In the Project navigator, look for **Package Dependencies**.
-   - Confirm whether `Capacitor`, `Cordova`, `RevenueCat`, or `RevenueCatPurchasesCapacitor` appear red/missing.
+---
 
-## Step 2: Lowest-risk Xcode-only recovery
+## Sequence of work
 
-Only if Step 1 confirms package/product errors:
+1. Screenshot cleanup (2.3.7) — code change only, you regenerate + re-upload.
+2. `/auth/callback` route (2.1a).
+3. Native features batch (4.2): biometrics, haptics, native share, widget scaffold.
+4. Beta-surface sweep on native (2.2).
+5. Overlapping-text audit on Quiz + Profile.
+6. Earnings caching migration + edge function update.
 
-1. In Xcode:
-   ```text
-   File → Packages → Resolve Package Versions
-   ```
+After each block I'll pause so you can pull → `npm install` → `npx cap sync ios` → archive on your Mac and spot-check before moving on.
 
-2. Wait for resolution to complete.
+---
 
-3. Then run:
-   ```text
-   Product → Clean Build Folder
-   ```
+## Technical details
 
-4. Try archive again.
+- New route: `src/pages/AuthCallback.tsx`; registered in `src/App.tsx` above the `*` catch-all.
+- New deps: `capacitor-native-biometric`, `@capacitor/haptics`, `@capacitor/share`. All optional on web via `Capacitor.isNativePlatform()` guards.
+- Widget: add a new Xcode target `WealthPerspectiveWidget` (WidgetKit, Swift). Shared App Group `group.com.northspan.wealthperspective`. App writes JSON via `Preferences` plugin (`@capacitor/preferences`) on daily spotlight refresh; widget reads it in its timeline provider. Manual Xcode step documented; no CocoaPods needed.
+- Earnings cache: new `celebrity_earnings_cache` table (name_normalized text PK, payload jsonb, fetched_at timestamptz). GRANTs to authenticated + service_role, RLS with SELECT for authenticated. Edge function checks cache first, writes on miss.
+- No changes to `capacitor.config.ts`, `AASA`, or Lovable Cloud auth URL allowlist (already correct).
 
-Expected result:
-- If packages were simply unresolved, the missing `Capacitor`, `Cordova`, and `RevenueCat` errors should disappear.
-
-Undo needed:
-- None. Resolving packages does not change app code.
-
-## Step 3: If package errors remain, reset only package cache
-
-Only if Step 2 fails with the same package errors:
-
-1. In Xcode:
-   ```text
-   File → Packages → Reset Package Caches
-   ```
-
-2. Then:
-   ```text
-   File → Packages → Resolve Package Versions
-   ```
-
-3. Clean build folder.
-
-4. Archive again.
-
-Expected result:
-- Xcode re-downloads/rebuilds the missing package artifacts.
-
-Undo needed:
-- None usually. This resets Xcode’s package cache, not app code.
-
-## Step 4: If still failing, collect hard evidence before changing anything
-
-Before any Terminal command or project-file edit, collect these three screenshots/details:
-
-1. The **first error** in the failed archive report log.
-2. The **Package Dependencies** list showing whether anything is red/missing.
-3. The exact top-window/project path showing whether `App.xcworkspace` is open.
-
-With that data, we decide between:
-
-- re-running dependency install/sync,
-- restoring the backed-up Xcode project file,
-- repairing package references,
-- or isolating a specific dependency like RevenueCat.
-
-## Step 5: Controlled change tracking if Terminal is required
-
-If we reach Terminal, use a strict change log:
-
-```text
-Change #:
-Reason:
-Command/menu action:
-Expected result:
-Undo path:
-Result:
-Next decision:
-```
-
-No multi-command cleanup bundles. One action, one verification.
-
-## Current best next move
-
-Do **not** change signing again right now.
-
-Start with Xcode-only confirmation:
-
-1. Confirm you opened `App.xcworkspace`.
-2. Open the failed archive report and find the first error.
-3. If the first error is package-related, run:
-   ```text
-   File → Packages → Resolve Package Versions
-   ```
-4. Clean Build Folder.
-5. Archive again.
-
-If that fails, we move to package cache reset, not signing changes.
+Ready for your go-ahead to switch to build mode and start with block 1.
