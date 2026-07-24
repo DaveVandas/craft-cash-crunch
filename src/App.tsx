@@ -21,6 +21,7 @@ import Search from "./pages/Search";
 import Share from "./pages/Share";
 import Category from "./pages/Category";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Admin from "./pages/Admin";
@@ -78,6 +79,7 @@ const App = () => (
                     <Route path="/search" element={<Search />} />
                     <Route path="/share" element={<Share />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     {!isNative && <Route path="/admin" element={<Admin />} />}
