@@ -102,20 +102,9 @@ const screenshots: Screenshot[] = [
     accent: 'from-fuchsia-500 to-amber-500',
     screen: quizAsset.url,
   },
-  {
-    id: '07-lifetime',
-    caption: 'Unlock Everything Forever',
-    subCaption: 'One payment. No subscriptions. Ever.',
-    accent: 'from-amber-400 to-yellow-600',
-    body: <LifetimeOfferGraphic />,
-  },
-  {
-    id: '08-mogul-cash',
-    caption: 'Stack the Deck. Trade Bigger.',
-    subCaption: 'Boost your virtual paper cash and trade bolder',
-    accent: 'from-emerald-500 via-amber-400 to-yellow-600',
-    body: null,
-  },
+  // Slides 07 (Lifetime) and 08 (Mogul Cash) removed for App Store 2.3.7
+  // compliance — Apple treats "one payment", "no subscriptions", price
+  // callouts, and "risk-free" as pricing references in screenshots.
   {
     id: '09-review-reality-check',
     caption: '"Reality Check Hit Different"',
