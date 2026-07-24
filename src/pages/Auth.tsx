@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
 import { Capacitor } from '@capacitor/core';
+import { isBiometricAvailable, isBiometricEnabled, setBiometricEnabled, verifyBiometric } from '@/lib/nativeBiometric';
 
 const IS_NATIVE_APP = Capacitor.isNativePlatform();
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
@@ -161,6 +162,23 @@ const Auth = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const maybeOfferBiometric = async () => {
+    if (!IS_NATIVE_APP || isBiometricEnabled()) return;
+    try {
+      const available = await isBiometricAvailable();
+      if (!available) return;
+      const wantsBiometric = window.confirm('Enable Face ID / Touch ID for faster sign-in next time?');
+      if (!wantsBiometric) return;
+      const ok = await verifyBiometric('Confirm to enable Face ID');
+      if (ok) {
+        setBiometricEnabled(true);
+        toast.success('Face ID enabled');
+      }
+    } catch {
+      // ignore — never block sign-in on biometric enrollment
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateInputs()) return;
@@ -184,6 +202,7 @@ const Auth = () => {
         localStorage.setItem('wp_remember_me', 'false');
       }
       toast.success('Welcome back!');
+      await maybeOfferBiometric();
       navigate('/');
     }
   };
