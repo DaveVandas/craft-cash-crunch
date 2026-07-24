@@ -83,7 +83,7 @@ const screenshots: Screenshot[] = [
   },
   {
     id: '04-mogul-markets',
-    caption: 'Trade Like a Mogul. Risk Zero.',
+    caption: 'Trade Like a Mogul. Practice Mode.',
     subCaption: 'Paper-trade real stocks with virtual cash',
     accent: 'from-emerald-500 to-amber-500',
     screen: marketsAsset.url,
