@@ -46,8 +46,9 @@ export async function nativeShare(opts: ShareOptions): Promise<boolean> {
 
   // Final fallback: copy the URL
   try {
-    if (opts.url && typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(opts.url);
+    const nav = typeof navigator !== 'undefined' ? (navigator as Navigator) : null;
+    if (opts.url && nav && nav.clipboard) {
+      await nav.clipboard.writeText(opts.url);
       return true;
     }
   } catch {
