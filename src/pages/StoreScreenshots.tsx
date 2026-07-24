@@ -132,7 +132,7 @@ const screenshots: Screenshot[] = [
     ),
   },
   {
-    id: '09-review-paper-trading',
+    id: '11-review-paper-trading',
     caption: '"Paper Trading Made Me Brave"',
     subCaption: 'What members are saying',
     accent: 'from-emerald-500 via-amber-400 to-yellow-600',
