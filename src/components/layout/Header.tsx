@@ -233,19 +233,19 @@ const Header = () => {
                     )}
                   </div>
                   <DropdownMenuSeparator />
-                  {isAdmin && (
+                  {isAdmin && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="h-4 w-4 mr-2" />
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  {isAffiliate && (
+                  {isAffiliate && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => navigate('/affiliate-dashboard')}>
                       <QrCode className="h-4 w-4 mr-2" />
                       Affiliate Dashboard
                     </DropdownMenuItem>
                   )}
-                  {isBetaUser && (
+                  {isBetaUser && !Capacitor.isNativePlatform() && (
                     <DropdownMenuItem onClick={() => setFeedbackModalOpen(true)}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Give Feedback
