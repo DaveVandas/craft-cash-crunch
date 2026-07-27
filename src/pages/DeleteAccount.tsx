@@ -99,10 +99,10 @@ const DeleteAccount = () => {
                 <p className="text-muted-foreground text-sm">
                   If you experience issues deleting your account, contact us at{' '}
                   <a 
-                    href="mailto:hello@wealthperspective.app" 
+                    href="mailto:wealthperspective@earningsexplorer.shop" 
                     className="text-primary hover:underline"
                   >
-                    hello@wealthperspective.app
+                    wealthperspective@earningsexplorer.shop
                   </a>
                   . We will process your deletion request within 30 days.
                 </p>

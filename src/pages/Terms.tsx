@@ -155,8 +155,8 @@ const Terms = () => {
                 <h2 className="text-xl font-semibold text-foreground mb-3">13. Contact</h2>
                 <p className="text-muted-foreground">
                   For questions about these Terms of Service, please contact us at{' '}
-                  <a href="mailto:vandasdave@gmail.com" className="text-primary hover:underline">
-                    vandasdave@gmail.com
+                  <a href="mailto:wealthperspective@earningsexplorer.shop" className="text-primary hover:underline">
+                    wealthperspective@earningsexplorer.shop
                   </a>.
                 </p>
               </section>
