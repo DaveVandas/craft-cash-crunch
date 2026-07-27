@@ -504,38 +504,39 @@ const Quiz = () => {
 
               {/* Question Card */}
               <Card className="border-border/50 bg-card/80 backdrop-blur overflow-hidden">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   {/* Celebrity Header - Adaptive for comparison questions */}
                   {question.questionType === 'net_worth_comparison' && question.celebrity2 ? (
-                    <div className="flex items-center justify-center gap-4 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                      <div className="text-center">
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="text-center min-w-0 flex-1">
                         <span className="text-3xl block mb-1">{question.emoji}</span>
-                        <p className="font-bold text-sm text-foreground">{question.celebrity}</p>
+                        <p className="font-bold text-sm text-foreground break-words">{question.celebrity}</p>
                       </div>
-                      <span className="text-2xl font-bold text-primary">VS</span>
-                      <div className="text-center">
+                      <span className="text-2xl font-bold text-primary shrink-0">VS</span>
+                      <div className="text-center min-w-0 flex-1">
                         <span className="text-3xl block mb-1">{question.emoji2}</span>
-                        <p className="font-bold text-sm text-foreground">{question.celebrity2}</p>
+                        <p className="font-bold text-sm text-foreground break-words">{question.celebrity2}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                      <span className="text-4xl">{question.emoji}</span>
-                      <div>
-                        <p className="font-bold text-lg text-foreground">{question.celebrity}</p>
-                        <p className="text-sm text-primary">{question.category}</p>
+                      <span className="text-4xl shrink-0">{question.emoji}</span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-base sm:text-lg text-foreground break-words">{question.celebrity}</p>
+                        <p className="text-sm text-primary break-words">{question.category}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Question Text - Adaptive for different question types */}
-                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-foreground">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-foreground break-words">
                     {question.questionText ? (
                       question.questionText
                     ) : (
                       <>How long to earn a {question.itemEmoji} <span className="text-primary">{question.itemName}</span>?</>
                     )}
                   </h2>
+
                   
                   {/* Subtitle - only for time_to_earn with item value */}
                   {question.itemValue && (
