@@ -1081,6 +1081,22 @@ Return ONLY valid JSON, no markdown or explanation.`
         source: finalSource,
       };
       console.log(`Fetched celebrity: ${parsed.name}, earnings: $${finalAnnualEarnings}, netWorth: $${finalNetWorth}, source: ${finalSource}, image: ${imageUrl ? 'found' : 'emoji: ' + emoji}`);
+
+      // Persist to cache so repeat lookups return identical figures
+      if (cacheKey) {
+        const keys = new Set([cacheKey]);
+        if (celebrity.name) keys.add(String(celebrity.name).trim().toLowerCase());
+        const rows = [...keys].map((k) => ({
+          name_normalized: k,
+          payload: celebrity,
+          fetched_at: new Date().toISOString(),
+        }));
+        const { error: cacheError } = await supabaseClient
+          .from('celebrity_earnings_cache')
+          .upsert(rows, { onConflict: 'name_normalized' });
+        if (cacheError) console.error('Cache write failed:', cacheError.message);
+      }
+
       return new Response(JSON.stringify({ celebrity, error: null }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
