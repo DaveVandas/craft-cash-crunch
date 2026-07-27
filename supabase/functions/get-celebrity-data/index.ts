@@ -917,12 +917,32 @@ serve(async (req) => {
       return errorResponse('Invalid category. Please select a valid category.', 'INVALID_INPUT', corsHeaders);
     }
 
+    // --- Persistent cache: guarantees identical numbers for repeat lookups ---
+    const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+    const cacheKey = name ? name.trim().toLowerCase() : null;
+
+    if (cacheKey) {
+      const { data: cached } = await supabaseClient
+        .from('celebrity_earnings_cache')
+        .select('payload, fetched_at')
+        .eq('name_normalized', cacheKey)
+        .maybeSingle();
+
+      if (cached && Date.now() - new Date(cached.fetched_at).getTime() < CACHE_TTL_MS) {
+        console.log(`Cache hit for "${cacheKey}"`);
+        return new Response(JSON.stringify({ celebrity: cached.payload, error: null }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY not configured');
       return errorResponse('Service temporarily unavailable. Please try again later.', 'SERVICE_UNAVAILABLE', corsHeaders);
     }
+
 
     // Sanitize name for safe prompt injection prevention
     const safeName = name ? sanitizeForPrompt(name) : null;
