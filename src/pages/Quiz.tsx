@@ -494,12 +494,13 @@ const Quiz = () => {
 
               {/* Streak Message Overlay */}
               {showStreakMessage && streak >= 2 && (
-                <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
-                  <div className={`text-4xl font-bold animate-scale-in ${getStreakMessage().color}`}>
+                <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50 px-6">
+                  <div className={`text-2xl sm:text-4xl font-bold text-center break-words animate-scale-in ${getStreakMessage().color}`}>
                     {getStreakMessage().message}
                   </div>
                 </div>
               )}
+
 
               {/* Question Card */}
               <Card className="border-border/50 bg-card/80 backdrop-blur overflow-hidden">
