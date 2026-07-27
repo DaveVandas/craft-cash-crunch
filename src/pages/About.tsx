@@ -99,10 +99,10 @@ const About = () => {
                   <AccordionContent className="text-muted-foreground">
                     Have questions, feedback, or partnership inquiries? Reach out to us at{' '}
                     <a 
-                      href="mailto:vandasdave@gmail.com" 
+                      href="mailto:wealthperspective@earningsexplorer.shop" 
                       className="text-primary hover:text-primary/80 underline transition-colors"
                     >
-                      vandasdave@gmail.com
+                      wealthperspective@earningsexplorer.shop
                     </a>
                   </AccordionContent>
                 </AccordionItem>

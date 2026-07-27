@@ -389,6 +389,24 @@ export type Database = {
           },
         ]
       }
+      celebrity_earnings_cache: {
+        Row: {
+          fetched_at: string
+          name_normalized: string
+          payload: Json
+        }
+        Insert: {
+          fetched_at?: string
+          name_normalized: string
+          payload: Json
+        }
+        Update: {
+          fetched_at?: string
+          name_normalized?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       celebrity_images: {
         Row: {
           celebrity_name: string

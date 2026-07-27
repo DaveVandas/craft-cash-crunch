@@ -33,7 +33,7 @@ const EarningsTicker = ({ annualEarnings, name }: EarningsTickerProps) => {
           <p className="text-sm text-muted-foreground mb-2">
             {name} has earned since you opened this page:
           </p>
-          <div className="font-mono text-4xl md:text-5xl font-bold gradient-gold-text ticker-number animate-count-up">
+          <div className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold gradient-gold-text ticker-number animate-count-up break-words">
             {formatLargeCurrency(currentEarnings)}
           </div>
           <p className="text-sm text-muted-foreground mt-4">

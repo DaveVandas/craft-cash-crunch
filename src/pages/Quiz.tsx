@@ -464,24 +464,25 @@ const Quiz = () => {
           {gameState === 'playing' && question && (
             <>
               {/* Header Stats */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-3 min-w-0 flex-wrap">
+                  <div className="text-sm whitespace-nowrap">
                     <span className="text-muted-foreground">Score: </span>
                     <span className="font-bold text-primary">{score}</span>
                   </div>
                   {streak >= 2 && (
-                    <div className="flex items-center gap-1 text-amber-500 animate-pulse">
+                    <div className="flex items-center gap-1 text-amber-500 animate-pulse shrink-0">
                       <Flame className="h-4 w-4" />
                       <span className="text-sm font-bold">{streak}x</span>
                     </div>
                   )}
                 </div>
-                <div className="text-sm font-mono bg-primary/10 px-3 py-1 rounded-full">
+                <div className="text-sm font-mono bg-primary/10 px-3 py-1 rounded-full whitespace-nowrap shrink-0">
                   <Zap className="h-3 w-3 inline mr-1 text-primary" />
                   {totalPoints} pts
                 </div>
               </div>
+
 
               {/* Progress */}
               <div className="mb-6">
@@ -493,47 +494,49 @@ const Quiz = () => {
 
               {/* Streak Message Overlay */}
               {showStreakMessage && streak >= 2 && (
-                <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
-                  <div className={`text-4xl font-bold animate-scale-in ${getStreakMessage().color}`}>
+                <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50 px-6">
+                  <div className={`text-2xl sm:text-4xl font-bold text-center break-words animate-scale-in ${getStreakMessage().color}`}>
                     {getStreakMessage().message}
                   </div>
                 </div>
               )}
 
+
               {/* Question Card */}
               <Card className="border-border/50 bg-card/80 backdrop-blur overflow-hidden">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   {/* Celebrity Header - Adaptive for comparison questions */}
                   {question.questionType === 'net_worth_comparison' && question.celebrity2 ? (
-                    <div className="flex items-center justify-center gap-4 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                      <div className="text-center">
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="text-center min-w-0 flex-1">
                         <span className="text-3xl block mb-1">{question.emoji}</span>
-                        <p className="font-bold text-sm text-foreground">{question.celebrity}</p>
+                        <p className="font-bold text-sm text-foreground break-words">{question.celebrity}</p>
                       </div>
-                      <span className="text-2xl font-bold text-primary">VS</span>
-                      <div className="text-center">
+                      <span className="text-2xl font-bold text-primary shrink-0">VS</span>
+                      <div className="text-center min-w-0 flex-1">
                         <span className="text-3xl block mb-1">{question.emoji2}</span>
-                        <p className="font-bold text-sm text-foreground">{question.celebrity2}</p>
+                        <p className="font-bold text-sm text-foreground break-words">{question.celebrity2}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
-                      <span className="text-4xl">{question.emoji}</span>
-                      <div>
-                        <p className="font-bold text-lg text-foreground">{question.celebrity}</p>
-                        <p className="text-sm text-primary">{question.category}</p>
+                      <span className="text-4xl shrink-0">{question.emoji}</span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-base sm:text-lg text-foreground break-words">{question.celebrity}</p>
+                        <p className="text-sm text-primary break-words">{question.category}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Question Text - Adaptive for different question types */}
-                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-foreground">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-foreground break-words">
                     {question.questionText ? (
                       question.questionText
                     ) : (
                       <>How long to earn a {question.itemEmoji} <span className="text-primary">{question.itemName}</span>?</>
                     )}
                   </h2>
+
                   
                   {/* Subtitle - only for time_to_earn with item value */}
                   {question.itemValue && (
@@ -544,10 +547,11 @@ const Quiz = () => {
                   
                   {!question.itemValue && <div className="mb-6" />}
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {question.options.map((option) => {
                       const correctAnswer = getCorrectAnswer(question);
-                      let buttonClass = 'h-auto py-4 text-base font-medium transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+                      let buttonClass = 'h-auto min-h-[3.5rem] py-3 px-3 text-sm sm:text-base font-medium whitespace-normal break-words text-center leading-snug transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+
                       if (selectedAnswer) {
                         if (option === correctAnswer) {
                           buttonClass += ' bg-success/20 border-success text-success scale-105';

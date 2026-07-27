@@ -148,8 +148,8 @@ const Privacy = () => {
                 <p className="text-muted-foreground">
                   If you have questions about this Privacy Policy or wish to exercise your data rights, 
                   please contact us at{' '}
-                  <a href="mailto:vandasdave@gmail.com" className="text-primary hover:underline">
-                    vandasdave@gmail.com
+                  <a href="mailto:wealthperspective@earningsexplorer.shop" className="text-primary hover:underline">
+                    wealthperspective@earningsexplorer.shop
                   </a>.
                 </p>
               </section>

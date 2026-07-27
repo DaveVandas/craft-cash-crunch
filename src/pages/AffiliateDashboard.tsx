@@ -389,7 +389,7 @@ export default function AffiliateDashboard() {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="font-bold text-primary">4.</span>
-                        <span>Email your completed W-9 to: <strong className="text-foreground">hello@wealthperspective.app</strong></span>
+                        <span>Email your completed W-9 to: <strong className="text-foreground">wealthperspective@earningsexplorer.shop</strong></span>
                       </li>
                     </ol>
                   </div>
@@ -408,7 +408,7 @@ export default function AffiliateDashboard() {
                       </Button>
                     </a>
                     <a
-                      href="mailto:hello@wealthperspective.app?subject=W-9%20Submission%20-%20Affiliate%20Code%3A%20" 
+                      href="mailto:wealthperspective@earningsexplorer.shop?subject=W-9%20Submission%20-%20Affiliate%20Code%3A%20" 
                       className="inline-flex"
                     >
                       <Button variant="outline" className="gap-2">
