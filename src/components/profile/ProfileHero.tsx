@@ -84,9 +84,9 @@ const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
             )}
           </div>
 
-          <div className="flex-1 animate-fade-in">
+          <div className="flex-1 min-w-0 w-full animate-fade-in">
             {/* Category badge */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               <Badge variant="outline" className="border-primary/40 text-primary bg-primary/5 px-3 py-1">
                 {celebrity.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Badge>
@@ -103,25 +103,25 @@ const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
               )}
             </div>
             
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-3 tracking-tight">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 tracking-tight break-words">
               {celebrity.name}
             </h1>
             
-            <p className={cn("text-xl md:text-2xl text-muted-foreground mb-8", isLoading && "animate-pulse")}>
+            <p className={cn("text-lg sm:text-xl md:text-2xl text-muted-foreground mb-6 md:mb-8 break-words", isLoading && "animate-pulse")}>
               {celebrity.profession}
             </p>
 
             {/* Stats cards */}
-            <div className="flex flex-wrap gap-4 mb-3">
-              <div className="px-5 py-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20">
+            <div className="flex flex-wrap gap-3 sm:gap-4 mb-3">
+              <div className="min-w-0 px-4 sm:px-5 py-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20">
                 <p className="text-xs text-primary font-medium uppercase tracking-wider mb-1">Net Worth</p>
-                <p className="text-2xl md:text-3xl font-bold gradient-gold-text">
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold gradient-gold-text break-words">
                   {formatCompactCurrency(celebrity.netWorth)}
                 </p>
               </div>
-              <div className="px-5 py-3 rounded-xl bg-card/80 border border-border/50">
+              <div className="min-w-0 px-4 sm:px-5 py-3 rounded-xl bg-card/80 border border-border/50">
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Annual Earnings</p>
-                <p className="text-2xl md:text-3xl font-bold text-foreground">
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground break-words">
                   {formatCompactCurrency(celebrity.annualEarnings)}
                 </p>
               </div>
@@ -129,6 +129,7 @@ const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
                 <HowWeCalculateModal variant="link" />
               </div>
             </div>
+
             
             {celebrity.source && (
               <p className="text-xs text-muted-foreground/60 mb-6">
