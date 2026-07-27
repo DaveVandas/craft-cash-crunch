@@ -58,10 +58,11 @@ const ProfileHero = ({ celebrity, isLoading }: ProfileHeroProps) => {
           </Link>
         </div>
 
-        <div className="flex flex-col md:flex-row items-start gap-8 md:gap-10">
+        <div className="flex flex-col md:flex-row items-start gap-6 md:gap-10">
           {/* Avatar with premium styling */}
-          <div className="relative">
-            <Avatar className="h-36 w-36 md:h-44 md:w-44 rounded-2xl shadow-2xl shadow-primary/15 ring-4 ring-primary/20 border-2 border-card">
+          <div className="relative shrink-0">
+            <Avatar className="h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 rounded-2xl shadow-2xl shadow-primary/15 ring-4 ring-primary/20 border-2 border-card">
+
               <AvatarImage
                 src={celebrity.imageUrl}
                 alt={celebrity.name}
