@@ -547,10 +547,11 @@ const Quiz = () => {
                   
                   {!question.itemValue && <div className="mb-6" />}
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {question.options.map((option) => {
                       const correctAnswer = getCorrectAnswer(question);
-                      let buttonClass = 'h-auto py-4 text-base font-medium transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+                      let buttonClass = 'h-auto min-h-[3.5rem] py-3 px-3 text-sm sm:text-base font-medium whitespace-normal break-words text-center leading-snug transition-all duration-300 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+
                       if (selectedAnswer) {
                         if (option === correctAnswer) {
                           buttonClass += ' bg-success/20 border-success text-success scale-105';
