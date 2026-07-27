@@ -464,24 +464,25 @@ const Quiz = () => {
           {gameState === 'playing' && question && (
             <>
               {/* Header Stats */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-3 min-w-0 flex-wrap">
+                  <div className="text-sm whitespace-nowrap">
                     <span className="text-muted-foreground">Score: </span>
                     <span className="font-bold text-primary">{score}</span>
                   </div>
                   {streak >= 2 && (
-                    <div className="flex items-center gap-1 text-amber-500 animate-pulse">
+                    <div className="flex items-center gap-1 text-amber-500 animate-pulse shrink-0">
                       <Flame className="h-4 w-4" />
                       <span className="text-sm font-bold">{streak}x</span>
                     </div>
                   )}
                 </div>
-                <div className="text-sm font-mono bg-primary/10 px-3 py-1 rounded-full">
+                <div className="text-sm font-mono bg-primary/10 px-3 py-1 rounded-full whitespace-nowrap shrink-0">
                   <Zap className="h-3 w-3 inline mr-1 text-primary" />
                   {totalPoints} pts
                 </div>
               </div>
+
 
               {/* Progress */}
               <div className="mb-6">
