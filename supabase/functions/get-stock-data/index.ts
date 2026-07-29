@@ -15,7 +15,7 @@ function isAllowedOrigin(origin: string): boolean {
   try {
     const { hostname } = new URL(origin);
     // Allow preview and staging domains
-    return hostname.endsWith('.lovable.app') || hostname.endsWith('.lovableproject.com');
+    return hostname.endsWith('.lovable.app') || hostname.endsWith('.lovableproject.com') || hostname.endsWith('.sandbox.lovable.dev');
   } catch {
     return false;
   }
