@@ -152,6 +152,10 @@ const Footer = () => {
               About
             </Link>
             <span className="text-border">•</span>
+            <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">
+              Support
+            </Link>
+            <span className="text-border">•</span>
             <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
               Terms
             </Link>
