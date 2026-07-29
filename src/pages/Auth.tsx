@@ -113,6 +113,11 @@ const SocialAuthButtons = () => {
         )}
         Continue with Google
       </Button>
+      {authError && (
+        <p className="text-xs text-destructive text-center px-2" role="alert">
+          {authError}
+        </p>
+      )}
     </div>
   );
 };
