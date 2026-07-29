@@ -565,6 +565,11 @@ const MogulMarkets = () => {
           onSelectTicker={handleSelectTicker}
           onRefreshPrices={handleRefreshPrices}
         />
+
+        {/* Native on-device price alerts */}
+        <div className="mt-6">
+          <PriceAlertsCard />
+        </div>
       </main>
 
       <Footer />
