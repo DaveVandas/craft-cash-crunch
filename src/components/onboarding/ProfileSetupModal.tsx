@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 interface ProfileSetupModalProps {
   open: boolean;
   onComplete: () => void;
+  onDismiss?: () => void;
 }
 
-const ProfileSetupModal = ({ open, onComplete }: ProfileSetupModalProps) => {
+const ProfileSetupModal = ({ open, onComplete, onDismiss }: ProfileSetupModalProps) => {
   const [displayName, setDisplayName] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
