@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { initPushNotifications } from '@/lib/pushNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { isBiometricEnabled, verifyBiometric } from '@/lib/nativeBiometric';
+import { checkAlerts } from '@/lib/priceAlerts';
 
 /**
  * Fire-and-forget native initializer. Renders nothing.
@@ -36,6 +37,8 @@ const NativeBootstrap = () => {
       }
 
       const { App } = await import('@capacitor/app');
+      const { Browser } = await import('@capacitor/browser');
+
       const listener = await App.addListener('appUrlOpen', async (event) => {
         try {
           const url = new URL(event.url);
@@ -52,11 +55,29 @@ const NativeBootstrap = () => {
           } else if (code) {
             await supabase.auth.exchangeCodeForSession(code);
           }
+
+          // Dismiss the in-app browser tab used for Google sign-in.
+          try {
+            await Browser.close();
+          } catch {
+            /* no browser open */
+          }
         } catch (err) {
           console.warn('[NativeBootstrap] appUrlOpen handling failed', err);
         }
       });
-      cleanup = () => listener.remove();
+
+      // Evaluate on-device price alerts on launch and every time the app
+      // returns to the foreground.
+      checkAlerts().catch(() => undefined);
+      const stateListener = await App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) checkAlerts().catch(() => undefined);
+      });
+
+      cleanup = () => {
+        listener.remove();
+        stateListener.remove();
+      };
     })();
 
     return () => {

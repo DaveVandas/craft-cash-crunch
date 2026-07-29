@@ -12,6 +12,7 @@ import UpdateNotification from "@/components/pwa/UpdateNotification";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import { PaperTradingDisclaimerSplash } from "@/components/disclaimer/PaperTradingDisclaimerSplash";
 import NativeBootstrap from "@/components/native/NativeBootstrap";
+import OfflineBanner from "@/components/native/OfflineBanner";
 import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -26,6 +27,7 @@ import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import DeleteAccount from "./pages/DeleteAccount";
@@ -69,6 +71,7 @@ const App = () => (
                 <InstallPrompt />
                 <PaperTradingDisclaimerSplash />
                 <NativeBootstrap />
+                <OfflineBanner />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
@@ -84,6 +87,7 @@ const App = () => (
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     {!isNative && <Route path="/admin" element={<Admin />} />}
                     <Route path="/about" element={<About />} />
+                    <Route path="/support" element={<Support />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/delete-account" element={<DeleteAccount />} />

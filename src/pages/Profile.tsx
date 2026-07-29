@@ -10,6 +10,7 @@ import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import ShareCard from '@/components/share/ShareCard';
 import TimeOnPageCounter from '@/components/profile/TimeOnPageCounter';
+import { addRecentProfile, cacheSet } from '@/lib/offlineCache';
 import MoneyRain from '@/components/effects/MoneyRain';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -133,6 +134,19 @@ const Profile = () => {
     setValidationError(false);
     fetchCelebrity(validatedName).then(setCelebrity);
   }, [id, fetchCelebrity, shouldBlock, authLoading, prefetchedCelebrity, celebrity]);
+
+  // Persist to the device so the profile is browsable offline in the app.
+  useEffect(() => {
+    if (!celebrity?.id) return;
+    addRecentProfile({
+      id: celebrity.id,
+      name: celebrity.name,
+      image: celebrity.imageUrl ?? null,
+    }).catch(() => undefined);
+    cacheSet(`profile_${celebrity.id}`, celebrity).catch(() => undefined);
+  }, [celebrity]);
+
+
 
   // Show paywall FIRST if blocked
   if (shouldBlock && !authLoading) {

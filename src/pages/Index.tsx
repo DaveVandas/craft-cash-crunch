@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import MobileNav from '@/components/layout/MobileNav';
 import SearchBarWithAutocomplete from '@/components/home/SearchBarWithAutocomplete';
 import QuickActions from '@/components/home/QuickActions';
+import RecentlyViewed from '@/components/home/RecentlyViewed';
 import TrendingSearches from '@/components/home/TrendingSearches';
 import CompactCategories from '@/components/home/CompactCategories';
 import DailyWealthFact from '@/components/home/DailyWealthFact';
@@ -103,6 +104,7 @@ const Index = () => {
 
         {/* Trending Now */}
         <section className="container mb-8">
+          <RecentlyViewed />
           <TrendingSearches />
         </section>
 

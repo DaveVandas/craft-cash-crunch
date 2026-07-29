@@ -27,6 +27,7 @@ import { MarketTicker } from '@/components/trading/MarketTicker';
 import { MarketStatus } from '@/components/trading/MarketStatus';
 import { TradingCockpit } from '@/components/trading/TradingCockpit';
 import { PaperTradingDisclaimer } from '@/components/info/PaperTradingDisclaimer';
+import PriceAlertsCard from '@/components/trading/PriceAlertsCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -565,6 +566,11 @@ const MogulMarkets = () => {
           onSelectTicker={handleSelectTicker}
           onRefreshPrices={handleRefreshPrices}
         />
+
+        {/* Native on-device price alerts */}
+        <div className="mt-6">
+          <PriceAlertsCard />
+        </div>
       </main>
 
       <Footer />
