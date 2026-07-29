@@ -85,6 +85,7 @@ const App = () => (
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     {!isNative && <Route path="/admin" element={<Admin />} />}
                     <Route path="/about" element={<About />} />
+                    <Route path="/support" element={<Support />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/delete-account" element={<DeleteAccount />} />
