@@ -70,6 +70,7 @@ const App = () => (
                 <InstallPrompt />
                 <PaperTradingDisclaimerSplash />
                 <NativeBootstrap />
+                <OfflineBanner />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
