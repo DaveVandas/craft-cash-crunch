@@ -145,6 +145,8 @@ const MogulMarkets = () => {
     }
 
     setIsBuyingCash(true);
+    // Open the tab synchronously so browsers don't block it as a popup
+    const checkoutTab = window.open('', '_blank');
     try {
       const { data, error } = await supabase.functions.invoke('buy-mogul-cash', {
         body: { portfolioId: portfolio.id },
@@ -152,10 +154,19 @@ const MogulMarkets = () => {
       
       if (error) throw error;
       
-      if (data.url) {
-        window.open(data.url, '_blank');
+      if (data?.url) {
+        if (checkoutTab) {
+          checkoutTab.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
+      } else {
+        checkoutTab?.close();
+        throw new Error('No checkout URL returned');
       }
     } catch (err) {
+      checkoutTab?.close();
+
       console.error('Error initiating cash purchase:', err);
       toast.error('Failed to start purchase', {
         description: 'Please try again.',
