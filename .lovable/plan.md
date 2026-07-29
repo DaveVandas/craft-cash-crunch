@@ -1,88 +1,72 @@
-## Resubmission Walkthrough — App Store Connect
+# Apple Resubmission Plan — Round 3 (Build 5)
 
-Before you start, confirm these are complete in Lovable/code:
-- [ ] Build number bumped in Xcode (`1.0` → `1.0.1` or higher, or build `3` → `4`)
-- [ ] New archive uploaded successfully from Xcode Organizer
-- [ ] Screenshots updated (no price/free/discount text)
-- [ ] IAPs attached to the version and ready for review
-- [ ] Demo video uploaded to App Review Information
+Four items from the July 28 review. Two are App Store Connect metadata fixes, two need code changes.
 
 ---
 
-### Step 1: Open App Store Connect
-1. Go to **https://appstoreconnect.apple.com** and sign in.
-2. Click **My Apps**.
-3. Click your app tile: **Wealth Perspective**.
+## 1. Guideline 2.1(b) — In-App Purchases not submitted (ASC only)
 
-### Step 2: Navigate to the iOS App version
-1. In the left sidebar, click **iOS App**.
-2. Click the version tile: **1.0** (or whatever your current rejected version is).
-3. You are now on the **iOS App Version 1.0** page.
+Apple could not see the IAPs because each product needs an **App Review Screenshot** attached before it can be submitted. This is a per-product image, separate from the app screenshots.
 
-### Step 3: Select the new build
-1. Scroll down to the **Build** section.
-2. Click the blue **+** (or click the current build to change it).
-3. Select the new build you just uploaded (e.g., **3** or **4**).
-4. Click **Done**.
-5. Click **Save** at the top-right if the button is active.
+Steps in App Store Connect:
+1. Monetization → In-App Purchases → **Lifetime Access**.
+2. Scroll to **App Review Information** → **Screenshot** → upload a 640x920 (or larger) image showing the purchase screen inside the app.
+3. Fill the **Review Notes** field (e.g. "Tap the Unlock Lifetime Access button on the paywall to trigger this purchase").
+4. Save. Status should move from "Missing Metadata" to **Ready to Submit**.
+5. Repeat for **Mogul Cash**.
+6. On the iOS App 1.0 version page → **In-App Purchases and Subscriptions** → **+** → add both products so they show the blue "added for review" banner.
+7. Apple also asks for a **new binary** with this fix — Build 5 from item 3/4 below covers that.
 
-### Step 4: Confirm In-App Purchases are attached
-1. Scroll down to **In-App Purchases and Subscriptions**.
-2. You should see both:
-   - **Lifetime Access**
-   - **Mogul Cash**
-3. If either is missing, click the **+** button and add them.
-4. Verify each product shows the blue banner: *"This item has been added for review, but you can still remove the item."*
+I can generate the two review screenshots as images if you want them produced from the app's paywall and Mogul Cash purchase screens.
 
-### Step 5: Verify Previews and Screenshots
-1. Scroll to **iPhone 17 Pro Max** (or whatever device Apple tested).
-2. Confirm the screenshots no longer show:
-   - dollar amounts
-   - the word "free"
-   - the word "discount"
-   - any promotional pricing language
-3. If you still see old screenshots, click **Delete** and re-upload the new set.
+## 2. Guideline 1.5 — Support URL (code + ASC)
 
-### Step 6: App Review Information
-1. Scroll to the top of the page and click **App Review Information** in the left sidebar.
-2. Fill in:
-   - **Sign-in required:** Yes
-   - **User Name:** `appreview@northspan.com`
-   - **Password:** the password you set for this account
-   - **Notes:** Briefly note the fixes: OAuth callback fixed, native biometric/haptics/share added, screenshots updated, beta routes hidden on native, IAPs attached.
-3. Confirm the **demo video** is still attached in the **Attachment** section.
-4. Click **Save**.
+The root domain is a marketing/app home page, not a support page.
 
-### Step 7: Resolve Unresolved Issues (if any)
-1. At the top of the version page, look for a red badge: **"Unresolved Issues"**.
-2. If it appears, scroll down to see red/yellow cards.
-3. Click into each card and answer the required questions or upload any missing items.
-4. Return to the version page and click **Save**.
+- Add a new public route `/support` with: what the app does, a "Contact Support" section with the wealthperspective@earningsexplorer.shop address, an FAQ block (account, purchases, restore purchases, data accuracy, account deletion), and links to Privacy, Terms, and Delete Account.
+- Link it from the footer and from the native app's menu.
+- In App Store Connect → App Information → **Support URL**, set `https://earningsexplorer.shop/support`.
 
-### Step 8: Submit for Review
-1. At the top-right of the iOS App Version 1.0 page, look for one of these buttons:
-   - **Submit for Review**
-   - **Add for Review**
-   - **Update Review**
-2. Click it.
-3. Apple will show compliance questions (e.g., data use, encryption, gambling, etc.). Answer them accurately.
-4. On the final screen, click **Submit**.
-5. After submission, the version status should change to **Waiting for Review**.
+## 3. Guideline 2.1(a) — Error page after tapping Sign in with Apple / Google
 
-### Step 9: Verify both app and IAPs are in review
-1. Wait a few minutes, then refresh the page.
-2. The app version status should be **Waiting for Review**.
-3. Go to **Monetization > In-App Purchases** in the sidebar.
-4. Both **Lifetime Access** and **Mogul Cash** should also show **Waiting for Review**.
+Current native flow sends the OAuth redirect to `https://earningsexplorer.shop/auth/callback` through the hosted broker. On a device this leaves the app, and the reviewer landed on an error page. The exact broker response has not been captured, so the plan replaces the fragile path rather than guessing at a one-line fix.
+
+Change to native-first sign-in on iOS:
+- **Apple:** use the native Sign in with Apple sheet (`@capacitor-community/apple-sign-in`) and pass the returned identity token to `supabase.auth.signInWithIdToken({ provider: 'apple', token })`. No browser hop, no redirect URL, cannot 404.
+- **Google:** use the native Google credential flow and the same `signInWithIdToken` path with `provider: 'google'`.
+- Keep the existing web (`lovable.auth.signInWithOAuth`) path unchanged for browser/PWA users; branch on `Capacitor.isNativePlatform()`.
+- Add a visible in-app error state instead of a silent navigation if a token exchange fails.
+- Keep `/auth/callback` in place as a safety net for web.
+
+Also required in Xcode (I will list the clicks when we get there): enable the **Sign in with Apple** capability on the App target, and add the reversed Google client ID URL scheme to Info.plist.
+
+## 4. Guideline 4.2 — Minimum functionality
+
+Push, share, and haptics were not enough. Add native capabilities that are impossible in a browser:
+
+- **Offline mode:** persist last-viewed celebrity profiles, favorites, and the paper-trading portfolio to native storage (`@capacitor/preferences`) and render them with an offline banner when the device has no connection (`@capacitor/network`).
+- **Home Screen quick actions:** long-press the icon for Search, Reality Check, and Mogul Markets (`@capacitor/app` + Info.plist `UIApplicationShortcutItems`).
+- **Face ID gate on the portfolio:** extend the existing biometric helper so Mogul Markets requires a biometric unlock when enabled.
+- **Native price alerts:** let the user set a target price on a watched stock and fire a scheduled local notification when the app next refreshes — a real on-device notification loop, not just a marketing blast.
+- **iPad layout pass:** two-column layout on regular-width devices for the home, profile, and Mogul Markets screens, since the reviewer explicitly called out iPad expectations.
+- **Native share sheet with generated image:** keep the existing share cards but route them through the native share sheet with the rendered PNG file rather than a URL only.
+
+## 5. Rebuild and resubmit
+
+1. Sync Lovable → GitHub, then on the Mac: `git pull origin main`, `npm install`, `npx cap sync ios`.
+2. Xcode: bump Build to **5**, add the Sign in with Apple capability, Clean Build Folder, Archive, Distribute.
+3. In App Store Connect: select Build 5, confirm both IAPs are attached, confirm the Support URL, refresh the demo video if the sign-in UI changed, then **Resubmit to App Review**.
 
 ---
 
-### Common Pitfalls to Avoid
-- **Don't submit from the Draft Submission panel.** Draft Submissions only manages IAPs; the app version must be submitted from the iOS App Version page.
-- **Make sure the build is actually selected.** If you see "No build selected," the submission will fail.
-- **Don't include pricing in the app description or screenshots.** Any mention of "$", "free", "discount", or "sale" can trigger another rejection.
-- **Use the sandbox tester account for your video**, not the Lovable Cloud auth review account, if the video shows a purchase.
+## Technical notes
 
----
+- New packages: `@capacitor-community/apple-sign-in`, `@codetrix-studio/capacitor-google-auth` (or the Google Identity native plugin), `@capacitor/preferences`, `@capacitor/network`.
+- Auth branching lives in `src/pages/Auth.tsx`'s `SocialAuthButtons`; the web path through `src/integrations/lovable/index.ts` is untouched.
+- Offline cache is a thin wrapper in `src/lib/offlineCache.ts` used by `useCelebrityData`, `useFavorites`, and `useTradingPortfolio`.
+- `/support` is a static React page — no backend or schema changes.
+- No database migrations are required for any item in this plan.
 
-Ready to proceed once you confirm the new build is already uploaded to App Store Connect.
+## Suggested order
+
+1 and 2 first (fast, unblock the metadata), then 3, then 4, then the Build 5 rebuild.
