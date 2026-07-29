@@ -99,5 +99,5 @@ export const useUserProfile = () => {
     return { error: null, url: publicUrl };
   };
 
-  return { profile, loading, updateProfile, uploadAvatar };
+  return { profile, loading, fetchFailed, updateProfile, uploadAvatar };
 };
