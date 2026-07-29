@@ -117,13 +117,14 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-2xl">💎</span>
-          <span className="font-serif text-xl font-bold gradient-gold-text">
+      <div className="container flex h-16 items-center justify-between gap-2">
+        <Link to="/" className="flex items-center gap-2 min-w-0 flex-shrink">
+          <span className="text-2xl flex-shrink-0">💎</span>
+          <span className="font-serif text-base sm:text-lg md:text-xl font-bold gradient-gold-text truncate">
             Wealth Perspective
           </span>
         </Link>
+
 
         {/* Desktop Navigation - simplified to just Search and Mogul Markets */}
         <nav className="hidden md:flex items-center gap-6">
@@ -146,7 +147,7 @@ const Header = () => {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Theme Toggle - Desktop only (lg+) */}
           <div className="hidden lg:block">
             <ThemeToggle />

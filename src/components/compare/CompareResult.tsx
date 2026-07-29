@@ -161,36 +161,38 @@ const CompareResult = ({ person1, person2 }: CompareResultProps) => {
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="flex justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
+              <div className="flex justify-between items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar className="h-6 w-6 flex-shrink-0">
                     <AvatarImage src={person1.imageUrl} alt={person1.name} className="object-cover" />
                     <AvatarFallback className="text-sm">{person1.emoji || getAvatarEmoji(person1.profession)}</AvatarFallback>
                   </Avatar>
-                  {!isTie && person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
-                  <span className="font-medium">{person1.name}</span>
+                  {!isTie && person1 === richer && <Crown className="h-4 w-4 text-primary fill-primary flex-shrink-0" />}
+                  <span className="font-medium truncate">{person1.name}</span>
                 </div>
-                <span className="text-primary font-mono">
+                <span className="text-primary font-mono flex-shrink-0 text-sm sm:text-base">
                   {formatCompactCurrency(person1.annualEarnings)}/yr
                 </span>
               </div>
+
               <Progress value={person1Percent} className="h-3" />
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <div className="flex justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
+              <div className="flex justify-between items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar className="h-6 w-6 flex-shrink-0">
                     <AvatarImage src={person2.imageUrl} alt={person2.name} className="object-cover" />
                     <AvatarFallback className="text-sm">{person2.emoji || getAvatarEmoji(person2.profession)}</AvatarFallback>
                   </Avatar>
-                  {!isTie && person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary" />}
-                  <span className="font-medium">{person2.name}</span>
+                  {!isTie && person2 === richer && <Crown className="h-4 w-4 text-primary fill-primary flex-shrink-0" />}
+                  <span className="font-medium truncate">{person2.name}</span>
                 </div>
-                <span className="text-primary font-mono">
+                <span className="text-primary font-mono flex-shrink-0 text-sm sm:text-base">
                   {formatCompactCurrency(person2.annualEarnings)}/yr
                 </span>
               </div>
+
               <Progress value={person2Percent} className="h-3" />
             </div>
           </div>
