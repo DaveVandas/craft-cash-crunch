@@ -80,14 +80,17 @@ const Compare = () => {
           </div>
 
           {/* Selection Layout */}
-          <div className="grid md:grid-cols-[1fr,auto,1fr] gap-4 md:gap-6 items-start mb-8">
+          <div className="grid md:grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] gap-4 md:gap-6 items-start mb-8">
             {/* Tycoon 1 Selector */}
-            <ComparePersonSelector
-              label="Tycoon #1"
-              selected={person1}
-              onSelect={setPerson1}
-              placeholder="e.g. Elon Musk, Drake Maye..."
-            />
+            <div className="min-w-0">
+              <ComparePersonSelector
+                label="Tycoon #1"
+                selected={person1}
+                onSelect={setPerson1}
+                placeholder="e.g. Elon Musk, Drake Maye..."
+              />
+            </div>
+
 
             {/* VS Badge - Premium */}
             <div className="flex items-center justify-center py-4 md:pt-8">
@@ -98,12 +101,15 @@ const Compare = () => {
             </div>
 
             {/* Tycoon 2 Selector */}
-            <ComparePersonSelector
-              label="Tycoon #2"
-              selected={person2}
-              onSelect={setPerson2}
-              placeholder="e.g. Jeff Bezos, Kid Rock..."
-            />
+            <div className="min-w-0">
+              <ComparePersonSelector
+                label="Tycoon #2"
+                selected={person2}
+                onSelect={setPerson2}
+                placeholder="e.g. Jeff Bezos, Kid Rock..."
+              />
+            </div>
+
           </div>
 
           {/* Category Suggestions */}
