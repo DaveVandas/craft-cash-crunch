@@ -55,7 +55,7 @@ const usePathname = () => {
 
 const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useUserProfile();
+  const { profile, loading: profileLoading, fetchFailed } = useUserProfile();
   const pathname = usePathname();
   const [showSetup, setShowSetup] = useState(false);
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
@@ -64,15 +64,16 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
 
+  const storageKey = user ? `${SETUP_DISMISSED_PREFIX}${user.id}` : null;
 
-  const previouslyDismissed = (() => {
-    if (!user) return false;
+  const markSetupSeen = () => {
+    if (!storageKey) return;
     try {
-      return localStorage.getItem(`${SETUP_DISMISSED_PREFIX}${user.id}`) === '1';
+      localStorage.setItem(storageKey, '1');
     } catch {
-      return false;
+      // ignore storage failures
     }
-  })();
+  };
 
   useEffect(() => {
     if (authLoading || profileLoading || !user || isExcludedPath) {
@@ -80,36 +81,59 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
       return;
     }
 
-    setShowSetup(!hasDisplayName && !hasCompletedSetup && !previouslyDismissed);
-  }, [user, authLoading, profileLoading, hasDisplayName, hasCompletedSetup, previouslyDismissed, isExcludedPath]);
+    // Never interrupt when the profile couldn't be loaded — avoids false prompts
+    if (fetchFailed) {
+      setShowSetup(false);
+      return;
+    }
+
+    // Already has a name: remember it so the prompt never returns
+    if (hasDisplayName) {
+      markSetupSeen();
+      setShowSetup(false);
+      return;
+    }
+
+    let alreadySeen = false;
+    try {
+      alreadySeen = storageKey ? localStorage.getItem(storageKey) === '1' : false;
+    } catch {
+      alreadySeen = false;
+    }
+
+    if (alreadySeen || hasCompletedSetup) {
+      setShowSetup(false);
+      return;
+    }
+
+    // First-time setup only — mark it seen the moment we show it
+    markSetupSeen();
+    setShowSetup(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, profileLoading, fetchFailed, hasDisplayName, hasCompletedSetup, isExcludedPath, storageKey]);
 
   const contextValue = useMemo(
     () => ({
-      canStartOnboardingTour: Boolean(user && !authLoading && !profileLoading && !showSetup && (hasDisplayName || hasCompletedSetup)),
+      canStartOnboardingTour: Boolean(user && !authLoading && !profileLoading && !showSetup),
       isProfileSetupOpen: showSetup,
     }),
-    [user, authLoading, profileLoading, showSetup, hasDisplayName, hasCompletedSetup]
+    [user, authLoading, profileLoading, showSetup]
   );
 
   const handleSetupComplete = () => {
     setShowSetup(false);
     setHasCompletedSetup(true);
-    if (user) {
-      try {
-        localStorage.setItem(`${SETUP_DISMISSED_PREFIX}${user.id}`, '1');
-      } catch {
-        // ignore storage failures
-      }
-    }
+    markSetupSeen();
   };
-
 
   return (
     <ProfileSetupContext.Provider value={contextValue}>
       {children}
-      <ProfileSetupModal open={showSetup} onComplete={handleSetupComplete} />
+      <ProfileSetupModal
+        open={showSetup}
+        onComplete={handleSetupComplete}
+        onDismiss={handleSetupComplete}
+      />
     </ProfileSetupContext.Provider>
   );
 };
-
-export default ProfileSetupGuard;
