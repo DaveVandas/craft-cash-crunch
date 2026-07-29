@@ -26,6 +26,7 @@ import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import DeleteAccount from "./pages/DeleteAccount";
