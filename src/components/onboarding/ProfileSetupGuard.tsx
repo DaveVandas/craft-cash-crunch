@@ -137,3 +137,5 @@ const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
     </ProfileSetupContext.Provider>
   );
 };
+
+export default ProfileSetupGuard;
