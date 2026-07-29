@@ -74,7 +74,7 @@ const ProfileSetupModal = ({ open, onComplete, onDismiss }: ProfileSetupModalPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onDismiss?.(); }}>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-serif">
