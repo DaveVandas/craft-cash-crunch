@@ -10,6 +10,7 @@ import EarningsTicker from '@/components/profile/EarningsTicker';
 import ComparisonGrid from '@/components/profile/ComparisonGrid';
 import ShareCard from '@/components/share/ShareCard';
 import TimeOnPageCounter from '@/components/profile/TimeOnPageCounter';
+import { addRecentProfile, cacheSet } from '@/lib/offlineCache';
 import MoneyRain from '@/components/effects/MoneyRain';
 import { useCelebrityData } from '@/hooks/useCelebrityData';
 import { useAuth } from '@/contexts/AuthContext';
