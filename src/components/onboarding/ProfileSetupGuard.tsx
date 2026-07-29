@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import ProfileSetupModal from '@/components/onboarding/ProfileSetupModal';
@@ -25,16 +24,46 @@ const SETUP_DISMISSED_PREFIX = 'profileSetupDone:';
 // Routes where the profile setup prompt must never interrupt the user
 const EXCLUDED_PATHS = ['/support', '/terms', '/privacy', '/auth', '/auth/callback', '/reset-password'];
 
+// This guard renders outside <Router>, so track the path via the History API
+const usePathname = () => {
+  const [pathname, setPathname] = useState(() =>
+    typeof window === 'undefined' ? '/' : window.location.pathname
+  );
+
+  useEffect(() => {
+    const update = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', update);
+    const originalPush = window.history.pushState;
+    const originalReplace = window.history.replaceState;
+    window.history.pushState = function (...args) {
+      originalPush.apply(this, args as Parameters<typeof originalPush>);
+      update();
+    };
+    window.history.replaceState = function (...args) {
+      originalReplace.apply(this, args as Parameters<typeof originalReplace>);
+      update();
+    };
+    return () => {
+      window.removeEventListener('popstate', update);
+      window.history.pushState = originalPush;
+      window.history.replaceState = originalReplace;
+    };
+  }, []);
+
+  return pathname;
+};
+
 const ProfileSetupGuard = ({ children }: ProfileSetupGuardProps) => {
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
-  const location = useLocation();
+  const pathname = usePathname();
   const [showSetup, setShowSetup] = useState(false);
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
   const hasDisplayName = Boolean(profile?.display_name?.trim());
   const isExcludedPath = EXCLUDED_PATHS.some(
-    (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
+
 
   const previouslyDismissed = (() => {
     if (!user) return false;
