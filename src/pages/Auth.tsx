@@ -26,22 +26,34 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 
 const SocialAuthButtons = () => {
   const [busy, setBusy] = useState<'apple' | 'google' | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const handleOAuth = async (provider: 'apple' | 'google') => {
     setBusy(provider);
+    setAuthError(null);
+    const label = provider === 'apple' ? 'Apple' : 'Google';
     try {
-      // On native (iOS/Android), Apple requires an HTTPS Universal Link as the
-      // OAuth redirect target — a custom-scheme (capacitor://) redirect is
-      // rejected. We send users to our production HTTPS origin; the Universal
-      // Link config on iOS bounces control back into the app, and
-      // NativeBootstrap consumes the tokens on appUrlOpen.
-      const redirectUri = IS_NATIVE_APP
-        ? 'https://earningsexplorer.shop/auth/callback'
-        : window.location.origin;
+      // Native (iOS/Android): use the system Sign in with Apple sheet and an
+      // in-app browser tab for Google, both returning into the app via the
+      // custom scheme. This avoids the external error page App Review saw.
+      if (IS_NATIVE_APP) {
+        if (provider === 'apple') {
+          await signInWithAppleNative();
+          window.location.href = '/';
+          return;
+        }
+        await signInWithGoogleNative();
+        // The in-app browser handles the rest; NativeBootstrap sets the session.
+        setBusy(null);
+        return;
+      }
+
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: redirectUri,
+        redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(`Could not sign in with ${provider === 'apple' ? 'Apple' : 'Google'}`);
+        setAuthError(`Could not sign in with ${label}. Please try again or use email.`);
+        toast.error(`Could not sign in with ${label}`);
         setBusy(null);
         return;
       }
@@ -49,11 +61,20 @@ const SocialAuthButtons = () => {
       if (!result.redirected) {
         window.location.href = '/';
       }
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      if (/cancel/i.test(message)) {
+        setBusy(null);
+        return;
+      }
+      setAuthError(
+        `${label} sign-in didn't complete${message ? `: ${message}` : ''}. You can also sign in with your email and password below.`,
+      );
       toast.error('Sign-in failed. Please try again.');
       setBusy(null);
     }
   };
+
   return (
     <div className="space-y-2">
       <Button
