@@ -103,6 +103,7 @@ const Index = () => {
 
         {/* Trending Now */}
         <section className="container mb-8">
+          <RecentlyViewed />
           <TrendingSearches />
         </section>
 
