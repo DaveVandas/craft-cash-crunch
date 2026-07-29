@@ -12,35 +12,50 @@ export const useUserProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchFailed, setFetchFailed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchProfile = async () => {
       if (!user) {
         setProfile(null);
+        setFetchFailed(false);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('id, display_name, avatar_url')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') {
+        if (cancelled) return;
+
+        if (error) {
           console.error('Error fetching profile:', error);
+          setFetchFailed(true);
+        } else {
+          setFetchFailed(false);
+          setProfile(data);
         }
-        
-        setProfile(data);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        if (!cancelled) {
+          console.error('Error fetching profile:', error);
+          setFetchFailed(true);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchProfile();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const updateProfile = async (updates: Partial<Pick<UserProfile, 'display_name' | 'avatar_url'>>) => {
@@ -84,5 +99,5 @@ export const useUserProfile = () => {
     return { error: null, url: publicUrl };
   };
 
-  return { profile, loading, updateProfile, uploadAvatar };
+  return { profile, loading, fetchFailed, updateProfile, uploadAvatar };
 };

@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 interface ProfileSetupModalProps {
   open: boolean;
   onComplete: () => void;
+  onDismiss?: () => void;
 }
 
-const ProfileSetupModal = ({ open, onComplete }: ProfileSetupModalProps) => {
+const ProfileSetupModal = ({ open, onComplete, onDismiss }: ProfileSetupModalProps) => {
   const [displayName, setDisplayName] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -73,7 +74,7 @@ const ProfileSetupModal = ({ open, onComplete }: ProfileSetupModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onDismiss?.(); }}>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-serif">
