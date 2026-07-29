@@ -134,6 +134,19 @@ const Profile = () => {
     fetchCelebrity(validatedName).then(setCelebrity);
   }, [id, fetchCelebrity, shouldBlock, authLoading, prefetchedCelebrity, celebrity]);
 
+  // Persist to the device so the profile is browsable offline in the app.
+  useEffect(() => {
+    if (!celebrity?.id) return;
+    addRecentProfile({
+      id: celebrity.id,
+      name: celebrity.name,
+      image: celebrity.imageUrl ?? null,
+    }).catch(() => undefined);
+    cacheSet(`profile_${celebrity.id}`, celebrity).catch(() => undefined);
+  }, [celebrity]);
+
+
+
   // Show paywall FIRST if blocked
   if (shouldBlock && !authLoading) {
     return (
