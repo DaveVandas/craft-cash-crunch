@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
 import { Capacitor } from '@capacitor/core';
 import { isBiometricAvailable, isBiometricEnabled, setBiometricEnabled, verifyBiometric } from '@/lib/nativeBiometric';
+import { signInWithAppleNative, signInWithGoogleNative } from '@/lib/nativeAuth';
 
 const IS_NATIVE_APP = Capacitor.isNativePlatform();
 import { AFFILIATE_CODE_KEY, AFFILIATE_VARIANT_KEY } from '@/hooks/useAffiliateAttribution';
