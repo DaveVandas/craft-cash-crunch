@@ -50,7 +50,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: 'The app is not loading data. What should I try?',
-    a: 'Check your internet connection, then fully close and reopen the app. If the problem continues, email us with your device model and iOS version so we can investigate.',
+    a: 'Check your internet connection, then fully close and reopen the app (or refresh the page in your browser). If the problem continues, email us with your device model, operating system version, and browser if applicable, so we can investigate.',
   },
 ];
 
