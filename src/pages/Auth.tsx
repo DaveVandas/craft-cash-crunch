@@ -475,7 +475,7 @@ const Auth = () => {
                             onChange={(e) => setRememberMe(e.target.checked)}
                             className="h-4 w-4 rounded border-border bg-background"
                           />
-                          <span className="text-muted-foreground">Remember me</span>
+                          <span className="text-muted-foreground">Keep me signed in</span>
                         </label>
                         <button
                           type="button"

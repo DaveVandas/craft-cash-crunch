@@ -90,7 +90,9 @@ const NativeBootstrap = () => {
 
     return () => {
       cleanup?.();
+      sessionCleanup?.();
     };
+
   }, []);
   return null;
 };
