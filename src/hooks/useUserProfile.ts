@@ -61,17 +61,23 @@ export const useUserProfile = () => {
   const updateProfile = async (updates: Partial<Pick<UserProfile, 'display_name' | 'avatar_url'>>) => {
     if (!user) return { error: new Error('Not authenticated') };
 
-    const { error } = await supabase
+    // Upsert (not update): if the profile row is missing, an UPDATE silently
+    // affects 0 rows and the display name is never saved — which made the
+    // setup modal reappear on every app launch.
+    const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', user.id);
+      .upsert({ id: user.id, ...updates }, { onConflict: 'id' })
+      .select('id, display_name, avatar_url')
+      .maybeSingle();
 
     if (!error) {
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      setProfile(prev => (data ?? (prev ? { ...prev, ...updates } : null)));
+      setFetchFailed(false);
     }
 
     return { error };
   };
+
 
   const uploadAvatar = async (file: File) => {
     if (!user) return { error: new Error('Not authenticated'), url: null };
