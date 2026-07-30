@@ -28,9 +28,10 @@ const FAQS: { q: string; a: string }[] = [
     a: 'Lifetime access is a one-time purchase. In the mobile app it is purchased through your device\u2019s in-app purchase system; on the web it is handled by our payment processor. Once purchased, full access is tied to your account.',
   },
   {
-    q: 'I already paid — how do I restore my purchase?',
-    a: 'Sign in with the same account, open the account menu and choose "Restore Purchases". This re-checks your Apple purchase history and restores lifetime access.',
+    q: 'I already paid on another device — how do I get my access back?',
+    a: 'Your lifetime access is tied to your account, so simply signing in with the same email restores it anywhere. If you bought through the mobile app and it is not showing, open the account menu in the iOS or Android app and choose "Restore Purchases" to re-check your store purchase history. On the web, sign in with the same account and your access appears automatically — if it does not, email support.',
   },
+
   {
     q: 'Is Mogul Markets real trading?',
     a: 'No. Mogul Markets is a paper-trading simulation using virtual money for education and entertainment only. No real securities are bought or sold, and nothing in the app is financial advice.',
