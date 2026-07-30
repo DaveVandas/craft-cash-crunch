@@ -4,6 +4,8 @@ import { initPushNotifications } from '@/lib/pushNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { isBiometricEnabled, verifyBiometric } from '@/lib/nativeBiometric';
 import { checkAlerts } from '@/lib/priceAlerts';
+import { initNativeSessionPersistence } from '@/lib/sessionPersistence';
+
 
 /**
  * Fire-and-forget native initializer. Renders nothing.
@@ -20,8 +22,14 @@ const NativeBootstrap = () => {
     if (!Capacitor.isNativePlatform()) return;
 
     let cleanup: (() => void) | undefined;
+    let sessionCleanup: (() => void) | undefined;
 
     (async () => {
+      // 0. Keep users signed in across launches even if the WebView drops
+      //    its local storage.
+      sessionCleanup = await initNativeSessionPersistence();
+
+
       // 1. Optional biometric unlock on cold launch. If the user enrolled
       //    Face ID, ask for verification once per app start before showing
       //    protected content. A failed check simply signs the user out —
@@ -82,7 +90,9 @@ const NativeBootstrap = () => {
 
     return () => {
       cleanup?.();
+      sessionCleanup?.();
     };
+
   }, []);
   return null;
 };
