@@ -25,7 +25,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: 'How do I unlock full access?',
-    a: 'Lifetime access is a one-time purchase. In the mobile app it is purchased through Apple In-App Purchase; on the web it is handled by our payment processor. Once purchased, full access is tied to your account.',
+    a: 'Lifetime access is a one-time purchase. In the mobile app it is purchased through your device\u2019s in-app purchase system; on the web it is handled by our payment processor. Once purchased, full access is tied to your account.',
   },
   {
     q: 'I already paid — how do I restore my purchase?',
