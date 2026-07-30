@@ -4,6 +4,8 @@ import { initPushNotifications } from '@/lib/pushNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { isBiometricEnabled, verifyBiometric } from '@/lib/nativeBiometric';
 import { checkAlerts } from '@/lib/priceAlerts';
+import { initNativeSessionPersistence } from '@/lib/sessionPersistence';
+
 
 /**
  * Fire-and-forget native initializer. Renders nothing.
