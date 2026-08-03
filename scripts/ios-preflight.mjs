@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -127,15 +127,33 @@ if (failures.length > 0) {
   console.log('✓ App.xcodeproj links the local CapApp-SPM package and product.');
 
   if (process.platform === 'darwin') {
+    const logPath = '/tmp/ios-preflight-xcodebuild.log';
+
+    const distill = (output, label) => {
+      writeFileSync(logPath, output ?? '', 'utf8');
+      const lines = (output ?? '').split('\n');
+      const interesting = lines.filter((line) =>
+        /(error:|fatal error|Missing package product|Unable to resolve|could not be resolved|failed with a nonzero exit|BUILD FAILED|The following build commands failed)/i.test(
+          line,
+        ),
+      );
+      console.error(`\n✖ ${label}\n`);
+      if (interesting.length > 0) {
+        for (const line of interesting.slice(0, 25)) console.error(`  ${line.trim()}`);
+      } else {
+        for (const line of lines.filter(Boolean).slice(-15)) console.error(`  ${line.trim()}`);
+      }
+      console.error(`\n  Full xcodebuild output: ${logPath}`);
+    };
+
     console.log('• Asking Xcode to resolve the complete Swift package graph...');
     const resolve = spawnSync(
       'xcodebuild',
       ['-resolvePackageDependencies', '-project', xcodeProject, '-scheme', 'App'],
-      { cwd: root, encoding: 'utf8' },
+      { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
     );
     if (resolve.status !== 0) {
-      console.error('\n✖ Xcode package resolution failed:\n');
-      console.error(resolve.stderr || resolve.stdout || 'xcodebuild returned no diagnostic output.');
+      distill(`${resolve.stdout ?? ''}\n${resolve.stderr ?? ''}`, 'Xcode package resolution failed:');
       process.exitCode = 1;
     } else {
       console.log('✓ Xcode resolved the complete Swift package graph.');
@@ -149,13 +167,13 @@ if (failures.length > 0) {
           '-configuration', 'Release',
           '-destination', 'generic/platform=iOS',
           'CODE_SIGNING_ALLOWED=NO',
+          '-quiet',
           'build',
         ],
-        { cwd: root, encoding: 'utf8' },
+        { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
       );
       if (build.status !== 0) {
-        console.error('\n✖ Unsigned Xcode compile failed:\n');
-        console.error(build.stderr || build.stdout || 'xcodebuild returned no diagnostic output.');
+        distill(`${build.stdout ?? ''}\n${build.stderr ?? ''}`, 'Unsigned Xcode compile failed:');
         process.exitCode = 1;
       } else {
         console.log('✓ Xcode compiled the app and resolved the Capacitor module.');
