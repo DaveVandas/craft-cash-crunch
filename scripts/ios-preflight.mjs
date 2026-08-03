@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 const root = process.cwd();
 const requiredCapacitorVersion = '8.4.2';
-const capacitorPackages = ['@capacitor/cli', '@capacitor/core', '@capacitor/ios'];
+const capacitorPackages = ['@capacitor/android', '@capacitor/cli', '@capacitor/core', '@capacitor/ios'];
 const nativePlugins = [
   '@capacitor/app',
   '@capacitor/browser',
