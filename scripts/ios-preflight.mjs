@@ -64,7 +64,10 @@ for (const name of nativePlugins) {
 const generatedManifest = join(root, 'ios', 'App', 'CapApp-SPM', 'Package.swift');
 if (existsSync(generatedManifest)) {
   const source = readFileSync(generatedManifest, 'utf8');
-  if (!source.includes('capacitor-swift-pm.git", from: "8.0.0"')) {
+  const capacitorSwiftPmVersion = source.match(
+    /capacitor-swift-pm\.git[\s\S]{0,160}?(?:from:\s*|exact:\s*)["'](\d+)\./,
+  );
+  if (!capacitorSwiftPmVersion || capacitorSwiftPmVersion[1] !== '8') {
     failures.push(
       'ios/App/CapApp-SPM/Package.swift is not on Capacitor Swift PM 8.x. Run npx cap sync ios with CLI 8.4.2.',
     );
