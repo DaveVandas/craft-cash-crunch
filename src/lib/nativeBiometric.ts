@@ -15,7 +15,7 @@ const BIOMETRIC_ENABLED_KEY = 'wp_biometric_enabled';
 async function loadPlugin() {
   if (!Capacitor.isNativePlatform()) return null;
   try {
-    return await import('capacitor-native-biometric');
+    return await import('@capgo/capacitor-native-biometric');
   } catch {
     return null;
   }
