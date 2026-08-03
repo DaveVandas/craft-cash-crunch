@@ -45,20 +45,21 @@ async function sha256Hex(value: string): Promise<string> {
  * Throws with a readable message on failure so the caller can show it inline.
  */
 export async function signInWithAppleNative(): Promise<boolean> {
-  const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+  const { SocialLogin } = await import('@capgo/capacitor-social-login');
 
   const rawNonce = randomNonce();
   const hashedNonce = await sha256Hex(rawNonce);
 
-  const result = await SignInWithApple.authorize({
-    clientId: 'com.northspan.wealthperspective',
-    redirectURI: NATIVE_REDIRECT_URI,
-    scopes: 'email name',
-    state: randomNonce(16),
-    nonce: hashedNonce,
+  await SocialLogin.initialize({
+    apple: { clientId: 'com.northspan.wealthperspective' },
   });
 
-  const idToken = result.response?.identityToken;
+  const result = await SocialLogin.login({
+    provider: 'apple',
+    options: { scopes: ['email', 'name'], nonce: hashedNonce },
+  });
+
+  const idToken = (result.result as { idToken?: string | null })?.idToken;
   if (!idToken) {
     throw new Error('Apple did not return an identity token.');
   }
@@ -72,6 +73,7 @@ export async function signInWithAppleNative(): Promise<boolean> {
   if (error) throw error;
   return true;
 }
+
 
 /**
  * Native Google sign-in through an in-app browser tab. The provider redirects
